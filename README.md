@@ -76,7 +76,9 @@ ADE20K semantic segmentation (`50.8 mIoU` on val), with only 44M parameters for 
 
 **COCO Object Detection (2017 val)**
 
-![main](srcs/figs/tab3.jpg)
+<p align="center">
+  <img src="srcs/figs/tab3.jpg" alt="table3" width="70%">
+</p>
 
 <!-- | Backbone | Method | pretrain | Lr Schd | box mAP | mask mAP | #params | FLOPs |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -87,7 +89,9 @@ ADE20K semantic segmentation (`50.8 mIoU` on val), with only 44M parameters for 
 
 **ADE20K Semantic Segmentation (val)**
 
-![main](srcs/figs/tab4.jpg)
+<p align="center">
+  <img src="srcs/figs/tab4.jpg" alt="table4" width="70%">
+</p>
 
 <!-- | Backbone | Method | pretrain | Crop Size | Lr Schd | mIoU | mIoU (ms+flip) | #params | FLOPs |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
