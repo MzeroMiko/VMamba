@@ -36,16 +36,24 @@ ADE20K semantic segmentation (`50.8 mIoU` on val), with only 44M parameters for 
 </p>
 **VMamba is linear complexity with 2D-Selective-Scan**
 
-![linear complexity](srcs/figs/fig2.jpg)
+<p align="center">
+  <img src="srcs/figs/fig2.jpg" alt="figure2" width="70%">
+</p>
 
 **VMamba has global effective receptive field**
 
-![ERF](srcs/figs/fig5.jpg)
+<p align="center">
+  <img src="srcs/figs/fig5.jpg" alt="figure3" width="70%">
+</p>
 
 **Main Architecture of VMamba**
 
-![main arch 1](srcs/figs/fig3.jpg)
-![main arch 2](srcs/figs/fig4.jpg)
+<p align="center">
+  <img src="srcs/figs/fig3.jpg" alt="figure4" width="70%">
+</p>
+<p align="center">
+  <img src="srcs/figs/fig4.jpg" alt="figure5" width="70%">
+</p>
 
 ## Main Results on ImageNet
 
