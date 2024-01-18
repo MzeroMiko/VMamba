@@ -1,0 +1,506 @@
+01/07 12:46:40 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/replknet/replknet-31B_3rdparty_in1k_20221118-fd08e268.pth
+starting loop: img_size (224, 224)
+Test: [0/391]	Time 3.796 (3.796)	Loss 0.4075 (0.4075)	Acc@1 95.312 (95.312)	Acc@5 99.219 (99.219)	Mem 2252MB
+Test: [10/391]	Time 2.816 (3.094)	Loss 1.1387 (0.5573)	Acc@1 78.125 (92.401)	Acc@5 98.438 (99.006)	Mem 2252MB
+Test: [20/391]	Time 2.532 (2.913)	Loss 0.4990 (0.6738)	Acc@1 91.406 (87.872)	Acc@5 97.656 (98.438)	Mem 2252MB
+Test: [30/391]	Time 2.786 (2.884)	Loss 1.1299 (0.7839)	Acc@1 81.250 (84.879)	Acc@5 91.406 (97.606)	Mem 2252MB
+Test: [40/391]	Time 3.617 (2.820)	Loss 0.5068 (0.7098)	Acc@1 95.312 (87.176)	Acc@5 98.438 (97.961)	Mem 2252MB
+Test: [50/391]	Time 2.424 (2.971)	Loss 0.3972 (0.7028)	Acc@1 96.094 (87.561)	Acc@5 100.000 (97.963)	Mem 2252MB
+Test: [60/391]	Time 2.392 (2.994)	Loss 0.8467 (0.6721)	Acc@1 87.500 (88.589)	Acc@5 96.094 (98.105)	Mem 2252MB
+Test: [70/391]	Time 2.843 (2.957)	Loss 0.8794 (0.7040)	Acc@1 83.594 (87.907)	Acc@5 96.875 (97.931)	Mem 2252MB
+Test: [80/391]	Time 2.599 (2.920)	Loss 0.8506 (0.7173)	Acc@1 85.938 (87.568)	Acc@5 96.094 (97.849)	Mem 2252MB
+Test: [90/391]	Time 2.388 (2.893)	Loss 0.9487 (0.7202)	Acc@1 78.125 (87.629)	Acc@5 96.875 (97.828)	Mem 2252MB
+Test: [100/391]	Time 1.806 (2.831)	Loss 0.7729 (0.7258)	Acc@1 91.406 (87.508)	Acc@5 96.875 (97.857)	Mem 2252MB
+Test: [110/391]	Time 2.832 (2.813)	Loss 1.2100 (0.7368)	Acc@1 61.719 (87.057)	Acc@5 98.438 (97.846)	Mem 2252MB
+Test: [120/391]	Time 1.888 (2.815)	Loss 0.6821 (0.7370)	Acc@1 91.406 (87.255)	Acc@5 98.438 (97.850)	Mem 2252MB
+Test: [130/391]	Time 2.122 (2.823)	Loss 0.4458 (0.7301)	Acc@1 97.656 (87.512)	Acc@5 99.219 (97.853)	Mem 2252MB
+Test: [140/391]	Time 2.235 (2.811)	Loss 1.2002 (0.7312)	Acc@1 71.094 (87.356)	Acc@5 98.438 (97.933)	Mem 2252MB
+Test: [150/391]	Time 3.525 (2.816)	Loss 0.8730 (0.7369)	Acc@1 77.344 (87.179)	Acc@5 98.438 (97.848)	Mem 2252MB
+Test: [160/391]	Time 2.697 (2.803)	Loss 0.7002 (0.7377)	Acc@1 86.719 (87.204)	Acc@5 97.656 (97.816)	Mem 2252MB
+Test: [170/391]	Time 2.527 (2.797)	Loss 1.5518 (0.7541)	Acc@1 67.188 (86.691)	Acc@5 91.406 (97.688)	Mem 2252MB
+Test: [180/391]	Time 2.135 (2.802)	Loss 1.4561 (0.7652)	Acc@1 61.719 (86.438)	Acc@5 95.312 (97.561)	Mem 2252MB
+Test: [190/391]	Time 2.230 (2.805)	Loss 1.2705 (0.7836)	Acc@1 75.000 (85.872)	Acc@5 96.094 (97.423)	Mem 2252MB
+Test: [200/391]	Time 3.058 (2.796)	Loss 0.5664 (0.7984)	Acc@1 92.969 (85.514)	Acc@5 98.438 (97.299)	Mem 2252MB
+Test: [210/391]	Time 1.997 (2.771)	Loss 0.9209 (0.8087)	Acc@1 80.469 (85.227)	Acc@5 96.875 (97.238)	Mem 2252MB
+Test: [220/391]	Time 2.898 (2.770)	Loss 0.7363 (0.8094)	Acc@1 92.969 (85.259)	Acc@5 98.438 (97.207)	Mem 2252MB
+Test: [230/391]	Time 2.950 (2.775)	Loss 1.3516 (0.8144)	Acc@1 71.094 (85.153)	Acc@5 92.969 (97.162)	Mem 2252MB
+Test: [240/391]	Time 2.643 (2.784)	Loss 0.7290 (0.8129)	Acc@1 89.062 (85.218)	Acc@5 96.094 (97.115)	Mem 2252MB
+Test: [250/391]	Time 3.808 (2.782)	Loss 0.5508 (0.8268)	Acc@1 91.406 (84.745)	Acc@5 99.219 (96.996)	Mem 2252MB
+Test: [260/391]	Time 2.101 (2.779)	Loss 0.8936 (0.8348)	Acc@1 81.250 (84.546)	Acc@5 97.656 (96.926)	Mem 2252MB
+Test: [270/391]	Time 3.574 (2.783)	Loss 1.3750 (0.8386)	Acc@1 68.750 (84.453)	Acc@5 94.531 (96.901)	Mem 2252MB
+Test: [280/391]	Time 3.029 (2.783)	Loss 0.9795 (0.8401)	Acc@1 78.906 (84.425)	Acc@5 97.656 (96.900)	Mem 2252MB
+Test: [290/391]	Time 2.069 (2.770)	Loss 1.4521 (0.8434)	Acc@1 56.250 (84.340)	Acc@5 96.875 (96.878)	Mem 2252MB
+Test: [300/391]	Time 2.818 (2.761)	Loss 0.7227 (0.8464)	Acc@1 86.719 (84.308)	Acc@5 97.656 (96.844)	Mem 2252MB
+Test: [310/391]	Time 2.384 (2.754)	Loss 0.8276 (0.8485)	Acc@1 85.938 (84.275)	Acc@5 97.656 (96.815)	Mem 2252MB
+Test: [320/391]	Time 2.382 (2.746)	Loss 0.6714 (0.8530)	Acc@1 88.281 (84.168)	Acc@5 99.219 (96.763)	Mem 2252MB
+Test: [330/391]	Time 2.405 (2.742)	Loss 1.2168 (0.8620)	Acc@1 64.844 (83.884)	Acc@5 94.531 (96.689)	Mem 2252MB
+Test: [340/391]	Time 2.801 (2.745)	Loss 0.8521 (0.8644)	Acc@1 83.594 (83.809)	Acc@5 96.875 (96.673)	Mem 2252MB
+Test: [350/391]	Time 1.797 (2.746)	Loss 0.8896 (0.8654)	Acc@1 83.594 (83.783)	Acc@5 96.875 (96.668)	Mem 2252MB
+Test: [360/391]	Time 2.913 (2.754)	Loss 1.2266 (0.8711)	Acc@1 70.312 (83.598)	Acc@5 95.312 (96.622)	Mem 2252MB
+Test: [370/391]	Time 3.781 (2.757)	Loss 1.1582 (0.8684)	Acc@1 70.312 (83.621)	Acc@5 99.219 (96.656)	Mem 2252MB
+Test: [380/391]	Time 2.552 (2.760)	Loss 0.8896 (0.8707)	Acc@1 85.156 (83.571)	Acc@5 98.438 (96.637)	Mem 2252MB
+Test: [390/391]	Time 1.231 (2.765)	Loss 1.3965 (0.8696)	Acc@1 63.855 (83.585)	Acc@5 95.181 (96.660)	Mem 2252MB
+ * Acc@1 83.585 Acc@5 96.660
+01/07 13:04:44 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/replknet/replknet-31B_3rdparty_in1k_20221118-fd08e268.pth
+starting loop: img_size (64, 64)
+Test: [0/391]	Time 1.381 (1.381)	Loss 13.7344 (13.7344)	Acc@1 60.156 (60.156)	Acc@5 73.438 (73.438)	Mem 2252MB
+Test: [10/391]	Time 2.080 (1.401)	Loss 18.3281 (12.9560)	Acc@1 42.188 (56.179)	Acc@5 61.719 (75.923)	Mem 2252MB
+Test: [20/391]	Time 1.522 (1.382)	Loss 12.2969 (16.3188)	Acc@1 57.031 (48.177)	Acc@5 73.438 (67.597)	Mem 2252MB
+Test: [30/391]	Time 1.464 (1.365)	Loss 16.1406 (17.1739)	Acc@1 50.781 (45.035)	Acc@5 66.406 (65.827)	Mem 2252MB
+Test: [40/391]	Time 1.308 (1.363)	Loss 13.3047 (15.8386)	Acc@1 52.344 (48.590)	Acc@5 67.188 (68.464)	Mem 2252MB
+Test: [50/391]	Time 1.355 (1.377)	Loss 8.1406 (15.7419)	Acc@1 71.875 (48.775)	Acc@5 86.719 (69.010)	Mem 2252MB
+Test: [60/391]	Time 1.467 (1.385)	Loss 20.6875 (14.9291)	Acc@1 29.688 (50.871)	Acc@5 57.812 (70.876)	Mem 2252MB
+Test: [70/391]	Time 0.978 (1.369)	Loss 23.9375 (15.1891)	Acc@1 30.469 (49.747)	Acc@5 60.156 (70.852)	Mem 2252MB
+Test: [80/391]	Time 1.296 (1.350)	Loss 19.2344 (15.4859)	Acc@1 39.062 (48.862)	Acc@5 63.281 (70.390)	Mem 2252MB
+Test: [90/391]	Time 1.062 (1.342)	Loss 18.5312 (15.5377)	Acc@1 35.156 (48.824)	Acc@5 72.656 (70.441)	Mem 2252MB
+Test: [100/391]	Time 1.231 (1.328)	Loss 15.7266 (15.4964)	Acc@1 45.312 (48.523)	Acc@5 74.219 (70.838)	Mem 2252MB
+Test: [110/391]	Time 1.799 (1.337)	Loss 15.1328 (15.5080)	Acc@1 39.844 (48.508)	Acc@5 75.000 (71.037)	Mem 2252MB
+Test: [120/391]	Time 1.416 (1.345)	Loss 17.4219 (15.4978)	Acc@1 39.062 (48.877)	Acc@5 72.656 (71.397)	Mem 2252MB
+Test: [130/391]	Time 1.286 (1.362)	Loss 16.4844 (15.4617)	Acc@1 52.344 (49.076)	Acc@5 65.625 (71.350)	Mem 2252MB
+Test: [140/391]	Time 1.450 (1.356)	Loss 22.7969 (15.3583)	Acc@1 34.375 (49.235)	Acc@5 59.375 (71.604)	Mem 2252MB
+Test: [150/391]	Time 2.253 (1.365)	Loss 9.3984 (15.2416)	Acc@1 58.594 (49.612)	Acc@5 85.938 (71.839)	Mem 2252MB
+Test: [160/391]	Time 1.150 (1.357)	Loss 14.2422 (15.2812)	Acc@1 54.688 (49.685)	Acc@5 73.438 (71.802)	Mem 2252MB
+Test: [170/391]	Time 1.233 (1.349)	Loss 18.0312 (15.4868)	Acc@1 30.469 (49.031)	Acc@5 64.062 (71.135)	Mem 2252MB
+Test: [180/391]	Time 0.964 (1.345)	Loss 17.7969 (15.6458)	Acc@1 29.688 (48.299)	Acc@5 60.156 (70.597)	Mem 2252MB
+Test: [190/391]	Time 1.229 (1.347)	Loss 20.8594 (15.7962)	Acc@1 35.938 (47.840)	Acc@5 58.594 (70.116)	Mem 2252MB
+Test: [200/391]	Time 1.124 (1.341)	Loss 21.2500 (16.0080)	Acc@1 28.125 (47.178)	Acc@5 50.781 (69.523)	Mem 2252MB
+Test: [210/391]	Time 1.400 (1.339)	Loss 16.9062 (16.0961)	Acc@1 46.875 (46.768)	Acc@5 67.969 (69.172)	Mem 2252MB
+Test: [220/391]	Time 1.266 (1.338)	Loss 9.8438 (16.0691)	Acc@1 55.469 (46.656)	Acc@5 82.031 (69.050)	Mem 2252MB
+Test: [230/391]	Time 1.599 (1.338)	Loss 23.7969 (16.1597)	Acc@1 25.000 (46.513)	Acc@5 46.094 (68.797)	Mem 2252MB
+Test: [240/391]	Time 1.019 (1.336)	Loss 20.2500 (16.2640)	Acc@1 39.062 (46.236)	Acc@5 58.594 (68.461)	Mem 2252MB
+Test: [250/391]	Time 1.380 (1.331)	Loss 15.8672 (16.4070)	Acc@1 53.125 (45.870)	Acc@5 67.188 (68.156)	Mem 2252MB
+Test: [260/391]	Time 1.371 (1.330)	Loss 16.4688 (16.4401)	Acc@1 42.969 (45.624)	Acc@5 65.625 (67.975)	Mem 2252MB
+Test: [270/391]	Time 1.253 (1.328)	Loss 22.2969 (16.4759)	Acc@1 31.250 (45.549)	Acc@5 51.562 (67.825)	Mem 2252MB
+Test: [280/391]	Time 1.267 (1.327)	Loss 14.8203 (16.4870)	Acc@1 39.844 (45.443)	Acc@5 73.438 (67.749)	Mem 2252MB
+Test: [290/391]	Time 1.221 (1.324)	Loss 19.1406 (16.5915)	Acc@1 27.344 (45.253)	Acc@5 60.938 (67.496)	Mem 2252MB
+Test: [300/391]	Time 1.308 (1.325)	Loss 16.5938 (16.6319)	Acc@1 54.688 (45.170)	Acc@5 67.969 (67.245)	Mem 2252MB
+Test: [310/391]	Time 1.268 (1.326)	Loss 18.9688 (16.7216)	Acc@1 34.375 (44.893)	Acc@5 63.281 (66.954)	Mem 2252MB
+Test: [320/391]	Time 1.216 (1.329)	Loss 7.1914 (16.7461)	Acc@1 70.312 (44.850)	Acc@5 85.156 (66.874)	Mem 2252MB
+Test: [330/391]	Time 1.196 (1.329)	Loss 19.0625 (16.9088)	Acc@1 40.625 (44.460)	Acc@5 57.812 (66.505)	Mem 2252MB
+Test: [340/391]	Time 1.671 (1.328)	Loss 15.4297 (16.9154)	Acc@1 37.500 (44.343)	Acc@5 68.750 (66.399)	Mem 2252MB
+Test: [350/391]	Time 1.388 (1.328)	Loss 15.6719 (16.9175)	Acc@1 46.875 (44.338)	Acc@5 64.844 (66.355)	Mem 2252MB
+Test: [360/391]	Time 1.335 (1.331)	Loss 20.3594 (16.9406)	Acc@1 29.688 (44.233)	Acc@5 53.906 (66.292)	Mem 2252MB
+Test: [370/391]	Time 1.454 (1.330)	Loss 13.5859 (16.8978)	Acc@1 56.250 (44.323)	Acc@5 77.344 (66.442)	Mem 2252MB
+Test: [380/391]	Time 1.179 (1.329)	Loss 7.1016 (16.8781)	Acc@1 70.312 (44.410)	Acc@5 91.406 (66.513)	Mem 2252MB
+Test: [390/391]	Time 0.854 (1.331)	Loss 25.2500 (16.7171)	Acc@1 24.096 (44.813)	Acc@5 45.783 (66.868)	Mem 2252MB
+ * Acc@1 44.813 Acc@5 66.868
+01/07 13:13:26 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/replknet/replknet-31B_3rdparty_in1k_20221118-fd08e268.pth
+starting loop: img_size (112, 112)
+Test: [0/391]	Time 1.741 (1.741)	Loss 0.5503 (0.5503)	Acc@1 93.750 (93.750)	Acc@5 98.438 (98.438)	Mem 2252MB
+Test: [10/391]	Time 3.030 (3.333)	Loss 3.1582 (1.1376)	Acc@1 67.969 (86.861)	Acc@5 89.844 (95.881)	Mem 2252MB
+Test: [20/391]	Time 1.740 (2.864)	Loss 1.2656 (1.7742)	Acc@1 82.812 (79.390)	Acc@5 92.969 (92.262)	Mem 2252MB
+Test: [30/391]	Time 2.123 (2.508)	Loss 2.4746 (2.0128)	Acc@1 76.562 (76.235)	Acc@5 89.062 (91.784)	Mem 2252MB
+Test: [40/391]	Time 2.152 (2.348)	Loss 1.1211 (1.7306)	Acc@1 85.156 (79.230)	Acc@5 92.188 (92.835)	Mem 2252MB
+Test: [50/391]	Time 2.987 (2.292)	Loss 0.6084 (1.7190)	Acc@1 89.062 (79.029)	Acc@5 97.656 (92.907)	Mem 2252MB
+Test: [60/391]	Time 1.863 (2.291)	Loss 1.4902 (1.5942)	Acc@1 77.344 (80.302)	Acc@5 93.750 (93.481)	Mem 2252MB
+Test: [70/391]	Time 1.695 (2.405)	Loss 2.2422 (1.6262)	Acc@1 65.625 (79.445)	Acc@5 92.188 (93.453)	Mem 2252MB
+Test: [80/391]	Time 1.601 (2.359)	Loss 1.8154 (1.6225)	Acc@1 73.438 (78.897)	Acc@5 87.500 (93.490)	Mem 2252MB
+Test: [90/391]	Time 3.002 (2.346)	Loss 2.2734 (1.6064)	Acc@1 55.469 (78.803)	Acc@5 92.188 (93.578)	Mem 2252MB
+Test: [100/391]	Time 1.790 (2.321)	Loss 1.3584 (1.5911)	Acc@1 78.906 (78.612)	Acc@5 94.531 (93.820)	Mem 2252MB
+Test: [110/391]	Time 2.643 (2.325)	Loss 2.4062 (1.6086)	Acc@1 58.594 (78.336)	Acc@5 96.875 (93.954)	Mem 2252MB
+Test: [120/391]	Time 2.576 (2.331)	Loss 1.5859 (1.6064)	Acc@1 76.562 (78.635)	Acc@5 95.312 (94.092)	Mem 2252MB
+Test: [130/391]	Time 2.210 (2.303)	Loss 1.0293 (1.5923)	Acc@1 89.844 (78.900)	Acc@5 96.094 (94.084)	Mem 2252MB
+Test: [140/391]	Time 1.716 (2.263)	Loss 2.5078 (1.5926)	Acc@1 67.969 (78.762)	Acc@5 93.750 (94.143)	Mem 2252MB
+Test: [150/391]	Time 3.477 (2.245)	Loss 1.5547 (1.5990)	Acc@1 72.656 (78.839)	Acc@5 96.094 (94.143)	Mem 2252MB
+Test: [160/391]	Time 3.015 (2.244)	Loss 1.0996 (1.6066)	Acc@1 82.031 (78.853)	Acc@5 96.094 (94.070)	Mem 2252MB
+Test: [170/391]	Time 2.016 (2.232)	Loss 2.7305 (1.6554)	Acc@1 53.125 (78.125)	Acc@5 87.500 (93.686)	Mem 2252MB
+Test: [180/391]	Time 1.592 (2.206)	Loss 2.5195 (1.6898)	Acc@1 64.062 (77.637)	Acc@5 90.625 (93.370)	Mem 2252MB
+Test: [190/391]	Time 2.061 (2.181)	Loss 2.9043 (1.7357)	Acc@1 58.594 (77.082)	Acc@5 86.719 (93.010)	Mem 2252MB
+Test: [200/391]	Time 1.512 (2.185)	Loss 1.5537 (1.7894)	Acc@1 79.688 (76.461)	Acc@5 90.625 (92.673)	Mem 2252MB
+Test: [210/391]	Time 3.385 (2.207)	Loss 2.6934 (1.8139)	Acc@1 65.625 (76.000)	Acc@5 89.844 (92.547)	Mem 2252MB
+Test: [220/391]	Time 3.657 (2.226)	Loss 1.3184 (1.8186)	Acc@1 80.469 (75.958)	Acc@5 93.750 (92.378)	Mem 2252MB
+Test: [230/391]	Time 2.641 (2.237)	Loss 3.6602 (1.8290)	Acc@1 53.906 (75.862)	Acc@5 82.812 (92.319)	Mem 2252MB
+Test: [240/391]	Time 2.188 (2.239)	Loss 2.0020 (1.8385)	Acc@1 78.906 (75.807)	Acc@5 89.062 (92.152)	Mem 2252MB
+Test: [250/391]	Time 2.075 (2.263)	Loss 1.0039 (1.8709)	Acc@1 86.719 (75.358)	Acc@5 94.531 (91.954)	Mem 2252MB
+Test: [260/391]	Time 3.045 (2.266)	Loss 1.8340 (1.8958)	Acc@1 70.312 (74.973)	Acc@5 94.531 (91.816)	Mem 2252MB
+Test: [270/391]	Time 5.016 (2.284)	Loss 3.6602 (1.9136)	Acc@1 57.812 (74.810)	Acc@5 82.031 (91.680)	Mem 2252MB
+Test: [280/391]	Time 1.722 (2.295)	Loss 1.8066 (1.9158)	Acc@1 74.219 (74.811)	Acc@5 91.406 (91.651)	Mem 2252MB
+Test: [290/391]	Time 2.506 (2.312)	Loss 2.9805 (1.9294)	Acc@1 47.656 (74.651)	Acc@5 85.156 (91.506)	Mem 2252MB
+Test: [300/391]	Time 3.110 (2.337)	Loss 2.3379 (1.9377)	Acc@1 78.125 (74.600)	Acc@5 85.938 (91.383)	Mem 2252MB
+Test: [310/391]	Time 2.690 (2.360)	Loss 2.4883 (1.9546)	Acc@1 64.062 (74.397)	Acc@5 86.719 (91.213)	Mem 2252MB
+Test: [320/391]	Time 1.960 (2.355)	Loss 0.7930 (1.9643)	Acc@1 88.281 (74.270)	Acc@5 98.438 (91.141)	Mem 2252MB
+Test: [330/391]	Time 1.649 (2.344)	Loss 2.7988 (1.9952)	Acc@1 60.938 (73.902)	Acc@5 86.719 (90.901)	Mem 2252MB
+Test: [340/391]	Time 3.153 (2.345)	Loss 1.6074 (2.0027)	Acc@1 77.344 (73.761)	Acc@5 93.750 (90.827)	Mem 2252MB
+Test: [350/391]	Time 1.894 (2.351)	Loss 2.0703 (2.0062)	Acc@1 73.438 (73.682)	Acc@5 88.281 (90.752)	Mem 2252MB
+Test: [360/391]	Time 2.296 (2.344)	Loss 2.2617 (2.0180)	Acc@1 64.844 (73.509)	Acc@5 93.750 (90.692)	Mem 2252MB
+Test: [370/391]	Time 1.810 (2.332)	Loss 2.3262 (2.0088)	Acc@1 64.844 (73.524)	Acc@5 92.969 (90.772)	Mem 2252MB
+Test: [380/391]	Time 2.155 (2.318)	Loss 1.7568 (2.0088)	Acc@1 75.000 (73.509)	Acc@5 92.969 (90.779)	Mem 2252MB
+Test: [390/391]	Time 1.365 (2.313)	Loss 3.0820 (1.9949)	Acc@1 55.422 (73.618)	Acc@5 83.133 (90.867)	Mem 2252MB
+ * Acc@1 73.618 Acc@5 90.867
+01/07 13:28:32 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/replknet/replknet-31B_3rdparty_in1k_20221118-fd08e268.pth
+starting loop: img_size (384, 384)
+Test: [0/391]	Time 4.476 (4.476)	Loss 2.3848 (2.3848)	Acc@1 89.062 (89.062)	Acc@5 96.875 (96.875)	Mem 5435MB
+Test: [10/391]	Time 5.468 (4.242)	Loss 3.6094 (2.7097)	Acc@1 63.281 (83.878)	Acc@5 82.031 (94.531)	Mem 5435MB
+Test: [20/391]	Time 5.016 (4.209)	Loss 2.6758 (2.9821)	Acc@1 86.719 (76.935)	Acc@5 95.312 (90.923)	Mem 5435MB
+Test: [30/391]	Time 5.735 (4.248)	Loss 3.4336 (3.1260)	Acc@1 72.656 (72.455)	Acc@5 82.812 (88.987)	Mem 5435MB
+Test: [40/391]	Time 3.380 (4.158)	Loss 2.6816 (3.0490)	Acc@1 74.219 (75.171)	Acc@5 90.625 (90.263)	Mem 5435MB
+Test: [50/391]	Time 3.157 (4.206)	Loss 1.9580 (2.9225)	Acc@1 88.281 (76.180)	Acc@5 96.875 (90.717)	Mem 5435MB
+Test: [60/391]	Time 4.715 (4.173)	Loss 3.0645 (2.8444)	Acc@1 78.125 (77.805)	Acc@5 93.750 (91.688)	Mem 5435MB
+Test: [70/391]	Time 4.384 (4.160)	Loss 3.1758 (2.8719)	Acc@1 54.688 (76.772)	Acc@5 82.812 (91.494)	Mem 5435MB
+Test: [80/391]	Time 3.041 (4.106)	Loss 3.9316 (2.8923)	Acc@1 57.031 (76.389)	Acc@5 79.688 (91.638)	Mem 5435MB
+Test: [90/391]	Time 4.367 (4.111)	Loss 3.2324 (2.9408)	Acc@1 65.625 (75.592)	Acc@5 94.531 (91.252)	Mem 5435MB
+Test: [100/391]	Time 4.405 (4.129)	Loss 3.0020 (2.9372)	Acc@1 82.031 (75.657)	Acc@5 91.406 (91.499)	Mem 5435MB
+Test: [110/391]	Time 3.797 (4.158)	Loss 3.5527 (2.9745)	Acc@1 50.781 (75.007)	Acc@5 81.250 (91.174)	Mem 5435MB
+Test: [120/391]	Time 5.316 (4.177)	Loss 3.0586 (2.9805)	Acc@1 80.469 (75.142)	Acc@5 93.750 (91.161)	Mem 5435MB
+Test: [130/391]	Time 4.033 (4.191)	Loss 2.3633 (2.9905)	Acc@1 86.719 (75.101)	Acc@5 92.969 (91.066)	Mem 5435MB
+Test: [140/391]	Time 5.642 (4.179)	Loss 3.2402 (2.9683)	Acc@1 57.031 (75.111)	Acc@5 92.188 (91.318)	Mem 5435MB
+Test: [150/391]	Time 5.042 (4.192)	Loss 2.7773 (2.9679)	Acc@1 68.750 (74.778)	Acc@5 88.281 (91.054)	Mem 5435MB
+Test: [160/391]	Time 3.578 (4.175)	Loss 2.4180 (2.9630)	Acc@1 76.562 (74.505)	Acc@5 89.844 (90.970)	Mem 5435MB
+Test: [170/391]	Time 3.722 (4.153)	Loss 2.8281 (2.9474)	Acc@1 61.719 (74.401)	Acc@5 85.156 (90.981)	Mem 5435MB
+Test: [180/391]	Time 3.962 (4.147)	Loss 3.2754 (2.9443)	Acc@1 55.469 (74.150)	Acc@5 85.156 (90.849)	Mem 5435MB
+Test: [190/391]	Time 3.275 (4.165)	Loss 3.3008 (2.9416)	Acc@1 57.812 (73.642)	Acc@5 87.500 (90.637)	Mem 5435MB
+Test: [200/391]	Time 3.830 (4.150)	Loss 2.9277 (2.9421)	Acc@1 80.469 (73.251)	Acc@5 93.750 (90.501)	Mem 5435MB
+Test: [210/391]	Time 3.677 (4.129)	Loss 2.1484 (2.9324)	Acc@1 78.906 (73.119)	Acc@5 94.531 (90.377)	Mem 5435MB
+Test: [220/391]	Time 3.874 (4.118)	Loss 3.0645 (2.9192)	Acc@1 66.406 (73.187)	Acc@5 79.688 (90.445)	Mem 5435MB
+Test: [230/391]	Time 4.058 (4.133)	Loss 3.5625 (2.9177)	Acc@1 53.906 (73.086)	Acc@5 81.250 (90.432)	Mem 5435MB
+Test: [240/391]	Time 4.156 (4.133)	Loss 3.4355 (2.9211)	Acc@1 73.438 (73.032)	Acc@5 84.375 (90.340)	Mem 5435MB
+Test: [250/391]	Time 3.956 (4.126)	Loss 2.3848 (2.9288)	Acc@1 81.250 (72.603)	Acc@5 93.750 (90.133)	Mem 5435MB
+Test: [260/391]	Time 5.157 (4.123)	Loss 3.1934 (2.9233)	Acc@1 57.812 (72.525)	Acc@5 86.719 (90.146)	Mem 5435MB
+Test: [270/391]	Time 4.991 (4.126)	Loss 3.5566 (2.9278)	Acc@1 48.438 (72.342)	Acc@5 74.219 (90.025)	Mem 5435MB
+Test: [280/391]	Time 2.977 (4.112)	Loss 2.3242 (2.9242)	Acc@1 77.344 (72.334)	Acc@5 96.875 (90.072)	Mem 5435MB
+Test: [290/391]	Time 3.631 (4.112)	Loss 2.8652 (2.9203)	Acc@1 40.625 (72.283)	Acc@5 86.719 (90.069)	Mem 5435MB
+Test: [300/391]	Time 3.568 (4.106)	Loss 2.8750 (2.9198)	Acc@1 75.781 (72.293)	Acc@5 88.281 (90.051)	Mem 5435MB
+Test: [310/391]	Time 4.485 (4.103)	Loss 2.2539 (2.9160)	Acc@1 78.125 (72.272)	Acc@5 97.656 (89.984)	Mem 5435MB
+Test: [320/391]	Time 3.775 (4.108)	Loss 2.2012 (2.9154)	Acc@1 78.906 (72.131)	Acc@5 92.969 (89.897)	Mem 5435MB
+Test: [330/391]	Time 3.745 (4.103)	Loss 3.3594 (2.9250)	Acc@1 54.688 (71.707)	Acc@5 89.062 (89.655)	Mem 5435MB
+Test: [340/391]	Time 3.998 (4.091)	Loss 2.4004 (2.9235)	Acc@1 83.594 (71.655)	Acc@5 96.875 (89.644)	Mem 5435MB
+Test: [350/391]	Time 3.988 (4.095)	Loss 2.6777 (2.9116)	Acc@1 78.125 (71.753)	Acc@5 89.062 (89.717)	Mem 5435MB
+Test: [360/391]	Time 3.930 (4.082)	Loss 2.0488 (2.9034)	Acc@1 71.875 (71.693)	Acc@5 91.406 (89.699)	Mem 5435MB
+Test: [370/391]	Time 6.151 (4.089)	Loss 2.4297 (2.8799)	Acc@1 64.844 (71.846)	Acc@5 96.094 (89.844)	Mem 5435MB
+Test: [380/391]	Time 4.462 (4.094)	Loss 1.6162 (2.8646)	Acc@1 82.812 (71.922)	Acc@5 97.656 (89.911)	Mem 5435MB
+Test: [390/391]	Time 2.393 (4.098)	Loss 3.2754 (2.8473)	Acc@1 56.627 (72.084)	Acc@5 86.747 (90.017)	Mem 5435MB
+ * Acc@1 72.084 Acc@5 90.017
+01/07 13:55:16 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/replknet/replknet-31B_3rdparty_in1k_20221118-fd08e268.pth
+starting loop: img_size (512, 512)
+Test: [0/391]	Time 5.794 (5.794)	Loss 3.9336 (3.9336)	Acc@1 20.312 (20.312)	Acc@5 48.438 (48.438)	Mem 9187MB
+Test: [10/391]	Time 6.901 (6.229)	Loss 5.9531 (4.1839)	Acc@1 0.000 (12.287)	Acc@5 9.375 (44.886)	Mem 9187MB
+Test: [20/391]	Time 7.136 (6.372)	Loss 4.8359 (4.9488)	Acc@1 5.469 (8.073)	Acc@5 34.375 (33.445)	Mem 9187MB
+Test: [30/391]	Time 7.218 (6.566)	Loss 5.5977 (5.3789)	Acc@1 7.812 (6.426)	Acc@5 25.000 (26.915)	Mem 9187MB
+Test: [40/391]	Time 8.096 (6.791)	Loss 4.8047 (5.0918)	Acc@1 5.469 (7.031)	Acc@5 39.062 (31.364)	Mem 9187MB
+Test: [50/391]	Time 7.959 (7.019)	Loss 1.8457 (4.8974)	Acc@1 49.219 (9.972)	Acc@5 89.844 (34.544)	Mem 9187MB
+Test: [60/391]	Time 4.490 (6.915)	Loss 5.4961 (4.6265)	Acc@1 3.125 (12.500)	Acc@5 19.531 (40.177)	Mem 9187MB
+Test: [70/391]	Time 6.660 (6.819)	Loss 6.4414 (4.7389)	Acc@1 5.469 (11.565)	Acc@5 21.875 (38.116)	Mem 9187MB
+Test: [80/391]	Time 5.845 (6.677)	Loss 7.7305 (4.8459)	Acc@1 0.000 (10.735)	Acc@5 2.344 (35.976)	Mem 9187MB
+Test: [90/391]	Time 4.486 (6.527)	Loss 5.7539 (4.9944)	Acc@1 1.562 (9.839)	Acc@5 21.094 (33.671)	Mem 9187MB
+Test: [100/391]	Time 4.797 (6.434)	Loss 6.3477 (5.0432)	Acc@1 0.000 (9.313)	Acc@5 10.156 (32.611)	Mem 9187MB
+Test: [110/391]	Time 5.961 (6.400)	Loss 6.6211 (5.1240)	Acc@1 0.000 (8.523)	Acc@5 2.344 (30.877)	Mem 9187MB
+Test: [120/391]	Time 4.457 (6.304)	Loss 3.8398 (5.1220)	Acc@1 18.750 (8.510)	Acc@5 57.812 (30.843)	Mem 9187MB
+Test: [130/391]	Time 4.587 (6.227)	Loss 3.5840 (5.1090)	Acc@1 29.688 (8.683)	Acc@5 67.969 (31.143)	Mem 9187MB
+Test: [140/391]	Time 5.336 (6.152)	Loss 5.5703 (5.0705)	Acc@1 3.125 (8.943)	Acc@5 24.219 (31.887)	Mem 9187MB
+Test: [150/391]	Time 6.553 (6.108)	Loss 4.9609 (5.1027)	Acc@1 0.781 (8.459)	Acc@5 27.344 (31.079)	Mem 9187MB
+Test: [160/391]	Time 6.645 (6.088)	Loss 5.3906 (5.1020)	Acc@1 11.719 (8.492)	Acc@5 32.031 (31.381)	Mem 9187MB
+Test: [170/391]	Time 5.241 (6.084)	Loss 4.4805 (5.1190)	Acc@1 10.156 (8.457)	Acc@5 35.156 (30.821)	Mem 9187MB
+Test: [180/391]	Time 5.399 (6.066)	Loss 5.9180 (5.1305)	Acc@1 11.719 (8.676)	Acc@5 17.969 (30.702)	Mem 9187MB
+Test: [190/391]	Time 5.890 (6.074)	Loss 6.6680 (5.1497)	Acc@1 13.281 (8.970)	Acc@5 24.219 (30.751)	Mem 9187MB
+Test: [200/391]	Time 6.146 (6.083)	Loss 6.0352 (5.1520)	Acc@1 0.000 (9.173)	Acc@5 8.594 (30.834)	Mem 9187MB
+Test: [210/391]	Time 5.455 (6.103)	Loss 3.9375 (5.1558)	Acc@1 21.094 (9.412)	Acc@5 46.875 (30.987)	Mem 9187MB
+Test: [220/391]	Time 5.967 (6.149)	Loss 3.9453 (5.1402)	Acc@1 21.875 (9.884)	Acc@5 62.500 (31.377)	Mem 9187MB
+Test: [230/391]	Time 5.999 (6.185)	Loss 6.5273 (5.1509)	Acc@1 6.250 (9.876)	Acc@5 15.625 (31.152)	Mem 9187MB
+Test: [240/391]	Time 4.827 (6.153)	Loss 6.8008 (5.1884)	Acc@1 7.031 (9.813)	Acc@5 16.406 (30.764)	Mem 9187MB
+Test: [250/391]	Time 4.380 (6.111)	Loss 5.6992 (5.2214)	Acc@1 0.781 (9.820)	Acc@5 11.719 (30.366)	Mem 9187MB
+Test: [260/391]	Time 5.495 (6.067)	Loss 5.2578 (5.2200)	Acc@1 13.281 (9.896)	Acc@5 31.250 (30.322)	Mem 9187MB
+Test: [270/391]	Time 5.198 (6.029)	Loss 7.2812 (5.2401)	Acc@1 0.000 (9.897)	Acc@5 1.562 (29.999)	Mem 9187MB
+Test: [280/391]	Time 5.348 (6.011)	Loss 4.0703 (5.2412)	Acc@1 10.938 (9.912)	Acc@5 40.625 (29.968)	Mem 9187MB
+Test: [290/391]	Time 4.254 (5.994)	Loss 5.3008 (5.2452)	Acc@1 0.000 (9.979)	Acc@5 18.750 (29.924)	Mem 9187MB
+Test: [300/391]	Time 4.467 (5.968)	Loss 6.4414 (5.2596)	Acc@1 3.125 (9.873)	Acc@5 20.312 (29.680)	Mem 9187MB
+Test: [310/391]	Time 4.367 (5.945)	Loss 4.5234 (5.2665)	Acc@1 15.625 (9.990)	Acc@5 36.719 (29.642)	Mem 9187MB
+Test: [320/391]	Time 6.122 (5.963)	Loss 3.4980 (5.2688)	Acc@1 21.875 (10.003)	Acc@5 63.281 (29.675)	Mem 9187MB
+Test: [330/391]	Time 5.789 (5.964)	Loss 5.9570 (5.2833)	Acc@1 2.344 (9.991)	Acc@5 14.062 (29.569)	Mem 9187MB
+Test: [340/391]	Time 6.995 (5.957)	Loss 4.5586 (5.2906)	Acc@1 17.969 (9.966)	Acc@5 37.500 (29.465)	Mem 9187MB
+Test: [350/391]	Time 5.162 (5.948)	Loss 4.8711 (5.2741)	Acc@1 13.281 (10.207)	Acc@5 44.531 (29.779)	Mem 9187MB
+Test: [360/391]	Time 5.445 (5.940)	Loss 3.8984 (5.2657)	Acc@1 28.125 (10.321)	Acc@5 58.594 (29.934)	Mem 9187MB
+Test: [370/391]	Time 5.421 (5.940)	Loss 3.7070 (5.2155)	Acc@1 22.656 (11.119)	Acc@5 54.688 (30.921)	Mem 9187MB
+Test: [380/391]	Time 6.299 (5.923)	Loss 3.0117 (5.1816)	Acc@1 34.375 (11.520)	Acc@5 71.875 (31.529)	Mem 9187MB
+Test: [390/391]	Time 4.140 (5.907)	Loss 5.9258 (5.1415)	Acc@1 1.205 (12.051)	Acc@5 8.434 (32.196)	Mem 9187MB
+ * Acc@1 12.051 Acc@5 32.196
+01/07 14:33:47 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/replknet/replknet-31B_3rdparty_in1k_20221118-fd08e268.pth
+starting loop: img_size (640, 640)
+Test: [0/391]	Time 7.275 (7.275)	Loss 5.5586 (5.5586)	Acc@1 1.562 (1.562)	Acc@5 19.531 (19.531)	Mem 14011MB
+Test: [10/391]	Time 8.332 (7.541)	Loss 8.1719 (5.9567)	Acc@1 0.000 (0.639)	Acc@5 0.000 (15.980)	Mem 14011MB
+Test: [20/391]	Time 7.318 (7.679)	Loss 6.9492 (6.8826)	Acc@1 0.000 (0.335)	Acc@5 0.000 (9.375)	Mem 14011MB
+Test: [30/391]	Time 7.884 (7.862)	Loss 7.7461 (7.4927)	Acc@1 0.000 (0.227)	Acc@5 0.781 (6.502)	Mem 14011MB
+Test: [40/391]	Time 7.592 (7.775)	Loss 6.8203 (7.0908)	Acc@1 0.000 (0.171)	Acc@5 14.062 (9.356)	Mem 14011MB
+Test: [50/391]	Time 6.998 (7.791)	Loss 2.2207 (6.8220)	Acc@1 39.062 (1.578)	Acc@5 89.062 (12.025)	Mem 14011MB
+Test: [60/391]	Time 7.778 (7.757)	Loss 7.8359 (6.4565)	Acc@1 0.000 (1.844)	Acc@5 0.781 (16.573)	Mem 14011MB
+Test: [70/391]	Time 7.709 (7.765)	Loss 9.4141 (6.6417)	Acc@1 0.000 (1.585)	Acc@5 0.000 (14.316)	Mem 14011MB
+Test: [80/391]	Time 8.518 (7.755)	Loss 10.4219 (6.8036)	Acc@1 0.000 (1.389)	Acc@5 0.000 (12.886)	Mem 14011MB
+Test: [90/391]	Time 9.024 (7.788)	Loss 8.2812 (7.0051)	Acc@1 0.000 (1.236)	Acc@5 0.000 (11.667)	Mem 14011MB
+Test: [100/391]	Time 8.349 (7.774)	Loss 8.9688 (7.0844)	Acc@1 0.000 (1.114)	Acc@5 0.000 (10.589)	Mem 14011MB
+Test: [110/391]	Time 8.042 (7.806)	Loss 8.7578 (7.1861)	Acc@1 0.000 (1.014)	Acc@5 0.000 (9.649)	Mem 14011MB
+Test: [120/391]	Time 8.793 (7.824)	Loss 5.1484 (7.1789)	Acc@1 0.000 (0.930)	Acc@5 10.156 (9.291)	Mem 14011MB
+Test: [130/391]	Time 7.224 (7.809)	Loss 5.2969 (7.1517)	Acc@1 0.000 (0.859)	Acc@5 21.875 (9.059)	Mem 14011MB
+Test: [140/391]	Time 7.180 (7.838)	Loss 7.9922 (7.1246)	Acc@1 0.000 (0.798)	Acc@5 3.125 (8.887)	Mem 14011MB
+Test: [150/391]	Time 8.637 (7.890)	Loss 7.0703 (7.1685)	Acc@1 0.000 (0.745)	Acc@5 0.781 (8.361)	Mem 14011MB
+Test: [160/391]	Time 8.686 (7.913)	Loss 8.0938 (7.1628)	Acc@1 0.000 (0.699)	Acc@5 0.781 (8.380)	Mem 14011MB
+Test: [170/391]	Time 7.488 (7.923)	Loss 6.1055 (7.1959)	Acc@1 0.000 (0.681)	Acc@5 4.688 (8.087)	Mem 14011MB
+Test: [180/391]	Time 9.248 (7.948)	Loss 8.1719 (7.2044)	Acc@1 0.781 (0.665)	Acc@5 10.156 (7.985)	Mem 14011MB
+Test: [190/391]	Time 6.885 (7.935)	Loss 8.8359 (7.2334)	Acc@1 0.781 (0.663)	Acc@5 8.594 (8.046)	Mem 14011MB
+Test: [200/391]	Time 7.414 (7.929)	Loss 8.4688 (7.2248)	Acc@1 0.000 (0.727)	Acc@5 0.000 (8.368)	Mem 14011MB
+Test: [210/391]	Time 8.244 (7.925)	Loss 5.6328 (7.2347)	Acc@1 3.125 (0.737)	Acc@5 9.375 (8.357)	Mem 14011MB
+Test: [220/391]	Time 6.934 (7.920)	Loss 5.6562 (7.2190)	Acc@1 0.000 (0.866)	Acc@5 1.562 (8.435)	Mem 14011MB
+Test: [230/391]	Time 8.079 (7.911)	Loss 8.9453 (7.2382)	Acc@1 0.781 (0.927)	Acc@5 5.469 (8.296)	Mem 14011MB
+Test: [240/391]	Time 7.934 (7.921)	Loss 9.5312 (7.2961)	Acc@1 0.000 (0.891)	Acc@5 2.344 (8.072)	Mem 14011MB
+Test: [250/391]	Time 7.958 (7.925)	Loss 8.1875 (7.3388)	Acc@1 0.000 (1.018)	Acc@5 0.000 (8.105)	Mem 14011MB
+Test: [260/391]	Time 7.863 (7.916)	Loss 7.1602 (7.3341)	Acc@1 0.000 (0.979)	Acc@5 5.469 (7.956)	Mem 14011MB
+Test: [270/391]	Time 7.791 (7.911)	Loss 10.1250 (7.3619)	Acc@1 0.000 (0.957)	Acc@5 0.000 (7.882)	Mem 14011MB
+Test: [280/391]	Time 7.195 (7.915)	Loss 5.4570 (7.3613)	Acc@1 0.000 (0.940)	Acc@5 9.375 (7.829)	Mem 14011MB
+Test: [290/391]	Time 6.836 (7.908)	Loss 7.6562 (7.3660)	Acc@1 0.000 (0.926)	Acc@5 0.000 (7.850)	Mem 14011MB
+Test: [300/391]	Time 8.371 (7.911)	Loss 9.0234 (7.3912)	Acc@1 0.000 (0.895)	Acc@5 0.000 (7.659)	Mem 14011MB
+Test: [310/391]	Time 6.824 (7.911)	Loss 6.6289 (7.4039)	Acc@1 0.000 (0.882)	Acc@5 4.688 (7.649)	Mem 14011MB
+Test: [320/391]	Time 6.790 (7.917)	Loss 5.1367 (7.4078)	Acc@1 0.781 (0.901)	Acc@5 19.531 (7.659)	Mem 14011MB
+Test: [330/391]	Time 7.386 (7.913)	Loss 8.3594 (7.4218)	Acc@1 0.000 (0.892)	Acc@5 0.781 (7.652)	Mem 14011MB
+Test: [340/391]	Time 7.845 (7.909)	Loss 6.9375 (7.4326)	Acc@1 0.000 (0.871)	Acc@5 5.469 (7.538)	Mem 14011MB
+Test: [350/391]	Time 8.323 (7.912)	Loss 7.0156 (7.4153)	Acc@1 0.000 (0.933)	Acc@5 6.250 (7.623)	Mem 14011MB
+Test: [360/391]	Time 7.921 (7.915)	Loss 5.5547 (7.4035)	Acc@1 0.781 (0.946)	Acc@5 14.062 (7.650)	Mem 14011MB
+Test: [370/391]	Time 7.870 (7.904)	Loss 5.0820 (7.3337)	Acc@1 1.562 (1.055)	Acc@5 17.188 (8.421)	Mem 14011MB
+Test: [380/391]	Time 7.208 (7.900)	Loss 4.7109 (7.2860)	Acc@1 0.000 (1.036)	Acc@5 25.000 (8.709)	Mem 14011MB
+Test: [390/391]	Time 4.262 (7.890)	Loss 8.0859 (7.2313)	Acc@1 0.000 (1.158)	Acc@5 1.205 (9.193)	Mem 14011MB
+ * Acc@1 1.158 Acc@5 9.193
+01/07 15:25:14 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/replknet/replknet-31B_3rdparty_in1k_20221118-fd08e268.pth
+starting loop: img_size (768, 768)
+Test: [0/521]	Time 6.976 (6.976)	Loss 7.6016 (7.6016)	Acc@1 0.000 (0.000)	Acc@5 1.042 (1.042)	Mem 15083MB
+Test: [10/521]	Time 8.297 (7.532)	Loss 8.3594 (7.2457)	Acc@1 0.000 (0.000)	Acc@5 0.000 (5.871)	Mem 15083MB
+Test: [20/521]	Time 7.420 (7.521)	Loss 8.2734 (8.0294)	Acc@1 0.000 (0.000)	Acc@5 0.000 (5.456)	Mem 15083MB
+Test: [30/521]	Time 7.922 (7.601)	Loss 11.2969 (8.5697)	Acc@1 0.000 (0.000)	Acc@5 0.000 (3.696)	Mem 15083MB
+Test: [40/521]	Time 6.803 (7.377)	Loss 8.6641 (8.9986)	Acc@1 0.000 (0.000)	Acc@5 0.000 (2.820)	Mem 15083MB
+Test: [50/521]	Time 6.429 (7.096)	Loss 5.2852 (8.7030)	Acc@1 0.000 (0.000)	Acc@5 6.250 (2.900)	Mem 15083MB
+Test: [60/521]	Time 6.449 (6.928)	Loss 6.0000 (8.4038)	Acc@1 2.083 (0.273)	Acc@5 33.333 (5.157)	Mem 15083MB
+Test: [70/521]	Time 6.639 (6.862)	Loss 5.3906 (8.0884)	Acc@1 0.000 (0.939)	Acc@5 9.375 (6.925)	Mem 15083MB
+Test: [80/521]	Time 5.326 (6.749)	Loss 8.5938 (7.7800)	Acc@1 0.000 (0.874)	Acc@5 0.000 (9.246)	Mem 15083MB
+Test: [90/521]	Time 6.370 (6.662)	Loss 8.3672 (7.9039)	Acc@1 0.000 (0.778)	Acc@5 0.000 (8.230)	Mem 15083MB
+Test: [100/521]	Time 6.190 (6.599)	Loss 8.5703 (8.0690)	Acc@1 0.000 (0.701)	Acc@5 0.000 (7.415)	Mem 15083MB
+Test: [110/521]	Time 6.787 (6.536)	Loss 9.6094 (8.1790)	Acc@1 0.000 (0.638)	Acc@5 0.000 (6.785)	Mem 15083MB
+Test: [120/521]	Time 5.775 (6.498)	Loss 11.0859 (8.3565)	Acc@1 0.000 (0.585)	Acc@5 0.000 (6.250)	Mem 15083MB
+Test: [130/521]	Time 5.488 (6.452)	Loss 7.5312 (8.4149)	Acc@1 0.000 (0.541)	Acc@5 0.000 (5.773)	Mem 15083MB
+Test: [140/521]	Time 6.814 (6.410)	Loss 9.2656 (8.4944)	Acc@1 0.000 (0.502)	Acc@5 0.000 (5.363)	Mem 15083MB
+Test: [150/521]	Time 6.075 (6.389)	Loss 8.1406 (8.5673)	Acc@1 0.000 (0.469)	Acc@5 0.000 (5.008)	Mem 15083MB
+Test: [160/521]	Time 5.710 (6.381)	Loss 6.5859 (8.5365)	Acc@1 0.000 (0.440)	Acc@5 1.042 (4.852)	Mem 15083MB
+Test: [170/521]	Time 6.258 (6.371)	Loss 6.7695 (8.5429)	Acc@1 0.000 (0.414)	Acc@5 6.250 (4.617)	Mem 15083MB
+Test: [180/521]	Time 5.949 (6.355)	Loss 5.7188 (8.4984)	Acc@1 0.000 (0.391)	Acc@5 7.292 (4.437)	Mem 15083MB
+Test: [190/521]	Time 6.535 (6.352)	Loss 6.3008 (8.4825)	Acc@1 0.000 (0.371)	Acc@5 1.042 (4.210)	Mem 15083MB
+Test: [200/521]	Time 7.073 (6.377)	Loss 8.4609 (8.5211)	Acc@1 0.000 (0.352)	Acc@5 0.000 (4.001)	Mem 15083MB
+Test: [210/521]	Time 6.333 (6.374)	Loss 4.8750 (8.4998)	Acc@1 0.000 (0.336)	Acc@5 25.000 (3.969)	Mem 15083MB
+Test: [220/521]	Time 6.607 (6.376)	Loss 11.5156 (8.5684)	Acc@1 0.000 (0.321)	Acc@5 0.000 (3.813)	Mem 15083MB
+Test: [230/521]	Time 6.464 (6.380)	Loss 6.5938 (8.5520)	Acc@1 0.000 (0.307)	Acc@5 0.000 (3.680)	Mem 15083MB
+Test: [240/521]	Time 6.304 (6.382)	Loss 9.5625 (8.5831)	Acc@1 0.000 (0.294)	Acc@5 11.458 (3.696)	Mem 15083MB
+Test: [250/521]	Time 6.491 (6.390)	Loss 10.1328 (8.6296)	Acc@1 0.000 (0.282)	Acc@5 0.000 (3.577)	Mem 15083MB
+Test: [260/521]	Time 6.755 (6.393)	Loss 6.6914 (8.6302)	Acc@1 0.000 (0.279)	Acc@5 1.042 (3.951)	Mem 15083MB
+Test: [270/521]	Time 6.214 (6.396)	Loss 12.2734 (8.6586)	Acc@1 0.000 (0.269)	Acc@5 3.125 (3.867)	Mem 15083MB
+Test: [280/521]	Time 6.166 (6.396)	Loss 6.6211 (8.6466)	Acc@1 1.042 (0.267)	Acc@5 7.292 (3.855)	Mem 15083MB
+Test: [290/521]	Time 7.169 (6.394)	Loss 7.9180 (8.6321)	Acc@1 0.000 (0.358)	Acc@5 0.000 (3.938)	Mem 15083MB
+Test: [300/521]	Time 6.423 (6.397)	Loss 7.0859 (8.6486)	Acc@1 6.250 (0.367)	Acc@5 48.958 (3.969)	Mem 15083MB
+Test: [310/521]	Time 6.709 (6.408)	Loss 11.6016 (8.6950)	Acc@1 0.000 (0.355)	Acc@5 0.000 (3.865)	Mem 15083MB
+Test: [320/521]	Time 6.480 (6.408)	Loss 11.1641 (8.7483)	Acc@1 0.000 (0.344)	Acc@5 1.042 (3.751)	Mem 15083MB
+Test: [330/521]	Time 6.491 (6.407)	Loss 11.3359 (8.7813)	Acc@1 0.000 (0.469)	Acc@5 0.000 (3.931)	Mem 15083MB
+Test: [340/521]	Time 6.473 (6.409)	Loss 8.8594 (8.8006)	Acc@1 0.000 (0.455)	Acc@5 0.000 (3.821)	Mem 15083MB
+Test: [350/521]	Time 6.725 (6.414)	Loss 10.4219 (8.7982)	Acc@1 0.000 (0.442)	Acc@5 0.000 (3.739)	Mem 15083MB
+Test: [360/521]	Time 9.545 (6.464)	Loss 12.2344 (8.8307)	Acc@1 0.000 (0.430)	Acc@5 0.000 (3.665)	Mem 15083MB
+Test: [370/521]	Time 9.084 (6.533)	Loss 10.8984 (8.8449)	Acc@1 0.000 (0.418)	Acc@5 0.000 (3.571)	Mem 15083MB
+Test: [380/521]	Time 7.651 (6.589)	Loss 10.2422 (8.8366)	Acc@1 0.000 (0.410)	Acc@5 0.000 (3.634)	Mem 15083MB
+Test: [390/521]	Time 9.150 (6.633)	Loss 10.3750 (8.8642)	Acc@1 0.000 (0.400)	Acc@5 0.000 (3.573)	Mem 15083MB
+Test: [400/521]	Time 8.052 (6.665)	Loss 10.4922 (8.8848)	Acc@1 0.000 (0.390)	Acc@5 0.000 (3.486)	Mem 15083MB
+Test: [410/521]	Time 8.138 (6.692)	Loss 9.6250 (8.9135)	Acc@1 0.000 (0.383)	Acc@5 3.125 (3.424)	Mem 15083MB
+Test: [420/521]	Time 8.458 (6.721)	Loss 11.5156 (8.9197)	Acc@1 0.000 (0.388)	Acc@5 0.000 (3.459)	Mem 15083MB
+Test: [430/521]	Time 7.255 (6.735)	Loss 9.8594 (8.9095)	Acc@1 0.000 (0.382)	Acc@5 0.000 (3.468)	Mem 15083MB
+Test: [440/521]	Time 6.995 (6.744)	Loss 9.9219 (8.9269)	Acc@1 0.000 (0.373)	Acc@5 0.000 (3.517)	Mem 15083MB
+Test: [450/521]	Time 8.575 (6.768)	Loss 7.4141 (8.9402)	Acc@1 0.000 (0.365)	Acc@5 1.042 (3.453)	Mem 15083MB
+Test: [460/521]	Time 7.032 (6.777)	Loss 7.9570 (8.9474)	Acc@1 0.000 (0.357)	Acc@5 0.000 (3.380)	Mem 15083MB
+Test: [470/521]	Time 7.383 (6.786)	Loss 11.3281 (8.9415)	Acc@1 0.000 (0.369)	Acc@5 2.083 (3.474)	Mem 15083MB
+Test: [480/521]	Time 6.885 (6.787)	Loss 7.4766 (8.9232)	Acc@1 0.000 (0.368)	Acc@5 1.042 (3.506)	Mem 15083MB
+Test: [490/521]	Time 6.560 (6.792)	Loss 5.8086 (8.8654)	Acc@1 0.000 (0.369)	Acc@5 25.000 (3.749)	Mem 15083MB
+Test: [500/521]	Time 6.749 (6.793)	Loss 8.3672 (8.8150)	Acc@1 0.000 (0.380)	Acc@5 0.000 (3.953)	Mem 15083MB
+Test: [510/521]	Time 7.001 (6.795)	Loss 6.0859 (8.7636)	Acc@1 0.000 (0.373)	Acc@5 0.000 (4.065)	Mem 15083MB
+Test: [520/521]	Time 5.583 (6.803)	Loss 9.6797 (8.7182)	Acc@1 0.000 (0.392)	Acc@5 0.000 (4.338)	Mem 15083MB
+ * Acc@1 0.392 Acc@5 4.338
+01/07 16:24:19 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/replknet/replknet-31B_3rdparty_in1k_20221118-fd08e268.pth
+starting loop: img_size (1024, 1024)
+Traceback (most recent call last):
+  File "/media/Disk2/LiuYue/Visualize/get_scaleup.py", line 284, in <module>
+  File "/media/Disk2/LiuYue/Visualize/get_scaleup.py", line 260, in main
+  File "/media/Disk2/LiuYue/Visualize/get_scaleup.py", line 155, in _validate
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/autograd/grad_mode.py", line 27, in decorate_context
+    return func(*args, **kwargs)
+  File "/media/Disk2/LiuYue/Visualize/get_scaleup.py", line 58, in validate
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1040, in forward
+    output = self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1003, in _run_ddp_forward
+    return module_to_run(*inputs, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/mmpretrain/models/classifiers/image.py", line 119, in forward
+    feats = self.extract_feat(inputs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/mmpretrain/models/classifiers/image.py", line 204, in extract_feat
+    x = self.backbone(inputs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/mmpretrain/models/backbones/replknet.py", line 642, in forward
+    x = self.forward_features(x)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/mmpretrain/models/backbones/replknet.py", line 627, in forward_features
+    x = stem_layer(x)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/container.py", line 204, in forward
+    input = module(input)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 463, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 459, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: Expected canUse32BitIndexMath(input) && canUse32BitIndexMath(output) to be true, but got false.  (Could this error message be improved?  If so, please report an enhancement request to PyTorch.)
+python: can't open file '/media/Disk2/LiuYue/Visualize/get_scaleup.py': [Errno 2] No such file or directory
+[W socket.cpp:426] [c10d] The server socket has failed to bind to [::]:61234 (errno: 98 - Address already in use).
+[W socket.cpp:426] [c10d] The server socket has failed to bind to ?UNKNOWN? (errno: 98 - Address already in use).
+[E socket.cpp:462] [c10d] The server socket has failed to listen on any local network address.
+The server socket has failed to listen on any local network address. The server socket has failed to bind to [::]:61234 (errno: 98 - Address already in use). The server socket has failed to bind to ?UNKNOWN? (errno: 98 - Address already in use).
+Traceback (most recent call last):
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 299, in <module>
+    main(os.environ['GETSCALENET'])
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/os.py", line 680, in __getitem__
+    raise KeyError(key) from None
+KeyError: 'GETSCALENET'
+[W socket.cpp:426] [c10d] The server socket has failed to bind to [::]:61234 (errno: 98 - Address already in use).
+[W socket.cpp:426] [c10d] The server socket has failed to bind to ?UNKNOWN? (errno: 98 - Address already in use).
+[E socket.cpp:462] [c10d] The server socket has failed to listen on any local network address.
+The server socket has failed to listen on any local network address. The server socket has failed to bind to [::]:61234 (errno: 98 - Address already in use). The server socket has failed to bind to ?UNKNOWN? (errno: 98 - Address already in use).
+using init_replknet ======================== 
+01/07 21:45:58 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/replknet/replknet-31B_3rdparty_in1k_20221118-fd08e268.pth
+starting loop: img_size (1024, 1024)
+Traceback (most recent call last):
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 299, in <module>
+    main(os.environ['GETSCALENET'])
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 275, in main
+    _validate(init_model(shape=1024), img_size=(1024, 1024), batch_size=72)
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 155, in _validate
+    validate(config, data_loader=data_loader, model=model)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/autograd/grad_mode.py", line 27, in decorate_context
+    return func(*args, **kwargs)
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 58, in validate
+    output = model(images)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1040, in forward
+    output = self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1003, in _run_ddp_forward
+    return module_to_run(*inputs, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/mmpretrain/models/classifiers/image.py", line 119, in forward
+    feats = self.extract_feat(inputs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/mmpretrain/models/classifiers/image.py", line 204, in extract_feat
+    x = self.backbone(inputs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/mmpretrain/models/backbones/replknet.py", line 642, in forward
+    x = self.forward_features(x)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/mmpretrain/models/backbones/replknet.py", line 627, in forward_features
+    x = stem_layer(x)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/container.py", line 204, in forward
+    input = module(input)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 463, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 459, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: Expected canUse32BitIndexMath(input) && canUse32BitIndexMath(output) to be true, but got false.  (Could this error message be improved?  If so, please report an enhancement request to PyTorch.)
+[W socket.cpp:426] [c10d] The server socket has failed to bind to [::]:61234 (errno: 98 - Address already in use).
+[W socket.cpp:426] [c10d] The server socket has failed to bind to ?UNKNOWN? (errno: 98 - Address already in use).
+[E socket.cpp:462] [c10d] The server socket has failed to listen on any local network address.
+The server socket has failed to listen on any local network address. The server socket has failed to bind to [::]:61234 (errno: 98 - Address already in use). The server socket has failed to bind to ?UNKNOWN? (errno: 98 - Address already in use).
+using init_replknet ======================== 
+01/07 21:47:34 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/replknet/replknet-31B_3rdparty_in1k_20221118-fd08e268.pth
+starting loop: img_size (1024, 1024)
+Traceback (most recent call last):
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 299, in <module>
+    main(os.environ['GETSCALENET'])
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 275, in main
+    _validate(init_model(shape=1024), img_size=(1024, 1024), batch_size=(64 if model in ["deit"] else 72))
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 155, in _validate
+    validate(config, data_loader=data_loader, model=model)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/autograd/grad_mode.py", line 27, in decorate_context
+    return func(*args, **kwargs)
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 58, in validate
+    output = model(images)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1040, in forward
+    output = self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1003, in _run_ddp_forward
+    return module_to_run(*inputs, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/mmpretrain/models/classifiers/image.py", line 119, in forward
+    feats = self.extract_feat(inputs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/mmpretrain/models/classifiers/image.py", line 204, in extract_feat
+    x = self.backbone(inputs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/mmpretrain/models/backbones/replknet.py", line 642, in forward
+    x = self.forward_features(x)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/mmpretrain/models/backbones/replknet.py", line 627, in forward_features
+    x = stem_layer(x)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/container.py", line 204, in forward
+    input = module(input)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 463, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 459, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: Expected canUse32BitIndexMath(input) && canUse32BitIndexMath(output) to be true, but got false.  (Could this error message be improved?  If so, please report an enhancement request to PyTorch.)
+[W socket.cpp:426] [c10d] The server socket has failed to bind to [::]:61234 (errno: 98 - Address already in use).
+[W socket.cpp:426] [c10d] The server socket has failed to bind to ?UNKNOWN? (errno: 98 - Address already in use).
+[E socket.cpp:462] [c10d] The server socket has failed to listen on any local network address.
+The server socket has failed to listen on any local network address. The server socket has failed to bind to [::]:61234 (errno: 98 - Address already in use). The server socket has failed to bind to ?UNKNOWN? (errno: 98 - Address already in use).
+using init_replknet ======================== 
+01/07 21:48:09 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/replknet/replknet-31B_3rdparty_in1k_20221118-fd08e268.pth
+starting loop: img_size (1024, 1024)
+Traceback (most recent call last):
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 299, in <module>
+    main(os.environ['GETSCALENET'])
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 275, in main
+    _validate(init_model(shape=1024), img_size=(1024, 1024), batch_size=(52 if model in ["deit"] else 72))
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 155, in _validate
+    validate(config, data_loader=data_loader, model=model)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/autograd/grad_mode.py", line 27, in decorate_context
+    return func(*args, **kwargs)
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 58, in validate
+    output = model(images)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1040, in forward
+    output = self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1003, in _run_ddp_forward
+    return module_to_run(*inputs, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/mmpretrain/models/classifiers/image.py", line 119, in forward
+    feats = self.extract_feat(inputs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/mmpretrain/models/classifiers/image.py", line 204, in extract_feat
+    x = self.backbone(inputs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/mmpretrain/models/backbones/replknet.py", line 642, in forward
+    x = self.forward_features(x)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/mmpretrain/models/backbones/replknet.py", line 627, in forward_features
+    x = stem_layer(x)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/container.py", line 204, in forward
+    input = module(input)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 463, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/conv.py", line 459, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: Expected canUse32BitIndexMath(input) && canUse32BitIndexMath(output) to be true, but got false.  (Could this error message be improved?  If so, please report an enhancement request to PyTorch.)
+# https://github.com/pytorch/pytorch/issues/80020
+Tensor too big 

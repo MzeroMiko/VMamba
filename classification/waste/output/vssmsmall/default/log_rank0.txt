@@ -1,0 +1,2216 @@
+[2024-01-04 19:43:41 vssmsmall] (main.py 342): INFO Full config saved to ./output/vssmsmall/default/config.json
+[2024-01-04 19:43:41 vssmsmall] (main.py 345): INFO AMP_ENABLE: true
+AMP_OPT_LEVEL: ''
+AUG:
+  AUTO_AUGMENT: rand-m9-mstd0.5-inc1
+  COLOR_JITTER: 0.4
+  CUTMIX: 1.0
+  CUTMIX_MINMAX: null
+  MIXUP: 0.8
+  MIXUP_MODE: batch
+  MIXUP_PROB: 1.0
+  MIXUP_SWITCH_PROB: 0.5
+  RECOUNT: 1
+  REMODE: pixel
+  REPROB: 0.25
+BASE:
+- ''
+DATA:
+  BATCH_SIZE: 64
+  CACHE_MODE: part
+  DATASET: imagenet
+  DATA_PATH: /dataset/ImageNet2012
+  IMG_SIZE: 224
+  INTERPOLATION: bicubic
+  MASK_PATCH_SIZE: 32
+  MASK_RATIO: 0.6
+  NUM_WORKERS: 8
+  PIN_MEMORY: true
+  ZIP_MODE: false
+ENABLE_AMP: false
+EVAL_MODE: false
+FUSED_LAYERNORM: false
+FUSED_WINDOW_PROCESS: false
+LOCAL_RANK: 0
+MODEL:
+  DROP_PATH_RATE: 0.3
+  DROP_RATE: 0.0
+  LABEL_SMOOTHING: 0.1
+  NAME: vssmsmall
+  NUM_CLASSES: 1000
+  PRETRAINED: ''
+  RESUME: ''
+  SIMMIM:
+    NORM_TARGET:
+      ENABLE: false
+      PATCH_SIZE: 47
+  SWIN:
+    APE: false
+    DEPTHS:
+    - 2
+    - 2
+    - 18
+    - 2
+    EMBED_DIM: 96
+    IN_CHANS: 3
+    MLP_RATIO: 4.0
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    QKV_BIAS: true
+    QK_SCALE: null
+    WINDOW_SIZE: 7
+  SWINV2:
+    APE: false
+    DEPTHS:
+    - 2
+    - 2
+    - 6
+    - 2
+    EMBED_DIM: 96
+    IN_CHANS: 3
+    MLP_RATIO: 4.0
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    PRETRAINED_WINDOW_SIZES:
+    - 0
+    - 0
+    - 0
+    - 0
+    QKV_BIAS: true
+    WINDOW_SIZE: 7
+  SWIN_MLP:
+    APE: false
+    DEPTHS:
+    - 2
+    - 2
+    - 6
+    - 2
+    EMBED_DIM: 96
+    IN_CHANS: 3
+    MLP_RATIO: 4.0
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    WINDOW_SIZE: 7
+  SWIN_MOE:
+    APE: false
+    AUX_LOSS_WEIGHT: 0.01
+    CAPACITY_FACTOR: 1.25
+    COSINE_ROUTER: false
+    COSINE_ROUTER_DIM: 256
+    COSINE_ROUTER_INIT_T: 0.5
+    DEPTHS:
+    - 2
+    - 2
+    - 6
+    - 2
+    EMBED_DIM: 96
+    GATE_NOISE: 1.0
+    INIT_STD: 0.02
+    IN_CHANS: 3
+    IS_GSHARD_LOSS: false
+    MLP_FC2_BIAS: true
+    MLP_RATIO: 4.0
+    MOE_BLOCKS:
+    - - -1
+    - - -1
+    - - -1
+    - - -1
+    MOE_DROP: 0.0
+    NORMALIZE_GATE: false
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    NUM_LOCAL_EXPERTS: 1
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    PRETRAINED_WINDOW_SIZES:
+    - 0
+    - 0
+    - 0
+    - 0
+    QKV_BIAS: true
+    QK_SCALE: null
+    TOP_VALUE: 1
+    USE_BPR: true
+    WINDOW_SIZE: 7
+  TYPE: vssm
+OUTPUT: ./output/vssmsmall/default
+PRINT_FREQ: 10
+SAVE_FREQ: 1
+SEED: 0
+TAG: default
+TEST:
+  CROP: true
+  SEQUENTIAL: false
+  SHUFFLE: false
+THROUGHPUT_MODE: false
+TRAIN:
+  ACCUMULATION_STEPS: 1
+  AUTO_RESUME: true
+  BASE_LR: 0.0004375
+  CLIP_GRAD: 5.0
+  EPOCHS: 300
+  LAYER_DECAY: 1.0
+  LR_SCHEDULER:
+    DECAY_EPOCHS: 30
+    DECAY_RATE: 0.1
+    GAMMA: 0.1
+    MULTISTEPS: []
+    NAME: cosine
+    WARMUP_PREFIX: true
+  MIN_LR: 4.3750000000000005e-06
+  MOE:
+    SAVE_MASTER: false
+  OPTIMIZER:
+    BETAS:
+    - 0.9
+    - 0.999
+    EPS: 1.0e-08
+    MOMENTUM: 0.9
+    NAME: adamw
+  START_EPOCH: 0
+  USE_CHECKPOINT: false
+  WARMUP_EPOCHS: 20
+  WARMUP_LR: 4.375e-07
+  WEIGHT_DECAY: 0.05
+
+[2024-01-04 19:43:41 vssmsmall] (main.py 346): INFO {"cfg": "configs/swin/swin_small_patch4_window7_224.yaml", "opts": ["MODEL.TYPE", "vssm", "MODEL.NAME", "vssmsmall"], "batch_size": 64, "data_path": "/dataset/ImageNet2012", "zip": false, "cache_mode": "part", "pretrained": null, "resume": null, "accumulation_steps": null, "use_checkpoint": false, "disable_amp": false, "amp_opt_level": null, "output": "./output", "tag": null, "eval": false, "throughput": false, "local_rank": 0, "fused_window_process": false, "fused_layernorm": false, "optim": null}
+[2024-01-04 19:43:44 vssmsmall] (main.py 87): INFO Creating model:vssm/vssmsmall
+[2024-01-04 19:43:44 vssmsmall] (main.py 89): INFO VSSM(
+  (patch_embed): PatchEmbed2D(
+    (proj): Conv2d(3, 96, kernel_size=(4, 4), stride=(4, 4))
+    (norm): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+  )
+  (pos_drop): Dropout(p=0.0, inplace=False)
+  (layers): ModuleList(
+    (0): VSSLayer(
+      (blocks): ModuleList(
+        (0): VSSBlock(
+          (ln_1): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=96, out_features=384, bias=False)
+            (conv2d): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192)
+            (act): SiLU()
+            (out_norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=192, out_features=96, bias=False)
+          )
+          (drop_path): timm.DropPath(0.0)
+        )
+        (1): VSSBlock(
+          (ln_1): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=96, out_features=384, bias=False)
+            (conv2d): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192)
+            (act): SiLU()
+            (out_norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=192, out_features=96, bias=False)
+          )
+          (drop_path): timm.DropPath(0.013043479062616825)
+        )
+      )
+      (downsample): PatchMerging2D(
+        (reduction): Linear(in_features=384, out_features=192, bias=False)
+        (norm): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+      )
+    )
+    (1): VSSLayer(
+      (blocks): ModuleList(
+        (0): VSSBlock(
+          (ln_1): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=192, out_features=768, bias=False)
+            (conv2d): Conv2d(384, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=384)
+            (act): SiLU()
+            (out_norm): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=384, out_features=192, bias=False)
+          )
+          (drop_path): timm.DropPath(0.02608695812523365)
+        )
+        (1): VSSBlock(
+          (ln_1): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=192, out_features=768, bias=False)
+            (conv2d): Conv2d(384, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=384)
+            (act): SiLU()
+            (out_norm): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=384, out_features=192, bias=False)
+          )
+          (drop_path): timm.DropPath(0.03913043811917305)
+        )
+      )
+      (downsample): PatchMerging2D(
+        (reduction): Linear(in_features=768, out_features=384, bias=False)
+        (norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+      )
+    )
+    (2): VSSLayer(
+      (blocks): ModuleList(
+        (0): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.0521739162504673)
+        )
+        (1): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.06521739810705185)
+        )
+        (2): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.0782608762383461)
+        )
+        (3): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.09130435436964035)
+        )
+        (4): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.1043478325009346)
+        )
+        (5): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.11739131063222885)
+        )
+        (6): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.1304347962141037)
+        )
+        (7): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.14347827434539795)
+        )
+        (8): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.1565217524766922)
+        )
+        (9): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.16956523060798645)
+        )
+        (10): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.1826087087392807)
+        )
+        (11): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.19565218687057495)
+        )
+        (12): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.2086956650018692)
+        )
+        (13): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.22173914313316345)
+        )
+        (14): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.2347826212644577)
+        )
+        (15): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.24782609939575195)
+        )
+        (16): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.260869562625885)
+        )
+        (17): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.27391305565834045)
+        )
+      )
+      (downsample): PatchMerging2D(
+        (reduction): Linear(in_features=1536, out_features=768, bias=False)
+        (norm): LayerNorm((1536,), eps=1e-05, elementwise_affine=True)
+      )
+    )
+    (3): VSSLayer(
+      (blocks): ModuleList(
+        (0): VSSBlock(
+          (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=768, out_features=3072, bias=False)
+            (conv2d): Conv2d(1536, 1536, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=1536)
+            (act): SiLU()
+            (out_norm): LayerNorm((1536,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=1536, out_features=768, bias=False)
+          )
+          (drop_path): timm.DropPath(0.2869565188884735)
+        )
+        (1): VSSBlock(
+          (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=768, out_features=3072, bias=False)
+            (conv2d): Conv2d(1536, 1536, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=1536)
+            (act): SiLU()
+            (out_norm): LayerNorm((1536,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=1536, out_features=768, bias=False)
+          )
+          (drop_path): timm.DropPath(0.30000001192092896)
+        )
+      )
+    )
+  )
+  (norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+  (avgpool): AdaptiveAvgPool1d(output_size=1)
+  (head): Linear(in_features=768, out_features=1000, bias=True)
+)
+[2024-01-04 19:43:44 vssmsmall] (main.py 92): INFO number of params: 33655432
+[2024-01-04 19:43:44 vssmsmall] (main.py 129): INFO no checkpoint found in ./output/vssmsmall/default, ignoring auto resume
+[2024-01-04 19:43:44 vssmsmall] (main.py 147): INFO Start training
+[2024-01-04 19:44:35 vssmsmall] (main.py 216): INFO Train: [0/300][0/2859]	eta 1 day, 16:04:16 lr 0.000000	 wd 0.0500	time 50.4571 (50.4571)	loss 6.9483 (6.9483)	grad_norm 1.5916 (1.5916)	loss_scale 65536.0000 (65536.0000)	mem 20083MB
+[2024-01-04 19:44:59 vssmsmall] (main.py 216): INFO Train: [0/300][10/2859]	eta 5:21:46 lr 0.000001	 wd 0.0500	time 0.8781 (6.7766)	loss 6.9443 (6.9486)	grad_norm 1.5751 (1.5225)	loss_scale 65536.0000 (65536.0000)	mem 20468MB
+[2024-01-04 20:24:26 vssmsmall] (main.py 342): INFO Full config saved to ./output/vssmsmall/default/config.json
+[2024-01-04 20:24:26 vssmsmall] (main.py 345): INFO AMP_ENABLE: true
+AMP_OPT_LEVEL: ''
+AUG:
+  AUTO_AUGMENT: rand-m9-mstd0.5-inc1
+  COLOR_JITTER: 0.4
+  CUTMIX: 1.0
+  CUTMIX_MINMAX: null
+  MIXUP: 0.8
+  MIXUP_MODE: batch
+  MIXUP_PROB: 1.0
+  MIXUP_SWITCH_PROB: 0.5
+  RECOUNT: 1
+  REMODE: pixel
+  REPROB: 0.25
+BASE:
+- ''
+DATA:
+  BATCH_SIZE: 64
+  CACHE_MODE: part
+  DATASET: imagenet
+  DATA_PATH: /dataset/ImageNet2012
+  IMG_SIZE: 224
+  INTERPOLATION: bicubic
+  MASK_PATCH_SIZE: 32
+  MASK_RATIO: 0.6
+  NUM_WORKERS: 5
+  PIN_MEMORY: true
+  ZIP_MODE: false
+ENABLE_AMP: false
+EVAL_MODE: false
+FUSED_LAYERNORM: false
+FUSED_WINDOW_PROCESS: false
+LOCAL_RANK: 0
+MODEL:
+  DROP_PATH_RATE: 0.3
+  DROP_RATE: 0.0
+  LABEL_SMOOTHING: 0.1
+  NAME: vssmsmall
+  NUM_CLASSES: 1000
+  PRETRAINED: ''
+  RESUME: ''
+  SIMMIM:
+    NORM_TARGET:
+      ENABLE: false
+      PATCH_SIZE: 47
+  SWIN:
+    APE: false
+    DEPTHS:
+    - 2
+    - 2
+    - 18
+    - 2
+    EMBED_DIM: 96
+    IN_CHANS: 3
+    MLP_RATIO: 4.0
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    QKV_BIAS: true
+    QK_SCALE: null
+    WINDOW_SIZE: 7
+  SWINV2:
+    APE: false
+    DEPTHS:
+    - 2
+    - 2
+    - 6
+    - 2
+    EMBED_DIM: 96
+    IN_CHANS: 3
+    MLP_RATIO: 4.0
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    PRETRAINED_WINDOW_SIZES:
+    - 0
+    - 0
+    - 0
+    - 0
+    QKV_BIAS: true
+    WINDOW_SIZE: 7
+  SWIN_MLP:
+    APE: false
+    DEPTHS:
+    - 2
+    - 2
+    - 6
+    - 2
+    EMBED_DIM: 96
+    IN_CHANS: 3
+    MLP_RATIO: 4.0
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    WINDOW_SIZE: 7
+  SWIN_MOE:
+    APE: false
+    AUX_LOSS_WEIGHT: 0.01
+    CAPACITY_FACTOR: 1.25
+    COSINE_ROUTER: false
+    COSINE_ROUTER_DIM: 256
+    COSINE_ROUTER_INIT_T: 0.5
+    DEPTHS:
+    - 2
+    - 2
+    - 6
+    - 2
+    EMBED_DIM: 96
+    GATE_NOISE: 1.0
+    INIT_STD: 0.02
+    IN_CHANS: 3
+    IS_GSHARD_LOSS: false
+    MLP_FC2_BIAS: true
+    MLP_RATIO: 4.0
+    MOE_BLOCKS:
+    - - -1
+    - - -1
+    - - -1
+    - - -1
+    MOE_DROP: 0.0
+    NORMALIZE_GATE: false
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    NUM_LOCAL_EXPERTS: 1
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    PRETRAINED_WINDOW_SIZES:
+    - 0
+    - 0
+    - 0
+    - 0
+    QKV_BIAS: true
+    QK_SCALE: null
+    TOP_VALUE: 1
+    USE_BPR: true
+    WINDOW_SIZE: 7
+  TYPE: vssm
+OUTPUT: ./output/vssmsmall/default
+PRINT_FREQ: 10
+SAVE_FREQ: 1
+SEED: 0
+TAG: default
+TEST:
+  CROP: true
+  SEQUENTIAL: false
+  SHUFFLE: false
+THROUGHPUT_MODE: false
+TRAIN:
+  ACCUMULATION_STEPS: 1
+  AUTO_RESUME: true
+  BASE_LR: 0.0004375
+  CLIP_GRAD: 5.0
+  EPOCHS: 300
+  LAYER_DECAY: 1.0
+  LR_SCHEDULER:
+    DECAY_EPOCHS: 30
+    DECAY_RATE: 0.1
+    GAMMA: 0.1
+    MULTISTEPS: []
+    NAME: cosine
+    WARMUP_PREFIX: true
+  MIN_LR: 4.3750000000000005e-06
+  MOE:
+    SAVE_MASTER: false
+  OPTIMIZER:
+    BETAS:
+    - 0.9
+    - 0.999
+    EPS: 1.0e-08
+    MOMENTUM: 0.9
+    NAME: adamw
+  START_EPOCH: 0
+  USE_CHECKPOINT: false
+  WARMUP_EPOCHS: 20
+  WARMUP_LR: 4.375e-07
+  WEIGHT_DECAY: 0.05
+
+[2024-01-04 20:24:26 vssmsmall] (main.py 346): INFO {"cfg": "configs/swin/swin_small_patch4_window7_224.yaml", "opts": ["MODEL.TYPE", "vssm", "MODEL.NAME", "vssmsmall", "DATA.NUM_WORKERS", "5"], "batch_size": 64, "data_path": "/dataset/ImageNet2012", "zip": false, "cache_mode": "part", "pretrained": null, "resume": null, "accumulation_steps": null, "use_checkpoint": false, "disable_amp": false, "amp_opt_level": null, "output": "./output", "tag": null, "eval": false, "throughput": false, "local_rank": 0, "fused_window_process": false, "fused_layernorm": false, "optim": null}
+[2024-01-04 20:24:29 vssmsmall] (main.py 87): INFO Creating model:vssm/vssmsmall
+[2024-01-04 20:24:29 vssmsmall] (main.py 89): INFO VSSM(
+  (patch_embed): PatchEmbed2D(
+    (proj): Conv2d(3, 96, kernel_size=(4, 4), stride=(4, 4))
+    (norm): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+  )
+  (pos_drop): Dropout(p=0.0, inplace=False)
+  (layers): ModuleList(
+    (0): VSSLayer(
+      (blocks): ModuleList(
+        (0): VSSBlock(
+          (ln_1): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=96, out_features=384, bias=False)
+            (conv2d): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192)
+            (act): SiLU()
+            (out_norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=192, out_features=96, bias=False)
+          )
+          (drop_path): timm.DropPath(0.0)
+        )
+        (1): VSSBlock(
+          (ln_1): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=96, out_features=384, bias=False)
+            (conv2d): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192)
+            (act): SiLU()
+            (out_norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=192, out_features=96, bias=False)
+          )
+          (drop_path): timm.DropPath(0.013043479062616825)
+        )
+      )
+      (downsample): PatchMerging2D(
+        (reduction): Linear(in_features=384, out_features=192, bias=False)
+        (norm): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+      )
+    )
+    (1): VSSLayer(
+      (blocks): ModuleList(
+        (0): VSSBlock(
+          (ln_1): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=192, out_features=768, bias=False)
+            (conv2d): Conv2d(384, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=384)
+            (act): SiLU()
+            (out_norm): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=384, out_features=192, bias=False)
+          )
+          (drop_path): timm.DropPath(0.02608695812523365)
+        )
+        (1): VSSBlock(
+          (ln_1): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=192, out_features=768, bias=False)
+            (conv2d): Conv2d(384, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=384)
+            (act): SiLU()
+            (out_norm): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=384, out_features=192, bias=False)
+          )
+          (drop_path): timm.DropPath(0.03913043811917305)
+        )
+      )
+      (downsample): PatchMerging2D(
+        (reduction): Linear(in_features=768, out_features=384, bias=False)
+        (norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+      )
+    )
+    (2): VSSLayer(
+      (blocks): ModuleList(
+        (0): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.0521739162504673)
+        )
+        (1): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.06521739810705185)
+        )
+        (2): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.0782608762383461)
+        )
+        (3): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.09130435436964035)
+        )
+        (4): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.1043478325009346)
+        )
+        (5): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.11739131063222885)
+        )
+        (6): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.1304347962141037)
+        )
+        (7): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.14347827434539795)
+        )
+        (8): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.1565217524766922)
+        )
+        (9): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.16956523060798645)
+        )
+        (10): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.1826087087392807)
+        )
+        (11): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.19565218687057495)
+        )
+        (12): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.2086956650018692)
+        )
+        (13): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.22173914313316345)
+        )
+        (14): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.2347826212644577)
+        )
+        (15): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.24782609939575195)
+        )
+        (16): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.260869562625885)
+        )
+        (17): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.27391305565834045)
+        )
+      )
+      (downsample): PatchMerging2D(
+        (reduction): Linear(in_features=1536, out_features=768, bias=False)
+        (norm): LayerNorm((1536,), eps=1e-05, elementwise_affine=True)
+      )
+    )
+    (3): VSSLayer(
+      (blocks): ModuleList(
+        (0): VSSBlock(
+          (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=768, out_features=3072, bias=False)
+            (conv2d): Conv2d(1536, 1536, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=1536)
+            (act): SiLU()
+            (out_norm): LayerNorm((1536,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=1536, out_features=768, bias=False)
+          )
+          (drop_path): timm.DropPath(0.2869565188884735)
+        )
+        (1): VSSBlock(
+          (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=768, out_features=3072, bias=False)
+            (conv2d): Conv2d(1536, 1536, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=1536)
+            (act): SiLU()
+            (out_norm): LayerNorm((1536,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=1536, out_features=768, bias=False)
+          )
+          (drop_path): timm.DropPath(0.30000001192092896)
+        )
+      )
+    )
+  )
+  (norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+  (avgpool): AdaptiveAvgPool1d(output_size=1)
+  (head): Linear(in_features=768, out_features=1000, bias=True)
+)
+[2024-01-04 20:24:29 vssmsmall] (main.py 92): INFO number of params: 33655432
+[2024-01-04 20:24:29 vssmsmall] (main.py 129): INFO no checkpoint found in ./output/vssmsmall/default, ignoring auto resume
+[2024-01-04 20:24:29 vssmsmall] (main.py 147): INFO Start training
+[2024-01-04 20:25:04 vssmsmall] (main.py 216): INFO Train: [0/300][0/2859]	eta 1 day, 3:28:15 lr 0.000000	 wd 0.0500	time 34.5909 (34.5909)	loss 6.9483 (6.9483)	grad_norm 1.5916 (1.5916)	loss_scale 65536.0000 (65536.0000)	mem 20083MB
+[2024-01-04 22:59:01 vssmsmall] (main.py 342): INFO Full config saved to ./output/vssmsmall/default/config.json
+[2024-01-04 22:59:01 vssmsmall] (main.py 345): INFO AMP_ENABLE: true
+AMP_OPT_LEVEL: ''
+AUG:
+  AUTO_AUGMENT: rand-m9-mstd0.5-inc1
+  COLOR_JITTER: 0.4
+  CUTMIX: 1.0
+  CUTMIX_MINMAX: null
+  MIXUP: 0.8
+  MIXUP_MODE: batch
+  MIXUP_PROB: 1.0
+  MIXUP_SWITCH_PROB: 0.5
+  RECOUNT: 1
+  REMODE: pixel
+  REPROB: 0.25
+BASE:
+- ''
+DATA:
+  BATCH_SIZE: 64
+  CACHE_MODE: part
+  DATASET: imagenet
+  DATA_PATH: /userhome/gushzh/data/imagenet
+  IMG_SIZE: 224
+  INTERPOLATION: bicubic
+  MASK_PATCH_SIZE: 32
+  MASK_RATIO: 0.6
+  NUM_WORKERS: 8
+  PIN_MEMORY: true
+  ZIP_MODE: false
+ENABLE_AMP: false
+EVAL_MODE: false
+FUSED_LAYERNORM: false
+FUSED_WINDOW_PROCESS: false
+LOCAL_RANK: 0
+MODEL:
+  DROP_PATH_RATE: 0.3
+  DROP_RATE: 0.0
+  LABEL_SMOOTHING: 0.1
+  NAME: vssmsmall
+  NUM_CLASSES: 1000
+  PRETRAINED: ''
+  RESUME: ''
+  SIMMIM:
+    NORM_TARGET:
+      ENABLE: false
+      PATCH_SIZE: 47
+  SWIN:
+    APE: false
+    DEPTHS:
+    - 2
+    - 2
+    - 18
+    - 2
+    EMBED_DIM: 96
+    IN_CHANS: 3
+    MLP_RATIO: 4.0
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    QKV_BIAS: true
+    QK_SCALE: null
+    WINDOW_SIZE: 7
+  SWINV2:
+    APE: false
+    DEPTHS:
+    - 2
+    - 2
+    - 6
+    - 2
+    EMBED_DIM: 96
+    IN_CHANS: 3
+    MLP_RATIO: 4.0
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    PRETRAINED_WINDOW_SIZES:
+    - 0
+    - 0
+    - 0
+    - 0
+    QKV_BIAS: true
+    WINDOW_SIZE: 7
+  SWIN_MLP:
+    APE: false
+    DEPTHS:
+    - 2
+    - 2
+    - 6
+    - 2
+    EMBED_DIM: 96
+    IN_CHANS: 3
+    MLP_RATIO: 4.0
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    WINDOW_SIZE: 7
+  SWIN_MOE:
+    APE: false
+    AUX_LOSS_WEIGHT: 0.01
+    CAPACITY_FACTOR: 1.25
+    COSINE_ROUTER: false
+    COSINE_ROUTER_DIM: 256
+    COSINE_ROUTER_INIT_T: 0.5
+    DEPTHS:
+    - 2
+    - 2
+    - 6
+    - 2
+    EMBED_DIM: 96
+    GATE_NOISE: 1.0
+    INIT_STD: 0.02
+    IN_CHANS: 3
+    IS_GSHARD_LOSS: false
+    MLP_FC2_BIAS: true
+    MLP_RATIO: 4.0
+    MOE_BLOCKS:
+    - - -1
+    - - -1
+    - - -1
+    - - -1
+    MOE_DROP: 0.0
+    NORMALIZE_GATE: false
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    NUM_LOCAL_EXPERTS: 1
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    PRETRAINED_WINDOW_SIZES:
+    - 0
+    - 0
+    - 0
+    - 0
+    QKV_BIAS: true
+    QK_SCALE: null
+    TOP_VALUE: 1
+    USE_BPR: true
+    WINDOW_SIZE: 7
+  TYPE: vssm
+OUTPUT: ./output/vssmsmall/default
+PRINT_FREQ: 10
+SAVE_FREQ: 1
+SEED: 0
+TAG: default
+TEST:
+  CROP: true
+  SEQUENTIAL: false
+  SHUFFLE: false
+THROUGHPUT_MODE: false
+TRAIN:
+  ACCUMULATION_STEPS: 1
+  AUTO_RESUME: true
+  BASE_LR: 0.0004375
+  CLIP_GRAD: 5.0
+  EPOCHS: 300
+  LAYER_DECAY: 1.0
+  LR_SCHEDULER:
+    DECAY_EPOCHS: 30
+    DECAY_RATE: 0.1
+    GAMMA: 0.1
+    MULTISTEPS: []
+    NAME: cosine
+    WARMUP_PREFIX: true
+  MIN_LR: 4.3750000000000005e-06
+  MOE:
+    SAVE_MASTER: false
+  OPTIMIZER:
+    BETAS:
+    - 0.9
+    - 0.999
+    EPS: 1.0e-08
+    MOMENTUM: 0.9
+    NAME: adamw
+  START_EPOCH: 0
+  USE_CHECKPOINT: false
+  WARMUP_EPOCHS: 20
+  WARMUP_LR: 4.375e-07
+  WEIGHT_DECAY: 0.05
+
+[2024-01-04 22:59:01 vssmsmall] (main.py 346): INFO {"cfg": "configs/swin/swin_small_patch4_window7_224.yaml", "opts": ["MODEL.TYPE", "vssm", "MODEL.NAME", "vssmsmall"], "batch_size": 64, "data_path": "/userhome/gushzh/data/imagenet", "zip": false, "cache_mode": "part", "pretrained": null, "resume": null, "accumulation_steps": null, "use_checkpoint": false, "disable_amp": false, "amp_opt_level": null, "output": "./output", "tag": null, "eval": false, "throughput": false, "local_rank": 0, "fused_window_process": false, "fused_layernorm": false, "optim": null}
+[2024-01-04 22:59:57 vssmsmall] (main.py 342): INFO Full config saved to ./output/vssmsmall/default/config.json
+[2024-01-04 22:59:57 vssmsmall] (main.py 345): INFO AMP_ENABLE: true
+AMP_OPT_LEVEL: ''
+AUG:
+  AUTO_AUGMENT: rand-m9-mstd0.5-inc1
+  COLOR_JITTER: 0.4
+  CUTMIX: 1.0
+  CUTMIX_MINMAX: null
+  MIXUP: 0.8
+  MIXUP_MODE: batch
+  MIXUP_PROB: 1.0
+  MIXUP_SWITCH_PROB: 0.5
+  RECOUNT: 1
+  REMODE: pixel
+  REPROB: 0.25
+BASE:
+- ''
+DATA:
+  BATCH_SIZE: 64
+  CACHE_MODE: part
+  DATASET: imagenet
+  DATA_PATH: /dataset/ImageNet2012
+  IMG_SIZE: 224
+  INTERPOLATION: bicubic
+  MASK_PATCH_SIZE: 32
+  MASK_RATIO: 0.6
+  NUM_WORKERS: 8
+  PIN_MEMORY: true
+  ZIP_MODE: false
+ENABLE_AMP: false
+EVAL_MODE: false
+FUSED_LAYERNORM: false
+FUSED_WINDOW_PROCESS: false
+LOCAL_RANK: 0
+MODEL:
+  DROP_PATH_RATE: 0.3
+  DROP_RATE: 0.0
+  LABEL_SMOOTHING: 0.1
+  NAME: vssmsmall
+  NUM_CLASSES: 1000
+  PRETRAINED: ''
+  RESUME: ''
+  SIMMIM:
+    NORM_TARGET:
+      ENABLE: false
+      PATCH_SIZE: 47
+  SWIN:
+    APE: false
+    DEPTHS:
+    - 2
+    - 2
+    - 18
+    - 2
+    EMBED_DIM: 96
+    IN_CHANS: 3
+    MLP_RATIO: 4.0
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    QKV_BIAS: true
+    QK_SCALE: null
+    WINDOW_SIZE: 7
+  SWINV2:
+    APE: false
+    DEPTHS:
+    - 2
+    - 2
+    - 6
+    - 2
+    EMBED_DIM: 96
+    IN_CHANS: 3
+    MLP_RATIO: 4.0
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    PRETRAINED_WINDOW_SIZES:
+    - 0
+    - 0
+    - 0
+    - 0
+    QKV_BIAS: true
+    WINDOW_SIZE: 7
+  SWIN_MLP:
+    APE: false
+    DEPTHS:
+    - 2
+    - 2
+    - 6
+    - 2
+    EMBED_DIM: 96
+    IN_CHANS: 3
+    MLP_RATIO: 4.0
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    WINDOW_SIZE: 7
+  SWIN_MOE:
+    APE: false
+    AUX_LOSS_WEIGHT: 0.01
+    CAPACITY_FACTOR: 1.25
+    COSINE_ROUTER: false
+    COSINE_ROUTER_DIM: 256
+    COSINE_ROUTER_INIT_T: 0.5
+    DEPTHS:
+    - 2
+    - 2
+    - 6
+    - 2
+    EMBED_DIM: 96
+    GATE_NOISE: 1.0
+    INIT_STD: 0.02
+    IN_CHANS: 3
+    IS_GSHARD_LOSS: false
+    MLP_FC2_BIAS: true
+    MLP_RATIO: 4.0
+    MOE_BLOCKS:
+    - - -1
+    - - -1
+    - - -1
+    - - -1
+    MOE_DROP: 0.0
+    NORMALIZE_GATE: false
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    NUM_LOCAL_EXPERTS: 1
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    PRETRAINED_WINDOW_SIZES:
+    - 0
+    - 0
+    - 0
+    - 0
+    QKV_BIAS: true
+    QK_SCALE: null
+    TOP_VALUE: 1
+    USE_BPR: true
+    WINDOW_SIZE: 7
+  TYPE: vssm
+OUTPUT: ./output/vssmsmall/default
+PRINT_FREQ: 10
+SAVE_FREQ: 1
+SEED: 0
+TAG: default
+TEST:
+  CROP: true
+  SEQUENTIAL: false
+  SHUFFLE: false
+THROUGHPUT_MODE: false
+TRAIN:
+  ACCUMULATION_STEPS: 1
+  AUTO_RESUME: true
+  BASE_LR: 0.0004375
+  CLIP_GRAD: 5.0
+  EPOCHS: 300
+  LAYER_DECAY: 1.0
+  LR_SCHEDULER:
+    DECAY_EPOCHS: 30
+    DECAY_RATE: 0.1
+    GAMMA: 0.1
+    MULTISTEPS: []
+    NAME: cosine
+    WARMUP_PREFIX: true
+  MIN_LR: 4.3750000000000005e-06
+  MOE:
+    SAVE_MASTER: false
+  OPTIMIZER:
+    BETAS:
+    - 0.9
+    - 0.999
+    EPS: 1.0e-08
+    MOMENTUM: 0.9
+    NAME: adamw
+  START_EPOCH: 0
+  USE_CHECKPOINT: false
+  WARMUP_EPOCHS: 20
+  WARMUP_LR: 4.375e-07
+  WEIGHT_DECAY: 0.05
+
+[2024-01-04 22:59:57 vssmsmall] (main.py 346): INFO {"cfg": "configs/swin/swin_small_patch4_window7_224.yaml", "opts": ["MODEL.TYPE", "vssm", "MODEL.NAME", "vssmsmall"], "batch_size": 64, "data_path": "/dataset/ImageNet2012", "zip": false, "cache_mode": "part", "pretrained": null, "resume": null, "accumulation_steps": null, "use_checkpoint": false, "disable_amp": false, "amp_opt_level": null, "output": "./output", "tag": null, "eval": false, "throughput": false, "local_rank": 0, "fused_window_process": false, "fused_layernorm": false, "optim": null}
+[2024-01-04 22:59:59 vssmsmall] (main.py 87): INFO Creating model:vssm/vssmsmall
+[2024-01-04 23:00:00 vssmsmall] (main.py 89): INFO VSSM(
+  (patch_embed): PatchEmbed2D(
+    (proj): Conv2d(3, 96, kernel_size=(4, 4), stride=(4, 4))
+    (norm): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+  )
+  (pos_drop): Dropout(p=0.0, inplace=False)
+  (layers): ModuleList(
+    (0): VSSLayer(
+      (blocks): ModuleList(
+        (0): VSSBlock(
+          (ln_1): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=96, out_features=384, bias=False)
+            (conv2d): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192)
+            (act): SiLU()
+            (out_norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=192, out_features=96, bias=False)
+          )
+          (drop_path): timm.DropPath(0.0)
+        )
+        (1): VSSBlock(
+          (ln_1): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=96, out_features=384, bias=False)
+            (conv2d): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192)
+            (act): SiLU()
+            (out_norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=192, out_features=96, bias=False)
+          )
+          (drop_path): timm.DropPath(0.013043479062616825)
+        )
+      )
+      (downsample): PatchMerging2D(
+        (reduction): Linear(in_features=384, out_features=192, bias=False)
+        (norm): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+      )
+    )
+    (1): VSSLayer(
+      (blocks): ModuleList(
+        (0): VSSBlock(
+          (ln_1): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=192, out_features=768, bias=False)
+            (conv2d): Conv2d(384, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=384)
+            (act): SiLU()
+            (out_norm): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=384, out_features=192, bias=False)
+          )
+          (drop_path): timm.DropPath(0.02608695812523365)
+        )
+        (1): VSSBlock(
+          (ln_1): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=192, out_features=768, bias=False)
+            (conv2d): Conv2d(384, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=384)
+            (act): SiLU()
+            (out_norm): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=384, out_features=192, bias=False)
+          )
+          (drop_path): timm.DropPath(0.03913043811917305)
+        )
+      )
+      (downsample): PatchMerging2D(
+        (reduction): Linear(in_features=768, out_features=384, bias=False)
+        (norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+      )
+    )
+    (2): VSSLayer(
+      (blocks): ModuleList(
+        (0): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.0521739162504673)
+        )
+        (1): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.06521739810705185)
+        )
+        (2): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.0782608762383461)
+        )
+        (3): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.09130435436964035)
+        )
+        (4): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.1043478325009346)
+        )
+        (5): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.11739131063222885)
+        )
+        (6): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.1304347962141037)
+        )
+        (7): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.14347827434539795)
+        )
+        (8): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.1565217524766922)
+        )
+        (9): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.16956523060798645)
+        )
+        (10): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.1826087087392807)
+        )
+        (11): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.19565218687057495)
+        )
+        (12): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.2086956650018692)
+        )
+        (13): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.22173914313316345)
+        )
+        (14): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.2347826212644577)
+        )
+        (15): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.24782609939575195)
+        )
+        (16): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.260869562625885)
+        )
+        (17): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.27391305565834045)
+        )
+      )
+      (downsample): PatchMerging2D(
+        (reduction): Linear(in_features=1536, out_features=768, bias=False)
+        (norm): LayerNorm((1536,), eps=1e-05, elementwise_affine=True)
+      )
+    )
+    (3): VSSLayer(
+      (blocks): ModuleList(
+        (0): VSSBlock(
+          (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=768, out_features=3072, bias=False)
+            (conv2d): Conv2d(1536, 1536, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=1536)
+            (act): SiLU()
+            (out_norm): LayerNorm((1536,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=1536, out_features=768, bias=False)
+          )
+          (drop_path): timm.DropPath(0.2869565188884735)
+        )
+        (1): VSSBlock(
+          (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=768, out_features=3072, bias=False)
+            (conv2d): Conv2d(1536, 1536, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=1536)
+            (act): SiLU()
+            (out_norm): LayerNorm((1536,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=1536, out_features=768, bias=False)
+          )
+          (drop_path): timm.DropPath(0.30000001192092896)
+        )
+      )
+    )
+  )
+  (norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+  (avgpool): AdaptiveAvgPool1d(output_size=1)
+  (head): Linear(in_features=768, out_features=1000, bias=True)
+)
+[2024-01-04 23:00:00 vssmsmall] (main.py 92): INFO number of params: 33655432
+[2024-01-04 23:00:00 vssmsmall] (main.py 129): INFO no checkpoint found in ./output/vssmsmall/default, ignoring auto resume
+[2024-01-04 23:00:00 vssmsmall] (main.py 147): INFO Start training
+[2024-01-04 23:00:19 vssmsmall] (main.py 216): INFO Train: [0/300][0/22]	eta 0:07:04 lr 0.000000	 wd 0.0500	time 19.2879 (19.2879)	loss 6.9623 (6.9623)	grad_norm 8.0384 (8.0384)	loss_scale 65536.0000 (65536.0000)	mem 20083MB
+[2024-01-04 23:00:28 vssmsmall] (main.py 216): INFO Train: [0/300][10/22]	eta 0:00:30 lr 0.000010	 wd 0.0500	time 0.8740 (2.5489)	loss 6.4608 (6.7825)	grad_norm 8.1986 (7.8972)	loss_scale 65536.0000 (65536.0000)	mem 20468MB
+[2024-01-04 23:00:56 vssmsmall] (main.py 342): INFO Full config saved to ./output/vssmsmall/default/config.json
+[2024-01-04 23:00:56 vssmsmall] (main.py 345): INFO AMP_ENABLE: true
+AMP_OPT_LEVEL: ''
+AUG:
+  AUTO_AUGMENT: rand-m9-mstd0.5-inc1
+  COLOR_JITTER: 0.4
+  CUTMIX: 1.0
+  CUTMIX_MINMAX: null
+  MIXUP: 0.8
+  MIXUP_MODE: batch
+  MIXUP_PROB: 1.0
+  MIXUP_SWITCH_PROB: 0.5
+  RECOUNT: 1
+  REMODE: pixel
+  REPROB: 0.25
+BASE:
+- ''
+DATA:
+  BATCH_SIZE: 64
+  CACHE_MODE: part
+  DATASET: imagenet
+  DATA_PATH: /dataset/ImageNet2012
+  IMG_SIZE: 224
+  INTERPOLATION: bicubic
+  MASK_PATCH_SIZE: 32
+  MASK_RATIO: 0.6
+  NUM_WORKERS: 8
+  PIN_MEMORY: true
+  ZIP_MODE: false
+ENABLE_AMP: false
+EVAL_MODE: false
+FUSED_LAYERNORM: false
+FUSED_WINDOW_PROCESS: false
+LOCAL_RANK: 0
+MODEL:
+  DROP_PATH_RATE: 0.3
+  DROP_RATE: 0.0
+  LABEL_SMOOTHING: 0.1
+  NAME: vssmsmall
+  NUM_CLASSES: 1000
+  PRETRAINED: ''
+  RESUME: ''
+  SIMMIM:
+    NORM_TARGET:
+      ENABLE: false
+      PATCH_SIZE: 47
+  SWIN:
+    APE: false
+    DEPTHS:
+    - 2
+    - 2
+    - 18
+    - 2
+    EMBED_DIM: 96
+    IN_CHANS: 3
+    MLP_RATIO: 4.0
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    QKV_BIAS: true
+    QK_SCALE: null
+    WINDOW_SIZE: 7
+  SWINV2:
+    APE: false
+    DEPTHS:
+    - 2
+    - 2
+    - 6
+    - 2
+    EMBED_DIM: 96
+    IN_CHANS: 3
+    MLP_RATIO: 4.0
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    PRETRAINED_WINDOW_SIZES:
+    - 0
+    - 0
+    - 0
+    - 0
+    QKV_BIAS: true
+    WINDOW_SIZE: 7
+  SWIN_MLP:
+    APE: false
+    DEPTHS:
+    - 2
+    - 2
+    - 6
+    - 2
+    EMBED_DIM: 96
+    IN_CHANS: 3
+    MLP_RATIO: 4.0
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    WINDOW_SIZE: 7
+  SWIN_MOE:
+    APE: false
+    AUX_LOSS_WEIGHT: 0.01
+    CAPACITY_FACTOR: 1.25
+    COSINE_ROUTER: false
+    COSINE_ROUTER_DIM: 256
+    COSINE_ROUTER_INIT_T: 0.5
+    DEPTHS:
+    - 2
+    - 2
+    - 6
+    - 2
+    EMBED_DIM: 96
+    GATE_NOISE: 1.0
+    INIT_STD: 0.02
+    IN_CHANS: 3
+    IS_GSHARD_LOSS: false
+    MLP_FC2_BIAS: true
+    MLP_RATIO: 4.0
+    MOE_BLOCKS:
+    - - -1
+    - - -1
+    - - -1
+    - - -1
+    MOE_DROP: 0.0
+    NORMALIZE_GATE: false
+    NUM_HEADS:
+    - 3
+    - 6
+    - 12
+    - 24
+    NUM_LOCAL_EXPERTS: 1
+    PATCH_NORM: true
+    PATCH_SIZE: 4
+    PRETRAINED_WINDOW_SIZES:
+    - 0
+    - 0
+    - 0
+    - 0
+    QKV_BIAS: true
+    QK_SCALE: null
+    TOP_VALUE: 1
+    USE_BPR: true
+    WINDOW_SIZE: 7
+  TYPE: vssm
+OUTPUT: ./output/vssmsmall/default
+PRINT_FREQ: 10
+SAVE_FREQ: 1
+SEED: 0
+TAG: default
+TEST:
+  CROP: true
+  SEQUENTIAL: false
+  SHUFFLE: false
+THROUGHPUT_MODE: false
+TRAIN:
+  ACCUMULATION_STEPS: 1
+  AUTO_RESUME: true
+  BASE_LR: 0.0004375
+  CLIP_GRAD: 5.0
+  EPOCHS: 300
+  LAYER_DECAY: 1.0
+  LR_SCHEDULER:
+    DECAY_EPOCHS: 30
+    DECAY_RATE: 0.1
+    GAMMA: 0.1
+    MULTISTEPS: []
+    NAME: cosine
+    WARMUP_PREFIX: true
+  MIN_LR: 4.3750000000000005e-06
+  MOE:
+    SAVE_MASTER: false
+  OPTIMIZER:
+    BETAS:
+    - 0.9
+    - 0.999
+    EPS: 1.0e-08
+    MOMENTUM: 0.9
+    NAME: adamw
+  START_EPOCH: 0
+  USE_CHECKPOINT: false
+  WARMUP_EPOCHS: 20
+  WARMUP_LR: 4.375e-07
+  WEIGHT_DECAY: 0.05
+
+[2024-01-04 23:00:56 vssmsmall] (main.py 346): INFO {"cfg": "configs/swin/swin_small_patch4_window7_224.yaml", "opts": ["MODEL.TYPE", "vssm", "MODEL.NAME", "vssmsmall"], "batch_size": 64, "data_path": "/dataset/ImageNet2012", "zip": false, "cache_mode": "part", "pretrained": null, "resume": null, "accumulation_steps": null, "use_checkpoint": false, "disable_amp": false, "amp_opt_level": null, "output": "./output", "tag": null, "eval": false, "throughput": false, "local_rank": 0, "fused_window_process": false, "fused_layernorm": false, "optim": null}
+[2024-01-04 23:00:58 vssmsmall] (main.py 87): INFO Creating model:vssm/vssmsmall
+[2024-01-04 23:00:59 vssmsmall] (main.py 89): INFO VSSM(
+  (patch_embed): PatchEmbed2D(
+    (proj): Conv2d(3, 96, kernel_size=(4, 4), stride=(4, 4))
+    (norm): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+  )
+  (pos_drop): Dropout(p=0.0, inplace=False)
+  (layers): ModuleList(
+    (0): VSSLayer(
+      (blocks): ModuleList(
+        (0): VSSBlock(
+          (ln_1): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=96, out_features=384, bias=False)
+            (conv2d): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192)
+            (act): SiLU()
+            (out_norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=192, out_features=96, bias=False)
+          )
+          (drop_path): timm.DropPath(0.0)
+        )
+        (1): VSSBlock(
+          (ln_1): LayerNorm((96,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=96, out_features=384, bias=False)
+            (conv2d): Conv2d(192, 192, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=192)
+            (act): SiLU()
+            (out_norm): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=192, out_features=96, bias=False)
+          )
+          (drop_path): timm.DropPath(0.013043479062616825)
+        )
+      )
+      (downsample): PatchMerging2D(
+        (reduction): Linear(in_features=384, out_features=192, bias=False)
+        (norm): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+      )
+    )
+    (1): VSSLayer(
+      (blocks): ModuleList(
+        (0): VSSBlock(
+          (ln_1): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=192, out_features=768, bias=False)
+            (conv2d): Conv2d(384, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=384)
+            (act): SiLU()
+            (out_norm): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=384, out_features=192, bias=False)
+          )
+          (drop_path): timm.DropPath(0.02608695812523365)
+        )
+        (1): VSSBlock(
+          (ln_1): LayerNorm((192,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=192, out_features=768, bias=False)
+            (conv2d): Conv2d(384, 384, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=384)
+            (act): SiLU()
+            (out_norm): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=384, out_features=192, bias=False)
+          )
+          (drop_path): timm.DropPath(0.03913043811917305)
+        )
+      )
+      (downsample): PatchMerging2D(
+        (reduction): Linear(in_features=768, out_features=384, bias=False)
+        (norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+      )
+    )
+    (2): VSSLayer(
+      (blocks): ModuleList(
+        (0): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.0521739162504673)
+        )
+        (1): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.06521739810705185)
+        )
+        (2): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.0782608762383461)
+        )
+        (3): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.09130435436964035)
+        )
+        (4): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.1043478325009346)
+        )
+        (5): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.11739131063222885)
+        )
+        (6): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.1304347962141037)
+        )
+        (7): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.14347827434539795)
+        )
+        (8): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.1565217524766922)
+        )
+        (9): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.16956523060798645)
+        )
+        (10): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.1826087087392807)
+        )
+        (11): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.19565218687057495)
+        )
+        (12): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.2086956650018692)
+        )
+        (13): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.22173914313316345)
+        )
+        (14): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.2347826212644577)
+        )
+        (15): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.24782609939575195)
+        )
+        (16): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.260869562625885)
+        )
+        (17): VSSBlock(
+          (ln_1): LayerNorm((384,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=384, out_features=1536, bias=False)
+            (conv2d): Conv2d(768, 768, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=768)
+            (act): SiLU()
+            (out_norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=768, out_features=384, bias=False)
+          )
+          (drop_path): timm.DropPath(0.27391305565834045)
+        )
+      )
+      (downsample): PatchMerging2D(
+        (reduction): Linear(in_features=1536, out_features=768, bias=False)
+        (norm): LayerNorm((1536,), eps=1e-05, elementwise_affine=True)
+      )
+    )
+    (3): VSSLayer(
+      (blocks): ModuleList(
+        (0): VSSBlock(
+          (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=768, out_features=3072, bias=False)
+            (conv2d): Conv2d(1536, 1536, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=1536)
+            (act): SiLU()
+            (out_norm): LayerNorm((1536,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=1536, out_features=768, bias=False)
+          )
+          (drop_path): timm.DropPath(0.2869565188884735)
+        )
+        (1): VSSBlock(
+          (ln_1): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+          (self_attention): SS2D(
+            (in_proj): Linear(in_features=768, out_features=3072, bias=False)
+            (conv2d): Conv2d(1536, 1536, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), groups=1536)
+            (act): SiLU()
+            (out_norm): LayerNorm((1536,), eps=1e-05, elementwise_affine=True)
+            (out_proj): Linear(in_features=1536, out_features=768, bias=False)
+          )
+          (drop_path): timm.DropPath(0.30000001192092896)
+        )
+      )
+    )
+  )
+  (norm): LayerNorm((768,), eps=1e-05, elementwise_affine=True)
+  (avgpool): AdaptiveAvgPool1d(output_size=1)
+  (head): Linear(in_features=768, out_features=1000, bias=True)
+)
+[2024-01-04 23:00:59 vssmsmall] (main.py 92): INFO number of params: 33655432
+[2024-01-04 23:00:59 vssmsmall] (main.py 129): INFO no checkpoint found in ./output/vssmsmall/default, ignoring auto resume
+[2024-01-04 23:00:59 vssmsmall] (main.py 147): INFO Start training
+[2024-01-04 23:01:18 vssmsmall] (main.py 216): INFO Train: [0/300][0/2232]	eta 11:38:50 lr 0.000000	 wd 0.0500	time 18.7862 (18.7862)	loss 6.9623 (6.9623)	grad_norm 8.0384 (8.0384)	loss_scale 65536.0000 (65536.0000)	mem 20083MB
+[2024-01-04 23:01:27 vssmsmall] (main.py 216): INFO Train: [0/300][10/2232]	eta 1:32:55 lr 0.000001	 wd 0.0500	time 0.8806 (2.5094)	loss 6.8751 (6.9158)	grad_norm 7.9216 (7.8517)	loss_scale 65536.0000 (65536.0000)	mem 20468MB
+[2024-01-04 23:01:36 vssmsmall] (main.py 216): INFO Train: [0/300][20/2232]	eta 1:03:53 lr 0.000001	 wd 0.0500	time 0.8814 (1.7331)	loss 6.8172 (6.8775)	grad_norm 7.5112 (7.7109)	loss_scale 65536.0000 (65536.0000)	mem 20468MB
+[2024-01-04 23:01:44 vssmsmall] (main.py 216): INFO Train: [0/300][30/2232]	eta 0:53:31 lr 0.000001	 wd 0.0500	time 0.8795 (1.4586)	loss 6.7238 (6.8368)	grad_norm 7.6722 (7.7007)	loss_scale 65536.0000 (65536.0000)	mem 20468MB
+[2024-01-04 23:01:53 vssmsmall] (main.py 216): INFO Train: [0/300][40/2232]	eta 0:48:09 lr 0.000001	 wd 0.0500	time 0.8824 (1.3184)	loss 6.6418 (6.7970)	grad_norm 7.8128 (7.7187)	loss_scale 65536.0000 (65536.0000)	mem 20468MB
+[2024-01-04 23:02:02 vssmsmall] (main.py 216): INFO Train: [0/300][50/2232]	eta 0:44:50 lr 0.000001	 wd 0.0500	time 0.8820 (1.2332)	loss 6.4847 (6.7524)	grad_norm 7.9557 (7.7504)	loss_scale 65536.0000 (65536.0000)	mem 20468MB
+[2024-01-04 23:02:11 vssmsmall] (main.py 216): INFO Train: [0/300][60/2232]	eta 0:42:34 lr 0.000001	 wd 0.0500	time 0.8830 (1.1759)	loss 6.4024 (6.7021)	grad_norm 7.9226 (7.8112)	loss_scale 65536.0000 (65536.0000)	mem 20468MB
+[2024-01-04 23:02:20 vssmsmall] (main.py 216): INFO Train: [0/300][70/2232]	eta 0:40:54 lr 0.000001	 wd 0.0500	time 0.8912 (1.1354)	loss 6.2725 (6.6471)	grad_norm 8.8487 (7.8906)	loss_scale 65536.0000 (65536.0000)	mem 20468MB
+[2024-01-04 23:02:29 vssmsmall] (main.py 216): INFO Train: [0/300][80/2232]	eta 0:39:37 lr 0.000001	 wd 0.0500	time 0.8876 (1.1048)	loss 6.1006 (6.5889)	grad_norm 9.3305 (7.9966)	loss_scale 65536.0000 (65536.0000)	mem 20468MB

@@ -1,0 +1,408 @@
+[W socket.cpp:426] [c10d] The server socket has failed to bind to [::]:61234 (errno: 98 - Address already in use).
+[W socket.cpp:426] [c10d] The server socket has failed to bind to ?UNKNOWN? (errno: 98 - Address already in use).
+[E socket.cpp:462] [c10d] The server socket has failed to listen on any local network address.
+The server socket has failed to listen on any local network address. The server socket has failed to bind to [::]:61234 (errno: 98 - Address already in use). The server socket has failed to bind to ?UNKNOWN? (errno: 98 - Address already in use).
+using init_swin ======================== 
+01/16 21:06:05 - mmengine - INFO - Because batch augmentations are enabled, the data preprocessor automatically enables the `to_onehot` option to generate one-hot format labels.
+01/16 21:06:05 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/swin-transformer/swin_tiny_224_b16x64_300e_imagenet_20210616_090925-66df6be6.pth
+starting loop: img_size 224; len(dataset) 50003
+Test: [0/391]	Time 7.116 (7.116)	Loss 0.3110 (0.3110)	Acc@1 94.531 (94.531)	Acc@5 99.219 (99.219)	Mem 1811MB
+Test: [10/391]	Time 5.735 (3.249)	Loss 0.9434 (0.4233)	Acc@1 77.344 (92.116)	Acc@5 97.656 (98.366)	Mem 1812MB
+Test: [20/391]	Time 5.932 (3.212)	Loss 0.5327 (0.5642)	Acc@1 90.625 (87.240)	Acc@5 97.656 (97.842)	Mem 1812MB
+Test: [30/391]	Time 2.821 (3.165)	Loss 1.0400 (0.6674)	Acc@1 80.469 (84.577)	Acc@5 93.750 (97.404)	Mem 1812MB
+Test: [40/391]	Time 3.737 (3.680)	Loss 0.5845 (0.6014)	Acc@1 92.188 (86.643)	Acc@5 94.531 (97.675)	Mem 1812MB
+Test: [50/391]	Time 4.082 (3.746)	Loss 0.2203 (0.6073)	Acc@1 98.438 (86.979)	Acc@5 100.000 (97.518)	Mem 1812MB
+Test: [60/391]	Time 5.957 (3.897)	Loss 0.8091 (0.5760)	Acc@1 85.156 (87.756)	Acc@5 94.531 (97.682)	Mem 1812MB
+Test: [70/391]	Time 5.276 (4.242)	Loss 0.7925 (0.6073)	Acc@1 75.000 (86.785)	Acc@5 98.438 (97.491)	Mem 1812MB
+Test: [80/391]	Time 6.236 (4.381)	Loss 0.6724 (0.6233)	Acc@1 83.594 (86.294)	Acc@5 96.094 (97.425)	Mem 1812MB
+Test: [90/391]	Time 6.176 (4.568)	Loss 0.8096 (0.6269)	Acc@1 75.781 (86.264)	Acc@5 96.875 (97.416)	Mem 1812MB
+Test: [100/391]	Time 5.926 (4.688)	Loss 0.5581 (0.6287)	Acc@1 91.406 (86.007)	Acc@5 96.094 (97.455)	Mem 1812MB
+Test: [110/391]	Time 7.076 (4.853)	Loss 1.1533 (0.6393)	Acc@1 62.500 (85.705)	Acc@5 97.656 (97.417)	Mem 1812MB
+Test: [120/391]	Time 5.815 (4.969)	Loss 0.4409 (0.6346)	Acc@1 90.625 (85.925)	Acc@5 99.219 (97.482)	Mem 1812MB
+Test: [130/391]	Time 5.972 (5.126)	Loss 0.2666 (0.6264)	Acc@1 96.094 (86.128)	Acc@5 100.000 (97.507)	Mem 1812MB
+Test: [140/391]	Time 7.805 (5.197)	Loss 0.9995 (0.6246)	Acc@1 75.000 (86.026)	Acc@5 99.219 (97.595)	Mem 1812MB
+Test: [150/391]	Time 7.275 (5.269)	Loss 0.7305 (0.6322)	Acc@1 79.688 (85.917)	Acc@5 96.094 (97.517)	Mem 1812MB
+Test: [160/391]	Time 6.927 (5.335)	Loss 0.7202 (0.6354)	Acc@1 82.031 (85.850)	Acc@5 96.094 (97.428)	Mem 1812MB
+Test: [170/391]	Time 5.602 (5.368)	Loss 1.4141 (0.6559)	Acc@1 67.188 (85.261)	Acc@5 89.062 (97.227)	Mem 1812MB
+Test: [180/391]	Time 5.055 (5.402)	Loss 1.4365 (0.6724)	Acc@1 63.281 (84.854)	Acc@5 93.750 (97.048)	Mem 1812MB
+Test: [190/391]	Time 5.025 (5.448)	Loss 1.2715 (0.6933)	Acc@1 72.656 (84.260)	Acc@5 94.531 (96.846)	Mem 1812MB
+Test: [200/391]	Time 5.547 (5.481)	Loss 0.5571 (0.7110)	Acc@1 85.938 (83.870)	Acc@5 97.656 (96.657)	Mem 1812MB
+Test: [210/391]	Time 5.207 (5.517)	Loss 0.7759 (0.7235)	Acc@1 82.031 (83.509)	Acc@5 96.875 (96.545)	Mem 1812MB
+Test: [220/391]	Time 6.920 (5.540)	Loss 0.4082 (0.7257)	Acc@1 92.188 (83.484)	Acc@5 97.656 (96.493)	Mem 1812MB
+Test: [230/391]	Time 7.648 (5.594)	Loss 1.3223 (0.7312)	Acc@1 70.312 (83.387)	Acc@5 88.281 (96.418)	Mem 1812MB
+Test: [240/391]	Time 6.383 (5.627)	Loss 0.7783 (0.7322)	Acc@1 85.938 (83.425)	Acc@5 93.750 (96.363)	Mem 1812MB
+Test: [250/391]	Time 5.309 (5.639)	Loss 0.4768 (0.7477)	Acc@1 89.062 (82.862)	Acc@5 98.438 (96.215)	Mem 1812MB
+Test: [260/391]	Time 6.906 (5.645)	Loss 0.8506 (0.7597)	Acc@1 75.781 (82.534)	Acc@5 96.875 (96.100)	Mem 1812MB
+Test: [270/391]	Time 6.954 (5.673)	Loss 1.4062 (0.7672)	Acc@1 61.719 (82.328)	Acc@5 92.188 (96.019)	Mem 1812MB
+Test: [280/391]	Time 6.081 (5.700)	Loss 0.9199 (0.7700)	Acc@1 75.781 (82.256)	Acc@5 96.094 (95.999)	Mem 1812MB
+Test: [290/391]	Time 5.459 (5.694)	Loss 1.4180 (0.7754)	Acc@1 51.562 (82.114)	Acc@5 93.750 (95.927)	Mem 1812MB
+Test: [300/391]	Time 6.192 (5.696)	Loss 0.6753 (0.7807)	Acc@1 85.156 (82.031)	Acc@5 96.875 (95.850)	Mem 1812MB
+Test: [310/391]	Time 5.337 (5.714)	Loss 0.8638 (0.7853)	Acc@1 79.688 (81.931)	Acc@5 94.531 (95.777)	Mem 1812MB
+Test: [320/391]	Time 5.262 (5.714)	Loss 0.4954 (0.7917)	Acc@1 89.844 (81.761)	Acc@5 97.656 (95.709)	Mem 1812MB
+Test: [330/391]	Time 5.597 (5.701)	Loss 1.2246 (0.8021)	Acc@1 68.750 (81.481)	Acc@5 91.406 (95.638)	Mem 1812MB
+Test: [340/391]	Time 5.079 (5.702)	Loss 0.6592 (0.8060)	Acc@1 82.812 (81.387)	Acc@5 97.656 (95.599)	Mem 1812MB
+Test: [350/391]	Time 5.169 (5.707)	Loss 0.7319 (0.8078)	Acc@1 82.031 (81.337)	Acc@5 95.312 (95.568)	Mem 1812MB
+Test: [360/391]	Time 5.845 (5.702)	Loss 1.2021 (0.8145)	Acc@1 72.656 (81.150)	Acc@5 95.312 (95.522)	Mem 1812MB
+Test: [370/391]	Time 6.810 (5.716)	Loss 0.9648 (0.8113)	Acc@1 67.969 (81.195)	Acc@5 96.875 (95.563)	Mem 1812MB
+Test: [380/391]	Time 4.950 (5.685)	Loss 0.7344 (0.8126)	Acc@1 81.250 (81.164)	Acc@5 98.438 (95.554)	Mem 1812MB
+Test: [390/391]	Time 2.988 (5.660)	Loss 1.6758 (0.8097)	Acc@1 50.602 (81.179)	Acc@5 90.361 (95.594)	Mem 1812MB
+ * Acc@1 81.179 Acc@5 95.594
+01/16 21:42:59 - mmengine - INFO - Because batch augmentations are enabled, the data preprocessor automatically enables the `to_onehot` option to generate one-hot format labels.
+01/16 21:43:00 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/swin-transformer/swin_tiny_224_b16x64_300e_imagenet_20210616_090925-66df6be6.pth
+starting loop: img_size 64; len(dataset) 50003
+The input shape (4, 4) is smaller than the window size (7). Please set `pad_small_map=True`, or decrease the `window_size`.
+01/16 21:43:02 - mmengine - INFO - Because batch augmentations are enabled, the data preprocessor automatically enables the `to_onehot` option to generate one-hot format labels.
+01/16 21:43:02 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/swin-transformer/swin_tiny_224_b16x64_300e_imagenet_20210616_090925-66df6be6.pth
+starting loop: img_size 112; len(dataset) 50003
+The input shape (4, 4) is smaller than the window size (7). Please set `pad_small_map=True`, or decrease the `window_size`.
+01/16 21:43:07 - mmengine - INFO - Because batch augmentations are enabled, the data preprocessor automatically enables the `to_onehot` option to generate one-hot format labels.
+01/16 21:43:07 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/swin-transformer/swin_tiny_224_b16x64_300e_imagenet_20210616_090925-66df6be6.pth
+starting loop: img_size 384; len(dataset) 50003
+Test: [0/391]	Time 6.127 (6.127)	Loss 0.5894 (0.5894)	Acc@1 93.750 (93.750)	Acc@5 99.219 (99.219)	Mem 5339MB
+Test: [10/391]	Time 5.629 (4.771)	Loss 1.0371 (0.7071)	Acc@1 78.906 (91.974)	Acc@5 97.656 (98.295)	Mem 5339MB
+Test: [20/391]	Time 3.589 (4.384)	Loss 0.7617 (0.8677)	Acc@1 90.625 (86.979)	Acc@5 96.875 (97.545)	Mem 5339MB
+Test: [30/391]	Time 4.420 (4.392)	Loss 1.3857 (0.9621)	Acc@1 71.094 (83.644)	Acc@5 91.406 (97.001)	Mem 5339MB
+Test: [40/391]	Time 4.000 (4.155)	Loss 0.7925 (0.9066)	Acc@1 90.625 (85.404)	Acc@5 96.094 (97.332)	Mem 5339MB
+Test: [50/391]	Time 3.424 (4.071)	Loss 0.5742 (0.9057)	Acc@1 96.875 (85.616)	Acc@5 100.000 (97.044)	Mem 5339MB
+Test: [60/391]	Time 3.237 (3.989)	Loss 1.1299 (0.8760)	Acc@1 85.938 (86.386)	Acc@5 96.094 (97.285)	Mem 5339MB
+Test: [70/391]	Time 3.251 (3.917)	Loss 1.1963 (0.9203)	Acc@1 75.781 (85.321)	Acc@5 96.094 (97.018)	Mem 5339MB
+Test: [80/391]	Time 2.268 (3.747)	Loss 1.1025 (0.9460)	Acc@1 81.250 (84.635)	Acc@5 96.875 (96.943)	Mem 5339MB
+Test: [90/391]	Time 2.224 (3.604)	Loss 1.2070 (0.9602)	Acc@1 67.188 (84.504)	Acc@5 97.656 (96.892)	Mem 5339MB
+Test: [100/391]	Time 2.313 (3.471)	Loss 0.9746 (0.9638)	Acc@1 87.500 (84.329)	Acc@5 95.312 (96.968)	Mem 5339MB
+Test: [110/391]	Time 2.718 (3.384)	Loss 1.3340 (0.9710)	Acc@1 60.156 (84.051)	Acc@5 97.656 (96.966)	Mem 5339MB
+Test: [120/391]	Time 2.325 (3.307)	Loss 0.8477 (0.9634)	Acc@1 91.406 (84.356)	Acc@5 98.438 (97.036)	Mem 5339MB
+Test: [130/391]	Time 2.177 (3.241)	Loss 0.4800 (0.9539)	Acc@1 97.656 (84.596)	Acc@5 99.219 (97.042)	Mem 5339MB
+Test: [140/391]	Time 2.561 (3.172)	Loss 1.4062 (0.9524)	Acc@1 71.875 (84.530)	Acc@5 96.875 (97.113)	Mem 5339MB
+Test: [150/391]	Time 3.210 (3.134)	Loss 0.9814 (0.9577)	Acc@1 78.906 (84.323)	Acc@5 96.094 (97.020)	Mem 5339MB
+Test: [160/391]	Time 2.465 (3.088)	Loss 0.9795 (0.9601)	Acc@1 78.906 (84.166)	Acc@5 95.312 (96.919)	Mem 5339MB
+Test: [170/391]	Time 2.052 (3.043)	Loss 1.8545 (0.9809)	Acc@1 57.031 (83.512)	Acc@5 86.719 (96.688)	Mem 5339MB
+Test: [180/391]	Time 2.698 (3.006)	Loss 1.6934 (0.9995)	Acc@1 62.500 (83.054)	Acc@5 91.406 (96.474)	Mem 5339MB
+Test: [190/391]	Time 2.164 (2.986)	Loss 1.5137 (1.0175)	Acc@1 68.750 (82.481)	Acc@5 92.188 (96.241)	Mem 5339MB
+Test: [200/391]	Time 2.702 (2.969)	Loss 1.1680 (1.0349)	Acc@1 78.125 (82.027)	Acc@5 96.094 (96.000)	Mem 5339MB
+Test: [210/391]	Time 2.511 (2.982)	Loss 0.9570 (1.0455)	Acc@1 78.125 (81.724)	Acc@5 96.094 (95.890)	Mem 5339MB
+Test: [220/391]	Time 3.358 (2.996)	Loss 0.7075 (1.0483)	Acc@1 86.719 (81.685)	Acc@5 97.656 (95.829)	Mem 5339MB
+Test: [230/391]	Time 4.481 (3.098)	Loss 1.5410 (1.0542)	Acc@1 71.094 (81.605)	Acc@5 89.844 (95.756)	Mem 5339MB
+Test: [240/391]	Time 6.146 (3.212)	Loss 1.0596 (1.0572)	Acc@1 87.500 (81.678)	Acc@5 91.406 (95.663)	Mem 5339MB
+Test: [250/391]	Time 5.576 (3.270)	Loss 0.8237 (1.0741)	Acc@1 84.375 (81.116)	Acc@5 98.438 (95.487)	Mem 5339MB
+Test: [260/391]	Time 4.473 (3.340)	Loss 1.3936 (1.0876)	Acc@1 69.531 (80.753)	Acc@5 95.312 (95.357)	Mem 5339MB
+Test: [270/391]	Time 5.306 (3.408)	Loss 1.6738 (1.0968)	Acc@1 61.719 (80.535)	Acc@5 89.844 (95.249)	Mem 5339MB
+Test: [280/391]	Time 4.756 (3.490)	Loss 1.2080 (1.0986)	Acc@1 76.562 (80.502)	Acc@5 94.531 (95.212)	Mem 5339MB
+Test: [290/391]	Time 6.082 (3.568)	Loss 1.5918 (1.1053)	Acc@1 52.344 (80.300)	Acc@5 90.625 (95.127)	Mem 5339MB
+Test: [300/391]	Time 7.053 (3.654)	Loss 0.9609 (1.1101)	Acc@1 84.375 (80.248)	Acc@5 95.312 (95.071)	Mem 5339MB
+Test: [310/391]	Time 5.767 (3.723)	Loss 1.1387 (1.1155)	Acc@1 82.812 (80.110)	Acc@5 96.094 (95.004)	Mem 5339MB
+Test: [320/391]	Time 8.041 (3.810)	Loss 0.8535 (1.1212)	Acc@1 85.156 (79.953)	Acc@5 96.875 (94.945)	Mem 5339MB
+Test: [330/391]	Time 7.672 (3.910)	Loss 1.6543 (1.1335)	Acc@1 62.500 (79.662)	Acc@5 87.500 (94.824)	Mem 5339MB
+Test: [340/391]	Time 8.284 (3.981)	Loss 1.1289 (1.1377)	Acc@1 79.688 (79.573)	Acc@5 96.094 (94.786)	Mem 5339MB
+Test: [350/391]	Time 5.925 (4.061)	Loss 1.1660 (1.1383)	Acc@1 78.906 (79.558)	Acc@5 94.531 (94.765)	Mem 5339MB
+Test: [360/391]	Time 3.084 (4.112)	Loss 1.1650 (1.1419)	Acc@1 72.656 (79.417)	Acc@5 95.312 (94.728)	Mem 5339MB
+Test: [370/391]	Time 7.728 (4.187)	Loss 1.1533 (1.1347)	Acc@1 64.844 (79.475)	Acc@5 98.438 (94.794)	Mem 5339MB
+Test: [380/391]	Time 5.540 (4.245)	Loss 0.8647 (1.1320)	Acc@1 82.812 (79.470)	Acc@5 96.875 (94.808)	Mem 5339MB
+Test: [390/391]	Time 3.599 (4.305)	Loss 1.9160 (1.1269)	Acc@1 48.193 (79.509)	Acc@5 90.361 (94.852)	Mem 5339MB
+ * Acc@1 79.509 Acc@5 94.852
+01/16 22:11:11 - mmengine - INFO - Because batch augmentations are enabled, the data preprocessor automatically enables the `to_onehot` option to generate one-hot format labels.
+01/16 22:11:12 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/swin-transformer/swin_tiny_224_b16x64_300e_imagenet_20210616_090925-66df6be6.pth
+starting loop: img_size 512; len(dataset) 50003
+Test: [0/391]	Time 10.921 (10.921)	Loss 0.7866 (0.7866)	Acc@1 92.969 (92.969)	Acc@5 99.219 (99.219)	Mem 9384MB
+Test: [10/391]	Time 12.148 (9.456)	Loss 1.1631 (0.9392)	Acc@1 80.469 (89.915)	Acc@5 98.438 (98.295)	Mem 9385MB
+Test: [20/391]	Time 8.832 (9.446)	Loss 1.0596 (1.1113)	Acc@1 88.281 (85.268)	Acc@5 96.094 (97.247)	Mem 9385MB
+Test: [30/391]	Time 11.157 (9.238)	Loss 1.5225 (1.1939)	Acc@1 71.875 (82.182)	Acc@5 89.844 (96.346)	Mem 9385MB
+Test: [40/391]	Time 6.463 (8.850)	Loss 1.0527 (1.1389)	Acc@1 88.281 (84.051)	Acc@5 94.531 (96.589)	Mem 9385MB
+Test: [50/391]	Time 9.260 (8.866)	Loss 0.9043 (1.1365)	Acc@1 92.969 (84.038)	Acc@5 99.219 (96.216)	Mem 9385MB
+Test: [60/391]	Time 8.905 (8.934)	Loss 1.5127 (1.1143)	Acc@1 78.906 (84.772)	Acc@5 95.312 (96.516)	Mem 9385MB
+Test: [70/391]	Time 8.268 (8.953)	Loss 1.4922 (1.1692)	Acc@1 67.188 (83.539)	Acc@5 98.438 (96.358)	Mem 9385MB
+Test: [80/391]	Time 7.481 (8.978)	Loss 1.4492 (1.2075)	Acc@1 80.469 (82.841)	Acc@5 95.312 (96.209)	Mem 9385MB
+Test: [90/391]	Time 6.766 (8.976)	Loss 1.4668 (1.2304)	Acc@1 67.969 (82.641)	Acc@5 97.656 (96.120)	Mem 9385MB
+Test: [100/391]	Time 8.221 (8.971)	Loss 1.3271 (1.2389)	Acc@1 86.719 (82.495)	Acc@5 96.875 (96.264)	Mem 9385MB
+Test: [110/391]	Time 9.221 (9.006)	Loss 1.5762 (1.2456)	Acc@1 59.375 (82.179)	Acc@5 96.094 (96.263)	Mem 9385MB
+Test: [120/391]	Time 9.815 (9.027)	Loss 1.0596 (1.2329)	Acc@1 89.062 (82.412)	Acc@5 97.656 (96.287)	Mem 9385MB
+Test: [130/391]	Time 7.234 (9.021)	Loss 0.6665 (1.2208)	Acc@1 96.094 (82.711)	Acc@5 99.219 (96.308)	Mem 9385MB
+Test: [140/391]	Time 10.305 (9.038)	Loss 1.6895 (1.2163)	Acc@1 69.531 (82.685)	Acc@5 96.875 (96.404)	Mem 9385MB
+Test: [150/391]	Time 10.106 (9.101)	Loss 1.2197 (1.2209)	Acc@1 75.781 (82.399)	Acc@5 96.094 (96.254)	Mem 9385MB
+Test: [160/391]	Time 9.669 (9.183)	Loss 1.2617 (1.2213)	Acc@1 78.125 (82.279)	Acc@5 92.969 (96.162)	Mem 9385MB
+Test: [170/391]	Time 10.524 (9.224)	Loss 2.1797 (1.2449)	Acc@1 55.469 (81.661)	Acc@5 83.594 (95.884)	Mem 9385MB
+Test: [180/391]	Time 9.816 (9.266)	Loss 1.9873 (1.2658)	Acc@1 58.594 (81.138)	Acc@5 89.844 (95.666)	Mem 9385MB
+Test: [190/391]	Time 5.317 (9.198)	Loss 1.8467 (1.2836)	Acc@1 64.062 (80.628)	Acc@5 89.844 (95.407)	Mem 9385MB
+Test: [200/391]	Time 8.151 (9.127)	Loss 1.6152 (1.3039)	Acc@1 78.906 (80.181)	Acc@5 95.312 (95.138)	Mem 9385MB
+Test: [210/391]	Time 9.755 (9.112)	Loss 1.2275 (1.3164)	Acc@1 75.781 (79.791)	Acc@5 95.312 (95.013)	Mem 9385MB
+Test: [220/391]	Time 9.039 (9.077)	Loss 0.9897 (1.3208)	Acc@1 85.938 (79.772)	Acc@5 96.094 (94.927)	Mem 9385MB
+Test: [230/391]	Time 10.004 (9.079)	Loss 1.9277 (1.3277)	Acc@1 69.531 (79.677)	Acc@5 89.844 (94.873)	Mem 9385MB
+Test: [240/391]	Time 6.452 (9.038)	Loss 1.3857 (1.3326)	Acc@1 86.719 (79.723)	Acc@5 91.406 (94.787)	Mem 9385MB
+Test: [250/391]	Time 4.512 (8.988)	Loss 1.1270 (1.3508)	Acc@1 83.594 (79.205)	Acc@5 98.438 (94.594)	Mem 9385MB
+Test: [260/391]	Time 9.482 (8.976)	Loss 1.8057 (1.3658)	Acc@1 63.281 (78.798)	Acc@5 89.844 (94.432)	Mem 9385MB
+Test: [270/391]	Time 10.856 (8.912)	Loss 1.9932 (1.3769)	Acc@1 60.156 (78.534)	Acc@5 86.719 (94.298)	Mem 9385MB
+Test: [280/391]	Time 4.620 (8.853)	Loss 1.5273 (1.3803)	Acc@1 72.656 (78.461)	Acc@5 95.312 (94.275)	Mem 9385MB
+Test: [290/391]	Time 9.031 (8.822)	Loss 1.8311 (1.3883)	Acc@1 52.344 (78.254)	Acc@5 92.188 (94.169)	Mem 9385MB
+Test: [300/391]	Time 9.420 (8.799)	Loss 1.1807 (1.3942)	Acc@1 81.250 (78.151)	Acc@5 93.750 (94.090)	Mem 9385MB
+Test: [310/391]	Time 8.144 (8.812)	Loss 1.4834 (1.4011)	Acc@1 79.688 (77.994)	Acc@5 95.312 (94.016)	Mem 9385MB
+Test: [320/391]	Time 9.104 (8.823)	Loss 1.0898 (1.4062)	Acc@1 83.594 (77.831)	Acc@5 97.656 (93.967)	Mem 9385MB
+Test: [330/391]	Time 7.351 (8.794)	Loss 2.0820 (1.4206)	Acc@1 57.812 (77.521)	Acc@5 87.500 (93.842)	Mem 9385MB
+Test: [340/391]	Time 7.389 (8.751)	Loss 1.4717 (1.4252)	Acc@1 78.906 (77.442)	Acc@5 96.094 (93.807)	Mem 9385MB
+Test: [350/391]	Time 8.341 (8.696)	Loss 1.5098 (1.4266)	Acc@1 78.906 (77.428)	Acc@5 94.531 (93.766)	Mem 9385MB
+Test: [360/391]	Time 9.814 (8.699)	Loss 1.2959 (1.4295)	Acc@1 75.000 (77.313)	Acc@5 95.312 (93.711)	Mem 9385MB
+Test: [370/391]	Time 6.952 (8.715)	Loss 1.3154 (1.4195)	Acc@1 67.969 (77.420)	Acc@5 96.094 (93.782)	Mem 9385MB
+Test: [380/391]	Time 9.753 (8.701)	Loss 1.1143 (1.4152)	Acc@1 77.344 (77.426)	Acc@5 95.312 (93.791)	Mem 9385MB
+Test: [390/391]	Time 4.049 (8.689)	Loss 2.2305 (1.4081)	Acc@1 49.398 (77.487)	Acc@5 90.361 (93.832)	Mem 9385MB
+ * Acc@1 77.487 Acc@5 93.832
+01/16 23:07:50 - mmengine - INFO - Because batch augmentations are enabled, the data preprocessor automatically enables the `to_onehot` option to generate one-hot format labels.
+01/16 23:07:51 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/swin-transformer/swin_tiny_224_b16x64_300e_imagenet_20210616_090925-66df6be6.pth
+starting loop: img_size 640; len(dataset) 50003
+Test: [0/391]	Time 12.807 (12.807)	Loss 1.0713 (1.0713)	Acc@1 90.625 (90.625)	Acc@5 99.219 (99.219)	Mem 13818MB
+Test: [10/391]	Time 13.752 (11.021)	Loss 1.3721 (1.2336)	Acc@1 79.688 (88.068)	Acc@5 97.656 (97.727)	Mem 13819MB
+Test: [20/391]	Time 6.497 (10.242)	Loss 1.3701 (1.4208)	Acc@1 85.938 (82.961)	Acc@5 95.312 (96.019)	Mem 13819MB
+Test: [30/391]	Time 10.927 (9.981)	Loss 1.8174 (1.4957)	Acc@1 63.281 (79.763)	Acc@5 87.500 (95.111)	Mem 13819MB
+Test: [40/391]	Time 9.692 (10.001)	Loss 1.3232 (1.4391)	Acc@1 87.500 (81.764)	Acc@5 94.531 (95.370)	Mem 13819MB
+Test: [50/391]	Time 9.874 (10.037)	Loss 1.2070 (1.4335)	Acc@1 91.406 (81.801)	Acc@5 97.656 (94.991)	Mem 13819MB
+Test: [60/391]	Time 11.005 (10.093)	Loss 1.9580 (1.4094)	Acc@1 75.781 (82.441)	Acc@5 95.312 (95.287)	Mem 13819MB
+Test: [70/391]	Time 10.173 (10.143)	Loss 1.8730 (1.4722)	Acc@1 67.188 (81.316)	Acc@5 95.312 (95.070)	Mem 13819MB
+Test: [80/391]	Time 10.724 (10.172)	Loss 1.8506 (1.5244)	Acc@1 78.125 (80.459)	Acc@5 92.969 (94.927)	Mem 13819MB
+Test: [90/391]	Time 11.230 (10.202)	Loss 1.7783 (1.5563)	Acc@1 66.406 (80.288)	Acc@5 96.875 (94.875)	Mem 13819MB
+Test: [100/391]	Time 9.316 (10.149)	Loss 1.8047 (1.5723)	Acc@1 82.812 (80.074)	Acc@5 94.531 (94.972)	Mem 13819MB
+Test: [110/391]	Time 11.367 (10.201)	Loss 1.8340 (1.5806)	Acc@1 59.375 (79.751)	Acc@5 94.531 (94.982)	Mem 13819MB
+Test: [120/391]	Time 9.682 (10.272)	Loss 1.3652 (1.5652)	Acc@1 84.375 (80.004)	Acc@5 94.531 (95.028)	Mem 13819MB
+Test: [130/391]	Time 11.389 (10.314)	Loss 0.8667 (1.5504)	Acc@1 95.312 (80.254)	Acc@5 99.219 (95.068)	Mem 13819MB
+Test: [140/391]	Time 12.118 (10.305)	Loss 1.9941 (1.5449)	Acc@1 64.062 (80.197)	Acc@5 95.312 (95.168)	Mem 13819MB
+Test: [150/391]	Time 12.706 (10.363)	Loss 1.4912 (1.5485)	Acc@1 70.312 (79.838)	Acc@5 94.531 (95.033)	Mem 13819MB
+Test: [160/391]	Time 8.235 (10.199)	Loss 1.6084 (1.5472)	Acc@1 74.219 (79.789)	Acc@5 92.188 (94.958)	Mem 13819MB
+Test: [170/391]	Time 10.819 (10.212)	Loss 2.5645 (1.5741)	Acc@1 52.344 (79.190)	Acc@5 81.250 (94.664)	Mem 13819MB
+Test: [180/391]	Time 9.603 (10.174)	Loss 2.3379 (1.5985)	Acc@1 55.469 (78.617)	Acc@5 87.500 (94.415)	Mem 13819MB
+Test: [190/391]	Time 8.087 (10.209)	Loss 2.2793 (1.6178)	Acc@1 57.812 (78.055)	Acc@5 87.500 (94.167)	Mem 13819MB
+Test: [200/391]	Time 10.234 (10.205)	Loss 2.0859 (1.6398)	Acc@1 74.219 (77.565)	Acc@5 93.750 (93.878)	Mem 13819MB
+Test: [210/391]	Time 6.283 (10.175)	Loss 1.5400 (1.6540)	Acc@1 76.562 (77.199)	Acc@5 90.625 (93.680)	Mem 13819MB
+Test: [220/391]	Time 9.116 (10.203)	Loss 1.4023 (1.6617)	Acc@1 83.594 (77.125)	Acc@5 94.531 (93.556)	Mem 13819MB
+Test: [230/391]	Time 11.420 (10.190)	Loss 2.2812 (1.6705)	Acc@1 64.844 (76.992)	Acc@5 86.719 (93.479)	Mem 13819MB
+Test: [240/391]	Time 12.023 (10.205)	Loss 1.7910 (1.6778)	Acc@1 83.594 (76.971)	Acc@5 89.844 (93.377)	Mem 13819MB
+Test: [250/391]	Time 13.296 (10.216)	Loss 1.4873 (1.6969)	Acc@1 77.344 (76.422)	Acc@5 92.969 (93.162)	Mem 13819MB
+Test: [260/391]	Time 10.046 (10.240)	Loss 2.3066 (1.7129)	Acc@1 57.031 (76.048)	Acc@5 88.281 (92.993)	Mem 13819MB
+Test: [270/391]	Time 13.277 (10.251)	Loss 2.2598 (1.7238)	Acc@1 60.156 (75.839)	Acc@5 86.719 (92.830)	Mem 13819MB
+Test: [280/391]	Time 8.385 (10.265)	Loss 1.9258 (1.7276)	Acc@1 69.531 (75.795)	Acc@5 92.188 (92.774)	Mem 13819MB
+Test: [290/391]	Time 12.168 (10.268)	Loss 2.1191 (1.7360)	Acc@1 52.344 (75.580)	Acc@5 92.188 (92.628)	Mem 13819MB
+Test: [300/391]	Time 7.974 (10.222)	Loss 1.5400 (1.7432)	Acc@1 79.688 (75.457)	Acc@5 91.406 (92.538)	Mem 13819MB
+Test: [310/391]	Time 7.740 (10.201)	Loss 1.8213 (1.7515)	Acc@1 78.125 (75.274)	Acc@5 92.969 (92.439)	Mem 13819MB
+Test: [320/391]	Time 10.893 (10.183)	Loss 1.4854 (1.7557)	Acc@1 82.812 (75.168)	Acc@5 96.094 (92.402)	Mem 13819MB
+Test: [330/391]	Time 6.966 (10.172)	Loss 2.5215 (1.7711)	Acc@1 57.812 (74.870)	Acc@5 85.156 (92.258)	Mem 13819MB
+Test: [340/391]	Time 13.221 (10.140)	Loss 1.9014 (1.7766)	Acc@1 77.344 (74.826)	Acc@5 94.531 (92.206)	Mem 13819MB
+Test: [350/391]	Time 9.672 (10.164)	Loss 1.9756 (1.7784)	Acc@1 74.219 (74.833)	Acc@5 90.625 (92.172)	Mem 13819MB
+Test: [360/391]	Time 8.005 (10.153)	Loss 1.5840 (1.7798)	Acc@1 70.312 (74.725)	Acc@5 94.531 (92.140)	Mem 13819MB
+Test: [370/391]	Time 11.159 (10.154)	Loss 1.5391 (1.7669)	Acc@1 67.969 (74.844)	Acc@5 96.094 (92.244)	Mem 13819MB
+Test: [380/391]	Time 11.667 (10.181)	Loss 1.3906 (1.7606)	Acc@1 75.781 (74.893)	Acc@5 93.750 (92.278)	Mem 13819MB
+Test: [390/391]	Time 7.315 (10.186)	Loss 2.6152 (1.7513)	Acc@1 44.578 (74.984)	Acc@5 87.952 (92.322)	Mem 13819MB
+ * Acc@1 74.984 Acc@5 92.322
+01/17 00:14:14 - mmengine - INFO - Because batch augmentations are enabled, the data preprocessor automatically enables the `to_onehot` option to generate one-hot format labels.
+01/17 00:14:15 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/swin-transformer/swin_tiny_224_b16x64_300e_imagenet_20210616_090925-66df6be6.pth
+starting loop: img_size 768; len(dataset) 50003
+Test: [0/521]	Time 12.011 (12.011)	Loss 1.3672 (1.3672)	Acc@1 91.667 (91.667)	Acc@5 97.917 (97.917)	Mem 15251MB
+Test: [10/521]	Time 11.475 (11.017)	Loss 1.4531 (1.5487)	Acc@1 91.667 (86.174)	Acc@5 94.792 (96.402)	Mem 15251MB
+Test: [20/521]	Time 11.044 (10.574)	Loss 1.9170 (1.6693)	Acc@1 76.042 (81.448)	Acc@5 91.667 (94.841)	Mem 15251MB
+Test: [30/521]	Time 6.261 (10.030)	Loss 2.1504 (1.7697)	Acc@1 72.917 (78.730)	Acc@5 88.542 (93.851)	Mem 15251MB
+Test: [40/521]	Time 8.289 (9.768)	Loss 2.0605 (1.7945)	Acc@1 56.250 (76.677)	Acc@5 86.458 (93.521)	Mem 15251MB
+Test: [50/521]	Time 8.873 (9.634)	Loss 1.7725 (1.7501)	Acc@1 79.167 (78.615)	Acc@5 93.750 (93.791)	Mem 15251MB
+Test: [60/521]	Time 9.636 (9.456)	Loss 1.1885 (1.7088)	Acc@1 86.458 (79.150)	Acc@5 96.875 (93.699)	Mem 15251MB
+Test: [70/521]	Time 7.496 (9.445)	Loss 1.5752 (1.7176)	Acc@1 82.292 (79.079)	Acc@5 93.750 (93.501)	Mem 15251MB
+Test: [80/521]	Time 4.183 (9.208)	Loss 2.1582 (1.6946)	Acc@1 75.000 (79.707)	Acc@5 95.833 (93.840)	Mem 15251MB
+Test: [90/521]	Time 6.868 (9.041)	Loss 2.1543 (1.7495)	Acc@1 71.875 (78.915)	Acc@5 93.750 (93.704)	Mem 15251MB
+Test: [100/521]	Time 7.128 (9.007)	Loss 2.6973 (1.8032)	Acc@1 55.208 (78.104)	Acc@5 85.417 (93.420)	Mem 15251MB
+Test: [110/521]	Time 11.558 (8.997)	Loss 2.3750 (1.8469)	Acc@1 67.708 (77.374)	Acc@5 93.750 (93.356)	Mem 15251MB
+Test: [120/521]	Time 7.841 (9.005)	Loss 2.0312 (1.8737)	Acc@1 59.375 (77.049)	Acc@5 94.792 (93.268)	Mem 15251MB
+Test: [130/521]	Time 9.607 (9.062)	Loss 2.0820 (1.9016)	Acc@1 68.750 (76.415)	Acc@5 94.792 (93.241)	Mem 15251MB
+Test: [140/521]	Time 6.619 (9.094)	Loss 1.7812 (1.9038)	Acc@1 83.333 (76.537)	Acc@5 94.792 (93.381)	Mem 15251MB
+Test: [150/521]	Time 11.253 (9.188)	Loss 1.2676 (1.9059)	Acc@1 85.417 (76.325)	Acc@5 97.917 (93.315)	Mem 15251MB
+Test: [160/521]	Time 6.483 (9.299)	Loss 1.7217 (1.8927)	Acc@1 79.167 (76.398)	Acc@5 94.792 (93.420)	Mem 15251MB
+Test: [170/521]	Time 10.843 (9.345)	Loss 1.4434 (1.8833)	Acc@1 80.208 (76.559)	Acc@5 93.750 (93.452)	Mem 15251MB
+Test: [180/521]	Time 6.907 (9.276)	Loss 1.9658 (1.8690)	Acc@1 75.000 (76.755)	Acc@5 94.792 (93.485)	Mem 15251MB
+Test: [190/521]	Time 10.166 (9.261)	Loss 1.8174 (1.8659)	Acc@1 78.125 (76.702)	Acc@5 89.583 (93.532)	Mem 15251MB
+Test: [200/521]	Time 15.180 (9.384)	Loss 1.5049 (1.8679)	Acc@1 75.000 (76.353)	Acc@5 94.792 (93.408)	Mem 15251MB
+Test: [210/521]	Time 11.719 (9.429)	Loss 1.4346 (1.8646)	Acc@1 90.625 (76.363)	Acc@5 98.958 (93.385)	Mem 15251MB
+Test: [220/521]	Time 9.696 (9.464)	Loss 2.0664 (1.8829)	Acc@1 70.833 (75.947)	Acc@5 88.542 (93.161)	Mem 15251MB
+Test: [230/521]	Time 8.224 (9.442)	Loss 2.3418 (1.9018)	Acc@1 63.542 (75.501)	Acc@5 88.542 (92.907)	Mem 15251MB
+Test: [240/521]	Time 11.634 (9.464)	Loss 2.3477 (1.9231)	Acc@1 48.958 (74.922)	Acc@5 86.458 (92.605)	Mem 15251MB
+Test: [250/521]	Time 8.780 (9.537)	Loss 2.1543 (1.9407)	Acc@1 73.958 (74.581)	Acc@5 89.583 (92.310)	Mem 15251MB
+Test: [260/521]	Time 10.414 (9.595)	Loss 2.1699 (1.9550)	Acc@1 67.708 (74.070)	Acc@5 89.583 (92.106)	Mem 15251MB
+Test: [270/521]	Time 10.238 (9.624)	Loss 2.1953 (1.9770)	Acc@1 75.000 (73.666)	Acc@5 88.542 (91.890)	Mem 15251MB
+Test: [280/521]	Time 9.437 (9.699)	Loss 1.7393 (1.9849)	Acc@1 75.000 (73.402)	Acc@5 90.625 (91.756)	Mem 15251MB
+Test: [290/521]	Time 15.076 (9.754)	Loss 3.1289 (1.9960)	Acc@1 47.917 (73.196)	Acc@5 75.000 (91.584)	Mem 15251MB
+Test: [300/521]	Time 9.056 (9.794)	Loss 1.2812 (1.9957)	Acc@1 86.458 (73.263)	Acc@5 97.917 (91.556)	Mem 15251MB
+Test: [310/521]	Time 5.458 (9.790)	Loss 2.8770 (2.0103)	Acc@1 45.833 (72.923)	Acc@5 82.292 (91.432)	Mem 15251MB
+Test: [320/521]	Time 7.231 (9.737)	Loss 2.0820 (2.0149)	Acc@1 79.167 (72.926)	Acc@5 89.583 (91.371)	Mem 15251MB
+Test: [330/521]	Time 7.737 (9.734)	Loss 2.9609 (2.0328)	Acc@1 51.042 (72.570)	Acc@5 76.042 (91.125)	Mem 15251MB
+Test: [340/521]	Time 6.558 (9.750)	Loss 2.6953 (2.0425)	Acc@1 60.417 (72.345)	Acc@5 84.375 (91.007)	Mem 15251MB
+Test: [350/521]	Time 10.703 (9.755)	Loss 2.3984 (2.0515)	Acc@1 65.625 (72.104)	Acc@5 90.625 (90.937)	Mem 15251MB
+Test: [360/521]	Time 8.282 (9.736)	Loss 2.7656 (2.0614)	Acc@1 54.167 (71.872)	Acc@5 83.333 (90.810)	Mem 15251MB
+Test: [370/521]	Time 7.896 (9.706)	Loss 2.9570 (2.0675)	Acc@1 54.167 (71.796)	Acc@5 87.500 (90.740)	Mem 15251MB
+Test: [380/521]	Time 9.704 (9.702)	Loss 2.8555 (2.0674)	Acc@1 60.417 (71.790)	Acc@5 79.167 (90.671)	Mem 15251MB
+Test: [390/521]	Time 9.630 (9.659)	Loss 2.6289 (2.0753)	Acc@1 62.500 (71.609)	Acc@5 89.583 (90.534)	Mem 15251MB
+Test: [400/521]	Time 11.247 (9.656)	Loss 1.7158 (2.0811)	Acc@1 80.208 (71.493)	Acc@5 90.625 (90.451)	Mem 15251MB
+Test: [410/521]	Time 9.259 (9.651)	Loss 2.2480 (2.0891)	Acc@1 72.917 (71.340)	Acc@5 87.500 (90.366)	Mem 15251MB
+Test: [420/521]	Time 12.642 (9.639)	Loss 2.4727 (2.0932)	Acc@1 69.792 (71.308)	Acc@5 84.375 (90.313)	Mem 15251MB
+Test: [430/521]	Time 9.916 (9.633)	Loss 2.6367 (2.0963)	Acc@1 55.208 (71.239)	Acc@5 83.333 (90.287)	Mem 15251MB
+Test: [440/521]	Time 5.861 (9.610)	Loss 3.1484 (2.1096)	Acc@1 51.042 (70.937)	Acc@5 76.042 (90.160)	Mem 15251MB
+Test: [450/521]	Time 10.999 (9.615)	Loss 2.4902 (2.1137)	Acc@1 59.375 (70.893)	Acc@5 93.750 (90.128)	Mem 15251MB
+Test: [460/521]	Time 6.837 (9.569)	Loss 2.8008 (2.1174)	Acc@1 47.917 (70.883)	Acc@5 72.917 (90.094)	Mem 15251MB
+Test: [470/521]	Time 10.098 (9.567)	Loss 2.0098 (2.1196)	Acc@1 75.000 (70.840)	Acc@5 92.708 (90.059)	Mem 15251MB
+Test: [480/521]	Time 9.949 (9.563)	Loss 1.7100 (2.1185)	Acc@1 76.042 (70.810)	Acc@5 92.708 (90.066)	Mem 15251MB
+Test: [490/521]	Time 7.751 (9.567)	Loss 1.3301 (2.1074)	Acc@1 83.333 (70.931)	Acc@5 97.917 (90.156)	Mem 15251MB
+Test: [500/521]	Time 9.747 (9.574)	Loss 2.4277 (2.0941)	Acc@1 57.292 (71.129)	Acc@5 83.333 (90.259)	Mem 15251MB
+Test: [510/521]	Time 11.734 (9.557)	Loss 2.3418 (2.0972)	Acc@1 69.792 (70.994)	Acc@5 92.708 (90.248)	Mem 15251MB
+Test: [520/521]	Time 6.052 (9.567)	Loss 2.9160 (2.0830)	Acc@1 40.964 (71.196)	Acc@5 75.904 (90.295)	Mem 15251MB
+ * Acc@1 71.196 Acc@5 90.295
+01/17 01:37:20 - mmengine - INFO - Because batch augmentations are enabled, the data preprocessor automatically enables the `to_onehot` option to generate one-hot format labels.
+01/17 01:37:21 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/swin-transformer/swin_tiny_224_b16x64_300e_imagenet_20210616_090925-66df6be6.pth
+starting loop: img_size 1024; len(dataset) 50003
+Test: [0/695]	Time 10.565 (10.565)	Loss 1.8896 (1.8896)	Acc@1 87.500 (87.500)	Acc@5 97.222 (97.222)	Mem 19926MB
+Test: [10/695]	Time 11.529 (10.175)	Loss 2.2773 (2.3344)	Acc@1 81.944 (70.833)	Acc@5 95.833 (92.045)	Mem 19926MB
+Test: [20/695]	Time 14.966 (10.090)	Loss 2.0762 (2.2904)	Acc@1 87.500 (73.082)	Acc@5 94.444 (92.394)	Mem 19926MB
+Test: [30/695]	Time 11.513 (9.922)	Loss 2.4238 (2.4348)	Acc@1 72.222 (68.772)	Acc@5 88.889 (89.382)	Mem 19926MB
+Test: [40/695]	Time 10.397 (10.050)	Loss 3.0957 (2.5652)	Acc@1 54.167 (65.346)	Acc@5 73.611 (87.093)	Mem 19926MB
+Test: [50/695]	Time 12.673 (10.181)	Loss 1.7119 (2.5438)	Acc@1 59.722 (64.733)	Acc@5 94.444 (87.418)	Mem 19926MB
+Test: [60/695]	Time 7.896 (9.941)	Loss 2.2559 (2.5314)	Acc@1 79.167 (64.709)	Acc@5 95.833 (87.454)	Mem 19926MB
+Test: [70/695]	Time 8.085 (9.865)	Loss 1.9277 (2.4720)	Acc@1 80.556 (66.843)	Acc@5 95.833 (88.243)	Mem 19926MB
+Test: [80/695]	Time 7.842 (9.817)	Loss 1.6758 (2.4362)	Acc@1 72.222 (67.078)	Acc@5 91.667 (88.049)	Mem 19926MB
+Test: [90/695]	Time 8.012 (9.945)	Loss 1.7002 (2.4454)	Acc@1 87.500 (67.063)	Acc@5 97.222 (87.805)	Mem 19926MB
+Test: [100/695]	Time 11.140 (10.047)	Loss 2.0430 (2.4317)	Acc@1 83.333 (67.726)	Acc@5 94.444 (88.119)	Mem 19926MB
+Test: [110/695]	Time 11.478 (10.084)	Loss 3.0000 (2.4310)	Acc@1 52.778 (67.705)	Acc@5 91.667 (88.313)	Mem 19926MB
+Test: [120/695]	Time 10.567 (10.127)	Loss 3.2539 (2.4800)	Acc@1 50.000 (66.942)	Acc@5 80.556 (87.902)	Mem 19926MB
+Test: [130/695]	Time 8.930 (10.120)	Loss 3.3594 (2.5268)	Acc@1 54.167 (66.285)	Acc@5 80.556 (87.553)	Mem 19926MB
+Test: [140/695]	Time 10.352 (10.062)	Loss 3.4258 (2.5792)	Acc@1 40.278 (64.943)	Acc@5 72.222 (87.037)	Mem 19926MB
+Test: [150/695]	Time 12.272 (10.124)	Loss 2.4180 (2.6122)	Acc@1 87.500 (64.634)	Acc@5 95.833 (86.875)	Mem 19926MB
+Test: [160/695]	Time 13.547 (10.157)	Loss 3.0742 (2.6446)	Acc@1 56.944 (64.113)	Acc@5 86.111 (86.508)	Mem 19926MB
+Test: [170/695]	Time 5.176 (10.110)	Loss 3.2969 (2.6827)	Acc@1 56.944 (63.150)	Acc@5 83.333 (86.176)	Mem 19926MB
+Test: [180/695]	Time 11.671 (10.119)	Loss 2.5664 (2.6924)	Acc@1 70.833 (62.891)	Acc@5 90.278 (86.149)	Mem 19926MB
+Test: [190/695]	Time 13.107 (10.199)	Loss 2.4277 (2.7070)	Acc@1 72.222 (62.551)	Acc@5 90.278 (86.046)	Mem 19926MB
+Test: [200/695]	Time 11.932 (10.218)	Loss 1.7881 (2.7032)	Acc@1 77.778 (62.583)	Acc@5 97.222 (86.118)	Mem 19926MB
+Test: [210/695]	Time 11.508 (10.232)	Loss 2.5371 (2.6848)	Acc@1 62.500 (62.948)	Acc@5 88.889 (86.341)	Mem 19926MB
+Test: [220/695]	Time 11.276 (10.299)	Loss 2.3828 (2.6959)	Acc@1 79.167 (62.682)	Acc@5 90.278 (86.231)	Mem 19926MB
+Test: [230/695]	Time 10.327 (10.338)	Loss 2.1367 (2.6713)	Acc@1 79.167 (63.234)	Acc@5 97.222 (86.430)	Mem 19926MB
+Test: [240/695]	Time 7.788 (10.375)	Loss 3.3555 (2.6574)	Acc@1 30.556 (63.388)	Acc@5 79.167 (86.509)	Mem 19926MB
+Test: [250/695]	Time 13.776 (10.405)	Loss 3.1621 (2.6530)	Acc@1 45.833 (63.302)	Acc@5 81.944 (86.642)	Mem 19926MB
+Test: [260/695]	Time 8.634 (10.424)	Loss 2.6113 (2.6482)	Acc@1 59.722 (63.261)	Acc@5 83.333 (86.606)	Mem 19926MB
+Test: [270/695]	Time 13.768 (10.510)	Loss 2.2227 (2.6383)	Acc@1 81.944 (63.177)	Acc@5 90.278 (86.603)	Mem 19926MB
+Test: [280/695]	Time 12.970 (10.532)	Loss 2.1465 (2.6359)	Acc@1 68.056 (63.187)	Acc@5 93.056 (86.531)	Mem 19926MB
+Test: [290/695]	Time 6.599 (10.528)	Loss 2.3359 (2.6505)	Acc@1 83.333 (62.844)	Acc@5 95.833 (86.250)	Mem 19926MB
+Test: [300/695]	Time 13.157 (10.569)	Loss 3.6602 (2.6653)	Acc@1 33.333 (62.578)	Acc@5 73.611 (86.023)	Mem 19926MB
+Test: [310/695]	Time 9.837 (10.572)	Loss 3.4570 (2.6882)	Acc@1 41.667 (62.067)	Acc@5 76.389 (85.615)	Mem 19926MB
+Test: [320/695]	Time 11.720 (10.614)	Loss 2.9668 (2.7056)	Acc@1 41.667 (61.609)	Acc@5 79.167 (85.285)	Mem 19926MB
+Test: [330/695]	Time 11.910 (10.657)	Loss 2.2031 (2.7216)	Acc@1 81.944 (61.354)	Acc@5 90.278 (84.978)	Mem 19926MB
+Test: [340/695]	Time 7.844 (10.631)	Loss 2.3516 (2.7314)	Acc@1 63.889 (60.964)	Acc@5 83.333 (84.812)	Mem 19926MB
+Test: [350/695]	Time 11.990 (10.640)	Loss 4.2148 (2.7496)	Acc@1 34.722 (60.525)	Acc@5 61.111 (84.513)	Mem 19926MB
+Test: [360/695]	Time 12.956 (10.650)	Loss 3.2344 (2.7656)	Acc@1 59.722 (60.176)	Acc@5 77.778 (84.222)	Mem 19926MB
+Test: [370/695]	Time 9.355 (10.636)	Loss 1.5811 (2.7752)	Acc@1 73.611 (59.909)	Acc@5 84.722 (83.947)	Mem 19926MB
+Test: [380/695]	Time 8.536 (10.604)	Loss 2.2539 (2.7789)	Acc@1 40.278 (59.711)	Acc@5 91.667 (83.833)	Mem 19926MB
+Test: [390/695]	Time 8.171 (10.605)	Loss 3.3867 (2.7876)	Acc@1 47.222 (59.584)	Acc@5 76.389 (83.678)	Mem 19926MB
+Test: [400/695]	Time 10.519 (10.613)	Loss 1.8604 (2.7910)	Acc@1 83.333 (59.511)	Acc@5 94.444 (83.645)	Mem 19926MB
+Test: [410/695]	Time 9.115 (10.602)	Loss 2.4961 (2.8021)	Acc@1 69.444 (59.253)	Acc@5 86.111 (83.455)	Mem 19926MB
+Test: [420/695]	Time 7.662 (10.589)	Loss 3.0527 (2.8103)	Acc@1 58.333 (59.122)	Acc@5 80.556 (83.337)	Mem 19926MB
+Test: [430/695]	Time 8.238 (10.569)	Loss 4.0938 (2.8183)	Acc@1 19.444 (58.994)	Acc@5 59.722 (83.166)	Mem 19926MB
+Test: [440/695]	Time 5.443 (10.531)	Loss 3.7012 (2.8265)	Acc@1 37.500 (58.815)	Acc@5 69.444 (83.062)	Mem 19926MB
+Test: [450/695]	Time 13.758 (10.550)	Loss 3.1738 (2.8306)	Acc@1 51.389 (58.755)	Acc@5 76.389 (82.961)	Mem 19926MB
+Test: [460/695]	Time 10.370 (10.538)	Loss 2.6191 (2.8409)	Acc@1 62.500 (58.514)	Acc@5 90.278 (82.812)	Mem 19926MB
+Test: [470/695]	Time 10.549 (10.522)	Loss 3.3242 (2.8501)	Acc@1 54.167 (58.395)	Acc@5 80.556 (82.693)	Mem 19926MB
+Test: [480/695]	Time 9.442 (10.539)	Loss 3.4746 (2.8523)	Acc@1 48.611 (58.342)	Acc@5 79.167 (82.640)	Mem 19926MB
+Test: [490/695]	Time 9.585 (10.531)	Loss 2.9863 (2.8562)	Acc@1 62.500 (58.328)	Acc@5 81.944 (82.572)	Mem 19926MB
+Test: [500/695]	Time 9.518 (10.511)	Loss 2.8145 (2.8572)	Acc@1 66.667 (58.311)	Acc@5 77.778 (82.574)	Mem 19926MB
+Test: [510/695]	Time 13.945 (10.533)	Loss 3.3262 (2.8618)	Acc@1 44.444 (58.189)	Acc@5 69.444 (82.426)	Mem 19926MB
+Test: [520/695]	Time 10.036 (10.537)	Loss 3.1660 (2.8638)	Acc@1 51.389 (58.171)	Acc@5 79.167 (82.344)	Mem 19926MB
+Test: [530/695]	Time 12.029 (10.556)	Loss 3.5312 (2.8707)	Acc@1 44.444 (57.999)	Acc@5 66.667 (82.201)	Mem 19926MB
+Test: [540/695]	Time 10.914 (10.557)	Loss 4.1250 (2.8806)	Acc@1 31.944 (57.871)	Acc@5 58.333 (81.993)	Mem 19926MB
+Test: [550/695]	Time 11.108 (10.560)	Loss 4.1523 (2.8839)	Acc@1 34.722 (57.779)	Acc@5 58.333 (81.909)	Mem 19926MB
+Test: [560/695]	Time 8.881 (10.558)	Loss 3.0645 (2.8846)	Acc@1 52.778 (57.796)	Acc@5 76.389 (81.897)	Mem 19926MB
+Test: [570/695]	Time 11.783 (10.550)	Loss 2.2129 (2.8840)	Acc@1 81.944 (57.788)	Acc@5 95.833 (81.927)	Mem 19926MB
+Test: [580/695]	Time 9.576 (10.547)	Loss 3.7930 (2.8902)	Acc@1 41.667 (57.652)	Acc@5 69.444 (81.885)	Mem 19926MB
+Test: [590/695]	Time 10.930 (10.527)	Loss 3.8574 (2.9005)	Acc@1 29.167 (57.422)	Acc@5 65.278 (81.745)	Mem 19926MB
+Test: [600/695]	Time 6.780 (10.504)	Loss 3.5840 (2.9014)	Acc@1 31.944 (57.469)	Acc@5 79.167 (81.748)	Mem 19926MB
+Test: [610/695]	Time 6.112 (10.484)	Loss 2.8535 (2.9048)	Acc@1 62.500 (57.404)	Acc@5 75.000 (81.694)	Mem 19926MB
+Test: [620/695]	Time 11.877 (10.477)	Loss 2.9844 (2.9094)	Acc@1 54.167 (57.293)	Acc@5 81.944 (81.616)	Mem 19926MB
+Test: [630/695]	Time 11.992 (10.487)	Loss 3.6777 (2.9110)	Acc@1 31.944 (57.239)	Acc@5 68.056 (81.568)	Mem 19926MB
+Test: [640/695]	Time 12.962 (10.486)	Loss 2.5332 (2.9085)	Acc@1 59.722 (57.246)	Acc@5 84.722 (81.570)	Mem 19926MB
+Test: [650/695]	Time 12.454 (10.481)	Loss 1.4160 (2.9002)	Acc@1 81.944 (57.380)	Acc@5 94.444 (81.650)	Mem 19926MB
+Test: [660/695]	Time 9.233 (10.479)	Loss 1.9297 (2.8834)	Acc@1 79.167 (57.648)	Acc@5 94.444 (81.846)	Mem 19926MB
+Test: [670/695]	Time 9.867 (10.464)	Loss 2.8848 (2.8737)	Acc@1 61.111 (57.863)	Acc@5 83.333 (81.947)	Mem 19926MB
+Test: [680/695]	Time 10.483 (10.452)	Loss 3.0234 (2.8765)	Acc@1 50.000 (57.734)	Acc@5 83.333 (81.930)	Mem 19926MB
+Test: [690/695]	Time 11.115 (10.424)	Loss 1.6289 (2.8616)	Acc@1 90.278 (58.024)	Acc@5 95.833 (82.049)	Mem 19926MB
+ * Acc@1 58.053 Acc@5 82.049
+01/17 03:37:55 - mmengine - INFO - Because batch augmentations are enabled, the data preprocessor automatically enables the `to_onehot` option to generate one-hot format labels.
+01/17 03:37:56 - mmengine - INFO - Loads checkpoint by http backend from path: https://download.openmmlab.com/mmclassification/v0/swin-transformer/swin_tiny_224_b16x64_300e_imagenet_20210616_090925-66df6be6.pth
+starting loop: img_size 1120; len(dataset) 50003
+Test: [0/834]	Time 10.017 (10.017)	Loss 1.9707 (1.9707)	Acc@1 86.667 (86.667)	Acc@5 96.667 (96.667)	Mem 19926MB
+Test: [10/834]	Time 5.338 (9.121)	Loss 2.8125 (2.6124)	Acc@1 73.333 (64.545)	Acc@5 93.333 (88.636)	Mem 19926MB
+Test: [20/834]	Time 6.777 (8.525)	Loss 2.1055 (2.6179)	Acc@1 76.667 (65.159)	Acc@5 93.333 (89.444)	Mem 19926MB
+Test: [30/834]	Time 9.078 (9.160)	Loss 3.1309 (2.6840)	Acc@1 45.000 (63.118)	Acc@5 81.667 (87.151)	Mem 19926MB
+Test: [40/834]	Time 10.928 (9.216)	Loss 3.1211 (2.7566)	Acc@1 60.000 (61.179)	Acc@5 81.667 (85.772)	Mem 19926MB
+Test: [50/834]	Time 8.020 (9.615)	Loss 3.5332 (2.8530)	Acc@1 20.000 (57.745)	Acc@5 70.000 (83.170)	Mem 19926MB
+Test: [60/834]	Time 11.253 (9.528)	Loss 1.8730 (2.8039)	Acc@1 48.333 (57.869)	Acc@5 95.000 (84.016)	Mem 19926MB
+Test: [70/834]	Time 5.065 (9.458)	Loss 2.5703 (2.7886)	Acc@1 71.667 (57.629)	Acc@5 81.667 (83.756)	Mem 19926MB
+Test: [80/834]	Time 10.165 (9.476)	Loss 2.8770 (2.7484)	Acc@1 63.333 (59.815)	Acc@5 78.333 (84.568)	Mem 19926MB
+Test: [90/834]	Time 8.490 (9.433)	Loss 2.1582 (2.7193)	Acc@1 56.667 (60.275)	Acc@5 88.333 (84.396)	Mem 19926MB
+Test: [100/834]	Time 8.335 (9.410)	Loss 2.7461 (2.6880)	Acc@1 58.333 (60.875)	Acc@5 75.000 (84.455)	Mem 19926MB
+Test: [110/834]	Time 10.667 (9.371)	Loss 2.8027 (2.6975)	Acc@1 61.667 (60.901)	Acc@5 88.333 (84.369)	Mem 19926MB
+Test: [120/834]	Time 10.024 (9.312)	Loss 2.4336 (2.6895)	Acc@1 76.667 (61.474)	Acc@5 95.000 (84.601)	Mem 19926MB
+Test: [130/834]	Time 9.926 (9.364)	Loss 2.9004 (2.6763)	Acc@1 71.667 (61.781)	Acc@5 91.667 (84.707)	Mem 19926MB
+Test: [140/834]	Time 10.306 (9.327)	Loss 2.2969 (2.7127)	Acc@1 86.667 (61.300)	Acc@5 96.667 (84.563)	Mem 19926MB
+Test: [150/834]	Time 9.335 (9.263)	Loss 3.4766 (2.7457)	Acc@1 43.333 (60.916)	Acc@5 75.000 (84.260)	Mem 19926MB
+Test: [160/834]	Time 8.859 (9.217)	Loss 3.9453 (2.7984)	Acc@1 38.333 (59.741)	Acc@5 61.667 (83.592)	Mem 19926MB
+Test: [170/834]	Time 9.428 (9.181)	Loss 3.5195 (2.8392)	Acc@1 36.667 (58.704)	Acc@5 73.333 (83.070)	Mem 19926MB
+Test: [180/834]	Time 4.722 (9.116)	Loss 2.5273 (2.8685)	Acc@1 88.333 (58.425)	Acc@5 95.000 (82.744)	Mem 19926MB
+Test: [190/834]	Time 5.222 (9.001)	Loss 2.6758 (2.8966)	Acc@1 70.000 (57.862)	Acc@5 85.000 (82.304)	Mem 19926MB
+Test: [200/834]	Time 7.829 (8.936)	Loss 3.6660 (2.9344)	Acc@1 31.667 (56.891)	Acc@5 80.000 (81.866)	Mem 19926MB
+Test: [210/834]	Time 7.941 (8.886)	Loss 2.3066 (2.9521)	Acc@1 85.000 (56.469)	Acc@5 91.667 (81.596)	Mem 19926MB
+Test: [220/834]	Time 6.308 (8.829)	Loss 3.9297 (2.9649)	Acc@1 30.000 (56.176)	Acc@5 66.667 (81.569)	Mem 19926MB
+Test: [230/834]	Time 8.439 (8.784)	Loss 3.2520 (2.9711)	Acc@1 53.333 (55.996)	Acc@5 76.667 (81.486)	Mem 19926MB
+Test: [240/834]	Time 9.775 (8.772)	Loss 1.7803 (2.9665)	Acc@1 78.333 (56.030)	Acc@5 96.667 (81.618)	Mem 19926MB
+Test: [250/834]	Time 6.620 (8.752)	Loss 2.0547 (2.9486)	Acc@1 71.667 (56.434)	Acc@5 90.000 (81.892)	Mem 19926MB
+Test: [260/834]	Time 6.962 (8.701)	Loss 3.5469 (2.9511)	Acc@1 40.000 (56.290)	Acc@5 80.000 (81.980)	Mem 19926MB
+Test: [270/834]	Time 6.989 (8.646)	Loss 1.4561 (2.9402)	Acc@1 91.667 (56.685)	Acc@5 100.000 (82.140)	Mem 19926MB
+Test: [280/834]	Time 7.899 (8.610)	Loss 3.1055 (2.9215)	Acc@1 45.000 (57.117)	Acc@5 78.333 (82.313)	Mem 19926MB
+Test: [290/834]	Time 6.346 (8.539)	Loss 3.9941 (2.9221)	Acc@1 23.333 (56.879)	Acc@5 60.000 (82.165)	Mem 19926MB
+Test: [300/834]	Time 7.392 (8.506)	Loss 3.6074 (2.9117)	Acc@1 26.667 (56.999)	Acc@5 76.667 (82.414)	Mem 19926MB
+Test: [310/834]	Time 7.686 (8.477)	Loss 3.1387 (2.9037)	Acc@1 38.333 (57.128)	Acc@5 76.667 (82.476)	Mem 19926MB
+Test: [320/834]	Time 9.570 (8.456)	Loss 1.7363 (2.8947)	Acc@1 75.000 (57.030)	Acc@5 90.000 (82.497)	Mem 19926MB
+Test: [330/834]	Time 6.574 (8.435)	Loss 2.0586 (2.8854)	Acc@1 71.667 (57.105)	Acc@5 85.000 (82.538)	Mem 19926MB
+Test: [340/834]	Time 5.519 (8.409)	Loss 3.4180 (2.8881)	Acc@1 48.333 (57.019)	Acc@5 83.333 (82.566)	Mem 19926MB
+Test: [350/834]	Time 7.381 (8.411)	Loss 4.0586 (2.9078)	Acc@1 41.667 (56.700)	Acc@5 70.000 (82.217)	Mem 19926MB
+Test: [360/834]	Time 6.882 (8.423)	Loss 3.8320 (2.9189)	Acc@1 23.333 (56.468)	Acc@5 76.667 (81.999)	Mem 19926MB
+Test: [370/834]	Time 8.154 (8.398)	Loss 3.5078 (2.9381)	Acc@1 60.000 (56.128)	Acc@5 75.000 (81.586)	Mem 19926MB
+Test: [380/834]	Time 8.819 (8.384)	Loss 3.9258 (2.9559)	Acc@1 36.667 (55.665)	Acc@5 65.000 (81.225)	Mem 19926MB
+Test: [390/834]	Time 9.082 (8.374)	Loss 3.3242 (2.9708)	Acc@1 43.333 (55.328)	Acc@5 78.333 (80.929)	Mem 19926MB
+Test: [400/834]	Time 9.172 (8.342)	Loss 3.5586 (2.9853)	Acc@1 50.000 (55.071)	Acc@5 78.333 (80.698)	Mem 19926MB
+Test: [410/834]	Time 5.932 (8.317)	Loss 4.0469 (2.9911)	Acc@1 35.000 (54.797)	Acc@5 56.667 (80.592)	Mem 19926MB
+Test: [420/834]	Time 6.693 (8.303)	Loss 4.3984 (3.0069)	Acc@1 25.000 (54.438)	Acc@5 60.000 (80.289)	Mem 19926MB
+Test: [430/834]	Time 10.352 (8.300)	Loss 4.0977 (3.0225)	Acc@1 33.333 (54.095)	Acc@5 61.667 (79.950)	Mem 19926MB
+Test: [440/834]	Time 7.868 (8.280)	Loss 3.2793 (3.0324)	Acc@1 60.000 (53.881)	Acc@5 75.000 (79.754)	Mem 19926MB
+Test: [450/834]	Time 8.718 (8.273)	Loss 2.2188 (3.0306)	Acc@1 75.000 (53.947)	Acc@5 86.667 (79.704)	Mem 19926MB
+Test: [460/834]	Time 8.095 (8.266)	Loss 3.4082 (3.0416)	Acc@1 58.333 (53.619)	Acc@5 78.333 (79.494)	Mem 19926MB
+Test: [470/834]	Time 8.397 (8.258)	Loss 3.4082 (3.0492)	Acc@1 38.333 (53.478)	Acc@5 70.000 (79.345)	Mem 19926MB
+Test: [480/834]	Time 6.456 (8.247)	Loss 2.0801 (3.0518)	Acc@1 78.333 (53.468)	Acc@5 86.667 (79.262)	Mem 19926MB
+Test: [490/834]	Time 7.312 (8.245)	Loss 2.7520 (3.0624)	Acc@1 65.000 (53.187)	Acc@5 81.667 (79.043)	Mem 19926MB
+Test: [500/834]	Time 9.118 (8.241)	Loss 4.1992 (3.0674)	Acc@1 26.667 (53.071)	Acc@5 58.333 (78.979)	Mem 19926MB
+Test: [510/834]	Time 8.124 (8.230)	Loss 2.7832 (3.0703)	Acc@1 71.667 (53.089)	Acc@5 90.000 (78.924)	Mem 19926MB
+Test: [520/834]	Time 8.943 (8.229)	Loss 3.6445 (3.0850)	Acc@1 40.000 (52.799)	Acc@5 68.333 (78.637)	Mem 19926MB
+Test: [530/834]	Time 8.050 (8.234)	Loss 3.2871 (3.0870)	Acc@1 40.000 (52.765)	Acc@5 80.000 (78.650)	Mem 19926MB
+Test: [540/834]	Time 5.995 (8.235)	Loss 3.4121 (3.0898)	Acc@1 48.333 (52.776)	Acc@5 70.000 (78.561)	Mem 19926MB
+Test: [550/834]	Time 7.665 (8.225)	Loss 2.8125 (3.1011)	Acc@1 73.333 (52.486)	Acc@5 93.333 (78.358)	Mem 19926MB
+Test: [560/834]	Time 5.865 (8.237)	Loss 2.5957 (3.1071)	Acc@1 75.000 (52.445)	Acc@5 90.000 (78.286)	Mem 19926MB
+Test: [570/834]	Time 8.847 (8.253)	Loss 2.5391 (3.1112)	Acc@1 76.667 (52.431)	Acc@5 90.000 (78.252)	Mem 19926MB
+Test: [580/834]	Time 9.109 (8.253)	Loss 3.9102 (3.1134)	Acc@1 41.667 (52.390)	Acc@5 68.333 (78.158)	Mem 19926MB
+Test: [590/834]	Time 8.094 (8.256)	Loss 2.8848 (3.1163)	Acc@1 66.667 (52.408)	Acc@5 90.000 (78.142)	Mem 19926MB
+Test: [600/834]	Time 8.451 (8.256)	Loss 2.9746 (3.1163)	Acc@1 66.667 (52.396)	Acc@5 78.333 (78.148)	Mem 19926MB
+Test: [610/834]	Time 12.466 (8.288)	Loss 3.8242 (3.1184)	Acc@1 43.333 (52.373)	Acc@5 63.333 (78.039)	Mem 19926MB
+Test: [620/834]	Time 8.899 (8.302)	Loss 3.7617 (3.1209)	Acc@1 43.333 (52.351)	Acc@5 78.333 (77.947)	Mem 19926MB
+Test: [630/834]	Time 8.323 (8.313)	Loss 3.2441 (3.1241)	Acc@1 58.333 (52.250)	Acc@5 71.667 (77.866)	Mem 19926MB
+Test: [640/834]	Time 7.929 (8.327)	Loss 2.7461 (3.1309)	Acc@1 68.333 (52.155)	Acc@5 80.000 (77.696)	Mem 19926MB
+Test: [650/834]	Time 12.154 (8.358)	Loss 2.8223 (3.1381)	Acc@1 31.667 (52.023)	Acc@5 88.333 (77.565)	Mem 19926MB
+Test: [660/834]	Time 12.076 (8.384)	Loss 4.3359 (3.1423)	Acc@1 25.000 (51.947)	Acc@5 51.667 (77.463)	Mem 19926MB
+Test: [670/834]	Time 8.057 (8.389)	Loss 3.2520 (3.1420)	Acc@1 63.333 (52.009)	Acc@5 90.000 (77.444)	Mem 19926MB
+Test: [680/834]	Time 8.502 (8.406)	Loss 2.9199 (3.1417)	Acc@1 65.000 (51.968)	Acc@5 80.000 (77.440)	Mem 19926MB
+Test: [690/834]	Time 7.044 (8.410)	Loss 3.8301 (3.1447)	Acc@1 31.667 (51.918)	Acc@5 68.333 (77.407)	Mem 19926MB
+Test: [700/834]	Time 14.188 (8.427)	Loss 3.5840 (3.1523)	Acc@1 48.333 (51.767)	Acc@5 70.000 (77.332)	Mem 19926MB
+Test: [710/834]	Time 5.419 (8.436)	Loss 2.9863 (3.1596)	Acc@1 61.667 (51.610)	Acc@5 80.000 (77.225)	Mem 19926MB
+Test: [720/834]	Time 7.506 (8.446)	Loss 4.0742 (3.1593)	Acc@1 21.667 (51.711)	Acc@5 58.333 (77.217)	Mem 19926MB
+Test: [730/834]	Time 7.502 (8.449)	Loss 4.7422 (3.1639)	Acc@1 15.000 (51.591)	Acc@5 46.667 (77.171)	Mem 19926MB
+Test: [740/834]	Time 10.066 (8.471)	Loss 3.4629 (3.1682)	Acc@1 60.000 (51.516)	Acc@5 73.333 (77.060)	Mem 19926MB
+Test: [750/834]	Time 11.297 (8.487)	Loss 2.4883 (3.1709)	Acc@1 75.000 (51.427)	Acc@5 90.000 (77.002)	Mem 19926MB
+Test: [760/834]	Time 11.089 (8.503)	Loss 2.0938 (3.1709)	Acc@1 78.333 (51.402)	Acc@5 93.333 (76.949)	Mem 19926MB
+Test: [770/834]	Time 6.129 (8.512)	Loss 2.4590 (3.1666)	Acc@1 58.333 (51.498)	Acc@5 83.333 (77.019)	Mem 19926MB
+Test: [780/834]	Time 9.777 (8.520)	Loss 1.6230 (3.1595)	Acc@1 75.000 (51.633)	Acc@5 91.667 (77.113)	Mem 19926MB
+Test: [790/834]	Time 8.454 (8.522)	Loss 2.1738 (3.1435)	Acc@1 78.333 (51.901)	Acc@5 90.000 (77.324)	Mem 19926MB
+Test: [800/834]	Time 7.104 (8.522)	Loss 2.8633 (3.1313)	Acc@1 63.333 (52.199)	Acc@5 81.667 (77.484)	Mem 19926MB
+Test: [810/834]	Time 9.289 (8.525)	Loss 3.1660 (3.1337)	Acc@1 31.667 (52.113)	Acc@5 78.333 (77.443)	Mem 19926MB
+Test: [820/834]	Time 10.474 (8.534)	Loss 1.6074 (3.1323)	Acc@1 88.333 (52.125)	Acc@5 95.000 (77.444)	Mem 19926MB
+Test: [830/834]	Time 13.110 (8.546)	Loss 1.4902 (3.1131)	Acc@1 83.333 (52.513)	Acc@5 90.000 (77.649)	Mem 19926MB
+ * Acc@1 52.473 Acc@5 77.621

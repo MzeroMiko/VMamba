@@ -1,0 +1,1009 @@
+[W socket.cpp:426] [c10d] The server socket has failed to bind to [::]:61234 (errno: 98 - Address already in use).
+[W socket.cpp:426] [c10d] The server socket has failed to bind to ?UNKNOWN? (errno: 98 - Address already in use).
+[E socket.cpp:462] [c10d] The server socket has failed to listen on any local network address.
+The server socket has failed to listen on any local network address. The server socket has failed to bind to [::]:61234 (errno: 98 - Address already in use). The server socket has failed to bind to ?UNKNOWN? (errno: 98 - Address already in use).
+[W socket.cpp:426] [c10d] The server socket has failed to bind to [::]:61233 (errno: 98 - Address already in use).
+[W socket.cpp:426] [c10d] The server socket has failed to bind to ?UNKNOWN? (errno: 98 - Address already in use).
+[E socket.cpp:462] [c10d] The server socket has failed to listen on any local network address.
+The server socket has failed to listen on any local network address. The server socket has failed to bind to [::]:61233 (errno: 98 - Address already in use). The server socket has failed to bind to ?UNKNOWN? (errno: 98 - Address already in use).
+[W socket.cpp:426] [c10d] The server socket has failed to bind to [::]:61232 (errno: 98 - Address already in use).
+[W socket.cpp:426] [c10d] The server socket has failed to bind to ?UNKNOWN? (errno: 98 - Address already in use).
+[E socket.cpp:462] [c10d] The server socket has failed to listen on any local network address.
+The server socket has failed to listen on any local network address. The server socket has failed to bind to [::]:61232 (errno: 98 - Address already in use). The server socket has failed to bind to ?UNKNOWN? (errno: 98 - Address already in use).
+[W socket.cpp:426] [c10d] The server socket has failed to bind to [::]:61231 (errno: 98 - Address already in use).
+[W socket.cpp:426] [c10d] The server socket has failed to bind to ?UNKNOWN? (errno: 98 - Address already in use).
+[E socket.cpp:462] [c10d] The server socket has failed to listen on any local network address.
+The server socket has failed to listen on any local network address. The server socket has failed to bind to [::]:61231 (errno: 98 - Address already in use). The server socket has failed to bind to ?UNKNOWN? (errno: 98 - Address already in use).
+using init_vssm ======================== 
+Successfully load ckpt /media/Disk2/LiuYue/Visualize/analyze/../../ckpts/vssmbase/ckpt_epoch_260.pth
+starting loop: img_size 224; len(dataset) 50003
+Test: [0/391]	Time 7.996 (7.996)	Loss 0.1847 (0.1847)	Acc@1 98.438 (98.438)	Acc@5 98.438 (98.438)	Mem 8814MB
+Test: [10/391]	Time 9.738 (7.457)	Loss 1.0361 (0.3692)	Acc@1 76.562 (93.040)	Acc@5 98.438 (98.509)	Mem 8815MB
+Test: [20/391]	Time 6.494 (7.125)	Loss 0.3423 (0.5079)	Acc@1 92.969 (88.728)	Acc@5 97.656 (98.289)	Mem 8815MB
+Test: [30/391]	Time 8.024 (7.113)	Loss 1.0898 (0.6300)	Acc@1 77.344 (85.433)	Acc@5 94.531 (97.707)	Mem 8815MB
+Test: [40/391]	Time 5.852 (6.896)	Loss 0.3389 (0.5489)	Acc@1 95.312 (87.652)	Acc@5 96.875 (97.923)	Mem 8815MB
+Test: [50/391]	Time 6.879 (6.866)	Loss 0.2009 (0.5482)	Acc@1 95.312 (88.067)	Acc@5 99.219 (97.886)	Mem 8815MB
+Test: [60/391]	Time 5.582 (6.871)	Loss 0.7578 (0.5129)	Acc@1 84.375 (88.832)	Acc@5 96.875 (98.066)	Mem 8815MB
+Test: [70/391]	Time 6.525 (6.668)	Loss 0.6553 (0.5405)	Acc@1 79.688 (88.116)	Acc@5 98.438 (97.975)	Mem 8815MB
+Test: [80/391]	Time 7.047 (6.666)	Loss 0.5527 (0.5538)	Acc@1 86.719 (87.780)	Acc@5 97.656 (97.907)	Mem 8815MB
+Test: [90/391]	Time 7.176 (6.649)	Loss 0.7935 (0.5567)	Acc@1 74.219 (87.792)	Acc@5 98.438 (97.862)	Mem 8815MB
+Test: [100/391]	Time 6.800 (6.591)	Loss 0.4590 (0.5585)	Acc@1 92.188 (87.577)	Acc@5 97.656 (97.865)	Mem 8815MB
+Test: [110/391]	Time 7.586 (6.634)	Loss 1.2305 (0.5699)	Acc@1 60.156 (87.162)	Acc@5 97.656 (97.839)	Mem 8815MB
+Test: [120/391]	Time 7.384 (6.644)	Loss 0.4033 (0.5688)	Acc@1 92.969 (87.339)	Acc@5 98.438 (97.863)	Mem 8815MB
+Test: [130/391]	Time 5.655 (6.674)	Loss 0.2495 (0.5608)	Acc@1 96.094 (87.572)	Acc@5 99.219 (97.889)	Mem 8815MB
+Test: [140/391]	Time 7.350 (6.635)	Loss 0.9839 (0.5597)	Acc@1 70.312 (87.367)	Acc@5 100.000 (97.978)	Mem 8815MB
+Test: [150/391]	Time 10.586 (6.688)	Loss 0.6025 (0.5657)	Acc@1 80.469 (87.236)	Acc@5 99.219 (97.925)	Mem 8815MB
+Test: [160/391]	Time 8.216 (6.717)	Loss 0.6738 (0.5693)	Acc@1 84.375 (87.223)	Acc@5 96.875 (97.860)	Mem 8815MB
+Test: [170/391]	Time 6.960 (6.728)	Loss 1.5283 (0.5875)	Acc@1 66.406 (86.678)	Acc@5 91.406 (97.743)	Mem 8815MB
+Test: [180/391]	Time 7.080 (6.736)	Loss 1.6406 (0.6042)	Acc@1 67.969 (86.386)	Acc@5 91.406 (97.600)	Mem 8815MB
+Test: [190/391]	Time 6.877 (6.782)	Loss 1.3877 (0.6299)	Acc@1 69.531 (85.815)	Acc@5 94.531 (97.411)	Mem 8815MB
+Test: [200/391]	Time 6.211 (6.793)	Loss 0.4226 (0.6469)	Acc@1 85.156 (85.463)	Acc@5 99.219 (97.271)	Mem 8815MB
+Test: [210/391]	Time 7.303 (6.807)	Loss 0.8394 (0.6616)	Acc@1 78.906 (85.101)	Acc@5 96.875 (97.171)	Mem 8815MB
+Test: [220/391]	Time 8.014 (6.817)	Loss 0.3035 (0.6634)	Acc@1 92.969 (85.057)	Acc@5 100.000 (97.154)	Mem 8815MB
+Test: [230/391]	Time 7.652 (6.843)	Loss 1.1768 (0.6688)	Acc@1 73.438 (84.984)	Acc@5 92.188 (97.091)	Mem 8815MB
+Test: [240/391]	Time 6.810 (6.856)	Loss 0.7915 (0.6700)	Acc@1 85.938 (84.997)	Acc@5 92.188 (97.050)	Mem 8815MB
+Test: [250/391]	Time 7.278 (6.866)	Loss 0.3923 (0.6859)	Acc@1 92.188 (84.559)	Acc@5 99.219 (96.912)	Mem 8815MB
+Test: [260/391]	Time 8.260 (6.867)	Loss 0.5347 (0.6974)	Acc@1 85.938 (84.333)	Acc@5 99.219 (96.794)	Mem 8815MB
+Test: [270/391]	Time 6.902 (6.881)	Loss 1.4990 (0.7045)	Acc@1 66.406 (84.190)	Acc@5 92.188 (96.734)	Mem 8815MB
+Test: [280/391]	Time 6.882 (6.891)	Loss 0.8965 (0.7068)	Acc@1 78.125 (84.158)	Acc@5 96.094 (96.708)	Mem 8815MB
+Test: [290/391]	Time 6.059 (6.900)	Loss 1.1162 (0.7108)	Acc@1 64.844 (84.080)	Acc@5 94.531 (96.655)	Mem 8815MB
+Test: [300/391]	Time 6.802 (6.903)	Loss 0.5977 (0.7161)	Acc@1 88.281 (83.983)	Acc@5 97.656 (96.605)	Mem 8815MB
+Test: [310/391]	Time 6.170 (6.911)	Loss 0.8174 (0.7204)	Acc@1 83.594 (83.908)	Acc@5 93.750 (96.543)	Mem 8815MB
+Test: [320/391]	Time 4.818 (6.864)	Loss 0.3972 (0.7255)	Acc@1 89.844 (83.805)	Acc@5 99.219 (96.493)	Mem 8815MB
+Test: [330/391]	Time 4.375 (6.790)	Loss 1.0273 (0.7343)	Acc@1 74.219 (83.601)	Acc@5 94.531 (96.438)	Mem 8815MB
+Test: [340/391]	Time 6.374 (6.730)	Loss 0.5083 (0.7379)	Acc@1 89.062 (83.525)	Acc@5 98.438 (96.412)	Mem 8815MB
+Test: [350/391]	Time 4.829 (6.680)	Loss 0.7007 (0.7399)	Acc@1 83.594 (83.474)	Acc@5 96.094 (96.399)	Mem 8815MB
+Test: [360/391]	Time 4.483 (6.597)	Loss 1.1982 (0.7487)	Acc@1 71.094 (83.247)	Acc@5 96.094 (96.364)	Mem 8815MB
+Test: [370/391]	Time 5.205 (6.515)	Loss 1.0703 (0.7461)	Acc@1 64.844 (83.278)	Acc@5 99.219 (96.416)	Mem 8815MB
+Test: [380/391]	Time 3.716 (6.438)	Loss 0.7295 (0.7493)	Acc@1 82.812 (83.202)	Acc@5 98.438 (96.418)	Mem 8815MB
+Test: [390/391]	Time 2.701 (6.378)	Loss 1.5186 (0.7476)	Acc@1 55.422 (83.205)	Acc@5 93.976 (96.446)	Mem 8815MB
+ * Acc@1 83.205 Acc@5 96.446
+Successfully load ckpt /media/Disk2/LiuYue/Visualize/analyze/../../ckpts/vssmbase/ckpt_epoch_260.pth
+starting loop: img_size 64; len(dataset) 50003
+Test: [0/391]	Time 1.636 (1.636)	Loss 3.3125 (3.3125)	Acc@1 71.094 (71.094)	Acc@5 84.375 (84.375)	Mem 8815MB
+Test: [10/391]	Time 2.152 (1.758)	Loss 5.9336 (4.2267)	Acc@1 53.125 (62.855)	Acc@5 71.875 (80.682)	Mem 8815MB
+Test: [20/391]	Time 1.673 (1.733)	Loss 5.6797 (5.2162)	Acc@1 56.250 (54.874)	Acc@5 70.312 (75.223)	Mem 8815MB
+Test: [30/391]	Time 1.864 (1.736)	Loss 6.6133 (5.7683)	Acc@1 54.688 (51.033)	Acc@5 72.656 (72.581)	Mem 8815MB
+Test: [40/391]	Time 1.666 (1.718)	Loss 4.3008 (5.1758)	Acc@1 60.156 (55.316)	Acc@5 77.344 (75.705)	Mem 8815MB
+Test: [50/391]	Time 1.744 (1.737)	Loss 1.8662 (5.2585)	Acc@1 80.469 (55.025)	Acc@5 90.625 (75.398)	Mem 8815MB
+Test: [60/391]	Time 1.636 (1.724)	Loss 6.8320 (4.9941)	Acc@1 43.750 (56.929)	Acc@5 71.875 (77.036)	Mem 8815MB
+Test: [70/391]	Time 1.480 (1.736)	Loss 6.1953 (5.0497)	Acc@1 43.750 (56.393)	Acc@5 73.438 (77.509)	Mem 8815MB
+Test: [80/391]	Time 1.455 (1.726)	Loss 6.1172 (5.1049)	Acc@1 50.000 (55.970)	Acc@5 72.656 (77.421)	Mem 8815MB
+Test: [90/391]	Time 2.288 (1.731)	Loss 4.6094 (5.1086)	Acc@1 47.656 (55.975)	Acc@5 82.031 (77.627)	Mem 8815MB
+Test: [100/391]	Time 1.360 (1.717)	Loss 4.9062 (5.0743)	Acc@1 52.344 (55.685)	Acc@5 80.469 (78.249)	Mem 8815MB
+Test: [110/391]	Time 2.045 (1.729)	Loss 6.2617 (5.0585)	Acc@1 39.062 (55.750)	Acc@5 81.250 (78.618)	Mem 8815MB
+Test: [120/391]	Time 1.448 (1.730)	Loss 8.0938 (5.0675)	Acc@1 39.062 (56.069)	Acc@5 67.969 (78.738)	Mem 8815MB
+Test: [130/391]	Time 1.584 (1.736)	Loss 5.4180 (5.0979)	Acc@1 60.156 (56.101)	Acc@5 75.781 (78.411)	Mem 8815MB
+Test: [140/391]	Time 1.713 (1.723)	Loss 5.5742 (5.0382)	Acc@1 53.125 (56.405)	Acc@5 79.688 (78.662)	Mem 8815MB
+Test: [150/391]	Time 2.636 (1.739)	Loss 2.3125 (4.9670)	Acc@1 78.906 (56.964)	Acc@5 92.188 (79.041)	Mem 8815MB
+Test: [160/391]	Time 1.832 (1.736)	Loss 5.5508 (4.9988)	Acc@1 53.125 (56.789)	Acc@5 72.656 (78.824)	Mem 8815MB
+Test: [170/391]	Time 1.335 (1.728)	Loss 7.0469 (5.1069)	Acc@1 35.938 (56.108)	Acc@5 67.188 (78.056)	Mem 8815MB
+Test: [180/391]	Time 1.463 (1.722)	Loss 7.2266 (5.2045)	Acc@1 34.375 (55.352)	Acc@5 64.844 (77.495)	Mem 8815MB
+Test: [190/391]	Time 1.364 (1.723)	Loss 8.2734 (5.2993)	Acc@1 31.250 (54.688)	Acc@5 65.625 (76.894)	Mem 8815MB
+Test: [200/391]	Time 1.356 (1.718)	Loss 7.8125 (5.4077)	Acc@1 30.469 (53.902)	Acc@5 61.719 (76.376)	Mem 8815MB
+Test: [210/391]	Time 3.144 (1.735)	Loss 6.8164 (5.4497)	Acc@1 46.875 (53.525)	Acc@5 66.406 (76.007)	Mem 8815MB
+Test: [220/391]	Time 1.968 (1.772)	Loss 5.2148 (5.4790)	Acc@1 54.688 (53.341)	Acc@5 75.781 (75.742)	Mem 8815MB
+Test: [230/391]	Time 2.958 (1.798)	Loss 10.1172 (5.5281)	Acc@1 28.906 (53.088)	Acc@5 53.906 (75.433)	Mem 8815MB
+Test: [240/391]	Time 4.010 (1.858)	Loss 6.5117 (5.5699)	Acc@1 49.219 (52.811)	Acc@5 66.406 (75.126)	Mem 8815MB
+Test: [250/391]	Time 3.982 (1.913)	Loss 5.3047 (5.6384)	Acc@1 58.594 (52.331)	Acc@5 73.438 (74.782)	Mem 8815MB
+Test: [260/391]	Time 4.423 (1.960)	Loss 5.1445 (5.6900)	Acc@1 51.562 (51.943)	Acc@5 75.781 (74.464)	Mem 8815MB
+Test: [270/391]	Time 4.020 (2.025)	Loss 7.5039 (5.7106)	Acc@1 37.500 (51.813)	Acc@5 64.844 (74.311)	Mem 8815MB
+Test: [280/391]	Time 3.716 (2.082)	Loss 7.7383 (5.7309)	Acc@1 39.062 (51.674)	Acc@5 65.625 (74.194)	Mem 8815MB
+Test: [290/391]	Time 3.508 (2.143)	Loss 7.5469 (5.7728)	Acc@1 38.281 (51.434)	Acc@5 63.281 (73.929)	Mem 8815MB
+Test: [300/391]	Time 3.354 (2.186)	Loss 6.8359 (5.7917)	Acc@1 42.969 (51.238)	Acc@5 70.312 (73.778)	Mem 8815MB
+Test: [310/391]	Time 4.424 (2.254)	Loss 6.3203 (5.8399)	Acc@1 46.875 (50.909)	Acc@5 67.969 (73.417)	Mem 8815MB
+Test: [320/391]	Time 4.133 (2.320)	Loss 4.1719 (5.8461)	Acc@1 58.594 (50.862)	Acc@5 82.812 (73.394)	Mem 8815MB
+Test: [330/391]	Time 1.348 (2.326)	Loss 7.1172 (5.9128)	Acc@1 38.281 (50.411)	Acc@5 63.281 (72.994)	Mem 8815MB
+Test: [340/391]	Time 4.882 (2.370)	Loss 4.7148 (5.9162)	Acc@1 54.688 (50.316)	Acc@5 78.906 (72.920)	Mem 8815MB
+Test: [350/391]	Time 3.704 (2.412)	Loss 5.3828 (5.9288)	Acc@1 52.344 (50.167)	Acc@5 75.000 (72.841)	Mem 8815MB
+Test: [360/391]	Time 3.383 (2.449)	Loss 6.7812 (5.9442)	Acc@1 39.062 (50.037)	Acc@5 71.875 (72.756)	Mem 8815MB
+Test: [370/391]	Time 5.023 (2.490)	Loss 4.2070 (5.9237)	Acc@1 57.812 (50.120)	Acc@5 85.156 (72.909)	Mem 8815MB
+Test: [380/391]	Time 3.830 (2.519)	Loss 2.4004 (5.9080)	Acc@1 77.344 (50.217)	Acc@5 92.188 (72.960)	Mem 8815MB
+Test: [390/391]	Time 1.789 (2.555)	Loss 7.9805 (5.8469)	Acc@1 25.301 (50.601)	Acc@5 62.651 (73.290)	Mem 8815MB
+ * Acc@1 50.601 Acc@5 73.290
+Successfully load ckpt /media/Disk2/LiuYue/Visualize/analyze/../../ckpts/vssmbase/ckpt_epoch_260.pth
+starting loop: img_size 112; len(dataset) 50003
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [0/391]	Time 5.317 (5.317)	Loss 0.4238 (0.4238)	Acc@1 93.750 (93.750)	Acc@5 97.656 (97.656)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [10/391]	Time 7.263 (6.262)	Loss 1.8086 (0.8322)	Acc@1 71.875 (86.861)	Acc@5 92.969 (95.881)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [20/391]	Time 6.138 (6.208)	Loss 1.1455 (1.2653)	Acc@1 83.594 (80.246)	Acc@5 90.625 (93.601)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [30/391]	Time 7.732 (6.174)	Loss 1.8994 (1.4812)	Acc@1 75.000 (76.714)	Acc@5 91.406 (92.792)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [40/391]	Time 5.916 (6.148)	Loss 1.0625 (1.2958)	Acc@1 85.938 (79.630)	Acc@5 92.188 (93.693)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [50/391]	Time 5.354 (6.178)	Loss 0.4871 (1.3147)	Acc@1 91.406 (79.856)	Acc@5 96.875 (93.566)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [60/391]	Time 5.228 (6.106)	Loss 1.4355 (1.2314)	Acc@1 78.906 (81.224)	Acc@5 95.312 (94.006)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [70/391]	Time 6.056 (6.099)	Loss 1.4893 (1.2692)	Acc@1 73.438 (80.524)	Acc@5 93.750 (94.091)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [80/391]	Time 4.604 (6.089)	Loss 1.5020 (1.2905)	Acc@1 75.000 (80.015)	Acc@5 92.969 (94.165)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [90/391]	Time 5.240 (6.025)	Loss 1.4570 (1.2891)	Acc@1 69.531 (80.022)	Acc@5 92.969 (94.154)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [100/391]	Time 3.522 (5.936)	Loss 1.2646 (1.2818)	Acc@1 81.250 (79.726)	Acc@5 95.312 (94.361)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [110/391]	Time 7.979 (5.930)	Loss 2.2422 (1.2874)	Acc@1 55.469 (79.540)	Acc@5 94.531 (94.517)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [120/391]	Time 6.225 (5.936)	Loss 1.2432 (1.2792)	Acc@1 75.000 (79.791)	Acc@5 96.094 (94.654)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [130/391]	Time 4.567 (5.899)	Loss 0.4858 (1.2682)	Acc@1 92.969 (80.099)	Acc@5 98.438 (94.698)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [140/391]	Time 5.641 (5.905)	Loss 1.7520 (1.2569)	Acc@1 67.188 (80.014)	Acc@5 96.094 (94.825)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [150/391]	Time 7.769 (5.915)	Loss 0.9150 (1.2473)	Acc@1 78.125 (80.210)	Acc@5 96.094 (94.847)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [160/391]	Time 6.397 (5.901)	Loss 1.4961 (1.2582)	Acc@1 76.562 (80.173)	Acc@5 92.969 (94.691)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [170/391]	Time 4.124 (5.895)	Loss 2.7871 (1.2991)	Acc@1 57.812 (79.546)	Acc@5 84.375 (94.371)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [180/391]	Time 6.105 (5.887)	Loss 2.6777 (1.3317)	Acc@1 61.719 (79.066)	Acc@5 86.719 (94.134)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [190/391]	Time 5.460 (5.895)	Loss 2.8418 (1.3762)	Acc@1 61.719 (78.481)	Acc@5 87.500 (93.836)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [200/391]	Time 5.293 (5.869)	Loss 1.1182 (1.4200)	Acc@1 77.344 (77.919)	Acc@5 93.750 (93.548)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [210/391]	Time 6.029 (5.884)	Loss 2.1797 (1.4390)	Acc@1 67.188 (77.607)	Acc@5 89.844 (93.402)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [220/391]	Time 5.708 (5.885)	Loss 0.9624 (1.4492)	Acc@1 87.500 (77.496)	Acc@5 94.531 (93.252)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [230/391]	Time 6.144 (5.876)	Loss 2.6562 (1.4670)	Acc@1 58.594 (77.286)	Acc@5 82.812 (93.111)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [240/391]	Time 6.192 (5.878)	Loss 1.9482 (1.4709)	Acc@1 78.125 (77.240)	Acc@5 85.938 (93.011)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [250/391]	Time 4.790 (5.846)	Loss 0.9214 (1.5024)	Acc@1 86.719 (76.727)	Acc@5 95.312 (92.832)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [260/391]	Time 6.295 (5.848)	Loss 0.9648 (1.5256)	Acc@1 83.594 (76.371)	Acc@5 96.094 (92.675)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [270/391]	Time 6.031 (5.846)	Loss 2.9629 (1.5401)	Acc@1 57.812 (76.205)	Acc@5 82.031 (92.551)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [280/391]	Time 5.737 (5.843)	Loss 1.8926 (1.5462)	Acc@1 66.406 (76.151)	Acc@5 92.188 (92.510)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [290/391]	Time 4.815 (5.836)	Loss 2.4863 (1.5622)	Acc@1 57.812 (75.983)	Acc@5 84.375 (92.378)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [300/391]	Time 5.438 (5.823)	Loss 1.8037 (1.5731)	Acc@1 77.344 (75.869)	Acc@5 89.062 (92.260)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [310/391]	Time 4.743 (5.814)	Loss 2.0137 (1.5868)	Acc@1 67.969 (75.718)	Acc@5 85.938 (92.110)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [320/391]	Time 5.609 (5.817)	Loss 0.8408 (1.5948)	Acc@1 85.156 (75.621)	Acc@5 97.656 (92.056)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [330/391]	Time 5.020 (5.813)	Loss 2.0977 (1.6179)	Acc@1 71.875 (75.309)	Acc@5 86.719 (91.888)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [340/391]	Time 7.001 (5.809)	Loss 1.0566 (1.6210)	Acc@1 75.781 (75.208)	Acc@5 96.094 (91.862)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [350/391]	Time 5.201 (5.800)	Loss 1.3271 (1.6269)	Acc@1 79.688 (75.105)	Acc@5 93.750 (91.800)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [360/391]	Time 5.730 (5.798)	Loss 1.9033 (1.6393)	Acc@1 58.594 (74.920)	Acc@5 93.750 (91.737)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [370/391]	Time 7.140 (5.804)	Loss 2.0039 (1.6355)	Acc@1 65.625 (74.947)	Acc@5 94.531 (91.806)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Test: [380/391]	Time 5.214 (5.792)	Loss 0.7324 (1.6348)	Acc@1 85.938 (74.967)	Acc@5 97.656 (91.831)	Mem 8815MB
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([128, 7, 7, 512]) is not match even ===========
+Warning, x.shape torch.Size([83, 7, 7, 512]) is not match even ===========
+Test: [390/391]	Time 3.055 (5.792)	Loss 3.2422 (1.6218)	Acc@1 49.398 (75.099)	Acc@5 84.337 (91.924)	Mem 8815MB
+ * Acc@1 75.099 Acc@5 91.924
+Successfully load ckpt /media/Disk2/LiuYue/Visualize/analyze/../../ckpts/vssmbase/ckpt_epoch_260.pth
+starting loop: img_size 384; len(dataset) 50003
+Test: [0/391]	Time 11.543 (11.543)	Loss 0.4028 (0.4028)	Acc@1 96.875 (96.875)	Acc@5 99.219 (99.219)	Mem 24776MB
+Test: [10/391]	Time 13.722 (10.723)	Loss 0.9849 (0.4784)	Acc@1 78.125 (93.253)	Acc@5 98.438 (99.077)	Mem 24777MB
+Test: [20/391]	Time 9.538 (10.530)	Loss 0.4827 (0.5962)	Acc@1 92.188 (89.211)	Acc@5 98.438 (98.586)	Mem 24777MB
+Test: [30/391]	Time 11.977 (10.653)	Loss 1.2061 (0.7039)	Acc@1 72.656 (86.038)	Acc@5 95.312 (97.984)	Mem 24777MB
+Test: [40/391]	Time 10.284 (10.448)	Loss 0.4954 (0.6393)	Acc@1 95.312 (87.995)	Acc@5 96.875 (98.209)	Mem 24777MB
+Test: [50/391]	Time 9.365 (10.466)	Loss 0.3210 (0.6381)	Acc@1 96.875 (88.312)	Acc@5 100.000 (98.208)	Mem 24777MB
+Test: [60/391]	Time 9.896 (10.469)	Loss 0.8203 (0.6078)	Acc@1 85.156 (89.178)	Acc@5 96.875 (98.373)	Mem 24777MB
+Test: [70/391]	Time 9.938 (10.423)	Loss 0.7627 (0.6340)	Acc@1 82.031 (88.435)	Acc@5 97.656 (98.217)	Mem 24777MB
+Test: [80/391]	Time 9.393 (10.243)	Loss 0.6641 (0.6472)	Acc@1 85.938 (88.021)	Acc@5 96.094 (98.090)	Mem 24777MB
+Test: [90/391]	Time 9.899 (10.147)	Loss 0.9033 (0.6525)	Acc@1 71.094 (87.895)	Acc@5 98.438 (98.008)	Mem 24777MB
+Test: [100/391]	Time 10.757 (10.137)	Loss 0.4951 (0.6541)	Acc@1 93.750 (87.717)	Acc@5 99.219 (98.074)	Mem 24777MB
+Test: [110/391]	Time 12.250 (10.226)	Loss 1.2451 (0.6653)	Acc@1 60.156 (87.282)	Acc@5 96.875 (98.050)	Mem 24777MB
+Test: [120/391]	Time 10.427 (10.310)	Loss 0.4934 (0.6653)	Acc@1 94.531 (87.429)	Acc@5 98.438 (98.063)	Mem 24777MB
+Test: [130/391]	Time 7.904 (10.323)	Loss 0.3713 (0.6573)	Acc@1 96.875 (87.667)	Acc@5 100.000 (98.092)	Mem 24777MB
+Test: [140/391]	Time 10.611 (10.285)	Loss 1.0352 (0.6581)	Acc@1 77.344 (87.539)	Acc@5 100.000 (98.166)	Mem 24777MB
+Test: [150/391]	Time 14.351 (10.320)	Loss 0.7295 (0.6651)	Acc@1 82.812 (87.464)	Acc@5 99.219 (98.106)	Mem 24777MB
+Test: [160/391]	Time 11.703 (10.343)	Loss 0.8086 (0.6676)	Acc@1 85.156 (87.471)	Acc@5 96.875 (98.035)	Mem 24777MB
+Test: [170/391]	Time 9.761 (10.362)	Loss 1.5801 (0.6842)	Acc@1 63.281 (86.993)	Acc@5 91.406 (97.894)	Mem 24777MB
+Test: [180/391]	Time 11.479 (10.381)	Loss 1.4980 (0.6984)	Acc@1 69.531 (86.663)	Acc@5 89.844 (97.734)	Mem 24777MB
+Test: [190/391]	Time 10.355 (10.411)	Loss 1.3584 (0.7189)	Acc@1 67.188 (86.122)	Acc@5 95.312 (97.570)	Mem 24777MB
+Test: [200/391]	Time 9.571 (10.397)	Loss 0.5806 (0.7340)	Acc@1 87.500 (85.786)	Acc@5 98.438 (97.388)	Mem 24777MB
+Test: [210/391]	Time 10.269 (10.395)	Loss 0.8667 (0.7470)	Acc@1 82.812 (85.449)	Acc@5 96.875 (97.312)	Mem 24777MB
+Test: [220/391]	Time 9.763 (10.376)	Loss 0.4739 (0.7481)	Acc@1 91.406 (85.457)	Acc@5 99.219 (97.285)	Mem 24777MB
+Test: [230/391]	Time 8.733 (10.378)	Loss 1.1426 (0.7517)	Acc@1 75.781 (85.383)	Acc@5 92.188 (97.240)	Mem 24777MB
+Test: [240/391]	Time 9.277 (10.371)	Loss 0.7720 (0.7519)	Acc@1 88.281 (85.454)	Acc@5 94.531 (97.193)	Mem 24777MB
+Test: [250/391]	Time 9.908 (10.362)	Loss 0.6128 (0.7654)	Acc@1 92.188 (85.001)	Acc@5 97.656 (97.059)	Mem 24777MB
+Test: [260/391]	Time 11.633 (10.349)	Loss 0.7178 (0.7744)	Acc@1 84.375 (84.734)	Acc@5 98.438 (96.980)	Mem 24777MB
+Test: [270/391]	Time 10.725 (10.342)	Loss 1.3174 (0.7797)	Acc@1 69.531 (84.611)	Acc@5 90.625 (96.918)	Mem 24777MB
+Test: [280/391]	Time 9.047 (10.328)	Loss 1.0225 (0.7809)	Acc@1 75.781 (84.611)	Acc@5 96.875 (96.894)	Mem 24777MB
+Test: [290/391]	Time 9.810 (10.308)	Loss 1.1641 (0.7838)	Acc@1 69.531 (84.566)	Acc@5 96.094 (96.872)	Mem 24777MB
+Test: [300/391]	Time 9.793 (10.294)	Loss 0.7090 (0.7873)	Acc@1 86.719 (84.507)	Acc@5 97.656 (96.833)	Mem 24777MB
+Test: [310/391]	Time 8.995 (10.287)	Loss 0.8252 (0.7904)	Acc@1 85.938 (84.453)	Acc@5 95.312 (96.797)	Mem 24777MB
+Test: [320/391]	Time 9.191 (10.280)	Loss 0.6328 (0.7950)	Acc@1 88.281 (84.377)	Acc@5 98.438 (96.748)	Mem 24777MB
+Test: [330/391]	Time 9.611 (10.262)	Loss 1.0117 (0.8015)	Acc@1 77.344 (84.203)	Acc@5 96.094 (96.698)	Mem 24777MB
+Test: [340/391]	Time 11.725 (10.261)	Loss 0.6797 (0.8045)	Acc@1 90.625 (84.128)	Acc@5 98.438 (96.680)	Mem 24777MB
+Test: [350/391]	Time 9.227 (10.255)	Loss 0.7188 (0.8055)	Acc@1 85.938 (84.090)	Acc@5 96.875 (96.672)	Mem 24777MB
+Test: [360/391]	Time 10.217 (10.249)	Loss 1.1729 (0.8133)	Acc@1 73.438 (83.886)	Acc@5 96.094 (96.630)	Mem 24777MB
+Test: [370/391]	Time 11.921 (10.248)	Loss 1.1123 (0.8110)	Acc@1 67.188 (83.914)	Acc@5 99.219 (96.664)	Mem 24777MB
+Test: [380/391]	Time 9.636 (10.240)	Loss 0.8760 (0.8140)	Acc@1 84.375 (83.862)	Acc@5 98.438 (96.645)	Mem 24777MB
+Test: [390/391]	Time 6.739 (10.232)	Loss 1.4463 (0.8136)	Acc@1 57.831 (83.843)	Acc@5 93.976 (96.660)	Mem 24777MB
+ * Acc@1 83.843 Acc@5 96.660
+Successfully load ckpt /media/Disk2/LiuYue/Visualize/analyze/../../ckpts/vssmbase/ckpt_epoch_260.pth
+starting loop: img_size 512; len(dataset) 50003
+Test: [0/391]	Time 13.927 (13.927)	Loss 0.5264 (0.5264)	Acc@1 94.531 (94.531)	Acc@5 99.219 (99.219)	Mem 43592MB
+Test: [10/391]	Time 14.694 (13.096)	Loss 0.9854 (0.5620)	Acc@1 78.125 (92.614)	Acc@5 98.438 (99.077)	Mem 43593MB
+Test: [20/391]	Time 13.538 (13.422)	Loss 0.5952 (0.6824)	Acc@1 91.406 (88.876)	Acc@5 98.438 (98.624)	Mem 43593MB
+Test: [30/391]	Time 13.742 (13.485)	Loss 1.2764 (0.7862)	Acc@1 70.312 (85.685)	Acc@5 92.969 (97.933)	Mem 43593MB
+Test: [40/391]	Time 13.182 (13.340)	Loss 0.5981 (0.7240)	Acc@1 96.094 (87.710)	Acc@5 96.875 (98.114)	Mem 43593MB
+Test: [50/391]	Time 12.710 (13.302)	Loss 0.4192 (0.7264)	Acc@1 96.875 (88.036)	Acc@5 100.000 (98.100)	Mem 43593MB
+Test: [60/391]	Time 14.369 (13.265)	Loss 0.9155 (0.6964)	Acc@1 85.938 (88.922)	Acc@5 96.094 (98.271)	Mem 43593MB
+Test: [70/391]	Time 13.339 (13.196)	Loss 0.8960 (0.7245)	Acc@1 82.031 (88.215)	Acc@5 96.875 (98.041)	Mem 43593MB
+Test: [80/391]	Time 13.753 (13.115)	Loss 0.7666 (0.7396)	Acc@1 87.500 (87.731)	Acc@5 95.312 (97.946)	Mem 43593MB
+Test: [90/391]	Time 13.413 (13.107)	Loss 0.9961 (0.7479)	Acc@1 69.531 (87.509)	Acc@5 99.219 (97.871)	Mem 43593MB
+Test: [100/391]	Time 12.061 (13.115)	Loss 0.6025 (0.7500)	Acc@1 92.969 (87.322)	Acc@5 99.219 (97.935)	Mem 43593MB
+Test: [110/391]	Time 15.447 (13.137)	Loss 1.3213 (0.7608)	Acc@1 60.938 (86.916)	Acc@5 98.438 (97.924)	Mem 43593MB
+Test: [120/391]	Time 13.551 (13.136)	Loss 0.6304 (0.7609)	Acc@1 94.531 (87.035)	Acc@5 97.656 (97.940)	Mem 43593MB
+Test: [130/391]	Time 13.135 (13.207)	Loss 0.4319 (0.7525)	Acc@1 96.875 (87.267)	Acc@5 100.000 (97.948)	Mem 43593MB
+Test: [140/391]	Time 12.179 (13.196)	Loss 1.1006 (0.7529)	Acc@1 76.562 (87.107)	Acc@5 100.000 (98.039)	Mem 43593MB
+Test: [150/391]	Time 16.983 (13.225)	Loss 0.8281 (0.7599)	Acc@1 80.469 (86.931)	Acc@5 99.219 (97.987)	Mem 43593MB
+Test: [160/391]	Time 13.951 (13.241)	Loss 0.9321 (0.7631)	Acc@1 83.594 (86.908)	Acc@5 96.094 (97.909)	Mem 43593MB
+Test: [170/391]	Time 13.858 (13.265)	Loss 1.7090 (0.7822)	Acc@1 63.281 (86.458)	Acc@5 89.844 (97.729)	Mem 43593MB
+Test: [180/391]	Time 13.583 (13.255)	Loss 1.5566 (0.7990)	Acc@1 69.531 (86.132)	Acc@5 91.406 (97.561)	Mem 43593MB
+Test: [190/391]	Time 9.737 (13.246)	Loss 1.4092 (0.8195)	Acc@1 67.969 (85.586)	Acc@5 94.531 (97.390)	Mem 43593MB
+Test: [200/391]	Time 11.799 (13.242)	Loss 0.7476 (0.8367)	Acc@1 85.938 (85.187)	Acc@5 98.438 (97.163)	Mem 43593MB
+Test: [210/391]	Time 13.159 (13.231)	Loss 0.9854 (0.8516)	Acc@1 81.250 (84.838)	Acc@5 95.312 (97.079)	Mem 43593MB
+Test: [220/391]	Time 13.869 (13.215)	Loss 0.6143 (0.8543)	Acc@1 89.844 (84.792)	Acc@5 99.219 (97.027)	Mem 43593MB
+Test: [230/391]	Time 15.383 (13.250)	Loss 1.2090 (0.8582)	Acc@1 78.906 (84.727)	Acc@5 91.406 (96.970)	Mem 43593MB
+Test: [240/391]	Time 13.418 (13.255)	Loss 0.8784 (0.8593)	Acc@1 87.500 (84.800)	Acc@5 93.750 (96.917)	Mem 43593MB
+Test: [250/391]	Time 12.561 (13.220)	Loss 0.7500 (0.8734)	Acc@1 92.188 (84.310)	Acc@5 98.438 (96.791)	Mem 43593MB
+Test: [260/391]	Time 13.735 (13.223)	Loss 0.8872 (0.8837)	Acc@1 83.594 (84.040)	Acc@5 97.656 (96.707)	Mem 43593MB
+Test: [270/391]	Time 15.276 (13.221)	Loss 1.4043 (0.8892)	Acc@1 68.750 (83.922)	Acc@5 89.062 (96.659)	Mem 43593MB
+Test: [280/391]	Time 11.614 (13.187)	Loss 1.1865 (0.8915)	Acc@1 74.219 (83.905)	Acc@5 96.094 (96.630)	Mem 43593MB
+Test: [290/391]	Time 12.791 (13.192)	Loss 1.2686 (0.8961)	Acc@1 71.094 (83.825)	Acc@5 96.875 (96.596)	Mem 43593MB
+Test: [300/391]	Time 12.229 (13.200)	Loss 0.8398 (0.9002)	Acc@1 86.719 (83.762)	Acc@5 95.312 (96.543)	Mem 43593MB
+Test: [310/391]	Time 13.495 (13.214)	Loss 0.9443 (0.9040)	Acc@1 87.500 (83.699)	Acc@5 94.531 (96.496)	Mem 43593MB
+Test: [320/391]	Time 13.226 (13.224)	Loss 0.7295 (0.9089)	Acc@1 89.062 (83.603)	Acc@5 97.656 (96.442)	Mem 43593MB
+Test: [330/391]	Time 12.200 (13.220)	Loss 1.1279 (0.9169)	Acc@1 80.469 (83.447)	Acc@5 94.531 (96.377)	Mem 43593MB
+Test: [340/391]	Time 13.837 (13.202)	Loss 0.8477 (0.9210)	Acc@1 89.062 (83.362)	Acc@5 97.656 (96.357)	Mem 43593MB
+Test: [350/391]	Time 13.726 (13.209)	Loss 0.8574 (0.9223)	Acc@1 85.156 (83.318)	Acc@5 98.438 (96.354)	Mem 43593MB
+Test: [360/391]	Time 13.304 (13.199)	Loss 1.2227 (0.9301)	Acc@1 75.781 (83.133)	Acc@5 96.875 (96.310)	Mem 43593MB
+Test: [370/391]	Time 14.187 (13.181)	Loss 1.1797 (0.9276)	Acc@1 66.406 (83.152)	Acc@5 97.656 (96.340)	Mem 43593MB
+Test: [380/391]	Time 12.320 (13.171)	Loss 1.0977 (0.9307)	Acc@1 82.031 (83.100)	Acc@5 96.875 (96.332)	Mem 43593MB
+Test: [390/391]	Time 8.611 (13.163)	Loss 1.5635 (0.9306)	Acc@1 57.831 (83.081)	Acc@5 92.771 (96.340)	Mem 43593MB
+ * Acc@1 83.081 Acc@5 96.340
+Successfully load ckpt /media/Disk2/LiuYue/Visualize/analyze/../../ckpts/vssmbase/ckpt_epoch_260.pth
+starting loop: img_size 640; len(dataset) 50003
+Test: [0/391]	Time 21.065 (21.065)	Loss 0.5938 (0.5938)	Acc@1 93.750 (93.750)	Acc@5 98.438 (98.438)	Mem 67784MB
+Test: [10/391]	Time 21.786 (19.120)	Loss 1.0010 (0.6415)	Acc@1 80.469 (92.116)	Acc@5 98.438 (98.793)	Mem 67785MB
+Test: [20/391]	Time 18.252 (19.176)	Loss 0.6807 (0.7660)	Acc@1 91.406 (88.467)	Acc@5 98.438 (98.400)	Mem 67785MB
+Test: [30/391]	Time 19.812 (19.218)	Loss 1.3516 (0.8674)	Acc@1 69.531 (85.333)	Acc@5 92.969 (97.782)	Mem 67785MB
+Test: [40/391]	Time 18.962 (18.837)	Loss 0.7300 (0.8047)	Acc@1 92.188 (87.348)	Acc@5 96.094 (97.942)	Mem 67785MB
+Test: [50/391]	Time 19.308 (18.880)	Loss 0.4976 (0.8120)	Acc@1 96.875 (87.515)	Acc@5 100.000 (97.748)	Mem 67785MB
+Test: [60/391]	Time 18.726 (18.806)	Loss 1.0322 (0.7831)	Acc@1 86.719 (88.461)	Acc@5 95.312 (97.976)	Mem 67785MB
+Test: [70/391]	Time 18.575 (18.791)	Loss 1.0234 (0.8121)	Acc@1 80.469 (87.643)	Acc@5 97.656 (97.821)	Mem 67785MB
+Test: [80/391]	Time 18.533 (18.800)	Loss 0.8823 (0.8321)	Acc@1 84.375 (87.076)	Acc@5 95.312 (97.714)	Mem 67785MB
+Test: [90/391]	Time 12.830 (18.709)	Loss 1.0703 (0.8435)	Acc@1 71.094 (86.822)	Acc@5 99.219 (97.613)	Mem 67785MB
+Test: [100/391]	Time 16.427 (18.576)	Loss 0.7393 (0.8475)	Acc@1 92.188 (86.525)	Acc@5 98.438 (97.687)	Mem 67785MB
+Test: [110/391]	Time 18.851 (18.566)	Loss 1.3965 (0.8576)	Acc@1 60.156 (86.128)	Acc@5 97.656 (97.663)	Mem 67785MB
+Test: [120/391]	Time 18.842 (18.595)	Loss 0.7637 (0.8565)	Acc@1 92.969 (86.209)	Acc@5 97.656 (97.689)	Mem 67785MB
+Test: [130/391]	Time 20.254 (18.630)	Loss 0.4695 (0.8475)	Acc@1 96.875 (86.421)	Acc@5 100.000 (97.710)	Mem 67785MB
+Test: [140/391]	Time 19.799 (18.656)	Loss 1.1875 (0.8469)	Acc@1 76.562 (86.331)	Acc@5 100.000 (97.789)	Mem 67785MB
+Test: [150/391]	Time 21.464 (18.666)	Loss 0.8838 (0.8531)	Acc@1 79.688 (86.108)	Acc@5 99.219 (97.734)	Mem 67785MB
+Test: [160/391]	Time 20.053 (18.714)	Loss 1.0918 (0.8568)	Acc@1 81.250 (86.122)	Acc@5 96.094 (97.656)	Mem 67785MB
+Test: [170/391]	Time 17.839 (18.690)	Loss 1.9170 (0.8795)	Acc@1 60.156 (85.641)	Acc@5 85.938 (97.414)	Mem 67785MB
+Test: [180/391]	Time 19.079 (18.705)	Loss 1.6514 (0.9004)	Acc@1 67.969 (85.225)	Acc@5 89.062 (97.203)	Mem 67785MB
+Test: [190/391]	Time 16.844 (18.685)	Loss 1.4941 (0.9219)	Acc@1 64.844 (84.665)	Acc@5 93.750 (96.990)	Mem 67785MB
+Test: [200/391]	Time 17.977 (18.676)	Loss 0.9160 (0.9422)	Acc@1 85.156 (84.220)	Acc@5 98.438 (96.747)	Mem 67785MB
+Test: [210/391]	Time 18.436 (18.627)	Loss 1.1406 (0.9600)	Acc@1 80.469 (83.794)	Acc@5 95.312 (96.657)	Mem 67785MB
+Test: [220/391]	Time 20.422 (18.619)	Loss 0.7871 (0.9645)	Acc@1 86.719 (83.746)	Acc@5 97.656 (96.578)	Mem 67785MB
+Test: [230/391]	Time 20.220 (18.581)	Loss 1.2920 (0.9693)	Acc@1 78.125 (83.692)	Acc@5 92.188 (96.533)	Mem 67785MB
+Test: [240/391]	Time 18.066 (18.518)	Loss 0.9790 (0.9716)	Acc@1 89.062 (83.743)	Acc@5 92.969 (96.496)	Mem 67785MB
+Test: [250/391]	Time 17.171 (18.487)	Loss 0.8511 (0.9871)	Acc@1 89.844 (83.236)	Acc@5 98.438 (96.365)	Mem 67785MB
+Test: [260/391]	Time 17.488 (18.490)	Loss 1.0928 (1.0000)	Acc@1 82.031 (82.944)	Acc@5 96.875 (96.246)	Mem 67785MB
+Test: [270/391]	Time 18.835 (18.487)	Loss 1.5479 (1.0063)	Acc@1 65.625 (82.824)	Acc@5 88.281 (96.180)	Mem 67785MB
+Test: [280/391]	Time 18.035 (18.518)	Loss 1.3477 (1.0102)	Acc@1 74.219 (82.812)	Acc@5 96.094 (96.160)	Mem 67785MB
+Test: [290/391]	Time 14.543 (18.499)	Loss 1.3770 (1.0163)	Acc@1 69.531 (82.727)	Acc@5 94.531 (96.091)	Mem 67785MB
+Test: [300/391]	Time 18.245 (18.476)	Loss 0.9746 (1.0222)	Acc@1 86.719 (82.628)	Acc@5 95.312 (96.021)	Mem 67785MB
+Test: [310/391]	Time 18.109 (18.496)	Loss 1.1152 (1.0271)	Acc@1 85.938 (82.534)	Acc@5 92.969 (95.981)	Mem 67785MB
+Test: [320/391]	Time 19.501 (18.492)	Loss 0.8647 (1.0325)	Acc@1 88.281 (82.460)	Acc@5 97.656 (95.923)	Mem 67785MB
+Test: [330/391]	Time 18.107 (18.481)	Loss 1.3320 (1.0423)	Acc@1 77.344 (82.260)	Acc@5 92.188 (95.860)	Mem 67785MB
+Test: [340/391]	Time 20.735 (18.478)	Loss 1.0166 (1.0472)	Acc@1 87.500 (82.171)	Acc@5 97.656 (95.835)	Mem 67785MB
+Test: [350/391]	Time 17.731 (18.443)	Loss 1.0322 (1.0494)	Acc@1 82.812 (82.129)	Acc@5 96.875 (95.813)	Mem 67785MB
+Test: [360/391]	Time 17.064 (18.429)	Loss 1.3926 (1.0577)	Acc@1 75.000 (81.947)	Acc@5 95.312 (95.765)	Mem 67785MB
+Test: [370/391]	Time 20.928 (18.410)	Loss 1.2090 (1.0543)	Acc@1 67.969 (82.000)	Acc@5 95.312 (95.795)	Mem 67785MB
+Test: [380/391]	Time 17.515 (18.409)	Loss 1.2871 (1.0575)	Acc@1 78.906 (81.959)	Acc@5 96.875 (95.792)	Mem 67785MB
+Test: [390/391]	Time 12.194 (18.413)	Loss 1.7363 (1.0574)	Acc@1 53.012 (81.947)	Acc@5 92.771 (95.806)	Mem 67785MB
+ * Acc@1 81.947 Acc@5 95.806
+Successfully load ckpt /media/Disk2/LiuYue/Visualize/analyze/../../ckpts/vssmbase/ckpt_epoch_260.pth
+starting loop: img_size 768; len(dataset) 50003
+Test: [0/596]	Time 14.877 (14.877)	Loss 0.5825 (0.5825)	Acc@1 96.429 (96.429)	Acc@5 97.619 (97.619)	Mem 67785MB
+Test: [10/596]	Time 15.650 (15.651)	Loss 0.6118 (0.7233)	Acc@1 96.429 (91.234)	Acc@5 98.810 (99.026)	Mem 67785MB
+Test: [20/596]	Time 17.568 (15.994)	Loss 1.2363 (0.8005)	Acc@1 76.190 (89.116)	Acc@5 96.429 (98.356)	Mem 67785MB
+Test: [30/596]	Time 17.130 (16.108)	Loss 0.7925 (0.8587)	Acc@1 92.857 (86.790)	Acc@5 98.810 (98.003)	Mem 67785MB
+Test: [40/596]	Time 16.220 (16.077)	Loss 1.3291 (0.9419)	Acc@1 75.000 (84.292)	Acc@5 96.429 (97.677)	Mem 67785MB
+Test: [50/596]	Time 16.514 (16.156)	Loss 0.6714 (0.9459)	Acc@1 94.048 (84.197)	Acc@5 96.429 (97.456)	Mem 67785MB
+Test: [60/596]	Time 14.811 (16.008)	Loss 0.8198 (0.8919)	Acc@1 82.143 (85.792)	Acc@5 98.810 (97.697)	Mem 67785MB
+Test: [70/596]	Time 15.063 (16.026)	Loss 1.0068 (0.8993)	Acc@1 85.714 (86.133)	Acc@5 97.619 (97.552)	Mem 67785MB
+Test: [80/596]	Time 14.352 (16.039)	Loss 0.8154 (0.8951)	Acc@1 86.905 (86.287)	Acc@5 98.810 (97.472)	Mem 67785MB
+Test: [90/596]	Time 13.704 (15.966)	Loss 1.1855 (0.8689)	Acc@1 72.619 (87.127)	Acc@5 98.810 (97.698)	Mem 67785MB
+Test: [100/596]	Time 15.745 (15.957)	Loss 1.0010 (0.8963)	Acc@1 88.095 (86.374)	Acc@5 95.238 (97.501)	Mem 67785MB
+Test: [110/596]	Time 16.549 (15.898)	Loss 1.2539 (0.9049)	Acc@1 77.381 (86.208)	Acc@5 94.048 (97.447)	Mem 67785MB
+Test: [120/596]	Time 14.814 (15.847)	Loss 1.1777 (0.9280)	Acc@1 82.143 (85.675)	Acc@5 96.429 (97.353)	Mem 67785MB
+Test: [130/596]	Time 14.419 (15.863)	Loss 1.0654 (0.9286)	Acc@1 82.143 (85.842)	Acc@5 97.619 (97.356)	Mem 67785MB
+Test: [140/596]	Time 16.460 (15.839)	Loss 1.0723 (0.9483)	Acc@1 84.524 (85.216)	Acc@5 98.810 (97.222)	Mem 67785MB
+Test: [150/596]	Time 15.293 (15.845)	Loss 0.8203 (0.9558)	Acc@1 90.476 (84.847)	Acc@5 97.619 (97.249)	Mem 67785MB
+Test: [160/596]	Time 17.257 (15.866)	Loss 1.0039 (0.9493)	Acc@1 86.905 (84.967)	Acc@5 98.810 (97.331)	Mem 67785MB
+Test: [170/596]	Time 13.695 (15.879)	Loss 1.2686 (0.9639)	Acc@1 82.143 (84.566)	Acc@5 90.476 (97.208)	Mem 67785MB
+Test: [180/596]	Time 15.960 (15.928)	Loss 1.2188 (0.9603)	Acc@1 69.048 (84.708)	Acc@5 100.000 (97.270)	Mem 67785MB
+Test: [190/596]	Time 15.101 (15.930)	Loss 0.6963 (0.9608)	Acc@1 89.286 (84.673)	Acc@5 100.000 (97.270)	Mem 67785MB
+Test: [200/596]	Time 17.781 (15.902)	Loss 0.9399 (0.9496)	Acc@1 92.857 (85.057)	Acc@5 96.429 (97.311)	Mem 67785MB
+Test: [210/596]	Time 16.343 (15.886)	Loss 0.7729 (0.9440)	Acc@1 83.333 (85.037)	Acc@5 100.000 (97.388)	Mem 67785MB
+Test: [220/596]	Time 16.665 (15.870)	Loss 0.8677 (0.9477)	Acc@1 88.095 (84.992)	Acc@5 98.810 (97.355)	Mem 67785MB
+Test: [230/596]	Time 14.710 (15.911)	Loss 1.0039 (0.9537)	Acc@1 77.381 (84.704)	Acc@5 97.619 (97.279)	Mem 67785MB
+Test: [240/596]	Time 16.810 (15.908)	Loss 0.8125 (0.9523)	Acc@1 91.667 (84.850)	Acc@5 98.810 (97.244)	Mem 67785MB
+Test: [250/596]	Time 17.927 (15.897)	Loss 0.9146 (0.9699)	Acc@1 88.095 (84.548)	Acc@5 100.000 (97.036)	Mem 67785MB
+Test: [260/596]	Time 15.985 (15.870)	Loss 1.8877 (0.9858)	Acc@1 69.048 (84.232)	Acc@5 89.286 (96.885)	Mem 67785MB
+Test: [270/596]	Time 16.715 (15.870)	Loss 1.7188 (1.0010)	Acc@1 64.286 (83.931)	Acc@5 91.667 (96.745)	Mem 67785MB
+Test: [280/596]	Time 17.541 (15.898)	Loss 1.4580 (1.0199)	Acc@1 80.952 (83.600)	Acc@5 92.857 (96.526)	Mem 67785MB
+Test: [290/596]	Time 17.568 (15.907)	Loss 1.9404 (1.0335)	Acc@1 54.762 (83.211)	Acc@5 92.857 (96.392)	Mem 67785MB
+Test: [300/596]	Time 15.816 (15.911)	Loss 1.7461 (1.0527)	Acc@1 66.667 (82.831)	Acc@5 89.286 (96.156)	Mem 67785MB
+Test: [310/596]	Time 17.543 (15.904)	Loss 1.1582 (1.0640)	Acc@1 82.143 (82.579)	Acc@5 96.429 (96.053)	Mem 67785MB
+Test: [320/596]	Time 16.735 (15.937)	Loss 1.0879 (1.0772)	Acc@1 82.143 (82.191)	Acc@5 96.429 (95.995)	Mem 67785MB
+Test: [330/596]	Time 16.027 (15.948)	Loss 0.7676 (1.0824)	Acc@1 95.238 (82.121)	Acc@5 96.429 (95.921)	Mem 67785MB
+Test: [340/596]	Time 15.805 (15.935)	Loss 1.2969 (1.0860)	Acc@1 78.571 (82.097)	Acc@5 94.048 (95.884)	Mem 67785MB
+Test: [350/596]	Time 15.497 (15.910)	Loss 1.4316 (1.0922)	Acc@1 79.762 (82.034)	Acc@5 92.857 (95.835)	Mem 67785MB
+Test: [360/596]	Time 14.557 (15.866)	Loss 0.9414 (1.0972)	Acc@1 90.476 (81.965)	Acc@5 96.429 (95.792)	Mem 67785MB
+Test: [370/596]	Time 14.847 (15.854)	Loss 1.7422 (1.1049)	Acc@1 63.095 (81.803)	Acc@5 85.714 (95.710)	Mem 67785MB
+Test: [380/596]	Time 14.257 (15.856)	Loss 1.4980 (1.1140)	Acc@1 53.571 (81.530)	Acc@5 97.619 (95.622)	Mem 67785MB
+Test: [390/596]	Time 16.300 (15.862)	Loss 2.2422 (1.1223)	Acc@1 58.333 (81.430)	Acc@5 84.524 (95.543)	Mem 67785MB
+Test: [400/596]	Time 14.286 (15.835)	Loss 1.1699 (1.1275)	Acc@1 83.333 (81.276)	Acc@5 96.429 (95.517)	Mem 67785MB
+Test: [410/596]	Time 16.816 (15.836)	Loss 2.2793 (1.1334)	Acc@1 54.762 (81.175)	Acc@5 80.952 (95.455)	Mem 67785MB
+Test: [420/596]	Time 16.596 (15.828)	Loss 1.7129 (1.1396)	Acc@1 73.810 (81.099)	Acc@5 94.048 (95.399)	Mem 67785MB
+Test: [430/596]	Time 16.130 (15.835)	Loss 0.7988 (1.1392)	Acc@1 90.476 (81.151)	Acc@5 100.000 (95.407)	Mem 67785MB
+Test: [440/596]	Time 15.356 (15.839)	Loss 1.2666 (1.1456)	Acc@1 80.952 (81.071)	Acc@5 94.048 (95.324)	Mem 67785MB
+Test: [450/596]	Time 17.325 (15.841)	Loss 0.9683 (1.1505)	Acc@1 84.524 (80.960)	Acc@5 97.619 (95.288)	Mem 67785MB
+Test: [460/596]	Time 14.680 (15.828)	Loss 2.0820 (1.1575)	Acc@1 54.762 (80.826)	Acc@5 79.762 (95.176)	Mem 67785MB
+Test: [470/596]	Time 13.895 (15.836)	Loss 1.3018 (1.1605)	Acc@1 72.619 (80.765)	Acc@5 95.238 (95.180)	Mem 67785MB
+Test: [480/596]	Time 15.015 (15.837)	Loss 1.4277 (1.1635)	Acc@1 80.952 (80.759)	Acc@5 91.667 (95.154)	Mem 67785MB
+Test: [490/596]	Time 15.208 (15.835)	Loss 1.3018 (1.1668)	Acc@1 78.571 (80.700)	Acc@5 95.238 (95.122)	Mem 67785MB
+Test: [500/596]	Time 17.425 (15.834)	Loss 1.5312 (1.1762)	Acc@1 75.000 (80.527)	Acc@5 90.476 (95.062)	Mem 67785MB
+Test: [510/596]	Time 15.586 (15.836)	Loss 1.3193 (1.1800)	Acc@1 80.952 (80.454)	Acc@5 95.238 (95.070)	Mem 67785MB
+Test: [520/596]	Time 14.126 (15.819)	Loss 0.6230 (1.1823)	Acc@1 94.048 (80.463)	Acc@5 100.000 (95.062)	Mem 67785MB
+Test: [530/596]	Time 17.037 (15.818)	Loss 0.9980 (1.1863)	Acc@1 85.714 (80.381)	Acc@5 95.238 (95.009)	Mem 67785MB
+Test: [540/596]	Time 16.739 (15.813)	Loss 1.6973 (1.1927)	Acc@1 59.524 (80.213)	Acc@5 94.048 (94.956)	Mem 67785MB
+Test: [550/596]	Time 15.741 (15.814)	Loss 1.0645 (1.1955)	Acc@1 80.952 (80.196)	Acc@5 97.619 (94.972)	Mem 67785MB
+Test: [560/596]	Time 13.889 (15.820)	Loss 0.9697 (1.1921)	Acc@1 86.905 (80.271)	Acc@5 98.810 (95.007)	Mem 67785MB
+Test: [570/596]	Time 15.918 (15.825)	Loss 0.7637 (1.1876)	Acc@1 92.857 (80.362)	Acc@5 100.000 (95.053)	Mem 67785MB
+Test: [580/596]	Time 15.289 (15.820)	Loss 2.0332 (1.1957)	Acc@1 66.667 (80.204)	Acc@5 89.286 (95.002)	Mem 67785MB
+Test: [590/596]	Time 16.218 (15.823)	Loss 0.7964 (1.1949)	Acc@1 91.667 (80.217)	Acc@5 96.429 (95.027)	Mem 67785MB
+ * Acc@1 80.215 Acc@5 95.028
+Successfully load ckpt /media/Disk2/LiuYue/Visualize/analyze/../../ckpts/vssmbase/ckpt_epoch_260.pth
+starting loop: img_size 1024; len(dataset) 50003
+Traceback (most recent call last):
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 464, in <module>
+    for shape in [64, 112, 224, 384, 512, 640, 768, 1024, 1120, 1280]:
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 443, in main
+    init_vssm = partial(build_vssm, ckpt=os.path.join(os.path.dirname(__file__), "../../ckpts/vssmtiny/ckpt_epoch_292.pth"), only_backbone=True)
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 436, in main_base
+    _validate(init_model(shape=1024), img_size=(1024, 1024), batch_size=(32 if model in ["deit"] else 72))
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 224, in _validate
+    validate(config, data_loader=data_loader, model=model)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/autograd/grad_mode.py", line 27, in decorate_context
+    return func(*args, **kwargs)
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 58, in validate
+    output = model(images)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1040, in forward
+    output = self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1003, in _run_ddp_forward
+    return module_to_run(*inputs, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/media/Disk2/LiuYue/Visualize/analyze/vmamba/vmamba.py", line 575, in forward
+    x = self.forward_features(x)
+  File "/media/Disk2/LiuYue/Visualize/analyze/vmamba/vmamba.py", line 556, in forward_features
+    x = layer(x)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/media/Disk2/LiuYue/Visualize/analyze/vmamba/vmamba.py", line 465, in forward
+    x = blk(x)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/media/Disk2/LiuYue/Visualize/analyze/vmamba/vmamba.py", line 403, in forward
+    x = input + self.drop_path(self.self_attention(self.ln_1(input)))
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/media/Disk2/LiuYue/Visualize/analyze/vmamba/vmamba.py", line 375, in forward
+    y1, y2, y3, y4 = self.forward_core(x)
+  File "/media/Disk2/LiuYue/Visualize/analyze/vmamba/vmamba.py", line 345, in forward_core
+    dts = dts.contiguous().float().view(B, -1, L) # (b, k * d, l)
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 18.00 GiB (GPU 0; 79.15 GiB total capacity; 54.57 GiB already allocated; 12.48 GiB free; 65.99 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+using init_vssm ======================== 
+Successfully load ckpt /media/Disk2/LiuYue/Visualize/analyze/../../ckpts/vssmbase/ckpt_epoch_260.pth
+starting loop: img_size 1024; len(dataset) 50003
+Traceback (most recent call last):
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 511, in <module>
+    main(os.environ['GETSCALENET'])
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 489, in main
+    main_base(model)
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 436, in main_base
+    _validate(init_model(shape=1024), img_size=(1024, 1024), batch_size=(32 if model in ["deit"] else 64))
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 224, in _validate
+    validate(config, data_loader=data_loader, model=model)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/autograd/grad_mode.py", line 27, in decorate_context
+    return func(*args, **kwargs)
+  File "/media/Disk2/LiuYue/Visualize/analyze/get_scaleup.py", line 58, in validate
+    output = model(images)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1040, in forward
+    output = self._run_ddp_forward(*inputs, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/parallel/distributed.py", line 1003, in _run_ddp_forward
+    return module_to_run(*inputs, **kwargs)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/media/Disk2/LiuYue/Visualize/analyze/vmamba/vmamba.py", line 575, in forward
+    x = self.forward_features(x)
+  File "/media/Disk2/LiuYue/Visualize/analyze/vmamba/vmamba.py", line 556, in forward_features
+    x = layer(x)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/media/Disk2/LiuYue/Visualize/analyze/vmamba/vmamba.py", line 465, in forward
+    x = blk(x)
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/media/Disk2/LiuYue/Visualize/analyze/vmamba/vmamba.py", line 403, in forward
+    x = input + self.drop_path(self.self_attention(self.ln_1(input)))
+  File "/home/LiuYue/miniconda3/envs/mamba/lib/python3.10/site-packages/torch/nn/modules/module.py", line 1190, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "/media/Disk2/LiuYue/Visualize/analyze/vmamba/vmamba.py", line 375, in forward
+    y1, y2, y3, y4 = self.forward_core(x)
+  File "/media/Disk2/LiuYue/Visualize/analyze/vmamba/vmamba.py", line 362, in forward_core
+    wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
+torch.cuda.OutOfMemoryError: CUDA out of memory. Tried to allocate 4.00 GiB (GPU 0; 79.15 GiB total capacity; 74.57 GiB already allocated; 1.07 GiB free; 76.34 GiB reserved in total by PyTorch) If reserved memory is >> allocated memory try setting max_split_size_mb to avoid fragmentation.  See documentation for Memory Management and PYTORCH_CUDA_ALLOC_CONF
+using init_vssm ======================== 
+Successfully load ckpt /media/Disk2/LiuYue/Visualize/analyze/../../ckpts/vssmbase/ckpt_epoch_260.pth
+starting loop: img_size 1024; len(dataset) 50003
+Test: [0/1042]	Time 12.021 (12.021)	Loss 0.4929 (0.4929)	Acc@1 97.917 (97.917)	Acc@5 97.917 (97.917)	Mem 65094MB
+Test: [10/1042]	Time 6.450 (7.410)	Loss 0.6582 (1.3024)	Acc@1 97.917 (78.030)	Acc@5 97.917 (93.939)	Mem 65094MB
+Test: [20/1042]	Time 6.348 (7.087)	Loss 0.6465 (1.0529)	Acc@1 95.833 (85.119)	Acc@5 100.000 (96.429)	Mem 65094MB
+Test: [30/1042]	Time 6.500 (7.026)	Loss 0.6387 (1.0330)	Acc@1 95.833 (85.013)	Acc@5 100.000 (96.841)	Mem 65094MB
+Test: [40/1042]	Time 6.520 (7.026)	Loss 0.9917 (1.1443)	Acc@1 83.333 (81.250)	Acc@5 100.000 (95.884)	Mem 65094MB
+Test: [50/1042]	Time 7.344 (7.005)	Loss 0.9253 (1.1667)	Acc@1 89.583 (80.719)	Acc@5 95.833 (95.670)	Mem 65094MB
+Test: [60/1042]	Time 6.550 (7.003)	Loss 1.7832 (1.2455)	Acc@1 64.583 (78.757)	Acc@5 81.250 (94.706)	Mem 65094MB
+Test: [70/1042]	Time 6.478 (6.980)	Loss 2.3750 (1.2778)	Acc@1 47.917 (77.347)	Acc@5 81.250 (94.601)	Mem 65094MB
+Test: [80/1042]	Time 6.658 (6.991)	Loss 2.2930 (1.2836)	Acc@1 43.750 (76.903)	Acc@5 87.500 (94.727)	Mem 65094MB
+Test: [90/1042]	Time 6.451 (6.975)	Loss 0.8911 (1.2692)	Acc@1 89.583 (77.541)	Acc@5 100.000 (94.780)	Mem 65094MB
+Test: [100/1042]	Time 6.403 (6.960)	Loss 0.8677 (1.2151)	Acc@1 85.417 (79.084)	Acc@5 95.833 (95.111)	Mem 65094MB
+Test: [110/1042]	Time 8.093 (6.981)	Loss 1.4365 (1.2027)	Acc@1 72.917 (79.655)	Acc@5 91.667 (95.158)	Mem 65094MB
+Test: [120/1042]	Time 6.998 (6.961)	Loss 0.8379 (1.2015)	Acc@1 89.583 (80.028)	Acc@5 100.000 (95.093)	Mem 65094MB
+Test: [130/1042]	Time 6.959 (6.957)	Loss 1.7158 (1.2184)	Acc@1 68.750 (79.580)	Acc@5 89.583 (94.831)	Mem 65094MB
+Test: [140/1042]	Time 6.545 (6.957)	Loss 1.2002 (1.1976)	Acc@1 77.083 (80.216)	Acc@5 93.750 (94.976)	Mem 65094MB
+Test: [150/1042]	Time 6.407 (6.940)	Loss 0.6104 (1.1716)	Acc@1 95.833 (81.043)	Acc@5 100.000 (95.226)	Mem 65094MB
+Test: [160/1042]	Time 6.459 (6.930)	Loss 1.3691 (1.1644)	Acc@1 77.083 (81.263)	Acc@5 93.750 (95.329)	Mem 65094MB
+Test: [170/1042]	Time 6.725 (6.925)	Loss 2.1816 (1.1782)	Acc@1 54.167 (80.909)	Acc@5 85.417 (95.309)	Mem 65094MB
+Test: [180/1042]	Time 6.419 (6.918)	Loss 1.8008 (1.1920)	Acc@1 68.750 (80.559)	Acc@5 91.667 (95.200)	Mem 65094MB
+Test: [190/1042]	Time 7.071 (6.913)	Loss 1.5576 (1.1973)	Acc@1 75.000 (80.421)	Acc@5 89.583 (95.157)	Mem 65094MB
+Test: [200/1042]	Time 7.215 (6.911)	Loss 2.1289 (1.2254)	Acc@1 66.667 (79.851)	Acc@5 79.167 (94.838)	Mem 65094MB
+Test: [210/1042]	Time 6.474 (6.903)	Loss 1.9883 (1.2419)	Acc@1 47.917 (79.354)	Acc@5 87.500 (94.757)	Mem 65094MB
+Test: [220/1042]	Time 6.860 (6.902)	Loss 2.0332 (1.2527)	Acc@1 58.333 (79.101)	Acc@5 89.583 (94.674)	Mem 65094MB
+Test: [230/1042]	Time 6.476 (6.894)	Loss 1.4551 (1.2551)	Acc@1 79.167 (79.031)	Acc@5 95.833 (94.733)	Mem 65094MB
+Test: [240/1042]	Time 6.666 (6.886)	Loss 1.3799 (1.2660)	Acc@1 66.667 (78.734)	Acc@5 95.833 (94.649)	Mem 65094MB
+Test: [250/1042]	Time 6.450 (6.879)	Loss 1.7070 (1.2831)	Acc@1 39.583 (78.096)	Acc@5 100.000 (94.588)	Mem 65094MB
+Test: [260/1042]	Time 6.975 (6.880)	Loss 1.5000 (1.2888)	Acc@1 75.000 (77.890)	Acc@5 91.667 (94.596)	Mem 65094MB
+Test: [270/1042]	Time 6.427 (6.872)	Loss 0.8638 (1.2801)	Acc@1 91.667 (78.290)	Acc@5 100.000 (94.711)	Mem 65094MB
+Test: [280/1042]	Time 6.527 (6.868)	Loss 1.2695 (1.2847)	Acc@1 83.333 (78.121)	Acc@5 97.917 (94.677)	Mem 65094MB
+Test: [290/1042]	Time 6.460 (6.873)	Loss 1.0010 (1.2876)	Acc@1 81.250 (78.064)	Acc@5 97.917 (94.659)	Mem 65094MB
+Test: [300/1042]	Time 7.461 (6.875)	Loss 1.3047 (1.2958)	Acc@1 60.417 (77.852)	Acc@5 100.000 (94.629)	Mem 65094MB
+Test: [310/1042]	Time 6.507 (6.872)	Loss 1.2803 (1.2873)	Acc@1 81.250 (78.202)	Acc@5 93.750 (94.695)	Mem 65094MB
+Test: [320/1042]	Time 6.563 (6.868)	Loss 1.3418 (1.2865)	Acc@1 83.333 (78.232)	Acc@5 95.833 (94.769)	Mem 65094MB
+Test: [330/1042]	Time 7.236 (6.861)	Loss 0.9116 (1.2903)	Acc@1 91.667 (78.216)	Acc@5 100.000 (94.738)	Mem 65094MB
+Test: [340/1042]	Time 7.350 (6.858)	Loss 0.9634 (1.2755)	Acc@1 83.333 (78.580)	Acc@5 95.833 (94.844)	Mem 65094MB
+Test: [350/1042]	Time 6.527 (6.851)	Loss 1.4336 (1.2726)	Acc@1 77.083 (78.710)	Acc@5 91.667 (94.836)	Mem 65094MB
+Test: [360/1042]	Time 6.542 (6.846)	Loss 1.5615 (1.2690)	Acc@1 58.333 (78.705)	Acc@5 97.917 (94.904)	Mem 65094MB
+Test: [370/1042]	Time 6.465 (6.841)	Loss 0.9878 (1.2660)	Acc@1 85.417 (78.661)	Acc@5 97.917 (94.974)	Mem 65094MB
+Test: [380/1042]	Time 7.295 (6.838)	Loss 0.9692 (1.2675)	Acc@1 87.500 (78.647)	Acc@5 93.750 (94.953)	Mem 65094MB
+Test: [390/1042]	Time 6.302 (6.838)	Loss 1.2881 (1.2709)	Acc@1 77.083 (78.517)	Acc@5 95.833 (94.933)	Mem 65094MB
+Test: [400/1042]	Time 6.725 (6.836)	Loss 0.5806 (1.2697)	Acc@1 95.833 (78.496)	Acc@5 100.000 (94.903)	Mem 65094MB
+Test: [410/1042]	Time 6.431 (6.835)	Loss 1.2598 (1.2658)	Acc@1 81.250 (78.558)	Acc@5 93.750 (94.901)	Mem 65094MB
+Test: [420/1042]	Time 6.811 (6.839)	Loss 1.8203 (1.2697)	Acc@1 58.333 (78.499)	Acc@5 93.750 (94.863)	Mem 65094MB
+Test: [430/1042]	Time 6.467 (6.836)	Loss 1.4951 (1.2803)	Acc@1 79.167 (78.321)	Acc@5 91.667 (94.751)	Mem 65094MB
+Test: [440/1042]	Time 6.922 (6.837)	Loss 1.6748 (1.2951)	Acc@1 70.833 (78.066)	Acc@5 83.333 (94.544)	Mem 65094MB
+Test: [450/1042]	Time 6.926 (6.836)	Loss 1.1592 (1.3003)	Acc@1 79.167 (78.021)	Acc@5 95.833 (94.494)	Mem 65094MB
+Test: [460/1042]	Time 7.374 (6.836)	Loss 2.0723 (1.3215)	Acc@1 60.417 (77.553)	Acc@5 89.583 (94.202)	Mem 65094MB
+Test: [470/1042]	Time 7.060 (6.832)	Loss 1.0537 (1.3342)	Acc@1 81.250 (77.291)	Acc@5 93.750 (94.042)	Mem 65094MB
+Test: [480/1042]	Time 6.453 (6.834)	Loss 1.8340 (1.3506)	Acc@1 64.583 (76.962)	Acc@5 85.417 (93.858)	Mem 65094MB
+Test: [490/1042]	Time 6.444 (6.831)	Loss 2.7148 (1.3674)	Acc@1 50.000 (76.634)	Acc@5 77.083 (93.614)	Mem 65094MB
+Test: [500/1042]	Time 6.600 (6.829)	Loss 1.3340 (1.3755)	Acc@1 83.333 (76.501)	Acc@5 95.833 (93.496)	Mem 65094MB
+Test: [510/1042]	Time 6.504 (6.824)	Loss 1.8770 (1.3861)	Acc@1 62.500 (76.199)	Acc@5 85.417 (93.416)	Mem 65094MB
+Test: [520/1042]	Time 6.453 (6.820)	Loss 2.0332 (1.4005)	Acc@1 64.583 (75.904)	Acc@5 89.583 (93.238)	Mem 65094MB
+Test: [530/1042]	Time 6.871 (6.819)	Loss 2.4395 (1.4142)	Acc@1 52.083 (75.585)	Acc@5 75.000 (93.044)	Mem 65094MB
+Test: [540/1042]	Time 7.375 (6.816)	Loss 1.8896 (1.4233)	Acc@1 72.917 (75.400)	Acc@5 89.583 (92.984)	Mem 65094MB
+Test: [550/1042]	Time 6.454 (6.818)	Loss 1.1768 (1.4340)	Acc@1 81.250 (75.019)	Acc@5 95.833 (92.839)	Mem 65094MB
+Test: [560/1042]	Time 7.338 (6.820)	Loss 1.3838 (1.4414)	Acc@1 75.000 (74.855)	Acc@5 93.750 (92.736)	Mem 65094MB
+Test: [570/1042]	Time 7.346 (6.818)	Loss 2.0762 (1.4501)	Acc@1 20.833 (74.555)	Acc@5 95.833 (92.674)	Mem 65094MB
+Test: [580/1042]	Time 7.298 (6.815)	Loss 2.1523 (1.4566)	Acc@1 64.583 (74.491)	Acc@5 85.417 (92.624)	Mem 65094MB
+Test: [590/1042]	Time 6.835 (6.816)	Loss 1.7607 (1.4597)	Acc@1 64.583 (74.447)	Acc@5 91.667 (92.618)	Mem 65094MB
+Test: [600/1042]	Time 6.429 (6.816)	Loss 0.6812 (1.4597)	Acc@1 93.750 (74.501)	Acc@5 95.833 (92.592)	Mem 65094MB
+Test: [610/1042]	Time 7.026 (6.811)	Loss 1.5859 (1.4704)	Acc@1 64.583 (74.229)	Acc@5 95.833 (92.475)	Mem 65094MB
+Test: [620/1042]	Time 6.655 (6.811)	Loss 1.4570 (1.4719)	Acc@1 64.583 (74.225)	Acc@5 93.750 (92.462)	Mem 65094MB
+Test: [630/1042]	Time 6.384 (6.814)	Loss 1.4414 (1.4768)	Acc@1 87.500 (74.168)	Acc@5 91.667 (92.406)	Mem 65094MB
+Test: [640/1042]	Time 6.571 (6.811)	Loss 1.0029 (1.4772)	Acc@1 89.583 (74.275)	Acc@5 93.750 (92.369)	Mem 65094MB
+Test: [650/1042]	Time 6.430 (6.806)	Loss 2.8418 (1.4921)	Acc@1 47.917 (73.918)	Acc@5 66.667 (92.163)	Mem 65094MB
+Test: [660/1042]	Time 7.310 (6.806)	Loss 2.5586 (1.4950)	Acc@1 50.000 (73.872)	Acc@5 72.917 (92.124)	Mem 65094MB
+Test: [670/1042]	Time 6.462 (6.808)	Loss 3.0859 (1.5013)	Acc@1 41.667 (73.736)	Acc@5 64.583 (92.064)	Mem 65094MB
+Test: [680/1042]	Time 6.945 (6.805)	Loss 2.3281 (1.5067)	Acc@1 54.167 (73.675)	Acc@5 79.167 (91.985)	Mem 65094MB
+Test: [690/1042]	Time 7.121 (6.804)	Loss 2.0938 (1.5153)	Acc@1 60.417 (73.399)	Acc@5 91.667 (91.902)	Mem 65094MB
+Test: [700/1042]	Time 7.069 (6.803)	Loss 1.0020 (1.5181)	Acc@1 91.667 (73.330)	Acc@5 95.833 (91.887)	Mem 65094MB
+Test: [710/1042]	Time 6.872 (6.800)	Loss 2.8418 (1.5230)	Acc@1 29.167 (73.239)	Acc@5 70.833 (91.831)	Mem 65094MB
+Test: [720/1042]	Time 7.301 (6.800)	Loss 1.6572 (1.5229)	Acc@1 70.833 (73.243)	Acc@5 91.667 (91.846)	Mem 65094MB
+Test: [730/1042]	Time 7.226 (6.799)	Loss 1.1846 (1.5291)	Acc@1 87.500 (73.119)	Acc@5 91.667 (91.741)	Mem 65094MB
+Test: [740/1042]	Time 6.548 (6.800)	Loss 2.1797 (1.5309)	Acc@1 64.583 (73.170)	Acc@5 79.167 (91.731)	Mem 65094MB
+Test: [750/1042]	Time 6.515 (6.797)	Loss 1.4404 (1.5324)	Acc@1 79.167 (73.141)	Acc@5 93.750 (91.725)	Mem 65094MB
+Test: [760/1042]	Time 7.471 (6.798)	Loss 1.9814 (1.5336)	Acc@1 64.583 (73.130)	Acc@5 89.583 (91.697)	Mem 65094MB
+Test: [770/1042]	Time 6.440 (6.801)	Loss 0.8726 (1.5372)	Acc@1 91.667 (73.109)	Acc@5 97.917 (91.632)	Mem 65094MB
+Test: [780/1042]	Time 6.425 (6.798)	Loss 1.6514 (1.5410)	Acc@1 68.750 (73.045)	Acc@5 87.500 (91.565)	Mem 65094MB
+Test: [790/1042]	Time 6.430 (6.798)	Loss 1.6318 (1.5447)	Acc@1 77.083 (72.917)	Acc@5 91.667 (91.551)	Mem 65094MB
+Test: [800/1042]	Time 6.472 (6.796)	Loss 1.2773 (1.5532)	Acc@1 83.333 (72.766)	Acc@5 93.750 (91.425)	Mem 65094MB
+Test: [810/1042]	Time 7.623 (6.800)	Loss 2.1875 (1.5577)	Acc@1 58.333 (72.688)	Acc@5 87.500 (91.374)	Mem 65094MB
+Test: [820/1042]	Time 6.470 (6.798)	Loss 2.2363 (1.5600)	Acc@1 58.333 (72.650)	Acc@5 85.417 (91.367)	Mem 65094MB
+Test: [830/1042]	Time 6.439 (6.798)	Loss 2.1973 (1.5634)	Acc@1 60.417 (72.613)	Acc@5 85.417 (91.316)	Mem 65094MB
+Test: [840/1042]	Time 7.414 (6.797)	Loss 2.0898 (1.5649)	Acc@1 66.667 (72.624)	Acc@5 81.250 (91.275)	Mem 65094MB
+Test: [850/1042]	Time 6.356 (6.797)	Loss 0.8901 (1.5672)	Acc@1 91.667 (72.508)	Acc@5 97.917 (91.263)	Mem 65094MB
+Test: [860/1042]	Time 7.004 (6.796)	Loss 1.8115 (1.5679)	Acc@1 62.500 (72.530)	Acc@5 89.583 (91.280)	Mem 65094MB
+Test: [870/1042]	Time 6.468 (6.793)	Loss 2.2129 (1.5727)	Acc@1 70.833 (72.410)	Acc@5 85.417 (91.227)	Mem 65094MB
+Test: [880/1042]	Time 7.279 (6.793)	Loss 2.5996 (1.5800)	Acc@1 54.167 (72.247)	Acc@5 83.333 (91.161)	Mem 65094MB
+Test: [890/1042]	Time 6.615 (6.792)	Loss 1.2949 (1.5825)	Acc@1 79.167 (72.204)	Acc@5 91.667 (91.164)	Mem 65094MB
+Test: [900/1042]	Time 6.475 (6.790)	Loss 2.2441 (1.5843)	Acc@1 50.000 (72.186)	Acc@5 87.500 (91.139)	Mem 65094MB
+Test: [910/1042]	Time 6.715 (6.789)	Loss 1.5791 (1.5877)	Acc@1 64.583 (72.114)	Acc@5 95.833 (91.106)	Mem 65094MB
+Test: [920/1042]	Time 6.411 (6.787)	Loss 3.1973 (1.5911)	Acc@1 31.250 (72.055)	Acc@5 70.833 (91.088)	Mem 65094MB
+Test: [930/1042]	Time 6.433 (6.787)	Loss 1.6846 (1.5947)	Acc@1 68.750 (71.986)	Acc@5 91.667 (91.031)	Mem 65094MB
+Test: [940/1042]	Time 6.504 (6.787)	Loss 1.2461 (1.5982)	Acc@1 81.250 (71.883)	Acc@5 93.750 (90.996)	Mem 65094MB
+Test: [950/1042]	Time 6.956 (6.785)	Loss 1.0439 (1.6053)	Acc@1 91.667 (71.699)	Acc@5 95.833 (90.942)	Mem 65094MB
+Test: [960/1042]	Time 6.667 (6.787)	Loss 2.0781 (1.6052)	Acc@1 62.500 (71.761)	Acc@5 83.333 (90.966)	Mem 65094MB
+Test: [970/1042]	Time 6.582 (6.786)	Loss 1.5957 (1.6054)	Acc@1 70.833 (71.741)	Acc@5 89.583 (90.982)	Mem 65094MB
+Test: [980/1042]	Time 6.536 (6.786)	Loss 1.3916 (1.6002)	Acc@1 64.583 (71.842)	Acc@5 97.917 (91.042)	Mem 65094MB
+Test: [990/1042]	Time 6.479 (6.785)	Loss 1.6641 (1.5977)	Acc@1 62.500 (71.842)	Acc@5 93.750 (91.084)	Mem 65094MB
+Test: [1000/1042]	Time 6.981 (6.784)	Loss 1.4531 (1.5925)	Acc@1 72.917 (71.993)	Acc@5 91.667 (91.130)	Mem 65094MB
+Test: [1010/1042]	Time 6.554 (6.782)	Loss 2.3887 (1.5977)	Acc@1 62.500 (71.897)	Acc@5 87.500 (91.088)	Mem 65094MB
+Test: [1020/1042]	Time 7.005 (6.780)	Loss 1.9258 (1.6038)	Acc@1 64.583 (71.776)	Acc@5 93.750 (91.044)	Mem 65094MB
+Test: [1030/1042]	Time 6.771 (6.781)	Loss 0.7192 (1.6014)	Acc@1 87.500 (71.842)	Acc@5 97.917 (91.062)	Mem 65094MB
+Test: [1040/1042]	Time 6.427 (6.780)	Loss 2.0449 (1.5958)	Acc@1 39.583 (71.962)	Acc@5 89.583 (91.106)	Mem 65094MB
+ * Acc@1 71.948 Acc@5 91.091
+Successfully load ckpt /media/Disk2/LiuYue/Visualize/analyze/../../ckpts/vssmbase/ckpt_epoch_260.pth
+starting loop: img_size 1120; len(dataset) 50003
+Test: [0/1389]	Time 6.377 (6.377)	Loss 0.5371 (0.5371)	Acc@1 97.222 (97.222)	Acc@5 97.222 (97.222)	Mem 65094MB
+Test: [10/1389]	Time 6.308 (6.690)	Loss 1.2549 (1.6445)	Acc@1 86.111 (67.424)	Acc@5 91.667 (91.162)	Mem 65094MB
+Test: [20/1389]	Time 6.225 (6.609)	Loss 0.9551 (1.3159)	Acc@1 91.667 (77.513)	Acc@5 100.000 (94.577)	Mem 65094MB
+Test: [30/1389]	Time 6.263 (6.547)	Loss 0.9717 (1.2157)	Acc@1 83.333 (81.004)	Acc@5 94.444 (95.520)	Mem 65094MB
+Test: [40/1389]	Time 7.150 (6.555)	Loss 0.7520 (1.2042)	Acc@1 94.444 (80.894)	Acc@5 100.000 (96.274)	Mem 65094MB
+Test: [50/1389]	Time 6.491 (6.580)	Loss 1.6025 (1.3023)	Acc@1 52.778 (77.778)	Acc@5 97.222 (95.044)	Mem 65094MB
+Test: [60/1389]	Time 6.349 (6.596)	Loss 0.5137 (1.2922)	Acc@1 100.000 (77.960)	Acc@5 100.000 (95.264)	Mem 65094MB
+Test: [70/1389]	Time 6.706 (6.590)	Loss 2.3105 (1.3714)	Acc@1 61.111 (76.408)	Acc@5 86.111 (94.210)	Mem 65094MB
+Test: [80/1389]	Time 6.380 (6.626)	Loss 2.0039 (1.4233)	Acc@1 63.889 (74.760)	Acc@5 72.222 (93.484)	Mem 65094MB
+Test: [90/1389]	Time 7.157 (6.661)	Loss 1.0762 (1.4335)	Acc@1 80.556 (74.451)	Acc@5 100.000 (93.468)	Mem 65094MB
+Test: [100/1389]	Time 6.870 (6.670)	Loss 1.2393 (1.4335)	Acc@1 69.444 (74.065)	Acc@5 97.222 (93.454)	Mem 65094MB
+Test: [110/1389]	Time 6.557 (6.667)	Loss 1.7422 (1.4668)	Acc@1 69.444 (72.673)	Acc@5 94.444 (93.218)	Mem 65094MB
+Test: [120/1389]	Time 6.438 (6.675)	Loss 1.0850 (1.4426)	Acc@1 86.111 (73.577)	Acc@5 100.000 (93.388)	Mem 65094MB
+Test: [130/1389]	Time 7.040 (6.673)	Loss 1.0342 (1.3955)	Acc@1 86.111 (74.915)	Acc@5 91.667 (93.702)	Mem 65094MB
+Test: [140/1389]	Time 6.607 (6.676)	Loss 1.2051 (1.3665)	Acc@1 83.333 (75.749)	Acc@5 94.444 (93.834)	Mem 65094MB
+Test: [150/1389]	Time 6.526 (6.691)	Loss 1.8701 (1.3754)	Acc@1 63.889 (76.012)	Acc@5 88.889 (93.580)	Mem 65094MB
+Test: [160/1389]	Time 6.303 (6.702)	Loss 0.9497 (1.3634)	Acc@1 83.333 (76.518)	Acc@5 94.444 (93.582)	Mem 65094MB
+Test: [170/1389]	Time 7.111 (6.713)	Loss 1.0654 (1.3653)	Acc@1 86.111 (76.462)	Acc@5 91.667 (93.486)	Mem 65094MB
+Test: [180/1389]	Time 6.505 (6.711)	Loss 0.6538 (1.3710)	Acc@1 88.889 (76.366)	Acc@5 100.000 (93.401)	Mem 65094MB
+Test: [190/1389]	Time 6.920 (6.711)	Loss 1.0547 (1.3491)	Acc@1 83.333 (77.051)	Acc@5 97.222 (93.543)	Mem 65094MB
+Test: [200/1389]	Time 6.377 (6.712)	Loss 0.6729 (1.3323)	Acc@1 97.222 (77.667)	Acc@5 100.000 (93.767)	Mem 65094MB
+Test: [210/1389]	Time 6.531 (6.721)	Loss 2.8652 (1.3221)	Acc@1 19.444 (77.949)	Acc@5 83.333 (93.892)	Mem 65094MB
+Test: [220/1389]	Time 6.379 (6.720)	Loss 1.0586 (1.3216)	Acc@1 83.333 (77.979)	Acc@5 100.000 (93.979)	Mem 65094MB
+Test: [230/1389]	Time 6.401 (6.721)	Loss 1.5928 (1.3395)	Acc@1 63.889 (77.453)	Acc@5 94.444 (93.867)	Mem 65094MB
+Test: [240/1389]	Time 6.812 (6.715)	Loss 1.7324 (1.3463)	Acc@1 66.667 (77.259)	Acc@5 94.444 (93.822)	Mem 65094MB
+Test: [250/1389]	Time 6.427 (6.711)	Loss 1.8828 (1.3491)	Acc@1 61.111 (77.224)	Acc@5 91.667 (93.825)	Mem 65094MB
+Test: [260/1389]	Time 6.964 (6.713)	Loss 1.8594 (1.3728)	Acc@1 69.444 (76.618)	Acc@5 94.444 (93.604)	Mem 65094MB
+Test: [270/1389]	Time 6.471 (6.708)	Loss 1.4863 (1.3961)	Acc@1 77.778 (76.148)	Acc@5 94.444 (93.266)	Mem 65094MB
+Test: [280/1389]	Time 6.529 (6.709)	Loss 2.2207 (1.4059)	Acc@1 44.444 (75.830)	Acc@5 88.889 (93.288)	Mem 65094MB
+Test: [290/1389]	Time 6.331 (6.714)	Loss 1.8457 (1.4152)	Acc@1 61.111 (75.601)	Acc@5 86.111 (93.184)	Mem 65094MB
+Test: [300/1389]	Time 7.334 (6.726)	Loss 0.7041 (1.4199)	Acc@1 97.222 (75.526)	Acc@5 100.000 (93.171)	Mem 65094MB
+Test: [310/1389]	Time 7.035 (6.726)	Loss 1.4609 (1.4269)	Acc@1 83.333 (75.250)	Acc@5 97.222 (93.176)	Mem 65094MB
+Test: [320/1389]	Time 6.702 (6.730)	Loss 1.5273 (1.4324)	Acc@1 69.444 (75.156)	Acc@5 97.222 (93.120)	Mem 65094MB
+Test: [330/1389]	Time 6.312 (6.729)	Loss 2.3555 (1.4494)	Acc@1 50.000 (74.555)	Acc@5 80.556 (92.925)	Mem 65094MB
+Test: [340/1389]	Time 7.054 (6.731)	Loss 1.2686 (1.4519)	Acc@1 83.333 (74.454)	Acc@5 97.222 (92.954)	Mem 65094MB
+Test: [350/1389]	Time 6.440 (6.740)	Loss 1.2510 (1.4543)	Acc@1 86.111 (74.351)	Acc@5 100.000 (93.012)	Mem 65094MB
+Test: [360/1389]	Time 7.040 (6.739)	Loss 1.1729 (1.4487)	Acc@1 86.111 (74.646)	Acc@5 97.222 (93.106)	Mem 65094MB
+Test: [370/1389]	Time 7.035 (6.746)	Loss 1.7773 (1.4552)	Acc@1 66.667 (74.423)	Acc@5 86.111 (93.074)	Mem 65094MB
+Test: [380/1389]	Time 7.490 (6.759)	Loss 1.4170 (1.4600)	Acc@1 80.556 (74.242)	Acc@5 88.889 (93.037)	Mem 65094MB
+Test: [390/1389]	Time 6.692 (6.771)	Loss 1.8486 (1.4564)	Acc@1 72.222 (74.425)	Acc@5 88.889 (93.080)	Mem 65094MB
+Test: [400/1389]	Time 7.485 (6.776)	Loss 1.4268 (1.4633)	Acc@1 58.333 (74.190)	Acc@5 100.000 (93.066)	Mem 65094MB
+Test: [410/1389]	Time 6.491 (6.780)	Loss 1.4785 (1.4545)	Acc@1 69.444 (74.480)	Acc@5 100.000 (93.154)	Mem 65094MB
+Test: [420/1389]	Time 6.462 (6.786)	Loss 1.1045 (1.4494)	Acc@1 77.778 (74.637)	Acc@5 97.222 (93.217)	Mem 65094MB
+Test: [430/1389]	Time 6.272 (6.780)	Loss 1.5498 (1.4526)	Acc@1 72.222 (74.536)	Acc@5 91.667 (93.233)	Mem 65094MB
+Test: [440/1389]	Time 6.810 (6.779)	Loss 0.9253 (1.4567)	Acc@1 94.444 (74.509)	Acc@5 100.000 (93.197)	Mem 65094MB
+Test: [450/1389]	Time 7.141 (6.778)	Loss 0.6069 (1.4443)	Acc@1 97.222 (74.840)	Acc@5 100.000 (93.299)	Mem 65094MB
+Test: [460/1389]	Time 7.305 (6.779)	Loss 1.2354 (1.4434)	Acc@1 80.556 (74.904)	Acc@5 97.222 (93.251)	Mem 65094MB
+Test: [470/1389]	Time 6.345 (6.773)	Loss 1.5381 (1.4367)	Acc@1 72.222 (75.106)	Acc@5 91.667 (93.289)	Mem 65094MB
+Test: [480/1389]	Time 7.113 (6.775)	Loss 1.7393 (1.4320)	Acc@1 58.333 (75.127)	Acc@5 94.444 (93.365)	Mem 65094MB
+Test: [490/1389]	Time 7.320 (6.773)	Loss 1.3418 (1.4333)	Acc@1 61.111 (74.909)	Acc@5 100.000 (93.409)	Mem 65094MB
+Test: [500/1389]	Time 7.404 (6.777)	Loss 1.7705 (1.4324)	Acc@1 69.444 (74.928)	Acc@5 94.444 (93.452)	Mem 65094MB
+Test: [510/1389]	Time 6.609 (6.781)	Loss 1.4834 (1.4307)	Acc@1 77.778 (75.054)	Acc@5 97.222 (93.422)	Mem 65094MB
+Test: [520/1389]	Time 6.865 (6.781)	Loss 1.6670 (1.4330)	Acc@1 69.444 (74.920)	Acc@5 97.222 (93.437)	Mem 65094MB
+Test: [530/1389]	Time 6.861 (6.787)	Loss 2.6074 (1.4306)	Acc@1 33.333 (74.974)	Acc@5 75.000 (93.419)	Mem 65094MB
+Test: [540/1389]	Time 6.560 (6.784)	Loss 0.9268 (1.4265)	Acc@1 88.889 (74.979)	Acc@5 94.444 (93.443)	Mem 65094MB
+Test: [550/1389]	Time 6.302 (6.784)	Loss 1.0410 (1.4248)	Acc@1 88.889 (75.025)	Acc@5 91.667 (93.436)	Mem 65094MB
+Test: [560/1389]	Time 6.296 (6.781)	Loss 2.2812 (1.4294)	Acc@1 47.222 (74.975)	Acc@5 88.889 (93.370)	Mem 65094MB
+Test: [570/1389]	Time 7.132 (6.784)	Loss 1.2520 (1.4325)	Acc@1 83.333 (74.912)	Acc@5 94.444 (93.384)	Mem 65094MB
+Test: [580/1389]	Time 6.534 (6.783)	Loss 1.3145 (1.4555)	Acc@1 80.556 (74.493)	Acc@5 97.222 (93.010)	Mem 65094MB
+Test: [590/1389]	Time 6.392 (6.779)	Loss 2.3555 (1.4615)	Acc@1 61.111 (74.417)	Acc@5 86.111 (92.964)	Mem 65094MB
+Test: [600/1389]	Time 6.354 (6.776)	Loss 1.3018 (1.4640)	Acc@1 77.778 (74.445)	Acc@5 94.444 (92.933)	Mem 65094MB
+Test: [610/1389]	Time 6.356 (6.774)	Loss 0.6011 (1.4817)	Acc@1 100.000 (74.050)	Acc@5 100.000 (92.626)	Mem 65094MB
+Test: [620/1389]	Time 7.014 (6.777)	Loss 1.8408 (1.4983)	Acc@1 75.000 (73.721)	Acc@5 94.444 (92.378)	Mem 65094MB
+Test: [630/1389]	Time 7.100 (6.775)	Loss 2.4648 (1.5056)	Acc@1 50.000 (73.605)	Acc@5 83.333 (92.301)	Mem 65094MB
+Test: [640/1389]	Time 7.009 (6.771)	Loss 2.1738 (1.5190)	Acc@1 52.778 (73.327)	Acc@5 83.333 (92.091)	Mem 65094MB
+Test: [650/1389]	Time 6.760 (6.776)	Loss 2.4199 (1.5309)	Acc@1 50.000 (73.131)	Acc@5 77.778 (91.893)	Mem 65094MB
+Test: [660/1389]	Time 6.406 (6.774)	Loss 1.2588 (1.5385)	Acc@1 86.111 (73.004)	Acc@5 91.667 (91.814)	Mem 65094MB
+Test: [670/1389]	Time 6.983 (6.772)	Loss 2.2793 (1.5476)	Acc@1 41.667 (72.831)	Acc@5 83.333 (91.683)	Mem 65094MB
+Test: [680/1389]	Time 6.378 (6.769)	Loss 2.1445 (1.5564)	Acc@1 61.111 (72.565)	Acc@5 86.111 (91.605)	Mem 65094MB
+Test: [690/1389]	Time 6.358 (6.765)	Loss 2.6914 (1.5654)	Acc@1 38.889 (72.363)	Acc@5 72.222 (91.446)	Mem 65094MB
+Test: [700/1389]	Time 7.013 (6.761)	Loss 2.7188 (1.5774)	Acc@1 58.333 (72.087)	Acc@5 77.778 (91.310)	Mem 65094MB
+Test: [710/1389]	Time 6.717 (6.760)	Loss 2.2441 (1.5884)	Acc@1 41.667 (71.812)	Acc@5 94.444 (91.159)	Mem 65094MB
+Test: [720/1389]	Time 6.320 (6.755)	Loss 1.6602 (1.5969)	Acc@1 77.778 (71.644)	Acc@5 91.667 (91.073)	Mem 65094MB
+Test: [730/1389]	Time 6.560 (6.754)	Loss 2.7578 (1.6049)	Acc@1 44.444 (71.432)	Acc@5 77.778 (90.945)	Mem 65094MB
+Test: [740/1389]	Time 6.377 (6.751)	Loss 2.0820 (1.6168)	Acc@1 58.333 (71.056)	Acc@5 75.000 (90.812)	Mem 65094MB
+Test: [750/1389]	Time 6.332 (6.750)	Loss 0.8301 (1.6178)	Acc@1 91.667 (71.076)	Acc@5 100.000 (90.797)	Mem 65094MB
+Test: [760/1389]	Time 6.371 (6.749)	Loss 2.7266 (1.6266)	Acc@1 2.778 (70.795)	Acc@5 94.444 (90.707)	Mem 65094MB
+Test: [770/1389]	Time 7.154 (6.746)	Loss 1.6133 (1.6315)	Acc@1 77.778 (70.731)	Acc@5 97.222 (90.676)	Mem 65094MB
+Test: [780/1389]	Time 6.784 (6.746)	Loss 1.6650 (1.6360)	Acc@1 72.222 (70.682)	Acc@5 94.444 (90.617)	Mem 65094MB
+Test: [790/1389]	Time 6.943 (6.747)	Loss 1.7236 (1.6386)	Acc@1 66.667 (70.624)	Acc@5 91.667 (90.603)	Mem 65094MB
+Test: [800/1389]	Time 6.350 (6.746)	Loss 0.7441 (1.6389)	Acc@1 91.667 (70.655)	Acc@5 94.444 (90.578)	Mem 65094MB
+Test: [810/1389]	Time 6.364 (6.744)	Loss 1.4844 (1.6488)	Acc@1 83.333 (70.407)	Acc@5 94.444 (90.451)	Mem 65094MB
+Test: [820/1389]	Time 6.330 (6.743)	Loss 1.7324 (1.6524)	Acc@1 66.667 (70.334)	Acc@5 86.111 (90.411)	Mem 65094MB
+Test: [830/1389]	Time 6.391 (6.745)	Loss 2.2891 (1.6546)	Acc@1 61.111 (70.307)	Acc@5 77.778 (90.393)	Mem 65094MB

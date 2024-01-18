@@ -1,0 +1,599 @@
+fvcore flops count for vssm ====================
+Unsupported operator aten::mul encountered 27 time(s)
+Unsupported operator aten::add encountered 48 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+dict_items([('conv', 0.040190976), ('layer_norm', 0.02558976), ('linear', 2.254307328), ('einsum', 0.71289), ('PythonOp.SelectiveScanFn', 0.652115456)])
+GFlops:  3.6850935199999997 Params:  18535584
+Unsupported operator aten::mul encountered 51 time(s)
+Unsupported operator aten::add encountered 96 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.10.drop_path, layers.2.blocks.11.drop_path, layers.2.blocks.12.drop_path, layers.2.blocks.13.drop_path, layers.2.blocks.14.drop_path, layers.2.blocks.15.drop_path, layers.2.blocks.16.drop_path, layers.2.blocks.17.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.2.blocks.9.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+dict_items([('conv', 0.056448), ('layer_norm', 0.03913728), ('linear', 4.3352064), ('einsum', 1.29093), ('PythonOp.SelectiveScanFn', 1.063971104)])
+GFlops:  6.785692784 Params:  32884896
+Unsupported operator aten::mul encountered 51 time(s)
+Unsupported operator aten::add encountered 96 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.10.drop_path, layers.2.blocks.11.drop_path, layers.2.blocks.12.drop_path, layers.2.blocks.13.drop_path, layers.2.blocks.14.drop_path, layers.2.blocks.15.drop_path, layers.2.blocks.16.drop_path, layers.2.blocks.17.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.2.blocks.9.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+dict_items([('conv', 0.075264), ('layer_norm', 0.05218304), ('linear', 7.7070336), ('einsum', 2.02983), ('PythonOp.SelectiveScanFn', 1.418720412)])
+GFlops:  11.283031052 Params:  56748928
+Unsupported operator aten::mul encountered 39 time(s)
+Unsupported operator aten::add encountered 72 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.0.blocks.2.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.1.blocks.2.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path, layers.3.blocks.2.drop_path
+dict_items([('conv', 0.05306112), ('layer_norm', 0.03631488), ('linear', 3.294756864), ('einsum', 1.069335), ('PythonOp.SelectiveScanFn', 0.978173184)])
+GFlops:  5.431641048 Params:  27024096
+Unsupported operator aten::mul encountered 75 time(s)
+Unsupported operator aten::add encountered 144 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.0.blocks.2.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.1.blocks.2.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.10.drop_path, layers.2.blocks.11.drop_path, layers.2.blocks.12.drop_path, layers.2.blocks.13.drop_path, layers.2.blocks.14.drop_path, layers.2.blocks.15.drop_path, layers.2.blocks.16.drop_path, layers.2.blocks.17.drop_path, layers.2.blocks.18.drop_path, layers.2.blocks.19.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.20.drop_path, layers.2.blocks.21.drop_path, layers.2.blocks.22.drop_path, layers.2.blocks.23.drop_path, layers.2.blocks.24.drop_path, layers.2.blocks.25.drop_path, layers.2.blocks.26.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.2.blocks.9.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path, layers.3.blocks.2.drop_path
+dict_items([('conv', 0.077446656), ('layer_norm', 0.05663616), ('linear', 6.416105472), ('einsum', 1.936395), ('PythonOp.SelectiveScanFn', 1.595956656)])
+GFlops:  10.082539944 Params:  48548064
+Unsupported operator aten::mul encountered 75 time(s)
+Unsupported operator aten::add encountered 144 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.0.blocks.2.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.1.blocks.2.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.10.drop_path, layers.2.blocks.11.drop_path, layers.2.blocks.12.drop_path, layers.2.blocks.13.drop_path, layers.2.blocks.14.drop_path, layers.2.blocks.15.drop_path, layers.2.blocks.16.drop_path, layers.2.blocks.17.drop_path, layers.2.blocks.18.drop_path, layers.2.blocks.19.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.20.drop_path, layers.2.blocks.21.drop_path, layers.2.blocks.22.drop_path, layers.2.blocks.23.drop_path, layers.2.blocks.24.drop_path, layers.2.blocks.25.drop_path, layers.2.blocks.26.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.2.blocks.9.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path, layers.3.blocks.2.drop_path
+dict_items([('conv', 0.103262208), ('layer_norm', 0.07551488), ('linear', 11.406409728), ('einsum', 3.044745), ('PythonOp.SelectiveScanFn', 2.128080618)])
+GFlops:  16.758012433999998 Params:  83740288
+Unsupported operator aten::mul encountered 33 time(s)
+Unsupported operator aten::add encountered 60 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+dict_items([('conv', 0.044255232), ('layer_norm', 0.02897664), ('linear', 2.774532096), ('einsum', 0.8574), ('PythonOp.SelectiveScanFn', 0.755079368)])
+GFlops:  4.4602433360000004 Params:  22122912
+Unsupported operator aten::mul encountered 69 time(s)
+Unsupported operator aten::add encountered 132 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.10.drop_path, layers.2.blocks.11.drop_path, layers.2.blocks.12.drop_path, layers.2.blocks.13.drop_path, layers.2.blocks.14.drop_path, layers.2.blocks.15.drop_path, layers.2.blocks.16.drop_path, layers.2.blocks.17.drop_path, layers.2.blocks.18.drop_path, layers.2.blocks.19.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.20.drop_path, layers.2.blocks.21.drop_path, layers.2.blocks.22.drop_path, layers.2.blocks.23.drop_path, layers.2.blocks.24.drop_path, layers.2.blocks.25.drop_path, layers.2.blocks.26.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.2.blocks.9.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+dict_items([('conv', 0.068640768), ('layer_norm', 0.04929792), ('linear', 5.895880704), ('einsum', 1.72446), ('PythonOp.SelectiveScanFn', 1.37286284)])
+GFlops:  9.111142231999999 Params:  43646880
+Unsupported operator aten::mul encountered 69 time(s)
+Unsupported operator aten::add encountered 132 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.10.drop_path, layers.2.blocks.11.drop_path, layers.2.blocks.12.drop_path, layers.2.blocks.13.drop_path, layers.2.blocks.14.drop_path, layers.2.blocks.15.drop_path, layers.2.blocks.16.drop_path, layers.2.blocks.17.drop_path, layers.2.blocks.18.drop_path, layers.2.blocks.19.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.20.drop_path, layers.2.blocks.21.drop_path, layers.2.blocks.22.drop_path, layers.2.blocks.23.drop_path, layers.2.blocks.24.drop_path, layers.2.blocks.25.drop_path, layers.2.blocks.26.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.2.blocks.9.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+dict_items([('conv', 0.091521024), ('layer_norm', 0.06573056), ('linear', 10.481565696), ('einsum', 2.72364), ('PythonOp.SelectiveScanFn', 1.83061146)])
+GFlops:  15.193068740000001 Params:  75227008
+mmengine flops count for vssm ====================
+01/08 19:15:13 - mmengine - WARNING - Unsupported operator aten::mul encountered 27 time(s)
+01/08 19:15:13 - mmengine - WARNING - Unsupported operator aten::add encountered 48 time(s)
+01/08 19:15:13 - mmengine - WARNING - The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+==============================
+Input shape: (3, 224, 224)	Flops: 3.685G	Params: 18.536M	
+01/08 19:15:14 - mmengine - WARNING - Unsupported operator aten::mul encountered 51 time(s)
+01/08 19:15:14 - mmengine - WARNING - Unsupported operator aten::add encountered 96 time(s)
+01/08 19:15:14 - mmengine - WARNING - The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.10.drop_path, layers.2.blocks.11.drop_path, layers.2.blocks.12.drop_path, layers.2.blocks.13.drop_path, layers.2.blocks.14.drop_path, layers.2.blocks.15.drop_path, layers.2.blocks.16.drop_path, layers.2.blocks.17.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.2.blocks.9.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+==============================
+Input shape: (3, 224, 224)	Flops: 6.786G	Params: 32.885M	
+==============================
+Input shape: (3, 224, 224)	Flops: 11.283G	Params: 56.749M	
+01/08 19:15:18 - mmengine - WARNING - Unsupported operator aten::mul encountered 39 time(s)
+01/08 19:15:18 - mmengine - WARNING - Unsupported operator aten::add encountered 72 time(s)
+01/08 19:15:18 - mmengine - WARNING - The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.0.blocks.2.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.1.blocks.2.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path, layers.3.blocks.2.drop_path
+==============================
+Input shape: (3, 224, 224)	Flops: 5.432G	Params: 27.024M	
+01/08 19:15:21 - mmengine - WARNING - Unsupported operator aten::mul encountered 75 time(s)
+01/08 19:15:21 - mmengine - WARNING - Unsupported operator aten::add encountered 144 time(s)
+01/08 19:15:21 - mmengine - WARNING - The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.0.blocks.2.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.1.blocks.2.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.10.drop_path, layers.2.blocks.11.drop_path, layers.2.blocks.12.drop_path, layers.2.blocks.13.drop_path, layers.2.blocks.14.drop_path, layers.2.blocks.15.drop_path, layers.2.blocks.16.drop_path, layers.2.blocks.17.drop_path, layers.2.blocks.18.drop_path, layers.2.blocks.19.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.20.drop_path, layers.2.blocks.21.drop_path, layers.2.blocks.22.drop_path, layers.2.blocks.23.drop_path, layers.2.blocks.24.drop_path, layers.2.blocks.25.drop_path, layers.2.blocks.26.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.2.blocks.9.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path, layers.3.blocks.2.drop_path
+==============================
+Input shape: (3, 224, 224)	Flops: 10.083G	Params: 48.548M	
+==============================
+Input shape: (3, 224, 224)	Flops: 16.758G	Params: 83.74M	
+01/08 19:15:25 - mmengine - WARNING - Unsupported operator aten::mul encountered 33 time(s)
+01/08 19:15:25 - mmengine - WARNING - Unsupported operator aten::add encountered 60 time(s)
+01/08 19:15:25 - mmengine - WARNING - The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+==============================
+Input shape: (3, 224, 224)	Flops: 4.46G	Params: 22.123M	
+01/08 19:15:27 - mmengine - WARNING - Unsupported operator aten::mul encountered 69 time(s)
+01/08 19:15:27 - mmengine - WARNING - Unsupported operator aten::add encountered 132 time(s)
+01/08 19:15:27 - mmengine - WARNING - The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.10.drop_path, layers.2.blocks.11.drop_path, layers.2.blocks.12.drop_path, layers.2.blocks.13.drop_path, layers.2.blocks.14.drop_path, layers.2.blocks.15.drop_path, layers.2.blocks.16.drop_path, layers.2.blocks.17.drop_path, layers.2.blocks.18.drop_path, layers.2.blocks.19.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.20.drop_path, layers.2.blocks.21.drop_path, layers.2.blocks.22.drop_path, layers.2.blocks.23.drop_path, layers.2.blocks.24.drop_path, layers.2.blocks.25.drop_path, layers.2.blocks.26.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.2.blocks.9.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+==============================
+Input shape: (3, 224, 224)	Flops: 9.111G	Params: 43.647M	
+==============================
+Input shape: (3, 224, 224)	Flops: 15.193G	Params: 75.227M	
+flops count for models with bigger inputs ====================
+Unsupported operator aten::mul encountered 33 time(s)
+Unsupported operator aten::add encountered 60 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+FLOPs for model vssm with different input shapes ==
+dict_items([('conv', 0.003612672), ('layer_norm', 0.00236544), ('linear', 0.226492416), ('einsum', 0.069988), ('PythonOp.SelectiveScanFn', 0.061637828)])
+GFlops:  0.364096356 Params:  22122912
+model vssm + input shape 64 => params 22122912 GFLOPs 0.364096356
+Warning, x.shape torch.Size([1, 7, 7, 384]) is not match even ===========
+Unsupported operator aten::mul encountered 33 time(s)
+Unsupported operator aten::add encountered 60 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+Warning, x.shape torch.Size([1, 7, 7, 384]) is not match even ===========
+Warning, x.shape torch.Size([1, 7, 7, 384]) is not match even ===========
+dict_items([('conv', 0.010973952), ('layer_norm', 0.00714432), ('linear', 0.666796032), ('einsum', 0.2092375), ('PythonOp.SelectiveScanFn', 0.18648843)])
+GFlops:  1.080640234 Params:  22122912
+model vssm + input shape 112 => params 22122912 GFLOPs 1.080640234
+Unsupported operator aten::mul encountered 33 time(s)
+Unsupported operator aten::add encountered 60 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+dict_items([('conv', 0.044255232), ('layer_norm', 0.02897664), ('linear', 2.774532096), ('einsum', 0.8574), ('PythonOp.SelectiveScanFn', 0.755079368)])
+GFlops:  4.4602433360000004 Params:  22122912
+model vssm + input shape 224 => params 22122912 GFLOPs 4.4602433360000004
+Unsupported operator aten::mul encountered 33 time(s)
+Unsupported operator aten::add encountered 60 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+dict_items([('conv', 0.130056192), ('layer_norm', 0.08515584), ('linear', 8.153726976), ('einsum', 2.519775), ('PythonOp.SelectiveScanFn', 2.218832408)])
+GFlops:  13.107546416000002 Params:  22122912
+model vssm + input shape 384 => params 22122912 GFLOPs 13.107546416000002
+Unsupported operator aten::mul encountered 33 time(s)
+Unsupported operator aten::add encountered 60 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+dict_items([('conv', 0.231211008), ('layer_norm', 0.15138816), ('linear', 14.495514624), ('einsum', 4.47945), ('PythonOp.SelectiveScanFn', 3.944970392)])
+GFlops:  23.302534184000002 Params:  22122912
+model vssm + input shape 512 => params 22122912 GFLOPs 23.302534184000002
+Unsupported operator aten::mul encountered 33 time(s)
+Unsupported operator aten::add encountered 60 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+dict_items([('conv', 0.3612672), ('layer_norm', 0.236544), ('linear', 22.6492416), ('einsum', 6.9988), ('PythonOp.SelectiveScanFn', 6.1637828)])
+GFlops:  36.4096356 Params:  22122912
+model vssm + input shape 640 => params 22122912 GFLOPs 36.4096356
+Unsupported operator aten::mul encountered 33 time(s)
+Unsupported operator aten::add encountered 60 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+dict_items([('conv', 0.520224768), ('layer_norm', 0.34062336), ('linear', 32.614907904), ('einsum', 10.0791), ('PythonOp.SelectiveScanFn', 8.875599632)])
+GFlops:  52.43045566400001 Params:  22122912
+model vssm + input shape 768 => params 22122912 GFLOPs 52.43045566400001
+Unsupported operator aten::mul encountered 33 time(s)
+Unsupported operator aten::add encountered 60 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+dict_items([('conv', 0.924844032), ('layer_norm', 0.60555264), ('linear', 57.982058496), ('einsum', 17.9175), ('PythonOp.SelectiveScanFn', 15.779641568)])
+GFlops:  93.20959673600001 Params:  22122912
+model vssm + input shape 1024 => params 22122912 GFLOPs 93.20959673600001
+Unsupported operator aten::mul encountered 33 time(s)
+Unsupported operator aten::add encountered 60 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+dict_items([('conv', 1.1063808), ('layer_norm', 0.724416), ('linear', 69.3633024), ('einsum', 21.43475), ('PythonOp.SelectiveScanFn', 18.8764592)])
+GFlops:  111.50530839999999 Params:  22122912
+model vssm + input shape 1120 => params 22122912 GFLOPs 111.50530839999999
+Unsupported operator aten::mul encountered 33 time(s)
+Unsupported operator aten::add encountered 60 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.blocks.0.drop_path, layers.0.blocks.1.drop_path, layers.1.blocks.0.drop_path, layers.1.blocks.1.drop_path, layers.2.blocks.0.drop_path, layers.2.blocks.1.drop_path, layers.2.blocks.2.drop_path, layers.2.blocks.3.drop_path, layers.2.blocks.4.drop_path, layers.2.blocks.5.drop_path, layers.2.blocks.6.drop_path, layers.2.blocks.7.drop_path, layers.2.blocks.8.drop_path, layers.3.blocks.0.drop_path, layers.3.blocks.1.drop_path
+dict_items([('conv', 1.4450688), ('layer_norm', 0.946176), ('linear', 90.5969664), ('einsum', 27.99675), ('PythonOp.SelectiveScanFn', 24.6546212)])
+GFlops:  145.6395824 Params:  22122912
+model vssm + input shape 1280 => params 22122912 GFLOPs 145.6395824
+Unsupported operator aten::rsub encountered 24 time(s)
+Unsupported operator aten::pad encountered 12 time(s)
+Unsupported operator aten::mul encountered 24 time(s)
+Unsupported operator aten::add encountered 53 time(s)
+Unsupported operator aten::softmax encountered 12 time(s)
+Unsupported operator aten::gelu encountered 12 time(s)
+Unsupported operator aten::fill_ encountered 45 time(s)
+Unsupported operator aten::sub encountered 17 time(s)
+Unsupported operator aten::ne encountered 5 time(s)
+Unsupported operator aten::im2col encountered 3 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+patch_embed.adaptive_padding, stages.0.blocks.0.attn.drop, stages.0.blocks.0.ffn.dropout_layer, stages.0.blocks.1.attn.drop, stages.0.blocks.1.ffn.dropout_layer, stages.0.downsample.adaptive_padding, stages.1.blocks.0.attn.drop, stages.1.blocks.0.ffn.dropout_layer, stages.1.blocks.1.attn.drop, stages.1.blocks.1.ffn.dropout_layer, stages.1.downsample.adaptive_padding, stages.2.blocks.0.attn.drop, stages.2.blocks.0.ffn.dropout_layer, stages.2.blocks.1.attn.drop, stages.2.blocks.1.ffn.dropout_layer, stages.2.blocks.2.attn.drop, stages.2.blocks.2.ffn.dropout_layer, stages.2.blocks.3.attn.drop, stages.2.blocks.3.ffn.dropout_layer, stages.2.blocks.4.attn.drop, stages.2.blocks.4.ffn.dropout_layer, stages.2.blocks.5.attn.drop, stages.2.blocks.5.ffn.dropout_layer, stages.2.downsample.adaptive_padding, stages.3.blocks.0.attn.drop, stages.3.blocks.0.ffn.dropout_layer, stages.3.blocks.1.attn.drop, stages.3.blocks.1.ffn.dropout_layer
+FLOPs for model swin with different input shapes ==
+The input shape (4, 4) is smaller than the window size (7). Please set `pad_small_map=True`, or decrease the `window_size`.
+The input shape (4, 4) is smaller than the window size (7). Please set `pad_small_map=True`, or decrease the `window_size`.
+dict_items([('conv', 0.014450688), ('layer_norm', 0.01843968), ('linear', 4.3352064), ('matmul', 0.140141568)])
+GFlops:  4.508238336 Params:  27517818
+model swin + input shape 224 => params 27517818 GFLOPs 4.508238336
+Unsupported operator aten::rsub encountered 24 time(s)
+Unsupported operator aten::pad encountered 12 time(s)
+Unsupported operator aten::mul encountered 24 time(s)
+Unsupported operator aten::add encountered 54 time(s)
+Unsupported operator aten::softmax encountered 12 time(s)
+Unsupported operator aten::gelu encountered 12 time(s)
+Unsupported operator aten::fill_ encountered 54 time(s)
+Unsupported operator aten::sub encountered 18 time(s)
+Unsupported operator aten::ne encountered 6 time(s)
+Unsupported operator aten::im2col encountered 3 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+patch_embed.adaptive_padding, stages.0.blocks.0.attn.drop, stages.0.blocks.0.ffn.dropout_layer, stages.0.blocks.1.attn.drop, stages.0.blocks.1.ffn.dropout_layer, stages.0.downsample.adaptive_padding, stages.1.blocks.0.attn.drop, stages.1.blocks.0.ffn.dropout_layer, stages.1.blocks.1.attn.drop, stages.1.blocks.1.ffn.dropout_layer, stages.1.downsample.adaptive_padding, stages.2.blocks.0.attn.drop, stages.2.blocks.0.ffn.dropout_layer, stages.2.blocks.1.attn.drop, stages.2.blocks.1.ffn.dropout_layer, stages.2.blocks.2.attn.drop, stages.2.blocks.2.ffn.dropout_layer, stages.2.blocks.3.attn.drop, stages.2.blocks.3.ffn.dropout_layer, stages.2.blocks.4.attn.drop, stages.2.blocks.4.ffn.dropout_layer, stages.2.blocks.5.attn.drop, stages.2.blocks.5.ffn.dropout_layer, stages.2.downsample.adaptive_padding, stages.3.blocks.0.attn.drop, stages.3.blocks.0.ffn.dropout_layer, stages.3.blocks.1.attn.drop, stages.3.blocks.1.ffn.dropout_layer
+dict_items([('conv', 0.042467328), ('layer_norm', 0.05419008), ('linear', 13.778878464), ('matmul', 0.477587712)])
+GFlops:  14.353123584 Params:  27517818
+model swin + input shape 384 => params 27517818 GFLOPs 14.353123584
+Unsupported operator aten::rsub encountered 24 time(s)
+Unsupported operator aten::pad encountered 12 time(s)
+Unsupported operator aten::mul encountered 24 time(s)
+Unsupported operator aten::add encountered 54 time(s)
+Unsupported operator aten::softmax encountered 12 time(s)
+Unsupported operator aten::gelu encountered 12 time(s)
+Unsupported operator aten::fill_ encountered 54 time(s)
+Unsupported operator aten::sub encountered 18 time(s)
+Unsupported operator aten::ne encountered 6 time(s)
+Unsupported operator aten::im2col encountered 3 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+patch_embed.adaptive_padding, stages.0.blocks.0.attn.drop, stages.0.blocks.0.ffn.dropout_layer, stages.0.blocks.1.attn.drop, stages.0.blocks.1.ffn.dropout_layer, stages.0.downsample.adaptive_padding, stages.1.blocks.0.attn.drop, stages.1.blocks.0.ffn.dropout_layer, stages.1.blocks.1.attn.drop, stages.1.blocks.1.ffn.dropout_layer, stages.1.downsample.adaptive_padding, stages.2.blocks.0.attn.drop, stages.2.blocks.0.ffn.dropout_layer, stages.2.blocks.1.attn.drop, stages.2.blocks.1.ffn.dropout_layer, stages.2.blocks.2.attn.drop, stages.2.blocks.2.ffn.dropout_layer, stages.2.blocks.3.attn.drop, stages.2.blocks.3.ffn.dropout_layer, stages.2.blocks.4.attn.drop, stages.2.blocks.4.ffn.dropout_layer, stages.2.blocks.5.attn.drop, stages.2.blocks.5.ffn.dropout_layer, stages.2.downsample.adaptive_padding, stages.3.blocks.0.attn.drop, stages.3.blocks.0.ffn.dropout_layer, stages.3.blocks.1.attn.drop, stages.3.blocks.1.ffn.dropout_layer
+dict_items([('conv', 0.075497472), ('layer_norm', 0.09633792), ('linear', 24.566833152), ('matmul', 0.860211072)])
+GFlops:  25.598879615999998 Params:  27517818
+model swin + input shape 512 => params 27517818 GFLOPs 25.598879615999998
+Unsupported operator aten::rsub encountered 24 time(s)
+Unsupported operator aten::pad encountered 12 time(s)
+Unsupported operator aten::mul encountered 24 time(s)
+Unsupported operator aten::add encountered 54 time(s)
+Unsupported operator aten::softmax encountered 12 time(s)
+Unsupported operator aten::gelu encountered 12 time(s)
+Unsupported operator aten::fill_ encountered 54 time(s)
+Unsupported operator aten::sub encountered 18 time(s)
+Unsupported operator aten::ne encountered 6 time(s)
+Unsupported operator aten::im2col encountered 3 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+patch_embed.adaptive_padding, stages.0.blocks.0.attn.drop, stages.0.blocks.0.ffn.dropout_layer, stages.0.blocks.1.attn.drop, stages.0.blocks.1.ffn.dropout_layer, stages.0.downsample.adaptive_padding, stages.1.blocks.0.attn.drop, stages.1.blocks.0.ffn.dropout_layer, stages.1.blocks.1.attn.drop, stages.1.blocks.1.ffn.dropout_layer, stages.1.downsample.adaptive_padding, stages.2.blocks.0.attn.drop, stages.2.blocks.0.ffn.dropout_layer, stages.2.blocks.1.attn.drop, stages.2.blocks.1.ffn.dropout_layer, stages.2.blocks.2.attn.drop, stages.2.blocks.2.ffn.dropout_layer, stages.2.blocks.3.attn.drop, stages.2.blocks.3.ffn.dropout_layer, stages.2.blocks.4.attn.drop, stages.2.blocks.4.ffn.dropout_layer, stages.2.blocks.5.attn.drop, stages.2.blocks.5.ffn.dropout_layer, stages.2.downsample.adaptive_padding, stages.3.blocks.0.attn.drop, stages.3.blocks.0.ffn.dropout_layer, stages.3.blocks.1.attn.drop, stages.3.blocks.1.ffn.dropout_layer
+dict_items([('conv', 0.1179648), ('layer_norm', 0.150528), ('linear', 36.380418048), ('matmul', 1.217940864)])
+GFlops:  37.866851712 Params:  27517818
+model swin + input shape 640 => params 27517818 GFLOPs 37.866851712
+Unsupported operator aten::rsub encountered 24 time(s)
+Unsupported operator aten::pad encountered 12 time(s)
+Unsupported operator aten::mul encountered 24 time(s)
+Unsupported operator aten::add encountered 54 time(s)
+Unsupported operator aten::softmax encountered 12 time(s)
+Unsupported operator aten::gelu encountered 12 time(s)
+Unsupported operator aten::fill_ encountered 54 time(s)
+Unsupported operator aten::sub encountered 18 time(s)
+Unsupported operator aten::ne encountered 6 time(s)
+Unsupported operator aten::im2col encountered 3 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+patch_embed.adaptive_padding, stages.0.blocks.0.attn.drop, stages.0.blocks.0.ffn.dropout_layer, stages.0.blocks.1.attn.drop, stages.0.blocks.1.ffn.dropout_layer, stages.0.downsample.adaptive_padding, stages.1.blocks.0.attn.drop, stages.1.blocks.0.ffn.dropout_layer, stages.1.blocks.1.attn.drop, stages.1.blocks.1.ffn.dropout_layer, stages.1.downsample.adaptive_padding, stages.2.blocks.0.attn.drop, stages.2.blocks.0.ffn.dropout_layer, stages.2.blocks.1.attn.drop, stages.2.blocks.1.ffn.dropout_layer, stages.2.blocks.2.attn.drop, stages.2.blocks.2.ffn.dropout_layer, stages.2.blocks.3.attn.drop, stages.2.blocks.3.ffn.dropout_layer, stages.2.blocks.4.attn.drop, stages.2.blocks.4.ffn.dropout_layer, stages.2.blocks.5.attn.drop, stages.2.blocks.5.ffn.dropout_layer, stages.2.downsample.adaptive_padding, stages.3.blocks.0.attn.drop, stages.3.blocks.0.ffn.dropout_layer, stages.3.blocks.1.attn.drop, stages.3.blocks.1.ffn.dropout_layer
+dict_items([('conv', 0.169869312), ('layer_norm', 0.21676032), ('linear', 52.514390016), ('matmul', 1.744393728)])
+GFlops:  54.645413376 Params:  27517818
+model swin + input shape 768 => params 27517818 GFLOPs 54.645413376
+Unsupported operator aten::rsub encountered 24 time(s)
+Unsupported operator aten::pad encountered 12 time(s)
+Unsupported operator aten::mul encountered 24 time(s)
+Unsupported operator aten::add encountered 54 time(s)
+Unsupported operator aten::softmax encountered 12 time(s)
+Unsupported operator aten::gelu encountered 12 time(s)
+Unsupported operator aten::fill_ encountered 54 time(s)
+Unsupported operator aten::sub encountered 18 time(s)
+Unsupported operator aten::ne encountered 6 time(s)
+Unsupported operator aten::im2col encountered 3 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+patch_embed.adaptive_padding, stages.0.blocks.0.attn.drop, stages.0.blocks.0.ffn.dropout_layer, stages.0.blocks.1.attn.drop, stages.0.blocks.1.ffn.dropout_layer, stages.0.downsample.adaptive_padding, stages.1.blocks.0.attn.drop, stages.1.blocks.0.ffn.dropout_layer, stages.1.blocks.1.attn.drop, stages.1.blocks.1.ffn.dropout_layer, stages.1.downsample.adaptive_padding, stages.2.blocks.0.attn.drop, stages.2.blocks.0.ffn.dropout_layer, stages.2.blocks.1.attn.drop, stages.2.blocks.1.ffn.dropout_layer, stages.2.blocks.2.attn.drop, stages.2.blocks.2.ffn.dropout_layer, stages.2.blocks.3.attn.drop, stages.2.blocks.3.ffn.dropout_layer, stages.2.blocks.4.attn.drop, stages.2.blocks.4.ffn.dropout_layer, stages.2.blocks.5.attn.drop, stages.2.blocks.5.ffn.dropout_layer, stages.2.downsample.adaptive_padding, stages.3.blocks.0.attn.drop, stages.3.blocks.0.ffn.dropout_layer, stages.3.blocks.1.attn.drop, stages.3.blocks.1.ffn.dropout_layer
+dict_items([('conv', 0.301989888), ('layer_norm', 0.38535168), ('linear', 94.889484288), ('matmul', 3.218646144)])
+GFlops:  98.795472 Params:  27517818
+model swin + input shape 1024 => params 27517818 GFLOPs 98.795472
+Unsupported operator aten::rsub encountered 24 time(s)
+Unsupported operator aten::pad encountered 12 time(s)
+Unsupported operator aten::mul encountered 24 time(s)
+Unsupported operator aten::add encountered 54 time(s)
+Unsupported operator aten::softmax encountered 12 time(s)
+Unsupported operator aten::gelu encountered 12 time(s)
+Unsupported operator aten::fill_ encountered 54 time(s)
+Unsupported operator aten::sub encountered 18 time(s)
+Unsupported operator aten::ne encountered 6 time(s)
+Unsupported operator aten::im2col encountered 3 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+patch_embed.adaptive_padding, stages.0.blocks.0.attn.drop, stages.0.blocks.0.ffn.dropout_layer, stages.0.blocks.1.attn.drop, stages.0.blocks.1.ffn.dropout_layer, stages.0.downsample.adaptive_padding, stages.1.blocks.0.attn.drop, stages.1.blocks.0.ffn.dropout_layer, stages.1.blocks.1.attn.drop, stages.1.blocks.1.ffn.dropout_layer, stages.1.downsample.adaptive_padding, stages.2.blocks.0.attn.drop, stages.2.blocks.0.ffn.dropout_layer, stages.2.blocks.1.attn.drop, stages.2.blocks.1.ffn.dropout_layer, stages.2.blocks.2.attn.drop, stages.2.blocks.2.ffn.dropout_layer, stages.2.blocks.3.attn.drop, stages.2.blocks.3.ffn.dropout_layer, stages.2.blocks.4.attn.drop, stages.2.blocks.4.ffn.dropout_layer, stages.2.blocks.5.attn.drop, stages.2.blocks.5.ffn.dropout_layer, stages.2.downsample.adaptive_padding, stages.3.blocks.0.attn.drop, stages.3.blocks.0.ffn.dropout_layer, stages.3.blocks.1.attn.drop, stages.3.blocks.1.ffn.dropout_layer
+dict_items([('conv', 0.3612672), ('layer_norm', 0.460992), ('linear', 108.38016), ('matmul', 3.5035392)])
+GFlops:  112.70595840000001 Params:  27517818
+model swin + input shape 1120 => params 27517818 GFLOPs 112.70595840000001
+Unsupported operator aten::rsub encountered 24 time(s)
+Unsupported operator aten::pad encountered 12 time(s)
+Unsupported operator aten::mul encountered 24 time(s)
+Unsupported operator aten::add encountered 54 time(s)
+Unsupported operator aten::softmax encountered 12 time(s)
+Unsupported operator aten::gelu encountered 12 time(s)
+Unsupported operator aten::fill_ encountered 54 time(s)
+Unsupported operator aten::sub encountered 18 time(s)
+Unsupported operator aten::ne encountered 6 time(s)
+Unsupported operator aten::im2col encountered 3 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+patch_embed.adaptive_padding, stages.0.blocks.0.attn.drop, stages.0.blocks.0.ffn.dropout_layer, stages.0.blocks.1.attn.drop, stages.0.blocks.1.ffn.dropout_layer, stages.0.downsample.adaptive_padding, stages.1.blocks.0.attn.drop, stages.1.blocks.0.ffn.dropout_layer, stages.1.blocks.1.attn.drop, stages.1.blocks.1.ffn.dropout_layer, stages.1.downsample.adaptive_padding, stages.2.blocks.0.attn.drop, stages.2.blocks.0.ffn.dropout_layer, stages.2.blocks.1.attn.drop, stages.2.blocks.1.ffn.dropout_layer, stages.2.blocks.2.attn.drop, stages.2.blocks.2.ffn.dropout_layer, stages.2.blocks.3.attn.drop, stages.2.blocks.3.ffn.dropout_layer, stages.2.blocks.4.attn.drop, stages.2.blocks.4.ffn.dropout_layer, stages.2.blocks.5.attn.drop, stages.2.blocks.5.ffn.dropout_layer, stages.2.downsample.adaptive_padding, stages.3.blocks.0.attn.drop, stages.3.blocks.0.ffn.dropout_layer, stages.3.blocks.1.attn.drop, stages.3.blocks.1.ffn.dropout_layer
+dict_items([('conv', 0.4718592), ('layer_norm', 0.602112), ('linear', 144.842489856), ('matmul', 4.78509696)])
+GFlops:  150.70155801599998 Params:  27517818
+model swin + input shape 1280 => params 27517818 GFLOPs 150.70155801599998
+Unsupported operator aten::gelu encountered 18 time(s)
+Unsupported operator aten::mul encountered 18 time(s)
+Unsupported operator aten::add encountered 18 time(s)
+FLOPs for model convnext with different input shapes ==
+dict_items([('conv', 0.02391552), ('layer_norm', 0.00121344), ('linear', 0.339738624)])
+GFlops:  0.36486758399999997 Params:  27818592
+model convnext + input shape 64 => params 27818592 GFLOPs 0.36486758399999997
+Unsupported operator aten::gelu encountered 18 time(s)
+Unsupported operator aten::mul encountered 18 time(s)
+Unsupported operator aten::add encountered 18 time(s)
+dict_items([('conv', 0.069040512), ('layer_norm', 0.00367872), ('linear', 0.994443264)])
+GFlops:  1.0671624960000001 Params:  27818592
+model convnext + input shape 112 => params 27818592 GFLOPs 1.0671624960000001
+Unsupported operator aten::gelu encountered 18 time(s)
+Unsupported operator aten::mul encountered 18 time(s)
+Unsupported operator aten::add encountered 18 time(s)
+dict_items([('conv', 0.29296512), ('layer_norm', 0.01486464), ('linear', 4.161798144)])
+GFlops:  4.469627903999999 Params:  27818592
+model convnext + input shape 224 => params 27818592 GFLOPs 4.469627903999999
+Unsupported operator aten::gelu encountered 18 time(s)
+Unsupported operator aten::mul encountered 18 time(s)
+Unsupported operator aten::add encountered 18 time(s)
+dict_items([('conv', 0.86095872), ('layer_norm', 0.04368384), ('linear', 12.230590464)])
+GFlops:  13.135233024 Params:  27818592
+model convnext + input shape 384 => params 27818592 GFLOPs 13.135233024
+Unsupported operator aten::gelu encountered 18 time(s)
+Unsupported operator aten::mul encountered 18 time(s)
+Unsupported operator aten::add encountered 18 time(s)
+dict_items([('conv', 1.53059328), ('layer_norm', 0.07766016), ('linear', 21.743271936)])
+GFlops:  23.351525375999998 Params:  27818592
+model convnext + input shape 512 => params 27818592 GFLOPs 23.351525375999998
+Unsupported operator aten::gelu encountered 18 time(s)
+Unsupported operator aten::mul encountered 18 time(s)
+Unsupported operator aten::add encountered 18 time(s)
+dict_items([('conv', 2.391552), ('layer_norm', 0.121344), ('linear', 33.9738624)])
+GFlops:  36.4867584 Params:  27818592
+model convnext + input shape 640 => params 27818592 GFLOPs 36.4867584
+Unsupported operator aten::gelu encountered 18 time(s)
+Unsupported operator aten::mul encountered 18 time(s)
+Unsupported operator aten::add encountered 18 time(s)
+dict_items([('conv', 3.44383488), ('layer_norm', 0.17473536), ('linear', 48.922361856)])
+GFlops:  52.540932096 Params:  27818592
+model convnext + input shape 768 => params 27818592 GFLOPs 52.540932096
+Unsupported operator aten::gelu encountered 18 time(s)
+Unsupported operator aten::mul encountered 18 time(s)
+Unsupported operator aten::add encountered 18 time(s)
+dict_items([('conv', 6.12237312), ('layer_norm', 0.31064064), ('linear', 86.973087744)])
+GFlops:  93.40610150399999 Params:  27818592
+model convnext + input shape 1024 => params 27818592 GFLOPs 93.40610150399999
+Unsupported operator aten::gelu encountered 18 time(s)
+Unsupported operator aten::mul encountered 18 time(s)
+Unsupported operator aten::add encountered 18 time(s)
+dict_items([('conv', 7.324128), ('layer_norm', 0.371616), ('linear', 104.0449536)])
+GFlops:  111.7406976 Params:  27818592
+model convnext + input shape 1120 => params 27818592 GFLOPs 111.7406976
+Unsupported operator aten::gelu encountered 18 time(s)
+Unsupported operator aten::mul encountered 18 time(s)
+Unsupported operator aten::add encountered 18 time(s)
+dict_items([('conv', 9.566208), ('layer_norm', 0.485376), ('linear', 135.8954496)])
+GFlops:  145.9470336 Params:  27818592
+model convnext + input shape 1280 => params 27818592 GFLOPs 145.9470336
+Unsupported operator aten::add_ encountered 24 time(s)
+Unsupported operator aten::add encountered 48 time(s)
+Unsupported operator aten::gelu encountered 24 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+stages.0.blocks.2.drop_path, stages.0.blocks.3.drop_path, stages.1.blocks.0.drop_path, stages.1.blocks.1.drop_path, stages.1.blocks.2.drop_path, stages.1.blocks.3.drop_path, stages.2.blocks.0.drop_path, stages.2.blocks.1.drop_path, stages.2.blocks.10.drop_path, stages.2.blocks.11.drop_path, stages.2.blocks.12.drop_path, stages.2.blocks.13.drop_path, stages.2.blocks.14.drop_path, stages.2.blocks.15.drop_path, stages.2.blocks.16.drop_path, stages.2.blocks.17.drop_path, stages.2.blocks.18.drop_path, stages.2.blocks.19.drop_path, stages.2.blocks.2.drop_path, stages.2.blocks.20.drop_path, stages.2.blocks.21.drop_path, stages.2.blocks.22.drop_path, stages.2.blocks.23.drop_path, stages.2.blocks.24.drop_path, stages.2.blocks.25.drop_path, stages.2.blocks.26.drop_path, stages.2.blocks.27.drop_path, stages.2.blocks.28.drop_path, stages.2.blocks.29.drop_path, stages.2.blocks.3.drop_path, stages.2.blocks.30.drop_path, stages.2.blocks.31.drop_path, stages.2.blocks.32.drop_path, stages.2.blocks.33.drop_path, stages.2.blocks.34.drop_path, stages.2.blocks.35.drop_path, stages.2.blocks.4.drop_path, stages.2.blocks.5.drop_path, stages.2.blocks.6.drop_path, stages.2.blocks.7.drop_path, stages.2.blocks.8.drop_path, stages.2.blocks.9.drop_path, stages.3.blocks.0.drop_path, stages.3.blocks.1.drop_path, stages.3.blocks.2.drop_path, stages.3.blocks.3.drop_path
+FLOPs for model replknet with different input shapes ==
+dict_items([('conv', 1.259614208), ('batch_norm', 0.006733824)])
+GFlops:  1.266348032 Params:  78839168
+model replknet + input shape 64 => params 78839168 GFLOPs 1.266348032
+Unsupported operator aten::add_ encountered 24 time(s)
+Unsupported operator aten::add encountered 48 time(s)
+Unsupported operator aten::gelu encountered 24 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+stages.0.blocks.2.drop_path, stages.0.blocks.3.drop_path, stages.1.blocks.0.drop_path, stages.1.blocks.1.drop_path, stages.1.blocks.2.drop_path, stages.1.blocks.3.drop_path, stages.2.blocks.0.drop_path, stages.2.blocks.1.drop_path, stages.2.blocks.10.drop_path, stages.2.blocks.11.drop_path, stages.2.blocks.12.drop_path, stages.2.blocks.13.drop_path, stages.2.blocks.14.drop_path, stages.2.blocks.15.drop_path, stages.2.blocks.16.drop_path, stages.2.blocks.17.drop_path, stages.2.blocks.18.drop_path, stages.2.blocks.19.drop_path, stages.2.blocks.2.drop_path, stages.2.blocks.20.drop_path, stages.2.blocks.21.drop_path, stages.2.blocks.22.drop_path, stages.2.blocks.23.drop_path, stages.2.blocks.24.drop_path, stages.2.blocks.25.drop_path, stages.2.blocks.26.drop_path, stages.2.blocks.27.drop_path, stages.2.blocks.28.drop_path, stages.2.blocks.29.drop_path, stages.2.blocks.3.drop_path, stages.2.blocks.30.drop_path, stages.2.blocks.31.drop_path, stages.2.blocks.32.drop_path, stages.2.blocks.33.drop_path, stages.2.blocks.34.drop_path, stages.2.blocks.35.drop_path, stages.2.blocks.4.drop_path, stages.2.blocks.5.drop_path, stages.2.blocks.6.drop_path, stages.2.blocks.7.drop_path, stages.2.blocks.8.drop_path, stages.2.blocks.9.drop_path, stages.3.blocks.0.drop_path, stages.3.blocks.1.drop_path, stages.3.blocks.2.drop_path, stages.3.blocks.3.drop_path
+dict_items([('conv', 3.937736192), ('batch_norm', 0.020806656)])
+GFlops:  3.958542848 Params:  78839168
+model replknet + input shape 112 => params 78839168 GFLOPs 3.958542848
+Unsupported operator aten::add_ encountered 24 time(s)
+Unsupported operator aten::add encountered 48 time(s)
+Unsupported operator aten::gelu encountered 24 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+stages.0.blocks.2.drop_path, stages.0.blocks.3.drop_path, stages.1.blocks.0.drop_path, stages.1.blocks.1.drop_path, stages.1.blocks.2.drop_path, stages.1.blocks.3.drop_path, stages.2.blocks.0.drop_path, stages.2.blocks.1.drop_path, stages.2.blocks.10.drop_path, stages.2.blocks.11.drop_path, stages.2.blocks.12.drop_path, stages.2.blocks.13.drop_path, stages.2.blocks.14.drop_path, stages.2.blocks.15.drop_path, stages.2.blocks.16.drop_path, stages.2.blocks.17.drop_path, stages.2.blocks.18.drop_path, stages.2.blocks.19.drop_path, stages.2.blocks.2.drop_path, stages.2.blocks.20.drop_path, stages.2.blocks.21.drop_path, stages.2.blocks.22.drop_path, stages.2.blocks.23.drop_path, stages.2.blocks.24.drop_path, stages.2.blocks.25.drop_path, stages.2.blocks.26.drop_path, stages.2.blocks.27.drop_path, stages.2.blocks.28.drop_path, stages.2.blocks.29.drop_path, stages.2.blocks.3.drop_path, stages.2.blocks.30.drop_path, stages.2.blocks.31.drop_path, stages.2.blocks.32.drop_path, stages.2.blocks.33.drop_path, stages.2.blocks.34.drop_path, stages.2.blocks.35.drop_path, stages.2.blocks.4.drop_path, stages.2.blocks.5.drop_path, stages.2.blocks.6.drop_path, stages.2.blocks.7.drop_path, stages.2.blocks.8.drop_path, stages.2.blocks.9.drop_path, stages.3.blocks.0.drop_path, stages.3.blocks.1.drop_path, stages.3.blocks.2.drop_path, stages.3.blocks.3.drop_path
+dict_items([('conv', 15.430274048), ('batch_norm', 0.082489344)])
+GFlops:  15.512763392 Params:  78839168
+model replknet + input shape 224 => params 78839168 GFLOPs 15.512763392
+Unsupported operator aten::add_ encountered 24 time(s)
+Unsupported operator aten::add encountered 48 time(s)
+Unsupported operator aten::gelu encountered 24 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+stages.0.blocks.2.drop_path, stages.0.blocks.3.drop_path, stages.1.blocks.0.drop_path, stages.1.blocks.1.drop_path, stages.1.blocks.2.drop_path, stages.1.blocks.3.drop_path, stages.2.blocks.0.drop_path, stages.2.blocks.1.drop_path, stages.2.blocks.10.drop_path, stages.2.blocks.11.drop_path, stages.2.blocks.12.drop_path, stages.2.blocks.13.drop_path, stages.2.blocks.14.drop_path, stages.2.blocks.15.drop_path, stages.2.blocks.16.drop_path, stages.2.blocks.17.drop_path, stages.2.blocks.18.drop_path, stages.2.blocks.19.drop_path, stages.2.blocks.2.drop_path, stages.2.blocks.20.drop_path, stages.2.blocks.21.drop_path, stages.2.blocks.22.drop_path, stages.2.blocks.23.drop_path, stages.2.blocks.24.drop_path, stages.2.blocks.25.drop_path, stages.2.blocks.26.drop_path, stages.2.blocks.27.drop_path, stages.2.blocks.28.drop_path, stages.2.blocks.29.drop_path, stages.2.blocks.3.drop_path, stages.2.blocks.30.drop_path, stages.2.blocks.31.drop_path, stages.2.blocks.32.drop_path, stages.2.blocks.33.drop_path, stages.2.blocks.34.drop_path, stages.2.blocks.35.drop_path, stages.2.blocks.4.drop_path, stages.2.blocks.5.drop_path, stages.2.blocks.6.drop_path, stages.2.blocks.7.drop_path, stages.2.blocks.8.drop_path, stages.2.blocks.9.drop_path, stages.3.blocks.0.drop_path, stages.3.blocks.1.drop_path, stages.3.blocks.2.drop_path, stages.3.blocks.3.drop_path
+dict_items([('conv', 45.346111488), ('batch_norm', 0.242417664)])
+GFlops:  45.588529152 Params:  78839168
+model replknet + input shape 384 => params 78839168 GFLOPs 45.588529152
+Unsupported operator aten::add_ encountered 24 time(s)
+Unsupported operator aten::add encountered 48 time(s)
+Unsupported operator aten::gelu encountered 24 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+stages.0.blocks.2.drop_path, stages.0.blocks.3.drop_path, stages.1.blocks.0.drop_path, stages.1.blocks.1.drop_path, stages.1.blocks.2.drop_path, stages.1.blocks.3.drop_path, stages.2.blocks.0.drop_path, stages.2.blocks.1.drop_path, stages.2.blocks.10.drop_path, stages.2.blocks.11.drop_path, stages.2.blocks.12.drop_path, stages.2.blocks.13.drop_path, stages.2.blocks.14.drop_path, stages.2.blocks.15.drop_path, stages.2.blocks.16.drop_path, stages.2.blocks.17.drop_path, stages.2.blocks.18.drop_path, stages.2.blocks.19.drop_path, stages.2.blocks.2.drop_path, stages.2.blocks.20.drop_path, stages.2.blocks.21.drop_path, stages.2.blocks.22.drop_path, stages.2.blocks.23.drop_path, stages.2.blocks.24.drop_path, stages.2.blocks.25.drop_path, stages.2.blocks.26.drop_path, stages.2.blocks.27.drop_path, stages.2.blocks.28.drop_path, stages.2.blocks.29.drop_path, stages.2.blocks.3.drop_path, stages.2.blocks.30.drop_path, stages.2.blocks.31.drop_path, stages.2.blocks.32.drop_path, stages.2.blocks.33.drop_path, stages.2.blocks.34.drop_path, stages.2.blocks.35.drop_path, stages.2.blocks.4.drop_path, stages.2.blocks.5.drop_path, stages.2.blocks.6.drop_path, stages.2.blocks.7.drop_path, stages.2.blocks.8.drop_path, stages.2.blocks.9.drop_path, stages.3.blocks.0.drop_path, stages.3.blocks.1.drop_path, stages.3.blocks.2.drop_path, stages.3.blocks.3.drop_path
+dict_items([('conv', 80.615309312), ('batch_norm', 0.430964736)])
+GFlops:  81.046274048 Params:  78839168
+model replknet + input shape 512 => params 78839168 GFLOPs 81.046274048
+Unsupported operator aten::add_ encountered 24 time(s)
+Unsupported operator aten::add encountered 48 time(s)
+Unsupported operator aten::gelu encountered 24 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+stages.0.blocks.2.drop_path, stages.0.blocks.3.drop_path, stages.1.blocks.0.drop_path, stages.1.blocks.1.drop_path, stages.1.blocks.2.drop_path, stages.1.blocks.3.drop_path, stages.2.blocks.0.drop_path, stages.2.blocks.1.drop_path, stages.2.blocks.10.drop_path, stages.2.blocks.11.drop_path, stages.2.blocks.12.drop_path, stages.2.blocks.13.drop_path, stages.2.blocks.14.drop_path, stages.2.blocks.15.drop_path, stages.2.blocks.16.drop_path, stages.2.blocks.17.drop_path, stages.2.blocks.18.drop_path, stages.2.blocks.19.drop_path, stages.2.blocks.2.drop_path, stages.2.blocks.20.drop_path, stages.2.blocks.21.drop_path, stages.2.blocks.22.drop_path, stages.2.blocks.23.drop_path, stages.2.blocks.24.drop_path, stages.2.blocks.25.drop_path, stages.2.blocks.26.drop_path, stages.2.blocks.27.drop_path, stages.2.blocks.28.drop_path, stages.2.blocks.29.drop_path, stages.2.blocks.3.drop_path, stages.2.blocks.30.drop_path, stages.2.blocks.31.drop_path, stages.2.blocks.32.drop_path, stages.2.blocks.33.drop_path, stages.2.blocks.34.drop_path, stages.2.blocks.35.drop_path, stages.2.blocks.4.drop_path, stages.2.blocks.5.drop_path, stages.2.blocks.6.drop_path, stages.2.blocks.7.drop_path, stages.2.blocks.8.drop_path, stages.2.blocks.9.drop_path, stages.3.blocks.0.drop_path, stages.3.blocks.1.drop_path, stages.3.blocks.2.drop_path, stages.3.blocks.3.drop_path
+dict_items([('conv', 125.9614208), ('batch_norm', 0.6733824)])
+GFlops:  126.6348032 Params:  78839168
+model replknet + input shape 640 => params 78839168 GFLOPs 126.6348032
+Unsupported operator aten::add_ encountered 24 time(s)
+Unsupported operator aten::add encountered 48 time(s)
+Unsupported operator aten::gelu encountered 24 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+stages.0.blocks.2.drop_path, stages.0.blocks.3.drop_path, stages.1.blocks.0.drop_path, stages.1.blocks.1.drop_path, stages.1.blocks.2.drop_path, stages.1.blocks.3.drop_path, stages.2.blocks.0.drop_path, stages.2.blocks.1.drop_path, stages.2.blocks.10.drop_path, stages.2.blocks.11.drop_path, stages.2.blocks.12.drop_path, stages.2.blocks.13.drop_path, stages.2.blocks.14.drop_path, stages.2.blocks.15.drop_path, stages.2.blocks.16.drop_path, stages.2.blocks.17.drop_path, stages.2.blocks.18.drop_path, stages.2.blocks.19.drop_path, stages.2.blocks.2.drop_path, stages.2.blocks.20.drop_path, stages.2.blocks.21.drop_path, stages.2.blocks.22.drop_path, stages.2.blocks.23.drop_path, stages.2.blocks.24.drop_path, stages.2.blocks.25.drop_path, stages.2.blocks.26.drop_path, stages.2.blocks.27.drop_path, stages.2.blocks.28.drop_path, stages.2.blocks.29.drop_path, stages.2.blocks.3.drop_path, stages.2.blocks.30.drop_path, stages.2.blocks.31.drop_path, stages.2.blocks.32.drop_path, stages.2.blocks.33.drop_path, stages.2.blocks.34.drop_path, stages.2.blocks.35.drop_path, stages.2.blocks.4.drop_path, stages.2.blocks.5.drop_path, stages.2.blocks.6.drop_path, stages.2.blocks.7.drop_path, stages.2.blocks.8.drop_path, stages.2.blocks.9.drop_path, stages.3.blocks.0.drop_path, stages.3.blocks.1.drop_path, stages.3.blocks.2.drop_path, stages.3.blocks.3.drop_path
+dict_items([('conv', 181.384445952), ('batch_norm', 0.969670656)])
+GFlops:  182.354116608 Params:  78839168
+model replknet + input shape 768 => params 78839168 GFLOPs 182.354116608
+Unsupported operator aten::add_ encountered 24 time(s)
+Unsupported operator aten::add encountered 48 time(s)
+Unsupported operator aten::gelu encountered 24 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+stages.0.blocks.2.drop_path, stages.0.blocks.3.drop_path, stages.1.blocks.0.drop_path, stages.1.blocks.1.drop_path, stages.1.blocks.2.drop_path, stages.1.blocks.3.drop_path, stages.2.blocks.0.drop_path, stages.2.blocks.1.drop_path, stages.2.blocks.10.drop_path, stages.2.blocks.11.drop_path, stages.2.blocks.12.drop_path, stages.2.blocks.13.drop_path, stages.2.blocks.14.drop_path, stages.2.blocks.15.drop_path, stages.2.blocks.16.drop_path, stages.2.blocks.17.drop_path, stages.2.blocks.18.drop_path, stages.2.blocks.19.drop_path, stages.2.blocks.2.drop_path, stages.2.blocks.20.drop_path, stages.2.blocks.21.drop_path, stages.2.blocks.22.drop_path, stages.2.blocks.23.drop_path, stages.2.blocks.24.drop_path, stages.2.blocks.25.drop_path, stages.2.blocks.26.drop_path, stages.2.blocks.27.drop_path, stages.2.blocks.28.drop_path, stages.2.blocks.29.drop_path, stages.2.blocks.3.drop_path, stages.2.blocks.30.drop_path, stages.2.blocks.31.drop_path, stages.2.blocks.32.drop_path, stages.2.blocks.33.drop_path, stages.2.blocks.34.drop_path, stages.2.blocks.35.drop_path, stages.2.blocks.4.drop_path, stages.2.blocks.5.drop_path, stages.2.blocks.6.drop_path, stages.2.blocks.7.drop_path, stages.2.blocks.8.drop_path, stages.2.blocks.9.drop_path, stages.3.blocks.0.drop_path, stages.3.blocks.1.drop_path, stages.3.blocks.2.drop_path, stages.3.blocks.3.drop_path
+dict_items([('conv', 322.461237248), ('batch_norm', 1.723858944)])
+GFlops:  324.185096192 Params:  78839168
+model replknet + input shape 1024 => params 78839168 GFLOPs 324.185096192
+Unsupported operator aten::add_ encountered 24 time(s)
+Unsupported operator aten::add encountered 48 time(s)
+Unsupported operator aten::gelu encountered 24 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+stages.0.blocks.2.drop_path, stages.0.blocks.3.drop_path, stages.1.blocks.0.drop_path, stages.1.blocks.1.drop_path, stages.1.blocks.2.drop_path, stages.1.blocks.3.drop_path, stages.2.blocks.0.drop_path, stages.2.blocks.1.drop_path, stages.2.blocks.10.drop_path, stages.2.blocks.11.drop_path, stages.2.blocks.12.drop_path, stages.2.blocks.13.drop_path, stages.2.blocks.14.drop_path, stages.2.blocks.15.drop_path, stages.2.blocks.16.drop_path, stages.2.blocks.17.drop_path, stages.2.blocks.18.drop_path, stages.2.blocks.19.drop_path, stages.2.blocks.2.drop_path, stages.2.blocks.20.drop_path, stages.2.blocks.21.drop_path, stages.2.blocks.22.drop_path, stages.2.blocks.23.drop_path, stages.2.blocks.24.drop_path, stages.2.blocks.25.drop_path, stages.2.blocks.26.drop_path, stages.2.blocks.27.drop_path, stages.2.blocks.28.drop_path, stages.2.blocks.29.drop_path, stages.2.blocks.3.drop_path, stages.2.blocks.30.drop_path, stages.2.blocks.31.drop_path, stages.2.blocks.32.drop_path, stages.2.blocks.33.drop_path, stages.2.blocks.34.drop_path, stages.2.blocks.35.drop_path, stages.2.blocks.4.drop_path, stages.2.blocks.5.drop_path, stages.2.blocks.6.drop_path, stages.2.blocks.7.drop_path, stages.2.blocks.8.drop_path, stages.2.blocks.9.drop_path, stages.3.blocks.0.drop_path, stages.3.blocks.1.drop_path, stages.3.blocks.2.drop_path, stages.3.blocks.3.drop_path
+dict_items([('conv', 385.7568512), ('batch_norm', 2.0622336)])
+GFlops:  387.81908480000004 Params:  78839168
+model replknet + input shape 1120 => params 78839168 GFLOPs 387.81908480000004
+Unsupported operator aten::add_ encountered 24 time(s)
+Unsupported operator aten::add encountered 48 time(s)
+Unsupported operator aten::gelu encountered 24 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+stages.0.blocks.2.drop_path, stages.0.blocks.3.drop_path, stages.1.blocks.0.drop_path, stages.1.blocks.1.drop_path, stages.1.blocks.2.drop_path, stages.1.blocks.3.drop_path, stages.2.blocks.0.drop_path, stages.2.blocks.1.drop_path, stages.2.blocks.10.drop_path, stages.2.blocks.11.drop_path, stages.2.blocks.12.drop_path, stages.2.blocks.13.drop_path, stages.2.blocks.14.drop_path, stages.2.blocks.15.drop_path, stages.2.blocks.16.drop_path, stages.2.blocks.17.drop_path, stages.2.blocks.18.drop_path, stages.2.blocks.19.drop_path, stages.2.blocks.2.drop_path, stages.2.blocks.20.drop_path, stages.2.blocks.21.drop_path, stages.2.blocks.22.drop_path, stages.2.blocks.23.drop_path, stages.2.blocks.24.drop_path, stages.2.blocks.25.drop_path, stages.2.blocks.26.drop_path, stages.2.blocks.27.drop_path, stages.2.blocks.28.drop_path, stages.2.blocks.29.drop_path, stages.2.blocks.3.drop_path, stages.2.blocks.30.drop_path, stages.2.blocks.31.drop_path, stages.2.blocks.32.drop_path, stages.2.blocks.33.drop_path, stages.2.blocks.34.drop_path, stages.2.blocks.35.drop_path, stages.2.blocks.4.drop_path, stages.2.blocks.5.drop_path, stages.2.blocks.6.drop_path, stages.2.blocks.7.drop_path, stages.2.blocks.8.drop_path, stages.2.blocks.9.drop_path, stages.3.blocks.0.drop_path, stages.3.blocks.1.drop_path, stages.3.blocks.2.drop_path, stages.3.blocks.3.drop_path
+dict_items([('conv', 503.8456832), ('batch_norm', 2.6935296)])
+GFlops:  506.5392128 Params:  78839168
+model replknet + input shape 1280 => params 78839168 GFLOPs 506.5392128
+Unsupported operator aten::upsample_bicubic2d encountered 1 time(s)
+Unsupported operator aten::add encountered 25 time(s)
+Unsupported operator aten::pow encountered 12 time(s)
+Unsupported operator aten::div encountered 12 time(s)
+Unsupported operator aten::softmax encountered 12 time(s)
+Unsupported operator aten::gelu encountered 12 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.attn.out_drop, layers.0.ffn.dropout_layer, layers.1.attn.out_drop, layers.1.ffn.dropout_layer, layers.10.attn.out_drop, layers.10.ffn.dropout_layer, layers.11.attn.out_drop, layers.11.ffn.dropout_layer, layers.2.attn.out_drop, layers.2.ffn.dropout_layer, layers.3.attn.out_drop, layers.3.ffn.dropout_layer, layers.4.attn.out_drop, layers.4.ffn.dropout_layer, layers.5.attn.out_drop, layers.5.ffn.dropout_layer, layers.6.attn.out_drop, layers.6.ffn.dropout_layer, layers.7.attn.out_drop, layers.7.ffn.dropout_layer, layers.8.attn.out_drop, layers.8.ffn.dropout_layer, layers.9.attn.out_drop, layers.9.ffn.dropout_layer, patch_embed.adaptive_padding
+FLOPs for model deit with different input shapes ==
+dict_items([('conv', 0.004718592), ('layer_norm', 0.000816), ('linear', 0.360972288), ('matmul', 0.002663424)])
+GFlops:  0.369170304 Params:  21665664
+model deit + input shape 64 => params 21665664 GFLOPs 0.369170304
+Unsupported operator aten::upsample_bicubic2d encountered 1 time(s)
+Unsupported operator aten::add encountered 25 time(s)
+Unsupported operator aten::pow encountered 12 time(s)
+Unsupported operator aten::div encountered 12 time(s)
+Unsupported operator aten::softmax encountered 12 time(s)
+Unsupported operator aten::gelu encountered 12 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.attn.out_drop, layers.0.ffn.dropout_layer, layers.1.attn.out_drop, layers.1.ffn.dropout_layer, layers.10.attn.out_drop, layers.10.ffn.dropout_layer, layers.11.attn.out_drop, layers.11.ffn.dropout_layer, layers.2.attn.out_drop, layers.2.ffn.dropout_layer, layers.3.attn.out_drop, layers.3.ffn.dropout_layer, layers.4.attn.out_drop, layers.4.ffn.dropout_layer, layers.5.attn.out_drop, layers.5.ffn.dropout_layer, layers.6.attn.out_drop, layers.6.ffn.dropout_layer, layers.7.attn.out_drop, layers.7.ffn.dropout_layer, layers.8.attn.out_drop, layers.8.ffn.dropout_layer, layers.9.attn.out_drop, layers.9.ffn.dropout_layer, patch_embed.adaptive_padding
+dict_items([('conv', 0.014450688), ('layer_norm', 0.0024), ('linear', 1.0616832), ('matmul', 0.02304)])
+GFlops:  1.101573888 Params:  21665664
+model deit + input shape 112 => params 21665664 GFLOPs 1.101573888
+Unsupported operator aten::add encountered 25 time(s)
+Unsupported operator aten::pow encountered 12 time(s)
+Unsupported operator aten::div encountered 12 time(s)
+Unsupported operator aten::softmax encountered 12 time(s)
+Unsupported operator aten::gelu encountered 12 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.attn.out_drop, layers.0.ffn.dropout_layer, layers.1.attn.out_drop, layers.1.ffn.dropout_layer, layers.10.attn.out_drop, layers.10.ffn.dropout_layer, layers.11.attn.out_drop, layers.11.ffn.dropout_layer, layers.2.attn.out_drop, layers.2.ffn.dropout_layer, layers.3.attn.out_drop, layers.3.ffn.dropout_layer, layers.4.attn.out_drop, layers.4.ffn.dropout_layer, layers.5.attn.out_drop, layers.5.ffn.dropout_layer, layers.6.attn.out_drop, layers.6.ffn.dropout_layer, layers.7.attn.out_drop, layers.7.ffn.dropout_layer, layers.8.attn.out_drop, layers.8.ffn.dropout_layer, layers.9.attn.out_drop, layers.9.ffn.dropout_layer, patch_embed.adaptive_padding
+dict_items([('conv', 0.057802752), ('layer_norm', 0.009456), ('linear', 4.183031808), ('matmul', 0.357663744)])
+GFlops:  4.607954304 Params:  21665664
+model deit + input shape 224 => params 21665664 GFLOPs 4.607954304
+Unsupported operator aten::upsample_bicubic2d encountered 1 time(s)
+Unsupported operator aten::add encountered 25 time(s)
+Unsupported operator aten::pow encountered 12 time(s)
+Unsupported operator aten::div encountered 12 time(s)
+Unsupported operator aten::softmax encountered 12 time(s)
+Unsupported operator aten::gelu encountered 12 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.attn.out_drop, layers.0.ffn.dropout_layer, layers.1.attn.out_drop, layers.1.ffn.dropout_layer, layers.10.attn.out_drop, layers.10.ffn.dropout_layer, layers.11.attn.out_drop, layers.11.ffn.dropout_layer, layers.2.attn.out_drop, layers.2.ffn.dropout_layer, layers.3.attn.out_drop, layers.3.ffn.dropout_layer, layers.4.attn.out_drop, layers.4.ffn.dropout_layer, layers.5.attn.out_drop, layers.5.ffn.dropout_layer, layers.6.attn.out_drop, layers.6.ffn.dropout_layer, layers.7.attn.out_drop, layers.7.ffn.dropout_layer, layers.8.attn.out_drop, layers.8.ffn.dropout_layer, layers.9.attn.out_drop, layers.9.ffn.dropout_layer, patch_embed.adaptive_padding
+dict_items([('conv', 0.169869312), ('layer_norm', 0.027696), ('linear', 12.251824128), ('matmul', 3.068273664)])
+GFlops:  15.517663104 Params:  21665664
+model deit + input shape 384 => params 21665664 GFLOPs 15.517663104
+Unsupported operator aten::upsample_bicubic2d encountered 1 time(s)
+Unsupported operator aten::add encountered 25 time(s)
+Unsupported operator aten::pow encountered 12 time(s)
+Unsupported operator aten::div encountered 12 time(s)
+Unsupported operator aten::softmax encountered 12 time(s)
+Unsupported operator aten::gelu encountered 12 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.attn.out_drop, layers.0.ffn.dropout_layer, layers.1.attn.out_drop, layers.1.ffn.dropout_layer, layers.10.attn.out_drop, layers.10.ffn.dropout_layer, layers.11.attn.out_drop, layers.11.ffn.dropout_layer, layers.2.attn.out_drop, layers.2.ffn.dropout_layer, layers.3.attn.out_drop, layers.3.ffn.dropout_layer, layers.4.attn.out_drop, layers.4.ffn.dropout_layer, layers.5.attn.out_drop, layers.5.ffn.dropout_layer, layers.6.attn.out_drop, layers.6.ffn.dropout_layer, layers.7.attn.out_drop, layers.7.ffn.dropout_layer, layers.8.attn.out_drop, layers.8.ffn.dropout_layer, layers.9.attn.out_drop, layers.9.ffn.dropout_layer, patch_embed.adaptive_padding
+dict_items([('conv', 0.301989888), ('layer_norm', 0.0492), ('linear', 21.7645056), ('matmul', 9.68256)])
+GFlops:  31.798255488000002 Params:  21665664
+model deit + input shape 512 => params 21665664 GFLOPs 31.798255488000002
+Unsupported operator aten::upsample_bicubic2d encountered 1 time(s)
+Unsupported operator aten::add encountered 25 time(s)
+Unsupported operator aten::pow encountered 12 time(s)
+Unsupported operator aten::div encountered 12 time(s)
+Unsupported operator aten::softmax encountered 12 time(s)
+Unsupported operator aten::gelu encountered 12 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.attn.out_drop, layers.0.ffn.dropout_layer, layers.1.attn.out_drop, layers.1.ffn.dropout_layer, layers.10.attn.out_drop, layers.10.ffn.dropout_layer, layers.11.attn.out_drop, layers.11.ffn.dropout_layer, layers.2.attn.out_drop, layers.2.ffn.dropout_layer, layers.3.attn.out_drop, layers.3.ffn.dropout_layer, layers.4.attn.out_drop, layers.4.ffn.dropout_layer, layers.5.attn.out_drop, layers.5.ffn.dropout_layer, layers.6.attn.out_drop, layers.6.ffn.dropout_layer, layers.7.attn.out_drop, layers.7.ffn.dropout_layer, layers.8.attn.out_drop, layers.8.ffn.dropout_layer, layers.9.attn.out_drop, layers.9.ffn.dropout_layer, patch_embed.adaptive_padding
+dict_items([('conv', 0.4718592), ('layer_norm', 0.076848), ('linear', 33.995096064), ('matmul', 23.622460416)])
+GFlops:  58.16626368 Params:  21665664
+model deit + input shape 640 => params 21665664 GFLOPs 58.16626368
+Unsupported operator aten::upsample_bicubic2d encountered 1 time(s)
+Unsupported operator aten::add encountered 25 time(s)
+Unsupported operator aten::pow encountered 12 time(s)
+Unsupported operator aten::div encountered 12 time(s)
+Unsupported operator aten::softmax encountered 12 time(s)
+Unsupported operator aten::gelu encountered 12 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.attn.out_drop, layers.0.ffn.dropout_layer, layers.1.attn.out_drop, layers.1.ffn.dropout_layer, layers.10.attn.out_drop, layers.10.ffn.dropout_layer, layers.11.attn.out_drop, layers.11.ffn.dropout_layer, layers.2.attn.out_drop, layers.2.ffn.dropout_layer, layers.3.attn.out_drop, layers.3.ffn.dropout_layer, layers.4.attn.out_drop, layers.4.ffn.dropout_layer, layers.5.attn.out_drop, layers.5.ffn.dropout_layer, layers.6.attn.out_drop, layers.6.ffn.dropout_layer, layers.7.attn.out_drop, layers.7.ffn.dropout_layer, layers.8.attn.out_drop, layers.8.ffn.dropout_layer, layers.9.attn.out_drop, layers.9.ffn.dropout_layer, patch_embed.adaptive_padding
+dict_items([('conv', 0.679477248), ('layer_norm', 0.11064), ('linear', 48.94359552), ('matmul', 48.9648384)])
+GFlops:  98.698551168 Params:  21665664
+model deit + input shape 768 => params 21665664 GFLOPs 98.698551168
+Unsupported operator aten::upsample_bicubic2d encountered 1 time(s)
+Unsupported operator aten::add encountered 25 time(s)
+Unsupported operator aten::pow encountered 12 time(s)
+Unsupported operator aten::div encountered 12 time(s)
+Unsupported operator aten::softmax encountered 12 time(s)
+Unsupported operator aten::gelu encountered 12 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.attn.out_drop, layers.0.ffn.dropout_layer, layers.1.attn.out_drop, layers.1.ffn.dropout_layer, layers.10.attn.out_drop, layers.10.ffn.dropout_layer, layers.11.attn.out_drop, layers.11.ffn.dropout_layer, layers.2.attn.out_drop, layers.2.ffn.dropout_layer, layers.3.attn.out_drop, layers.3.ffn.dropout_layer, layers.4.attn.out_drop, layers.4.ffn.dropout_layer, layers.5.attn.out_drop, layers.5.ffn.dropout_layer, layers.6.attn.out_drop, layers.6.ffn.dropout_layer, layers.7.attn.out_drop, layers.7.ffn.dropout_layer, layers.8.attn.out_drop, layers.8.ffn.dropout_layer, layers.9.attn.out_drop, layers.9.ffn.dropout_layer, patch_embed.adaptive_padding
+dict_items([('conv', 1.207959552), ('layer_norm', 0.196656), ('linear', 86.994321408), ('matmul', 154.694329344)])
+GFlops:  243.093266304 Params:  21665664
+model deit + input shape 1024 => params 21665664 GFLOPs 243.093266304
+Unsupported operator aten::upsample_bicubic2d encountered 1 time(s)
+Unsupported operator aten::add encountered 25 time(s)
+Unsupported operator aten::pow encountered 12 time(s)
+Unsupported operator aten::div encountered 12 time(s)
+Unsupported operator aten::softmax encountered 12 time(s)
+Unsupported operator aten::gelu encountered 12 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.attn.out_drop, layers.0.ffn.dropout_layer, layers.1.attn.out_drop, layers.1.ffn.dropout_layer, layers.10.attn.out_drop, layers.10.ffn.dropout_layer, layers.11.attn.out_drop, layers.11.ffn.dropout_layer, layers.2.attn.out_drop, layers.2.ffn.dropout_layer, layers.3.attn.out_drop, layers.3.ffn.dropout_layer, layers.4.attn.out_drop, layers.4.ffn.dropout_layer, layers.5.attn.out_drop, layers.5.ffn.dropout_layer, layers.6.attn.out_drop, layers.6.ffn.dropout_layer, layers.7.attn.out_drop, layers.7.ffn.dropout_layer, layers.8.attn.out_drop, layers.8.ffn.dropout_layer, layers.9.attn.out_drop, layers.9.ffn.dropout_layer, patch_embed.adaptive_padding
+dict_items([('conv', 1.4450688), ('layer_norm', 0.235248), ('linear', 104.066187264), ('matmul', 221.366486016)])
+GFlops:  327.11299008000003 Params:  21665664
+model deit + input shape 1120 => params 21665664 GFLOPs 327.11299008000003
+Unsupported operator aten::upsample_bicubic2d encountered 1 time(s)
+Unsupported operator aten::add encountered 25 time(s)
+Unsupported operator aten::pow encountered 12 time(s)
+Unsupported operator aten::div encountered 12 time(s)
+Unsupported operator aten::softmax encountered 12 time(s)
+Unsupported operator aten::gelu encountered 12 time(s)
+The following submodules of the model were never called during the trace of the graph. They may be unused, or they were accessed by direct calls to .forward() or via other python methods. In the latter case they will have zeros for statistics, though their statistics will still contribute to their parent calling module.
+layers.0.attn.out_drop, layers.0.ffn.dropout_layer, layers.1.attn.out_drop, layers.1.ffn.dropout_layer, layers.10.attn.out_drop, layers.10.ffn.dropout_layer, layers.11.attn.out_drop, layers.11.ffn.dropout_layer, layers.2.attn.out_drop, layers.2.ffn.dropout_layer, layers.3.attn.out_drop, layers.3.ffn.dropout_layer, layers.4.attn.out_drop, layers.4.ffn.dropout_layer, layers.5.attn.out_drop, layers.5.ffn.dropout_layer, layers.6.attn.out_drop, layers.6.ffn.dropout_layer, layers.7.attn.out_drop, layers.7.ffn.dropout_layer, layers.8.attn.out_drop, layers.8.ffn.dropout_layer, layers.9.attn.out_drop, layers.9.ffn.dropout_layer, patch_embed.adaptive_padding
+dict_items([('conv', 1.8874368), ('layer_norm', 0.307248), ('linear', 135.916683264), ('matmul', 377.605334016)])
+GFlops:  515.71670208 Params:  21665664
+model deit + input shape 1280 => params 21665664 GFLOPs 515.71670208
+Unsupported operator aten::max_pool2d encountered 1 time(s)
+Unsupported operator aten::add_ encountered 16 time(s)
+FLOPs for model resnet50 with different input shapes ==
+dict_items([('conv', 0.333643776), ('batch_norm', 0.001814528)])
+GFlops:  0.335458304 Params:  23508032
+model resnet50 + input shape 64 => params 23508032 GFLOPs 0.335458304
+Unsupported operator aten::max_pool2d encountered 1 time(s)
+Unsupported operator aten::add_ encountered 16 time(s)
+dict_items([('conv', 1.075851264), ('batch_norm', 0.005637632)])
+GFlops:  1.081488896 Params:  23508032
+model resnet50 + input shape 112 => params 23508032 GFLOPs 1.081488896
+Unsupported operator aten::max_pool2d encountered 1 time(s)
+Unsupported operator aten::add_ encountered 16 time(s)
+dict_items([('conv', 4.087136256), ('batch_norm', 0.022227968)])
+GFlops:  4.109364224 Params:  23508032
+model resnet50 + input shape 224 => params 23508032 GFLOPs 4.109364224
+Unsupported operator aten::max_pool2d encountered 1 time(s)
+Unsupported operator aten::add_ encountered 16 time(s)
+dict_items([('conv', 12.011175936), ('batch_norm', 0.065323008)])
+GFlops:  12.076498944 Params:  23508032
+model resnet50 + input shape 384 => params 23508032 GFLOPs 12.076498944
+Unsupported operator aten::max_pool2d encountered 1 time(s)
+Unsupported operator aten::add_ encountered 16 time(s)
+dict_items([('conv', 21.353201664), ('batch_norm', 0.116129792)])
+GFlops:  21.469331456 Params:  23508032
+model resnet50 + input shape 512 => params 23508032 GFLOPs 21.469331456
+Unsupported operator aten::max_pool2d encountered 1 time(s)
+Unsupported operator aten::add_ encountered 16 time(s)
+dict_items([('conv', 33.3643776), ('batch_norm', 0.1814528)])
+GFlops:  33.5458304 Params:  23508032
+model resnet50 + input shape 640 => params 23508032 GFLOPs 33.5458304
+Unsupported operator aten::max_pool2d encountered 1 time(s)
+Unsupported operator aten::add_ encountered 16 time(s)
+dict_items([('conv', 48.044703744), ('batch_norm', 0.261292032)])
+GFlops:  48.305995776 Params:  23508032
+model resnet50 + input shape 768 => params 23508032 GFLOPs 48.305995776
+Unsupported operator aten::max_pool2d encountered 1 time(s)
+Unsupported operator aten::add_ encountered 16 time(s)
+dict_items([('conv', 85.412806656), ('batch_norm', 0.464519168)])
+GFlops:  85.877325824 Params:  23508032
+model resnet50 + input shape 1024 => params 23508032 GFLOPs 85.877325824
+Unsupported operator aten::max_pool2d encountered 1 time(s)
+Unsupported operator aten::add_ encountered 16 time(s)
+dict_items([('conv', 102.1784064), ('batch_norm', 0.5556992)])
+GFlops:  102.7341056 Params:  23508032
+model resnet50 + input shape 1120 => params 23508032 GFLOPs 102.7341056
+Unsupported operator aten::max_pool2d encountered 1 time(s)
+Unsupported operator aten::add_ encountered 16 time(s)
+dict_items([('conv', 133.4575104), ('batch_norm', 0.7258112)])
+GFlops:  134.1833216 Params:  23508032
+model resnet50 + input shape 1280 => params 23508032 GFLOPs 134.1833216
