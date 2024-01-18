@@ -59,7 +59,9 @@ ADE20K semantic segmentation (`50.8 mIoU` on val), with only 44M parameters for 
 
 **ImageNet-1K VMamba Models**
 
-![main](srcs/figs/tab2.jpg)
+<p align="center">
+  <img src="srcs/figs/tab2.jpg" alt="table2" width="70%">
+</p>
 
 
 <!-- | name | pretrain | resolution |acc@1 | acc@5 | #params | FLOPs | FPS| 22K model | 1K model |
