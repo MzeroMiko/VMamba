@@ -29,6 +29,26 @@ from utils.logger import create_logger
 from utils.utils import load_checkpoint, load_pretrained, save_checkpoint, NativeScalerWithGradNormCount, auto_resume_helper, \
     reduce_tensor
 
+from timm.utils import ModelEma as ModelEma
+from utils.utils_ema import load_checkpoint_ema, load_pretrained_ema, save_checkpoint_ema
+print(f"================= {torch.multiprocessing.get_start_method()} ==================")
+torch.multiprocessing.set_start_method("spawn", force=True)
+
+
+def str2bool(v):
+    """
+    Converts string to bool type; enables command line 
+    arguments in the format of '--arg1 true --arg2 false'
+    """
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
 
 def parse_option():
     parser = argparse.ArgumentParser('Swin Transformer training and evaluation script', add_help=False)
@@ -67,12 +87,17 @@ def parse_option():
     parser.add_argument("--local_rank", type=int, required=True, help='local rank for DistributedDataParallel')
 
     # for acceleration
-    parser.add_argument('--fused_window_process', action='store_true',
-                        help='Fused window shift & window partition, similar for reversed part.')
+    # parser.add_argument('--fused_window_process', action='store_true',
+                        # help='Fused window shift & window partition, similar for reversed part.')
     parser.add_argument('--fused_layernorm', action='store_true', help='Use fused layernorm.')
     ## overwrite optimizer in config (*.yaml) if specified, e.g., fused_adam/fused_lamb
     parser.add_argument('--optim', type=str,
                         help='overwrite optimizer if provided, can be adamw/sgd/fused_adam/fused_lamb.')
+
+    # EMA related parameters
+    parser.add_argument('--model_ema', type=str2bool, default=True)
+    parser.add_argument('--model_ema_decay', type=float, default=0.9999, help='')
+    parser.add_argument('--model_ema_force_cpu', type=str2bool, default=False, help='')
 
     args, unparsed = parser.parse_known_args()
 
@@ -97,6 +122,17 @@ def main(config):
     model.cuda()
     model_without_ddp = model
 
+    model_ema = None
+    if args.model_ema:
+        # Important to create EMA model after cuda(), DP wrapper, and AMP but before SyncBN and DDP wrapper
+        model_ema = ModelEma(
+            model,
+            decay=args.model_ema_decay,
+            device='cpu' if args.model_ema_force_cpu else '',
+            resume='')
+        print("Using EMA with decay = %.8f" % args.model_ema_decay)
+
+
     optimizer = build_optimizer(config, model)
     model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[config.LOCAL_RANK], broadcast_buffers=False)
     loss_scaler = NativeScalerWithGradNormCount()
@@ -115,6 +151,7 @@ def main(config):
         criterion = torch.nn.CrossEntropyLoss()
 
     max_accuracy = 0.0
+    max_accuracy_ema = 0.0
 
     if config.TRAIN.AUTO_RESUME:
         resume_file = auto_resume_helper(config.OUTPUT)
@@ -129,19 +166,28 @@ def main(config):
             logger.info(f'no checkpoint found in {config.OUTPUT}, ignoring auto resume')
 
     if config.MODEL.RESUME:
-        max_accuracy = load_checkpoint(config, model_without_ddp, optimizer, lr_scheduler, loss_scaler, logger)
+        max_accuracy, max_accuracy_ema = load_checkpoint_ema(config, model_without_ddp, optimizer, lr_scheduler, loss_scaler, logger, model_ema)
         acc1, acc5, loss = validate(config, data_loader_val, model)
         logger.info(f"Accuracy of the network on the {len(dataset_val)} test images: {acc1:.1f}%")
+        if model_ema is not None:
+            acc1_ema, acc5_ema, loss_ema = validate(config, data_loader_val, model_ema.ema)
+            logger.info(f"Accuracy of the network ema on the {len(dataset_val)} test images: {acc1_ema:.1f}%")
+
         if config.EVAL_MODE:
             return
 
     if config.MODEL.PRETRAINED and (not config.MODEL.RESUME):
-        load_pretrained(config, model_without_ddp, logger)
+        load_pretrained_ema(config, model_without_ddp, logger, model_ema)
         acc1, acc5, loss = validate(config, data_loader_val, model)
         logger.info(f"Accuracy of the network on the {len(dataset_val)} test images: {acc1:.1f}%")
+        if model_ema is not None:
+            acc1_ema, acc5_ema, loss_ema = validate(config, data_loader_val, model_ema.ema)
+            logger.info(f"Accuracy of the network ema on the {len(dataset_val)} test images: {acc1_ema:.1f}%")
 
     if config.THROUGHPUT_MODE:
         throughput(data_loader_val, model, logger)
+        if model_ema is not None:
+            throughput(data_loader_val, model_ema.ema, logger)
         return
 
     logger.info("Start training")
@@ -149,28 +195,33 @@ def main(config):
     for epoch in range(config.TRAIN.START_EPOCH, config.TRAIN.EPOCHS):
         data_loader_train.sampler.set_epoch(epoch)
 
-        train_one_epoch(config, model, criterion, data_loader_train, optimizer, epoch, mixup_fn, lr_scheduler,
-                        loss_scaler)
+        train_one_epoch(config, model, criterion, data_loader_train, optimizer, epoch, mixup_fn, lr_scheduler, loss_scaler, model_ema)
         if dist.get_rank() == 0 and (epoch % config.SAVE_FREQ == 0 or epoch == (config.TRAIN.EPOCHS - 1)):
-            save_checkpoint(config, epoch, model_without_ddp, max_accuracy, optimizer, lr_scheduler, loss_scaler,
-                            logger)
+            save_checkpoint_ema(config, epoch, model_without_ddp, max_accuracy, optimizer, lr_scheduler, loss_scaler, logger, model_ema, max_accuracy_ema)
 
         acc1, acc5, loss = validate(config, data_loader_val, model)
         logger.info(f"Accuracy of the network on the {len(dataset_val)} test images: {acc1:.1f}%")
         max_accuracy = max(max_accuracy, acc1)
         logger.info(f'Max accuracy: {max_accuracy:.2f}%')
+        if model_ema is not None:
+            acc1_ema, acc5_ema, loss_ema = validate(config, data_loader_val, model_ema.ema)
+            logger.info(f"Accuracy of the network on the {len(dataset_val)} test images: {acc1_ema:.1f}%")
+            max_accuracy_ema = max(max_accuracy_ema, acc1_ema)
+            logger.info(f'Max accuracy ema: {max_accuracy_ema:.2f}%')
+
 
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
     logger.info('Training time {}'.format(total_time_str))
 
 
-def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mixup_fn, lr_scheduler, loss_scaler):
+def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mixup_fn, lr_scheduler, loss_scaler, model_ema=None):
     model.train()
     optimizer.zero_grad()
 
     num_steps = len(data_loader)
     batch_time = AverageMeter()
+    data_time = AverageMeter()
     loss_meter = AverageMeter()
     norm_meter = AverageMeter()
     scaler_meter = AverageMeter()
@@ -183,6 +234,8 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
 
         if mixup_fn is not None:
             samples, targets = mixup_fn(samples, targets)
+
+        data_time.update(time.time() - end)
 
         with torch.cuda.amp.autocast(enabled=config.AMP_ENABLE):
             outputs = model(samples)
@@ -197,6 +250,8 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
         if (idx + 1) % config.TRAIN.ACCUMULATION_STEPS == 0:
             optimizer.zero_grad()
             lr_scheduler.step_update((epoch * num_steps + idx) // config.TRAIN.ACCUMULATION_STEPS)
+            if model_ema is not None:
+                model_ema.update(model)
         loss_scale_value = loss_scaler.state_dict()["scale"]
 
         torch.cuda.synchronize()
@@ -217,6 +272,7 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
                 f'Train: [{epoch}/{config.TRAIN.EPOCHS}][{idx}/{num_steps}]\t'
                 f'eta {datetime.timedelta(seconds=int(etas))} lr {lr:.6f}\t wd {wd:.4f}\t'
                 f'time {batch_time.val:.4f} ({batch_time.avg:.4f})\t'
+                f'data time {data_time.val:.4f} ({data_time.avg:.4f})\t'
                 f'loss {loss_meter.val:.4f} ({loss_meter.avg:.4f})\t'
                 f'grad_norm {norm_meter.val:.4f} ({norm_meter.avg:.4f})\t'
                 f'loss_scale {scaler_meter.val:.4f} ({scaler_meter.avg:.4f})\t'

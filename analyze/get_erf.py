@@ -238,12 +238,14 @@ def visualize_erf(MODEL: nn.Module=None, num_images=50, data_path="/dataset/Imag
 
 
 if __name__ == "__main__":
+    showpath = "./analyze/show/erf"
+    ckpt_vssm = os.path.join(os.path.dirname(__file__), "../../ckpts/classification/vssm/vssmtiny/ckpt_epoch_292.pth")
     from get_scaleup import build_vssm, build_mmpretrain_models
     
     def init_vssm(ckpt=False, **kwargs):
-        _ckpt="/home/LiuYue/Workspace3/ckpts/ckpt_vssm_tiny_224/ckpt_epoch_292.pth"
         if ckpt:
-            ckpt = _ckpt
+            ckpt = ckpt_vssm
+            assert os.path.exists(ckpt)
         return build_vssm(ckpt=ckpt, only_backbone=True, with_norm=True, depths=[2, 2, 9, 2], dims=96,)
     
     init_swin = partial(build_mmpretrain_models, cfg="swin_tiny", ckpt=False, only_backbone=True, with_norm=True,)
@@ -255,11 +257,9 @@ if __name__ == "__main__":
     for model in ["vssm", "swin", "convnext", "replknet", "deit", "resnet50"]:
         save_path = f"/tmp/{time.time()}/erf.npy"
         visualize_erf(eval(f"init_{model}(ckpt=False)"), save_path=save_path)
-        analyze_erf(source=save_path, dest=f"./show/erf/heatmap_{model}_before.png")
+        analyze_erf(source=save_path, dest=f"{showpath}/heatmap_{model}_before.png")
 
         save_path = f"/tmp/{time.time()}/erf.npy"
         visualize_erf(eval(f"init_{model}(ckpt=True)"), save_path=save_path)
-        analyze_erf(source=save_path, dest=f"./show/erf/heatmap_{model}_after.png")
+        analyze_erf(source=save_path, dest=f"{showpath}/heatmap_{model}_after.png")
 
-
-# CUDA_VISIBLE_DEVICES=6 python analyze/get_erf.py > ./show/erf/get_erf.log 2>&1

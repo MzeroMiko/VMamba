@@ -176,7 +176,9 @@ def draw_fig(data: list, xlim=(0, 301), ylim=(68, 84), xstep=None,ystep=None, sa
 
 
 def main():
-    logpath = "../logs"
+    logpath = os.path.join(os.path.dirname(__file__), "../../logs")
+    showpath = os.path.join(os.path.dirname(__file__), "./show/log")
+    
     # baseline ===
     swin_tiny = f"{logpath}/swin_tiny_224_b16x64_300e_imagenet_20210616_090925.json"
     swin_small = f"{logpath}/swin_small_224_b16x64_300e_imagenet_20210615_110219.json"
@@ -291,7 +293,7 @@ def main():
             dict(x=vssmtiny3393_nodroppath_convnext['xaxis'], y=vssmtiny3393_nodroppath_convnext['accs']['acc1'], label="vssmtiny3393_nodroppath_convnext"),
             dict(x=vssmtiny3393_nodroppath_convnext['xaxis'], y=vssmtiny3393_nodroppath_convnext['emaaccs']['acc1'], label="vssmtiny3393_nodroppath_convnext_ema"),
             # ======================================================================
-        ], xlim=(10, 300), ylim=(65, 85), xstep=5, ystep=0.5, save_path="./show/log/acc_nodroppath.jpg")
+        ], xlim=(10, 300), ylim=(65, 85), xstep=5, ystep=0.5, save_path=f"{showpath}/acc_nodroppath.jpg")
 
     if True:
         draw_fig(data=[
@@ -307,54 +309,56 @@ def main():
             # ======================================================================
             dict(x=vssmtiny3393_nodroppath_convnext['loss_xaxis'], y=vssmtiny3393_nodroppath_convnext['avglosses'], label="vssmtiny3393_nodroppath_convnext"),
             # ======================================================================
-        ], xlim=(10, 300), ylim=(0, 7), save_path="./show/log/loss_nodroppath.jpg")
+        ], xlim=(10, 300), ylim=(0, 7), save_path=f"{showpath}/loss_nodroppath.jpg")
 
 
     # droppath + 2292 =======================================================
     fit_vssmbase = linefit(vssmsmall['xaxis'], vssmsmall['accs']['acc1'], fit_range=[100, 300], out_range=[60, 300])
 
-    draw_fig(data=[
-        dict(x=swin_tiny['xaxis'], y=swin_tiny['accs']['acc1'], label="swin_tiny"),
-        dict(x=swin_small['xaxis'], y=swin_small['accs']['acc1'], label="swin_small"),
-        dict(x=swin_base['xaxis'], y=swin_base['accs']['acc1'], label="swin_base"),
-        # dict(x=convnext_baseline['xaxis'], y=convnext_baseline['accs']['acc1'], label="convnext_tiny_acc1_baseline"),
-        # dict(x=convnext_baseline['xaxis'], y=convnext_baseline['emaaccs']['acc1'], label="convnext_tiny_acc1_ema_baseline"),
-        # ======================================================================
-        # dict(x=vssmtiny2262_nodroppath['xaxis'], y=vssmtiny2262_nodroppath['accs']['acc1'], label="vssmtiny2262_nodroppath"),
-        # ======================================================================
-        dict(x=vssmtiny['xaxis'], y=vssmtiny['accs']['acc1'], label="vssmtiny"),
-        # dict(x=vssmtiny_nodroppath['xaxis'], y=vssmtiny_nodroppath['accs']['acc1'], label="vssmtiny_nodroppath"),
-        # dict(x=vsstiny_noconv['xaxis'], y=vsstiny_noconv['accs']['acc1'], label="vsstiny_noconv"),
-        dict(x=vssmbase['xaxis'], y=vssmbase['accs']['acc1'], label="vssmbase"),
-        dict(x=vssmsmall['xaxis'], y=vssmsmall['accs']['acc1'], label="vssmsmall"),
-        dict(x=vssmsmall['xaxis'], y=vssmsmall['emaaccs']['acc1'], label="vssmsmall_ema"),
-        dict(x=vssmbasedrop06['xaxis'], y=vssmbasedrop06['accs']['acc1'], label="vssmbasedrop06"),
-        dict(x=vssmbasedrop06['xaxis'], y=vssmbasedrop06['emaaccs']['acc1'], label="vssmbasedrop06_ema"),
-        # ======================================================================
-        # dict(x=fit_vssmbase[0], y=fit_vssmbase[1], label="vssmbase"),
-        # ======================================================================
-    ], xlim=(20, 300), ylim=(70, 85), xstep=5, ystep=0.5, save_path="./show/log/acc_vssm.jpg")
+    if True:
+        draw_fig(data=[
+            dict(x=swin_tiny['xaxis'], y=swin_tiny['accs']['acc1'], label="swin_tiny"),
+            dict(x=swin_small['xaxis'], y=swin_small['accs']['acc1'], label="swin_small"),
+            dict(x=swin_base['xaxis'], y=swin_base['accs']['acc1'], label="swin_base"),
+            # dict(x=convnext_baseline['xaxis'], y=convnext_baseline['accs']['acc1'], label="convnext_tiny_acc1_baseline"),
+            # dict(x=convnext_baseline['xaxis'], y=convnext_baseline['emaaccs']['acc1'], label="convnext_tiny_acc1_ema_baseline"),
+            # ======================================================================
+            # dict(x=vssmtiny2262_nodroppath['xaxis'], y=vssmtiny2262_nodroppath['accs']['acc1'], label="vssmtiny2262_nodroppath"),
+            # ======================================================================
+            dict(x=vssmtiny['xaxis'], y=vssmtiny['accs']['acc1'], label="vssmtiny"),
+            # dict(x=vssmtiny_nodroppath['xaxis'], y=vssmtiny_nodroppath['accs']['acc1'], label="vssmtiny_nodroppath"),
+            # dict(x=vsstiny_noconv['xaxis'], y=vsstiny_noconv['accs']['acc1'], label="vsstiny_noconv"),
+            dict(x=vssmbase['xaxis'], y=vssmbase['accs']['acc1'], label="vssmbase"),
+            dict(x=vssmsmall['xaxis'], y=vssmsmall['accs']['acc1'], label="vssmsmall"),
+            dict(x=vssmsmall['xaxis'], y=vssmsmall['emaaccs']['acc1'], label="vssmsmall_ema"),
+            dict(x=vssmbasedrop06['xaxis'], y=vssmbasedrop06['accs']['acc1'], label="vssmbasedrop06"),
+            dict(x=vssmbasedrop06['xaxis'], y=vssmbasedrop06['emaaccs']['acc1'], label="vssmbasedrop06_ema"),
+            # ======================================================================
+            # dict(x=fit_vssmbase[0], y=fit_vssmbase[1], label="vssmbase"),
+            # ======================================================================
+        ], xlim=(20, 300), ylim=(70, 85), xstep=5, ystep=0.5, save_path=f"{showpath}/acc_vssm.jpg")
 
-    draw_fig(data=[
-        dict(x=swin_tiny['loss_xaxis'], y=swin_tiny['avglosses'], label="swin_tiny"),
-        dict(x=swin_small['loss_xaxis'], y=swin_small['avglosses'], label="swin_small"),
-        dict(x=swin_base['loss_xaxis'], y=swin_base['avglosses'], label="swin_base"),
-        # dict(x=convnext_baseline['loss_xaxis'], y=convnext_baseline['avglosses'], label="convnext_tiny_acc1_baseline"),
-        # ======================================================================
-        # dict(x=vssmtiny2262_nodroppath['loss_xaxis'], y=vssmtiny2262_nodroppath['avglosses'], label="vssmtiny2262_nodroppath"),
-        # dict(x=vssmsmall22182_nodroppath['loss_xaxis'], y=vssmsmall22182_nodroppath['avglosses'], label="vssmsmall22182_nodroppath"),
-        # dict(x=vssmbase22182_nodroppath['loss_xaxis'], y=vssmbase22182_nodroppath['avglosses'], label="vssmbase22182_nodroppath"),
-        # ======================================================================
-        # dict(x=vssmtiny3393_nodroppath_convnext['loss_xaxis'], y=vssmtiny3393_nodroppath_convnext['avglosses'], label="vssmtiny3393_nodroppath_convnext"),
-        # ======================================================================
-        # dict(x=vssmtiny_nodroppath['loss_xaxis'], y=vssmtiny_nodroppath['avglosses'], label="vssmtiny_nodroppath"),
-        # ======================================================================
-        dict(x=vssmtiny['loss_xaxis'], y=vssmtiny['avglosses'], label="vssmtiny"),
-        dict(x=vssmbase['loss_xaxis'], y=vssmbase['avglosses'], label="vssmbase"),
-        dict(x=vssmsmall['loss_xaxis'], y=vssmsmall['avglosses'], label="vssmsmall"),
-        dict(x=vssmbasedrop06['loss_xaxis'], y=vssmbasedrop06['avglosses'], label="vssmbasedrop06"),
-        # ======================================================================
-    ], xlim=(10, 300), ylim=(2,5), save_path="./show/log/loss_vssm.jpg")
+    if True:
+        draw_fig(data=[
+            dict(x=swin_tiny['loss_xaxis'], y=swin_tiny['avglosses'], label="swin_tiny"),
+            dict(x=swin_small['loss_xaxis'], y=swin_small['avglosses'], label="swin_small"),
+            dict(x=swin_base['loss_xaxis'], y=swin_base['avglosses'], label="swin_base"),
+            # dict(x=convnext_baseline['loss_xaxis'], y=convnext_baseline['avglosses'], label="convnext_tiny_acc1_baseline"),
+            # ======================================================================
+            # dict(x=vssmtiny2262_nodroppath['loss_xaxis'], y=vssmtiny2262_nodroppath['avglosses'], label="vssmtiny2262_nodroppath"),
+            # dict(x=vssmsmall22182_nodroppath['loss_xaxis'], y=vssmsmall22182_nodroppath['avglosses'], label="vssmsmall22182_nodroppath"),
+            # dict(x=vssmbase22182_nodroppath['loss_xaxis'], y=vssmbase22182_nodroppath['avglosses'], label="vssmbase22182_nodroppath"),
+            # ======================================================================
+            # dict(x=vssmtiny3393_nodroppath_convnext['loss_xaxis'], y=vssmtiny3393_nodroppath_convnext['avglosses'], label="vssmtiny3393_nodroppath_convnext"),
+            # ======================================================================
+            # dict(x=vssmtiny_nodroppath['loss_xaxis'], y=vssmtiny_nodroppath['avglosses'], label="vssmtiny_nodroppath"),
+            # ======================================================================
+            dict(x=vssmtiny['loss_xaxis'], y=vssmtiny['avglosses'], label="vssmtiny"),
+            dict(x=vssmbase['loss_xaxis'], y=vssmbase['avglosses'], label="vssmbase"),
+            dict(x=vssmsmall['loss_xaxis'], y=vssmsmall['avglosses'], label="vssmsmall"),
+            dict(x=vssmbasedrop06['loss_xaxis'], y=vssmbasedrop06['avglosses'], label="vssmbasedrop06"),
+            # ======================================================================
+        ], xlim=(10, 300), ylim=(2,5), save_path=f"{showpath}/loss_vssm.jpg")
 
     # droppath + 2262 =======================================================
 
@@ -370,31 +374,33 @@ def main():
     lx, losses, avglosses = get_loss_swin(vssmdbase, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
     vssmdbase = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
 
-    draw_fig(data=[
-        dict(x=swin_tiny['xaxis'], y=swin_tiny['accs']['acc1'], label="swin_tiny"),
-        dict(x=swin_small['xaxis'], y=swin_small['accs']['acc1'], label="swin_small"),
-        dict(x=swin_base['xaxis'], y=swin_base['accs']['acc1'], label="swin_base"),
-        dict(x=vssmdtiny['xaxis'], y=vssmdtiny['accs']['acc1'], label="vssmdtiny"),
-        dict(x=vssmdsmall['xaxis'], y=vssmdsmall['accs']['acc1'], label="vssmdsmall"),
-        dict(x=vssmdbase['xaxis'], y=vssmdbase['accs']['acc1'], label="vssmdbase"),
-        # ======================================================================
-        dict(x=vssmdtiny['xaxis'], y=vssmdtiny['emaaccs']['acc1'], label="vssmdtiny_ema"),
-        dict(x=vssmdsmall['xaxis'], y=vssmdsmall['emaaccs']['acc1'], label="vssmdsmall_ema"),
-        dict(x=vssmdbase['xaxis'], y=vssmdbase['emaaccs']['acc1'], label="vssmdbase_ema"),
-        # dict(x=fit_vssmbase[0], y=fit_vssmbase[1], label="vssmbase"),
-        # ======================================================================
-    ], xlim=(20, 300), ylim=(70, 85), xstep=5, ystep=0.5, save_path="./show/log/acc_vssmd.jpg")
+    if True:
+        draw_fig(data=[
+            dict(x=swin_tiny['xaxis'], y=swin_tiny['accs']['acc1'], label="swin_tiny"),
+            dict(x=swin_small['xaxis'], y=swin_small['accs']['acc1'], label="swin_small"),
+            dict(x=swin_base['xaxis'], y=swin_base['accs']['acc1'], label="swin_base"),
+            dict(x=vssmdtiny['xaxis'], y=vssmdtiny['accs']['acc1'], label="vssmdtiny"),
+            dict(x=vssmdsmall['xaxis'], y=vssmdsmall['accs']['acc1'], label="vssmdsmall"),
+            dict(x=vssmdbase['xaxis'], y=vssmdbase['accs']['acc1'], label="vssmdbase"),
+            # ======================================================================
+            dict(x=vssmdtiny['xaxis'], y=vssmdtiny['emaaccs']['acc1'], label="vssmdtiny_ema"),
+            dict(x=vssmdsmall['xaxis'], y=vssmdsmall['emaaccs']['acc1'], label="vssmdsmall_ema"),
+            dict(x=vssmdbase['xaxis'], y=vssmdbase['emaaccs']['acc1'], label="vssmdbase_ema"),
+            # dict(x=fit_vssmbase[0], y=fit_vssmbase[1], label="vssmbase"),
+            # ======================================================================
+        ], xlim=(20, 300), ylim=(70, 85), xstep=5, ystep=0.5, save_path=f"{showpath}/acc_vssmd.jpg")
 
-    draw_fig(data=[
-        dict(x=swin_tiny['loss_xaxis'], y=swin_tiny['avglosses'], label="swin_tiny"),
-        dict(x=swin_small['loss_xaxis'], y=swin_small['avglosses'], label="swin_small"),
-        dict(x=swin_base['loss_xaxis'], y=swin_base['avglosses'], label="swin_base"),
-        # ======================================================================
-        dict(x=vssmdtiny['loss_xaxis'], y=vssmdtiny['avglosses'], label="vssmdtiny"),
-        dict(x=vssmdbase['loss_xaxis'], y=vssmdbase['avglosses'], label="vssmdbase"),
-        dict(x=vssmdsmall['loss_xaxis'], y=vssmdsmall['avglosses'], label="vssmdsmall"),
-        # ======================================================================
-    ], xlim=(10, 300), ylim=(2,5), save_path="./show/log/loss_vssmd.jpg")
+    if True:
+        draw_fig(data=[
+            dict(x=swin_tiny['loss_xaxis'], y=swin_tiny['avglosses'], label="swin_tiny"),
+            dict(x=swin_small['loss_xaxis'], y=swin_small['avglosses'], label="swin_small"),
+            dict(x=swin_base['loss_xaxis'], y=swin_base['avglosses'], label="swin_base"),
+            # ======================================================================
+            dict(x=vssmdtiny['loss_xaxis'], y=vssmdtiny['avglosses'], label="vssmdtiny"),
+            dict(x=vssmdbase['loss_xaxis'], y=vssmdbase['avglosses'], label="vssmdbase"),
+            dict(x=vssmdsmall['loss_xaxis'], y=vssmdsmall['avglosses'], label="vssmdsmall"),
+            # ======================================================================
+        ], xlim=(10, 300), ylim=(2,5), save_path=f"{showpath}/loss_vssmd.jpg")
 
 
 

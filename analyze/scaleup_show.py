@@ -28,7 +28,7 @@ def draw_fig(data: list, xlim=(0, 301), ylim=(68, 84), xstep=None, ystep=None, s
     plot.savefig(save_path)
 
 
-def readlog(file="/home/LiuYue/Workspace3/Visualize/show/scaleup.log/get_scaleup_deit.log"):
+def readlog(file=None):
     log = open(file, "r").readlines()
     log = [d.strip(" ").strip("\n") for d in log if ("img_size" in d) or ("* Acc" in d)]
     _log = []
@@ -47,7 +47,7 @@ def readlog(file="/home/LiuYue/Workspace3/Visualize/show/scaleup.log/get_scaleup
     return _log, x_axis, acc1, acc5
 
 
-def readlogflops(file="/home/LiuYue/Workspace3/Visualize/show/scaleup.log/flops.log"):
+def readlogflops(file=None):
     series = dict(tiny=dict(), small=dict(), base=dict())
     log = open(file, "r").readlines()
     log = [d.strip(" ").strip("\n") for d in log if ("==" in d)]
@@ -85,24 +85,24 @@ def readlogflops(file="/home/LiuYue/Workspace3/Visualize/show/scaleup.log/flops.
     return series
 
 
-readlogflops()
+scalepath = "analyze/show/scaleup.log"
+readlogflops(f"{scalepath}/flops.log")
+vssm_tiny = readlog(f"{scalepath}/vssmtiny_scale.log")
+swin_tiny = readlog(f"{scalepath}/swintiny_scale.log")
+convnext_tiny = readlog(f"{scalepath}/convnexttiny_scale.log")
+deit_small = readlog(f"{scalepath}/deitsmall_scale.log")
+resnet50 = readlog(f"{scalepath}/resnet50_scale.log")
 
-vssm_tiny = readlog("/home/LiuYue/Workspace3/Visualize/show/scaleup.log/vssmtiny_scale.log")
-swin_tiny = readlog("/home/LiuYue/Workspace3/Visualize/show/scaleup.log/swintiny_scale.log")
-convnext_tiny = readlog("/home/LiuYue/Workspace3/Visualize/show/scaleup.log/convnexttiny_scale.log")
-deit_small = readlog("/home/LiuYue/Workspace3/Visualize/show/scaleup.log/deitsmall_scale.log")
-resnet50 = readlog("/home/LiuYue/Workspace3/Visualize/show/scaleup.log/resnet50_scale.log")
+vssm_small = readlog(f"{scalepath}/vssmsmall_scale.log")
+swin_small = readlog(f"{scalepath}/swinsmall_scale.log")
+convnext_small = readlog(f"{scalepath}/convnextsmall_scale.log")
+deit_base = readlog(f"{scalepath}/deitbase_scale.log")
+resnet101 = readlog(f"{scalepath}/resnet101_scale.log")
 
-vssm_small = readlog("/home/LiuYue/Workspace3/Visualize/show/scaleup.log/vssmsmall_scale.log")
-swin_small = readlog("/home/LiuYue/Workspace3/Visualize/show/scaleup.log/swinsmall_scale.log")
-convnext_small = readlog("/home/LiuYue/Workspace3/Visualize/show/scaleup.log/convnextsmall_scale.log")
-deit_base = readlog("/home/LiuYue/Workspace3/Visualize/show/scaleup.log/deitbase_scale.log")
-resnet101 = readlog("/home/LiuYue/Workspace3/Visualize/show/scaleup.log/resnet101_scale.log")
-
-vssm_base = readlog("/home/LiuYue/Workspace3/Visualize/show/scaleup.log/vssmbase_scale.log")
-swin_base = readlog("/home/LiuYue/Workspace3/Visualize/show/scaleup.log/swinbase_scale.log")
-convnext_base = readlog("/home/LiuYue/Workspace3/Visualize/show/scaleup.log/convnextbase_scale.log")
-replknet_31B = readlog("/home/LiuYue/Workspace3/Visualize/show/scaleup.log/replknet31b_scale.log")
+vssm_base = readlog(f"{scalepath}/vssmbase_scale.log")
+swin_base = readlog(f"{scalepath}/swinbase_scale.log")
+convnext_base = readlog(f"{scalepath}/convnextbase_scale.log")
+replknet_31B = readlog(f"{scalepath}/replknet31b_scale.log")
 
 print("vssm_tiny:", vssm_tiny)
 print("swin_tiny:", swin_tiny)
@@ -121,14 +121,16 @@ print("swin_base:", swin_base)
 print("convnext_base:", convnext_base)
 print("replknet_31B:", replknet_31B)
 
-# if False:
-#     draw_fig([
-#         dict(x=[224, 224], y=[0, 85], label="where all the models are trained"),
-#         dict(x=vssm_tiny[1], y=vssm_tiny[2], label="vssm_tiny"),
-#         dict(x=swin_tiny[1], y=swin_tiny[2], label="swin_tiny (64, 112 is too small for windows size 7)"),
-#         dict(x=convnext_tiny[1], y=convnext_tiny[2], label="convnext_tiny"),
-#         dict(x=deit_small[1], y=deit_small[2], label="deit_small (equal to tiny model)"),
-#         dict(x=resnet50[1], y=resnet50[2], label="resnet50 (equal to tiny model)"),
-#         dict(x=vssm_tiny[1], y=vssm_tiny[2], label="vssm_tiny"),
-#         # dict(x=replknet_31B[1], y=replknet_31B[2], label="replknet_31B (equal to *base model, 1024 is too big to test)"),
-#     ], xlim=(64, 1300), ylim=(0, 85), save_path="./show/show_scaleup_acc.jpg")
+if False:
+    draw_fig([
+        dict(x=[224, 224], y=[0, 85], label="where all the models are trained"),
+        dict(x=vssm_tiny[1], y=vssm_tiny[2], label="vssm_tiny"),
+        dict(x=swin_tiny[1], y=swin_tiny[2], label="swin_tiny (64, 112 is too small for windows size 7)"),
+        dict(x=convnext_tiny[1], y=convnext_tiny[2], label="convnext_tiny"),
+        dict(x=deit_small[1], y=deit_small[2], label="deit_small (equal to tiny model)"),
+        dict(x=resnet50[1], y=resnet50[2], label="resnet50 (equal to tiny model)"),
+        dict(x=vssm_tiny[1], y=vssm_tiny[2], label="vssm_tiny"),
+        # dict(x=replknet_31B[1], y=replknet_31B[2], label="replknet_31B (equal to *base model, 1024 is too big to test)"),
+    ], xlim=(64, 1300), ylim=(0, 85), save_path="analyze/show/show_scaleup_acc.jpg")
+
+

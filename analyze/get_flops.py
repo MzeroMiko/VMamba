@@ -496,7 +496,7 @@ def mmdet_mmseg_vssm(FORCE_BUILD=True):
         ...
 
 
-def mmseg_flops(config="/home/LiuYue/Workspace3/Visualize/segmentation/configs/upernet/upernet_r50_4xb4-160k_ade20k-512x512.py", input_shape=(3, 512, 2048)):
+def mmseg_flops(config=None, input_shape=(3, 512, 2048)):
     from mmengine.config import Config, DictAction
     from mmengine.runner import Runner
     from mmseg.registry import RUNNERS
@@ -513,7 +513,7 @@ def mmseg_flops(config="/home/LiuYue/Workspace3/Visualize/segmentation/configs/u
     fvcore_flop_count(model, input_shape=input_shape)
 
 
-def mmdet_flops(config="/home/LiuYue/Workspace3/Visualize/detection/mask_rcnn_swin_fpn_coco_tiny.py"):
+def mmdet_flops(config=None):
     from mmengine.config import Config, DictAction
     from mmengine.runner import Runner
     from mmseg.registry import RUNNERS
@@ -528,6 +528,7 @@ def mmdet_flops(config="/home/LiuYue/Workspace3/Visualize/detection/mask_rcnn_sw
     model = runner.model.cuda()
     
     if True:
+        oridir = os.getcwd()
         os.chdir(os.path.join(os.path.dirname(__file__), "../detection"))
         data_loader = runner.val_dataloader
         num_images = 100
@@ -543,33 +544,39 @@ def mmdet_flops(config="/home/LiuYue/Workspace3/Visualize/detection/mask_rcnn_sw
             mean_flops.append(out['flops'])
         mean_flops = np.average(np.array(mean_flops))
         print(params, mean_flops)
-
-
-
-
+        os.chdir(oridir)
 
     
 if __name__ == '__main__':
-    # print("fvcore flops count for vssm ====================", flush=True)
-    # get_flops_vssm()
-    # print("mmengine flops count for vssm ====================", flush=True)
-    # get_flops_vssm("mm") # same as fvcore
-    # print("flops count for models with bigger inputs ====================", flush=True)
-    # get_scale_up()  
-    mmdet_mmseg_vssm()
-    # mmseg_flops(config="/home/LiuYue/Workspace3/Visualize/segmentation/configs/upernet/upernet_r50_4xb4-160k_ade20k-512x512.py")
-    # mmseg_flops(config="/home/LiuYue/Workspace3/Visualize/segmentation/configs/upernet/upernet_r101_4xb4-160k_ade20k-512x512.py")
-    # mmseg_flops(config="/home/LiuYue/Workspace3/Visualize/segmentation/configs/vit/vit_deit-s16_mln_upernet_8xb2-160k_ade20k-512x512.py")
-    # mmseg_flops(config="/home/LiuYue/Workspace3/Visualize/segmentation/configs/vit/vit_deit-b16_mln_upernet_8xb2-160k_ade20k-512x512.py")
-    mmseg_flops(config="/home/LiuYue/Workspace3/Visualize/segmentation/upernet_swin_4xb4-160k_ade20k-640x640_small.py", input_shape=(3, 640, 2560)) # GFlops:  1614.082896384 Params:  81259766
-    # mmseg_flops(config="/home/LiuYue/Workspace3/Visualize/segmentation/upernet_convnext_4xb4-160k_ade20k-640x640_small.py", input_shape=(3, 640, 2560)) # GFlops:  1606.538496 Params:  81877196
-    # mmseg_flops(config="/home/LiuYue/Workspace3/Visualize/segmentation/upernet_vssm_4xb4-160k_ade20k-640x640_small.py", input_shape=(3, 640, 2560)) # GFlops:  1619.8110944 Params:  76070924
-    
-    # mmdet_flops(config="/home/LiuYue/Workspace3/Visualize/detection/mask_rcnn_swin_fpn_coco_tiny.py") # 42.4M 262093532640.0
-    # mmdet_flops(config="/home/LiuYue/Workspace3/Visualize/detection/mask_rcnn_swin_fpn_coco_small.py") # 63.924M 357006236640.0
-    # mmdet_flops(config="/home/LiuYue/Workspace3/Visualize/detection/mask_rcnn_swin_fpn_coco_base.py") # 95.628M 482127568640.0
-    # mmdet_flops(config="/home/LiuYue/Workspace3/Visualize/detection/configs/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py") # 44.396M 260152304640.0
-    # mmdet_flops(config="/home/LiuYue/Workspace3/Visualize/detection/configs/mask_rcnn/mask-rcnn_r101_fpn_1x_coco.py") # 44.396M 260152304640.0
+    if True:
+        print("fvcore flops count for vssm ====================", flush=True)
+        get_flops_vssm()
+        print("mmengine flops count for vssm ====================", flush=True)
+        get_flops_vssm("mm") # same as fvcore
+        print("flops count for models with bigger inputs ====================", flush=True)
+        get_scale_up()  
 
-# CUDA_VISIBLE_DEVICES=6 python analyze/get_flops.py > ./show/flops/flops.log 2>&1
+    if True:
+        mmdet_mmseg_vssm()
+        segpath = "segmentation/configs"
+        detpath = "detection/configs"
+        if True:
+            mmseg_flops(config=f"{segpath}/upernet/upernet_r50_4xb4-160k_ade20k-512x512.py", input_shape=(3, 512, 2048)) # GFlops:  952.616667136 Params:  66516108
+            mmseg_flops(config=f"{segpath}/upernet/upernet_r101_4xb4-160k_ade20k-512x512.py", input_shape=(3, 512, 2048)) # GFlops:  1030.4084234239997 Params:  85508236
+            mmseg_flops(config=f"{segpath}/vit/vit_deit-s16_mln_upernet_8xb2-160k_ade20k-512x512.py", input_shape=(3, 512, 2048)) # GFlops:  1216.821829632 Params:  57994796
+            mmseg_flops(config=f"{segpath}/vit/vit_deit-b16_mln_upernet_8xb2-160k_ade20k-512x512.py", input_shape=(3, 512, 2048)) # GFlops:  2006.545496064 Params:  144172844
+            mmseg_flops(config=f"{segpath}/vssm/upernet_vssm_4xb4-160k_ade20k-512x512_tiny.py", input_shape=(3, 512, 2048)) # GFlops:  939.4933174400002 Params:  54546956
+            mmseg_flops(config=f"{segpath}/vssm/upernet_vssm_4xb4-160k_ade20k-512x512_small.py", input_shape=(3, 512, 2048)) # GFlops:  1036.6845167359998 Params:  76070924
+            mmseg_flops(config=f"{segpath}/vssm/upernet_vssm_4xb4-160k_ade20k-512x512_base.py", input_shape=(3, 512, 2048)) # GFlops:  1166.887735664 Params:  109765548
+            mmseg_flops(config=f"{segpath}/vssm/upernet_swin_4xb4-160k_ade20k-640x640_small.py", input_shape=(3, 640, 2560)) # GFlops:  1614.082896384 Params:  81259766
+            mmseg_flops(config=f"{segpath}/vssm/upernet_convnext_4xb4-160k_ade20k-640x640_small.py", input_shape=(3, 640, 2560)) # GFlops:  1606.538496 Params:  81877196
+            mmseg_flops(config=f"{segpath}/vssm/upernet_vssm_4xb4-160k_ade20k-640x640_small.py", input_shape=(3, 640, 2560)) # GFlops:  1619.8110944 Params:  76070924
+    
+        if True:
+            mmdet_flops(config=f"{detpath}/vssm/mask_rcnn_swin_fpn_coco_tiny.py") # 42.4M 262093532640.0
+            mmdet_flops(config=f"{detpath}/vssm/mask_rcnn_swin_fpn_coco_small.py") # 63.924M 357006236640.0
+            mmdet_flops(config=f"{detpath}/vssm/mask_rcnn_swin_fpn_coco_base.py") # 95.628M 482127568640.0
+            mmdet_flops(config=f"{detpath}/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py") # 44.396M 260152304640.0
+            mmdet_flops(config=f"{detpath}/mask_rcnn/mask-rcnn_r101_fpn_1x_coco.py") # 63.388M 336434160640.0
+
     

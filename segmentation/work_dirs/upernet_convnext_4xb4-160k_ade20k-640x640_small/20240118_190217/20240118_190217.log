@@ -1,0 +1,477 @@
+2024/01/18 19:02:20 - mmengine - INFO - 
+------------------------------------------------------------
+System environment:
+    sys.platform: linux
+    Python: 3.10.13 (main, Sep 11 2023, 13:44:35) [GCC 11.2.0]
+    CUDA available: True
+    numpy_random_seed: 1247995686
+    GPU 0,1,2,3,4,5,6: NVIDIA A100-SXM4-80GB
+    CUDA_HOME: /usr/local/cuda-11.7
+    NVCC: Cuda compilation tools, release 11.7, V11.7.64
+    GCC: gcc (Ubuntu 9.4.0-1ubuntu1~20.04.3) 9.4.0
+    PyTorch: 1.13.0
+    PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2023.1-Product Build 20230303 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.6.0 (Git Hash 52b5f107dd9cf10910aaa19cb47f3abf9b349815)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.7
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.5
+  - Magma 2.6.1
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.7, CUDNN_VERSION=8.5.0, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -fabi-version=11 -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DEDGE_PROFILER_USE_KINETO -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wunused-local-typedefs -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.13.0, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+    TorchVision: 0.14.0
+    OpenCV: 4.8.1
+    MMEngine: 0.10.1
+
+Runtime environment:
+    cudnn_benchmark: True
+    mp_cfg: {'mp_start_method': 'fork', 'opencv_num_threads': 0}
+    dist_cfg: {'backend': 'nccl'}
+    seed: 1247995686
+    Distributed launcher: pytorch
+    Distributed training: True
+    GPU number: 4
+------------------------------------------------------------
+
+2024/01/18 19:02:21 - mmengine - INFO - Config:
+checkpoint_file = 'https://download.openmmlab.com/mmclassification/v0/convnext/downstream/convnext-small_3rdparty_32xb128-noema_in1k_20220301-303e75e3.pth'
+crop_size = (
+    640,
+    640,
+)
+custom_imports = dict(allow_failed_imports=False, imports='mmpretrain.models')
+data_preprocessor = dict(
+    bgr_to_rgb=True,
+    mean=[
+        123.675,
+        116.28,
+        103.53,
+    ],
+    pad_val=0,
+    seg_pad_val=255,
+    size=(
+        640,
+        640,
+    ),
+    std=[
+        58.395,
+        57.12,
+        57.375,
+    ],
+    type='SegDataPreProcessor')
+data_root = 'data/ade/ADEChallengeData2016'
+dataset_type = 'ADE20KDataset'
+default_hooks = dict(
+    checkpoint=dict(by_epoch=False, interval=16000, type='CheckpointHook'),
+    logger=dict(interval=50, log_metric_by_epoch=False, type='LoggerHook'),
+    param_scheduler=dict(type='ParamSchedulerHook'),
+    sampler_seed=dict(type='DistSamplerSeedHook'),
+    timer=dict(type='IterTimerHook'),
+    visualization=dict(type='SegVisualizationHook'))
+default_scope = 'mmseg'
+env_cfg = dict(
+    cudnn_benchmark=True,
+    dist_cfg=dict(backend='nccl'),
+    mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0))
+img_ratios = [
+    0.5,
+    0.75,
+    1.0,
+    1.25,
+    1.5,
+    1.75,
+]
+launcher = 'pytorch'
+load_from = '../../ckpts/segmentation/upernet_convnext_4xb4-160k_ade20k-640x640_small/iter_160000.pth'
+log_level = 'INFO'
+log_processor = dict(by_epoch=False)
+model = dict(
+    module=dict(
+        auxiliary_head=dict(
+            align_corners=False,
+            channels=256,
+            concat_input=False,
+            dropout_ratio=0.1,
+            in_channels=384,
+            in_index=2,
+            loss_decode=dict(
+                loss_weight=0.4, type='CrossEntropyLoss', use_sigmoid=False),
+            norm_cfg=dict(requires_grad=True, type='SyncBN'),
+            num_classes=150,
+            num_convs=1,
+            type='FCNHead'),
+        backbone=dict(
+            arch='small',
+            drop_path_rate=0.3,
+            gap_before_final_norm=False,
+            init_cfg=dict(
+                checkpoint=
+                'https://download.openmmlab.com/mmclassification/v0/convnext/downstream/convnext-small_3rdparty_32xb128-noema_in1k_20220301-303e75e3.pth',
+                prefix='backbone.',
+                type='Pretrained'),
+            layer_scale_init_value=1.0,
+            out_indices=[
+                0,
+                1,
+                2,
+                3,
+            ],
+            pretrained=None,
+            type='mmpretrain.ConvNeXt'),
+        data_preprocessor=dict(
+            bgr_to_rgb=True,
+            mean=[
+                123.675,
+                116.28,
+                103.53,
+            ],
+            pad_val=0,
+            seg_pad_val=255,
+            size=(
+                640,
+                640,
+            ),
+            std=[
+                58.395,
+                57.12,
+                57.375,
+            ],
+            type='SegDataPreProcessor'),
+        decode_head=dict(
+            align_corners=False,
+            channels=512,
+            dropout_ratio=0.1,
+            in_channels=[
+                96,
+                192,
+                384,
+                768,
+            ],
+            in_index=[
+                0,
+                1,
+                2,
+                3,
+            ],
+            loss_decode=dict(
+                loss_weight=1.0, type='CrossEntropyLoss', use_sigmoid=False),
+            norm_cfg=dict(requires_grad=True, type='SyncBN'),
+            num_classes=150,
+            pool_scales=(
+                1,
+                2,
+                3,
+                6,
+            ),
+            type='UPerHead'),
+        pretrained=None,
+        test_cfg=dict(
+            crop_size=(
+                640,
+                640,
+            ), mode='slide', stride=(
+                426,
+                426,
+            )),
+        train_cfg=dict(),
+        type='EncoderDecoder'),
+    type='SegTTAModel')
+norm_cfg = dict(requires_grad=True, type='SyncBN')
+optim_wrapper = dict(
+    constructor='LearningRateDecayOptimizerConstructor',
+    loss_scale='dynamic',
+    optimizer=dict(
+        betas=(
+            0.9,
+            0.999,
+        ), lr=0.0001, type='AdamW', weight_decay=0.05),
+    paramwise_cfg=dict(decay_rate=0.9, decay_type='stage_wise', num_layers=12),
+    type='AmpOptimWrapper')
+optimizer = dict(lr=0.01, momentum=0.9, type='SGD', weight_decay=0.0005)
+param_scheduler = [
+    dict(
+        begin=0, by_epoch=False, end=1500, start_factor=1e-06,
+        type='LinearLR'),
+    dict(
+        begin=1500,
+        by_epoch=False,
+        end=160000,
+        eta_min=0.0,
+        power=1.0,
+        type='PolyLR'),
+]
+resume = False
+test_cfg = dict(type='TestLoop')
+test_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        data_prefix=dict(
+            img_path='images/validation',
+            seg_map_path='annotations/validation'),
+        data_root='data/ade/ADEChallengeData2016',
+        pipeline=[
+            dict(backend_args=None, type='LoadImageFromFile'),
+            dict(
+                transforms=[
+                    [
+                        dict(keep_ratio=True, scale_factor=0.5, type='Resize'),
+                        dict(
+                            keep_ratio=True, scale_factor=0.75, type='Resize'),
+                        dict(keep_ratio=True, scale_factor=1.0, type='Resize'),
+                        dict(
+                            keep_ratio=True, scale_factor=1.25, type='Resize'),
+                        dict(keep_ratio=True, scale_factor=1.5, type='Resize'),
+                        dict(
+                            keep_ratio=True, scale_factor=1.75, type='Resize'),
+                    ],
+                    [
+                        dict(
+                            direction='horizontal',
+                            prob=0.0,
+                            type='RandomFlip'),
+                        dict(
+                            direction='horizontal',
+                            prob=1.0,
+                            type='RandomFlip'),
+                    ],
+                    [
+                        dict(type='LoadAnnotations'),
+                    ],
+                    [
+                        dict(type='PackSegInputs'),
+                    ],
+                ],
+                type='TestTimeAug'),
+        ],
+        type='ADE20KDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+test_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(keep_ratio=True, scale=(
+        2560,
+        640,
+    ), type='Resize'),
+    dict(reduce_zero_label=True, type='LoadAnnotations'),
+    dict(type='PackSegInputs'),
+]
+train_cfg = dict(
+    max_iters=160000, type='IterBasedTrainLoop', val_interval=16000)
+train_dataloader = dict(
+    batch_size=2,
+    dataset=dict(
+        data_prefix=dict(
+            img_path='images/training', seg_map_path='annotations/training'),
+        data_root='data/ade/ADEChallengeData2016',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(reduce_zero_label=True, type='LoadAnnotations'),
+            dict(
+                keep_ratio=True,
+                ratio_range=(
+                    0.5,
+                    2.0,
+                ),
+                scale=(
+                    2560,
+                    640,
+                ),
+                type='RandomResize'),
+            dict(
+                cat_max_ratio=0.75, crop_size=(
+                    640,
+                    640,
+                ), type='RandomCrop'),
+            dict(prob=0.5, type='RandomFlip'),
+            dict(type='PhotoMetricDistortion'),
+            dict(type='PackSegInputs'),
+        ],
+        type='ADE20KDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=True, type='InfiniteSampler'))
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(reduce_zero_label=True, type='LoadAnnotations'),
+    dict(
+        keep_ratio=True,
+        ratio_range=(
+            0.5,
+            2.0,
+        ),
+        scale=(
+            2560,
+            640,
+        ),
+        type='RandomResize'),
+    dict(cat_max_ratio=0.75, crop_size=(
+        640,
+        640,
+    ), type='RandomCrop'),
+    dict(prob=0.5, type='RandomFlip'),
+    dict(type='PhotoMetricDistortion'),
+    dict(type='PackSegInputs'),
+]
+tta_model = dict(
+    module=dict(
+        auxiliary_head=dict(
+            align_corners=False,
+            channels=256,
+            concat_input=False,
+            dropout_ratio=0.1,
+            in_channels=384,
+            in_index=2,
+            loss_decode=dict(
+                loss_weight=0.4, type='CrossEntropyLoss', use_sigmoid=False),
+            norm_cfg=dict(requires_grad=True, type='SyncBN'),
+            num_classes=150,
+            num_convs=1,
+            type='FCNHead'),
+        backbone=dict(
+            arch='small',
+            drop_path_rate=0.3,
+            gap_before_final_norm=False,
+            init_cfg=dict(
+                checkpoint=
+                'https://download.openmmlab.com/mmclassification/v0/convnext/downstream/convnext-small_3rdparty_32xb128-noema_in1k_20220301-303e75e3.pth',
+                prefix='backbone.',
+                type='Pretrained'),
+            layer_scale_init_value=1.0,
+            out_indices=[
+                0,
+                1,
+                2,
+                3,
+            ],
+            pretrained=None,
+            type='mmpretrain.ConvNeXt'),
+        data_preprocessor=dict(
+            bgr_to_rgb=True,
+            mean=[
+                123.675,
+                116.28,
+                103.53,
+            ],
+            pad_val=0,
+            seg_pad_val=255,
+            size=(
+                640,
+                640,
+            ),
+            std=[
+                58.395,
+                57.12,
+                57.375,
+            ],
+            type='SegDataPreProcessor'),
+        decode_head=dict(
+            align_corners=False,
+            channels=512,
+            dropout_ratio=0.1,
+            in_channels=[
+                96,
+                192,
+                384,
+                768,
+            ],
+            in_index=[
+                0,
+                1,
+                2,
+                3,
+            ],
+            loss_decode=dict(
+                loss_weight=1.0, type='CrossEntropyLoss', use_sigmoid=False),
+            norm_cfg=dict(requires_grad=True, type='SyncBN'),
+            num_classes=150,
+            pool_scales=(
+                1,
+                2,
+                3,
+                6,
+            ),
+            type='UPerHead'),
+        pretrained=None,
+        test_cfg=dict(
+            crop_size=(
+                640,
+                640,
+            ), mode='slide', stride=(
+                426,
+                426,
+            )),
+        train_cfg=dict(),
+        type='EncoderDecoder'),
+    type='SegTTAModel')
+tta_pipeline = [
+    dict(backend_args=None, type='LoadImageFromFile'),
+    dict(
+        transforms=[
+            [
+                dict(keep_ratio=True, scale_factor=0.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=0.75, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.0, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.25, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.5, type='Resize'),
+                dict(keep_ratio=True, scale_factor=1.75, type='Resize'),
+            ],
+            [
+                dict(direction='horizontal', prob=0.0, type='RandomFlip'),
+                dict(direction='horizontal', prob=1.0, type='RandomFlip'),
+            ],
+            [
+                dict(type='LoadAnnotations'),
+            ],
+            [
+                dict(type='PackSegInputs'),
+            ],
+        ],
+        type='TestTimeAug'),
+]
+val_cfg = dict(type='ValLoop')
+val_dataloader = dict(
+    batch_size=1,
+    dataset=dict(
+        data_prefix=dict(
+            img_path='images/validation',
+            seg_map_path='annotations/validation'),
+        data_root='data/ade/ADEChallengeData2016',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(keep_ratio=True, scale=(
+                2560,
+                640,
+            ), type='Resize'),
+            dict(reduce_zero_label=True, type='LoadAnnotations'),
+            dict(type='PackSegInputs'),
+        ],
+        type='ADE20KDataset'),
+    num_workers=4,
+    persistent_workers=True,
+    sampler=dict(shuffle=False, type='DefaultSampler'))
+val_evaluator = dict(
+    iou_metrics=[
+        'mIoU',
+    ], type='IoUMetric')
+vis_backends = [
+    dict(type='LocalVisBackend'),
+]
+visualizer = dict(
+    name='visualizer',
+    type='SegLocalVisualizer',
+    vis_backends=[
+        dict(type='LocalVisBackend'),
+    ])
+work_dir = './work_dirs/upernet_convnext_4xb4-160k_ade20k-640x640_small'
+

@@ -225,7 +225,7 @@ def _validate(
 
 
 # ======================================
-def build_vssm(ckpt="/home/LiuYue/Workspace3/ckpts/ckpt_vssm_tiny_224/ckpt_epoch_292.pth", only_backbone=False, with_norm=True, depths=[2, 2, 9, 2], dims=96, **kwargs):
+def build_vssm(ckpt=None, only_backbone=False, with_norm=True, depths=[2, 2, 9, 2], dims=96, **kwargs):
     from vmamba.vmamba import VSSM
     model = VSSM(depths=depths, dims=dims)
         
@@ -267,7 +267,7 @@ def build_mmpretrain_models(cfg="swin_tiny", ckpt=True, only_backbone=False, wit
     from mmengine.runner import CheckpointLoader
     from mmpretrain.models import build_classifier, ImageClassifier, ConvNeXt, VisionTransformer, SwinTransformer
     from mmengine.config import Config
-    config_root = "/home/LiuYue/Workspace3/Visualize/pretrain/configs/"
+    config_root = os.path.join(os.path.dirname(__file__), "./mmpretrain_configs/configs/") 
     
     CFGS = dict(
         swin_tiny=dict(
@@ -342,7 +342,7 @@ def build_mmpretrain_models(cfg="swin_tiny", ckpt=True, only_backbone=False, wit
 
 
 def main_tiny(model="replknet"):
-    init_vssm = partial(build_vssm, ckpt=os.path.join(os.path.dirname(__file__), "../../ckpts/vssmtiny/ckpt_epoch_292.pth"))
+    init_vssm = partial(build_vssm, ckpt=os.path.join(os.path.dirname(__file__), "../../ckpts/classification/vssm/vssmtiny/ckpt_epoch_292.pth"))
     init_swin = partial(build_mmpretrain_models, cfg="swin_tiny", ckpt=True, only_backbone=False, with_norm=True)
     init_convnext = partial(build_mmpretrain_models, cfg="convnext_tiny", ckpt=True, only_backbone=False, with_norm=True)
     init_deit = partial(build_mmpretrain_models, cfg="deit_small", ckpt=True, only_backbone=False, with_norm=True)
@@ -374,10 +374,9 @@ def main_tiny(model="replknet"):
         # _validate(init_model(shape=1280), img_size=(1280, 1280), batch_size=32)
 
 def main_small(model="replknet"):
-    init_vssm = partial(build_vssm, ckpt=os.path.join(os.path.dirname(__file__), "../../ckpts/vssmsmall/ema_ckpt_epoch_238.pth"), depths=[2,2,27,2])
+    init_vssm = partial(build_vssm, ckpt=os.path.join(os.path.dirname(__file__), "../../ckpts/classification/vssm/vssmsmall/ema_ckpt_epoch_238.pth"), depths=[2,2,27,2])
     init_swin = partial(build_mmpretrain_models, cfg="swin_small", ckpt=True, only_backbone=False, with_norm=True)
     init_convnext = partial(build_mmpretrain_models, cfg="convnext_small", ckpt=True, only_backbone=False, with_norm=True)
-    init_deit = partial(build_mmpretrain_models, cfg="deit_base", ckpt=True, only_backbone=False, with_norm=True)
     init_resnet = partial(build_mmpretrain_models, cfg="resnet101", ckpt=True, only_backbone=False, with_norm=True)
 
     # replknet when size > 1024
@@ -406,9 +405,10 @@ def main_small(model="replknet"):
         # _validate(init_model(shape=1280), img_size=(1280, 1280), batch_size=32)
 
 def main_base(model="replknet"):
-    init_vssm = partial(build_vssm, ckpt=os.path.join(os.path.dirname(__file__), "../../ckpts/vssmbase/ckpt_epoch_260.pth"), depths=[2,2,27,2], dims=128)
+    init_vssm = partial(build_vssm, ckpt=os.path.join(os.path.dirname(__file__), "../../ckpts/classification/vssm/vssmbase/ckpt_epoch_260.pth"), depths=[2,2,27,2], dims=128)
     init_swin = partial(build_mmpretrain_models, cfg="swin_base", ckpt=True, only_backbone=False, with_norm=True)
     init_convnext = partial(build_mmpretrain_models, cfg="convnext_base", ckpt=True, only_backbone=False, with_norm=True)
+    init_deit = partial(build_mmpretrain_models, cfg="deit_base", ckpt=True, only_backbone=False, with_norm=True)
     init_replknet = partial(build_mmpretrain_models, cfg="replknet_base", ckpt=True, only_backbone=False, with_norm=True)
 
     # replknet when size > 1024
@@ -417,7 +417,7 @@ def main_base(model="replknet"):
     print(f"using init_{model} ======================== ", flush=True)
     init_model = eval(f"init_{model}")
     
-    if False:
+    if True:
         _validate(init_model(shape=224), img_size=(224, 224), batch_size=128) #128 Mem 6446MB
         try:
             _validate(init_model(shape=64), img_size=(64, 64), batch_size=128) #128 Mem 6446MB
@@ -430,10 +430,10 @@ def main_base(model="replknet"):
         _validate(init_model(shape=384), img_size=(384, 384), batch_size=128)
         _validate(init_model(shape=512), img_size=(512, 512), batch_size=128)
         _validate(init_model(shape=640), img_size=(640, 640), batch_size=128)
-    if False:
+    if True:
         _validate(init_model(shape=768), img_size=(768, 768), batch_size=84)
     if True:
-        _validate(init_model(shape=1024), img_size=(1024, 1024), batch_size=(32 if model in ["deit"] else 48))
+        _validate(init_model(shape=1024), img_size=(1024, 1024), batch_size=(36 if model in ["deit"] else 48))
         _validate(init_model(shape=1120), img_size=(1120, 1120), batch_size=(24 if model in ["deit"] else 36))
         # _validate(init_model(shape=1280), img_size=(1280, 1280), batch_size=32)
 
@@ -482,12 +482,15 @@ def main_flops():
                 pass
 
 
-def main(model="replknet"):
-    ...
-    # main_tiny(model)
-    # main_small(model)
-    main_base(model)
-    # main_flops()
+def main(model="replknet", action="tiny"):
+    if action in ['tiny']:
+        main_tiny(model)
+    elif action in ['small']:
+        main_small(model)
+    elif action in ['base']:
+        main_base(model)
+    elif action in ['flops']:
+        main_flops()
 
 if __name__ == "__main__":
     # os.environ['CUDA_VISIBLE_DEVICES'] = "0"
@@ -508,13 +511,5 @@ if __name__ == "__main__":
 
     torch.cuda.set_device(dist.get_rank())
     dist.barrier()
-    main(os.environ['GETSCALENET'])
+    main(os.environ['SCALENET'], os.environ['ACTION'])
 
-
-# CUDA_VISIBLE_DEVICES=1 GETSCALENET=vssm python analyze/get_scaleup.py >> ./show/scaleup.log/base_scaleup_vssm.log 2>&1
-# CUDA_VISIBLE_DEVICES=0 GETSCALENET=deit python analyze/get_scaleup.py >> ./show/scaleup.log/small_scaleup_deit.log 2>&1
-# CUDA_VISIBLE_DEVICES=5 GETSCALENET=swin python analyze/get_scaleup.py >> ./show/scaleup.log/get_scaleup_swin.log 2>&1
-# CUDA_VISIBLE_DEVICES=4 GETSCALENET=convnext python analyze/get_scaleup.py >> ./show/scaleup.log/get_scaleup_sconvnext.log 2>&1
-# CUDA_VISIBLE_DEVICES=6 GETSCALENET=replknet python analyze/get_scaleup.py >> ./show/scaleup.log/get_scaleup_replknet.log 2>&1
-# CUDA_VISIBLE_DEVICES=6 GETSCALENET=deit python analyze/get_scaleup.py >> ./show/scaleup.log/get_scaleup_deit.log 2>&1
-# CUDA_VISIBLE_DEVICES=6 GETSCALENET=resnet python analyze/get_scaleup.py >> ./show/scaleup.log/get_scaleup_resnet.log 2>&1
