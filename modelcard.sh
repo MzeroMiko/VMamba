@@ -48,23 +48,23 @@ function dataset_to_memory() {
 }
 
 # test ok
-function classification_tiny() {
+function classification() {
+    # test ok
+    # ======================================================
     export CODE=classification PYTHON=python log_url="logs/classification"
     export nnodes=1 nrank=0 nprocs=8 mport=29501 maddr="127.0.0.1"
     export pycmds="main.py --cfg configs/vssm/vssm_tiny_224.yaml --batch-size 64 --data-path /dataset/ImageNet2012 --output /tmp"
     cd ${CODE}; ${PYTHON} -m torch.distributed.launch --nnodes ${nnodes} --node_rank ${nrank} --nproc_per_node ${nprocs} --master_addr ${maddr} --master_port ${mport} --log_dir ${log_url} ${pycmds}
-}
 
-# test ok
-function classification_small() {
+    # test ok
+    # ======================================================
     export CODE=classification PYTHON=python log_url="logs/classification"
     export nnodes=1 nrank=0 nprocs=8 mport=29501 maddr="127.0.0.1"
     export pycmds="main.py --cfg configs/vssm/vssm_small_224.yaml --batch-size 64 --data-path /dataset/ImageNet2012 --output /tmp"
     cd ${CODE}; ${PYTHON} -m torch.distributed.launch --nnodes ${nnodes} --node_rank ${nrank} --nproc_per_node ${nprocs} --master_addr ${maddr} --master_port ${mport} --log_dir ${log_url} ${pycmds}
-}
 
-# test ok
-function classification_base() {
+    # test ok
+    # ======================================================
     export CODE=classification PYTHON=python log_url="logs/classification"
     export nnodes=1 nrank=0 nprocs=8 mport=29501 maddr="127.0.0.1"
     export pycmds="main.py --cfg configs/vssm/vssm_base_224.yaml --batch-size 64 --data-path /dataset/ImageNet2012 --output /tmp"
@@ -226,6 +226,7 @@ function segmentation_test_tta() {
     cd $CODE; export GPUS=8 NNODES=${NNODES:-1} NODE_RANK=${NODE_RANK:-0} PORT=${PORT:-29500} MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}; PYTHONPATH="$PWD":$PYTHONPATH $PYTHON -m torch.distributed.launch --nnodes=$NNODES --node_rank=$NODE_RANK --master_addr=$MASTER_ADDR --nproc_per_node=$GPUS --master_port=$PORT ./tools/test.py $CONFIG $CKPT --launcher pytorch --tta
 }
 
+# test ok
 function analyze() {
     # test ok =====================================================
     CUDA_VISIBLE_DEVICES=0 python analyze/get_erf.py > analyze/show/erf/get_erf.log 2>&1
@@ -252,7 +253,6 @@ function analyze() {
     # test ok ============================================
     python analyze/scaleup_show.py
 }
-
 
 
 
