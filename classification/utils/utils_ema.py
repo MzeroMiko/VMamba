@@ -124,7 +124,7 @@ def _load_pretrained(config, model, logger, state_dict):
 
     logger.info(f"=> loaded successfully '{config.MODEL.PRETRAINED}'")
 
-    del checkpoint
+    # del checkpoint
     torch.cuda.empty_cache()
 
 
