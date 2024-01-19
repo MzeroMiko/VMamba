@@ -32,7 +32,7 @@ ADE20K semantic segmentation (`50.8 mIoU` on val), with only 44M parameters for 
   <img src="srcs/figs/accuracy_comp.png" alt="figure1" width="70%">
 </p>
 <!-- <p align="center">
-  <img src="srcs/figs/integrate_comp" alt="table1" width="70%">
+  <img src="srcs/figs/integrate_comp.png" alt="table1" width="70%">
 </p> -->
 **VMamba is linear complexity with 2D-Selective-Scan**
 
