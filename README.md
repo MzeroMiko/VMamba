@@ -87,6 +87,12 @@ We will release all the pre-trained models in few days!
 | Swin-B | UPerNet | ImageNet-22K | 640x640 | 160K | 50.04 | 51.66 | 121M | 1841G |
 | Swin-L | UperNet | ImageNet-22K | 640x640 | 160K | 52.05 | 53.53 | 234M | 3230G | -->
 
+
+
+## Getting Started
+
+- For installation, training and testing, please see [modelcard.sh](modelcard.sh) for detailed instructions.
+
 ## Cite VMamba:
 
 ```
@@ -99,11 +105,6 @@ We will release all the pre-trained models in few days!
       primaryClass={cs.CV}
 }
 ```
-
-## Getting Started
-
-- For installation, training and testing, please see [modelcard.sh](modelcard.sh) for detailed instructions.
-
 
 ## Acknowledgment
 
