@@ -97,7 +97,7 @@ We will release all the pre-trained models/logs in few days!
 
 ## Getting Started
 
-- For installation, training and testing, please see [modelcard.sh](modelcard.sh) for detailed instructions.
+- For installation, training, and testing, please see [modelcard.sh](modelcard.sh) for detailed instructions.
 
 ## Citation
 
