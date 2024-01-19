@@ -22,8 +22,7 @@ TODO:
 ## Introduction
 
 **VMamba (VSSM)** is initially described in [arxiv](https://arxiv.org/abs/2401.10166), which capably serves as a
-general-purpose backbone for computer vision with linear complexity, 
-while still preserving the advantages associated with global receptive fields and dynamic weights.
+general-purpose backbone for computer vision with linear complexity and shows the advantages of global receptive fields and dynamic weights.
 
 VMamba achieves strong performance on COCO object detection (`49.7 box AP` and `44.0 mask AP` on COCO val 2017) and
 ADE20K semantic segmentation (`50.8 mIoU` on val), with only 44M parameters for backbone.
