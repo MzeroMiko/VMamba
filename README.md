@@ -48,13 +48,6 @@ ADE20K semantic segmentation (`50.8 mIoU` on val), with only 44M parameters for 
 
 **Main Architecture of VMamba**
 
-<p align="center">
-  <img src="srcs/figs/fig3.jpg" alt="figure4" width="70%">
-</p>
-<p align="center">
-  <img src="srcs/figs/fig4.jpg" alt="figure5" width="70%">
-</p>
-
 ## Main Results on ImageNet
 
 **ImageNet-1K VMamba Models**
