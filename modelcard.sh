@@ -1,5 +1,5 @@
 function get_env() {
-    pack_url=/home/LiuYue/Workspace3/Visualize/package
+    pack_url=/path/to/packages
     conda_url="~/miniconda3"
     conda_env="mamba"
     nvcc -V
