@@ -7,7 +7,7 @@
 
 <sup>1</sup>  University of Chinese Academy of Sciences, <sup>2</sup>  HUAWEI Inc.,  <sup>3</sup> PengCheng Lab.
 
-ArXiv Preprint: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
+Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 
 
 </div>
