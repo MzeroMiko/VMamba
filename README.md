@@ -55,6 +55,9 @@ We will release all the pre-trained models in few days!
 
 | name | pretrain | resolution |acc@1 | #params | FLOPs | checkpoints/logs |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| DeiT-S | ImageNet-1K | 224x224 | 79.8 | 22M | 4.6G | -- |
+| DeiT-B | ImageNet-1K | 224x224 | 81.8 | 86M | 17.5G | -- |
+| DeiT-B | ImageNet-1K | 384x384 | 83.1 | 86M | 55.4G | -- |
 | Swin-T | ImageNet-1K | 224x224 | 81.2 | 28M | 4.5G | -- |
 | Swin-S | ImageNet-1K | 224x224 | 83.2 | 50M | 8.7G | -- |
 | Swin-B | ImageNet-1K | 224x224 | 83.5 | 88M | 15.4G | -- |
