@@ -29,22 +29,26 @@ VMamba achieves strong performance on COCO object detection (`49.7 box AP` and `
 ADE20K semantic segmentation (`50.8 mIoU` on val), with only 44M parameters for backbone.
 
 <p align="center">
-  <img src="srcs/figs/accuracy_comp.png" alt="figure1" width="70%">
+  <img src="srcs/figs/accuracy_comp.png" alt="accuracy" width="70%">
 </p>
 
 **VMamba is linear complexity with 2D-Selective-Scan**
 
 <p align="center">
-  <img src="srcs/figs/integrate_comp.png" alt="table1" width="70%">
+  <img src="srcs/figs/integrate_comp.png" alt="integrate" width="70%">
 </p>
 
 **VMamba has global effective receptive field**
 
 <p align="center">
-  <img src="srcs/figs/erf_comp.png" alt="figure3" width="70%">
+  <img src="srcs/figs/erf_comp.png" alt="erf" width="70%">
 </p>
 
 **Main Architecture of VMamba**
+
+<p align="center">
+  <img src="srcs/figs/arch.png" alt="arch" width="70%">
+</p>
 
 ## Main Results on ImageNet
 
