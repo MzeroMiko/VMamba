@@ -21,7 +21,7 @@ TODO:
 
 ## Introduction
 
-**VMamba (VSSM)** is initially described in [arxiv](?), which capably serves as a
+**VMamba (VSSM)** is initially described in [arxiv](https://arxiv.org/abs/2401.10166), which capably serves as a
 general-purpose backbone for computer vision with linear complexity, 
 while still preserving the advantages associated with global receptive fields and dynamic weights.
 
