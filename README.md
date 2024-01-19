@@ -31,6 +31,7 @@ ADE20K semantic segmentation (`50.8 mIoU` on val), with only 44M parameters for 
 <p align="center">
   <img src="srcs/figs/accuracy_comp.png" alt="accuracy" width="70%">
 </p>
+***the base model is still training, the acc1 now has reached 83.56 in epoch 210.***
 
 **VMamba is linear complexity with 2D-Selective-Scan**
 
