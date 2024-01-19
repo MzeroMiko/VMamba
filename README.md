@@ -1,7 +1,7 @@
 # VMamba: Visual State Space Models
 
 
-This repo is the official implementation of ["VMamba: Visual State Space Models"](https://arxiv.org/abs/2401.10166) as well as the follow-ups. It currently includes code and models for the following tasks:
+This repo is the official implementation of [VMamba: Visual State Space Models](https://arxiv.org/abs/2401.10166) as well as the follow-ups. It currently includes code and models for the following tasks:
 
 > **Image Classification**
 
