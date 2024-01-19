@@ -19,16 +19,14 @@ Initial commits:
 
 ## Introduction
 
-**VMamba (VSSM)** is initially described in [arxiv](https://arxiv.org/abs/2401.10166), which capably serves as a
+**VMamba** is initially described in [arxiv](https://arxiv.org/abs/2401.10166), which capably serves as a
 general-purpose backbone for computer vision with linear complexity and shows the advantages of global receptive fields and dynamic weights.
-
-VMamba achieves strong performance on COCO object detection (`49.7 box AP` and `44.0 mask AP` on COCO val 2017) and
-ADE20K semantic segmentation (`50.8 mIoU` on val), with only 44M parameters for backbone.
 
 <p align="center">
   <img src="srcs/figs/accuracy_comp.png" alt="accuracy" width="70%">
 </p>
-<!-- ***the base model is still training, the acc1 now has reached 83.56 in epoch 210.*** -->
+
+***The base level model is being trained and the top-1 acc1 has reached 83.56 at 210-th epoch.*** 
 
 **VMamba is linear complexity with 2D-Selective-Scan**
 
