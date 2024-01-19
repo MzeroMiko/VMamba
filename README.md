@@ -65,17 +65,20 @@ We will release all the pre-trained models in few days!
 | VMamba-S | ImageNet-1K | 224x224 | 83.5 | 44M | 9.1G | waiting |
 | VMamba-B | ImageNet-1K | 224x224 | 84.0 | 75M | 15.2G | waiting |
 
-
-
-## Main Results on Downstream Tasks
-
-**COCO Object Detection (2017 val)**
-
-<!-- | Backbone | Method | pretrain | Lr Schd | box mAP | mask mAP | #params | FLOPs |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| VMamba-T | Mask R-CNN | ImageNet-1K | 1x | / | / | 48M | 267G |
-| VMamba-S | Mask R-CNN | ImageNet-1K | 1x | / | / | 69M | 359G |
-| Swin-S | Mask R-CNN | ImageNet-1K | 1x | / | / | 69M | 359G | -->
+* **Object Detection on COCO**
+  
+| Backbone | #params | FLOPs | Detector | box mAP | mask mAP | checkpoints/logs |
+| :---: | :---: | :---: | :---: | :---: | :---: |:---: |
+| Swin-T | 48M | 267G | MaskRCNN@1x | 42.7| 39.3 |-- |
+| VMamba-T | 42M | 262G | MaskRCNN@1x | 46.5| 42.1 |waiting |
+| Swin-S | 69M | 354G | MaskRCNN@1x | 44.8| 40.9 |-- |
+| VMamba-S | 64M | 357G | MaskRCNN@1x | 48.2| 43.0 |waiting |
+| Swin-B | 107M | 496G | MaskRCNN@1x | 46.9| 42.3 |-- |
+| VMamba-B | 96M | 482G | MaskRCNN@1x | 48.5| 43.1 |waiting |
+| Swin-T | 48M | 267G | MaskRCNN@3x | 46.0| 41.6 |-- |
+| VMamba-T | 42M | 262G | MaskRCNN@3x | 48.5| 43.2 |waiting |
+| Swin-S | 69M | 354G | MaskRCNN@3x | 48.2| 43.2 |-- |
+| VMamba-S | 64M | 357G | MaskRCNN@3x | 49.7| 44.0 |waiting |
 
 
 **ADE20K Semantic Segmentation (val)**
