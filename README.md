@@ -46,18 +46,21 @@ inspiration from the recently introduced state space model and propose the Visua
 </p>
 
 
-## Main Results on ImageNet
+## Main Results
 
 We will release all the pre-trained models in few days!
 
-**ImageNet-1K VMamba Models**
+* **Classification on ImageNet-1K**
 
 
-<!-- | name | pretrain | resolution |acc@1 | acc@5 | #params | FLOPs | FPS| 22K model | 1K model |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |:---: |:---: |
-| Swin-T | ImageNet-1K | 224x224 | 81.2 | 95.5 | 28M | 4.5G | 755 | - | [github](...)/[baidu](...)/[config](classification/configs/vssm/vssm_tiny_224.yaml)/[log](...) |
-| Swin-S | ImageNet-1K | 224x224 | 83.2 | 96.2 | 50M | 8.7G | 437 | - | [github](...)/[baidu](...)/[config](classification/configs/vssm/vssm_small_224.yaml)/[log](...) |
-| Swin-B | ImageNet-1K | 224x224 | 83.5 | 96.5 | 88M | 15.4G | 278  | - | [github](...)/[config](classification/configs/vssm/vssm_base_224.yaml)/[log](...) | -->
+| name | pretrain | resolution |acc@1 | #params | FLOPs | checkpoints/logs |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| Swin-T | ImageNet-1K | 224x224 | 81.2 | 28M | 4.5G | -- |
+| Swin-S | ImageNet-1K | 224x224 | 83.2 | 50M | 8.7G | -- |
+| Swin-B | ImageNet-1K | 224x224 | 83.5 | 88M | 15.4G | -- |
+| VMamba-T | ImageNet-1K | 224x224 | 82.2 | 22M | 4.5G | waiting |
+| VMamba-S | ImageNet-1K | 224x224 | 83.5 | 44M | 9.1G | waiting |
+| VMamba-B | ImageNet-1K | 224x224 | 84.0 | 75M | 15.2G | waiting |
 
 
 
