@@ -36,7 +36,7 @@ inspiration from the recently introduced state space model and propose the Visua
 * **2D-Selective-Scan of VMamba**
 
 <p align="center">
-  <img src="assets/ss2d.png" alt="arch" width="50%">
+  <img src="assets/ss2d.png" alt="arch" width="60%">
 </p>
 
 * **VMamba has global effective receptive field**
