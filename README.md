@@ -102,13 +102,11 @@ We will release all the pre-trained models/logs in few days!
 ## Citation
 
 ```
-@misc{liu2024vmamba,
+@article{liu2024vmamba,
       title={VMamba: Visual State Space Model}, 
       author={Yue Liu and Yunjie Tian and Yuzhong Zhao and Hongtian Yu and Lingxi Xie and Yaowei Wang and Qixiang Ye and Yunfan Liu},
-      year={2024},
-      eprint={2401.10166},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
+      journal={arXiv preprint arXiv:2401.10166},
+      year={2024}
 }
 ```
 
