@@ -48,7 +48,7 @@ inspiration from the recently introduced state space model and propose the Visua
 
 ## Main Results
 
-We will release all the pre-trained models in few days!
+We will release all the pre-trained models/logs in few days!
 
 * **Classification on ImageNet-1K**
 
