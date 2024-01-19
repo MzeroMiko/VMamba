@@ -104,7 +104,14 @@ ADE20K semantic segmentation (`50.8 mIoU` on val), with only 44M parameters for 
 ## Citing VMamba: Visual State Space Models
 
 ```
-@inproceedings{...}
+@misc{liu2024vmamba,
+      title={VMamba: Visual State Space Model}, 
+      author={Yue Liu and Yunjie Tian and Yuzhong Zhao and Hongtian Yu and Lingxi Xie and Yaowei Wang and Qixiang Ye and Yunfan Liu},
+      year={2024},
+      eprint={2401.10166},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV}
+}
 ```
 
 ## Getting Started
