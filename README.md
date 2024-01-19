@@ -1,4 +1,4 @@
-# VMamba: Visual State Space Models (work in progress)
+# VMamba: Visual State Space Models
 
 
 This repo is the official implementation of ["VMamba: Visual State Space Models"](https://arxiv.org/abs/2401.10166) as well as the follow-ups. It currently includes code and models for the following tasks:
@@ -31,19 +31,17 @@ ADE20K semantic segmentation (`50.8 mIoU` on val), with only 44M parameters for 
 <p align="center">
   <img src="srcs/figs/accuracy_comp.png" alt="figure1" width="70%">
 </p>
-<!-- <p align="center">
-  <img src="srcs/figs/integrate_comp.png" alt="table1" width="70%">
-</p> -->
+
 **VMamba is linear complexity with 2D-Selective-Scan**
 
 <p align="center">
-  <img src="srcs/figs/erf_comp.png" alt="figure2" width="70%">
+  <img src="srcs/figs/integrate_comp.png" alt="table1" width="70%">
 </p>
 
 **VMamba has global effective receptive field**
 
 <p align="center">
-  <img src="srcs/figs/fig5.jpg" alt="figure3" width="70%">
+  <img src="srcs/figs/erf_comp.png" alt="figure3" width="70%">
 </p>
 
 **Main Architecture of VMamba**
