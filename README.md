@@ -14,10 +14,8 @@ This repo is the official implementation of [VMamba: Visual State Space Models](
 ***01/18/2024***
 
 Initial commits:
-1. The supported code and models for ImageNet-1K image classification, COCO object detection and ADE20K semantic segmentation are provided.
+1. The supported code for image classification, object detection, and semantic segmentation are provided. The pre-trained models will be released in few days!
 
-TODO:
-1. Pretrained models on ImageNet-1K ([VMamba-T-IN1K](...), [VMamba-S-IN1K](...), [VMamba-B-IN1K](...)) are provided.
 
 ## Introduction
 
