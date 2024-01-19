@@ -80,16 +80,18 @@ We will release all the pre-trained models in few days!
 | Swin-S | 69M | 354G | MaskRCNN@3x | 48.2| 43.2 |-- |
 | VMamba-S | 64M | 357G | MaskRCNN@3x | 49.7| 44.0 |waiting |
 
+* **Semantic Segmentation on ADE20K**
 
-**ADE20K Semantic Segmentation (val)**
-
-<!-- | Backbone | Method | pretrain | Crop Size | Lr Schd | mIoU | mIoU (ms+flip) | #params | FLOPs |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| Swin-T | UPerNet | ImageNet-1K | 512x512 | 160K | 44.51 | 45.81 | 60M | 945G |
-| Swin-S | UperNet | ImageNet-1K | 512x512 | 160K | 47.64 | 49.47 | 81M | 1038G |
-| Swin-B | UperNet | ImageNet-1K | 512x512 | 160K | 48.13 | 49.72 | 121M | 1188G |
-| Swin-B | UPerNet | ImageNet-22K | 640x640 | 160K | 50.04 | 51.66 | 121M | 1841G |
-| Swin-L | UperNet | ImageNet-22K | 640x640 | 160K | 52.05 | 53.53 | 234M | 3230G | -->
+| Backbone | Input|  #params | FLOPs | Segmentor | mIoU | checkpoints/logs |
+| :---: | :---: | :---: | :---: | :---: | :---: |:---: |
+| Swin-T | 512x512 | 60M | 945G | UperNet@160k | 44.4| -- |
+| VMamba-T| 512x512 | 55M | 939G | UperNet@160k | 47.3| waiting |
+| Swin-S | 512x512 | 81M | 1039G | UperNet@160k | 47.6| -- |
+| VMamba-S| 512x512 | 76M | 1037G | UperNet@160k | 49.5| waiting |
+| Swin-B | 512x512 | 121M | 1188G | UperNet@160k | 48.1| -- |
+| VMamba-B| 512x512 | 110M | 1167G | UperNet@160k | 50.0| waiting |
+| Swin-S | 640x640 | 81M | 1614G | UperNet@160k | 47.9| -- |
+| VMamba-S| 640x640 | 76M | 1620G | UperNet@160k | 50.8| waiting |
 
 
 
