@@ -109,4 +109,5 @@ ADE20K semantic segmentation (`50.8 mIoU` on val), with only 44M parameters for 
 ## Contributing
 
 This project is based on Mamba ([paper](https://arxiv.org/abs/2312.00752), [code](https://github.com/state-spaces/mamba)), Swin-Transformer ([paper](https://arxiv.org/pdf/2103.14030.pdf), [code](https://github.com/microsoft/Swin-Transformer)). Thanks for their wonderful works.
+Our analyze/get_erf.py is adopted from [replknet](https://github.com/DingXiaoH/RepLKNet-pytorch/tree/main/erf), and the implementation of ema is modified from [convnext](https://github.com/facebookresearch/ConvNeXt) , thanks for their excellent job.
 
