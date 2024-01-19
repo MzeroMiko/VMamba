@@ -25,9 +25,9 @@ complexity. A closer inspection reveals that ViTs achieve superior visual modeli
 weights. This observation motivates us to propose a novel architecture that inherits these components while enhancing computational efficiency. To this end, we draw
 inspiration from the recently introduced state space model and propose the Visual State Space Model (VMamba), which achieves linear complexity without sacrificing global receptive fields. To address the encountered direction-sensitive issue, we introduce the Cross-Scan Module (CSM) to traverse the spatial domain and convert any non-causal visual image into order patch sequences. Extensive experimental results substantiate that VMamba not only demonstrates promising capabilities across various visual perception tasks, but also exhibits more pronounced advantages over established benchmarks as the image resolution increases. 
 
+## Overview
 
-**VMamba** is initially described in [arxiv](https://arxiv.org/abs/2401.10166), which capably serves as a
-general-purpose backbone for computer vision with linear complexity and shows the advantages of global receptive fields and dynamic weights.
+[**VMamba**](https://arxiv.org/abs/2401.10166) serves as a general-purpose backbone for computer vision with linear complexity and shows the advantages of global receptive fields and dynamic weights.
 
 <p align="center">
   <img src="assets/accuracy_comp.png" alt="accuracy" width="70%">
