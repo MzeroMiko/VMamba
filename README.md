@@ -10,6 +10,8 @@
 ArXiv Preprint: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 
 
+</div>
+
 ## Updates
 
 * **` Jan. 19th, 2024`:** The source code for classification, object detection, and semantic segmentation are provided. The pre-trained models will be released in few days!
