@@ -21,7 +21,7 @@ The source code for classification, object detection, and semantic segmentation 
 general-purpose backbone for computer vision with linear complexity and shows the advantages of global receptive fields and dynamic weights.
 
 <p align="center">
-  <img src="srcs/figs/accuracy_comp.png" alt="accuracy" width="70%">
+  <img src="assets/accuracy_comp.png" alt="accuracy" width="70%">
 </p>
 
 ***The base level model is being trained and the top-1 accuracy has reached to 83.56 at 210-th epoch. We will update the latest results as soon as possible.*** 
@@ -29,19 +29,19 @@ general-purpose backbone for computer vision with linear complexity and shows th
 **VMamba is linear complexity with 2D-Selective-Scan**
 
 <p align="center">
-  <img src="srcs/figs/integrate_comp.png" alt="integrate" width="70%">
+  <img src="assets/integrate_comp.png" alt="integrate" width="70%">
 </p>
 
 **VMamba has global effective receptive field**
 
 <p align="center">
-  <img src="srcs/figs/erf_comp.png" alt="erf" width="70%">
+  <img src="assets/erf_comp.png" alt="erf" width="70%">
 </p>
 
 **Main Architecture of VMamba**
 
 <p align="center">
-  <img src="srcs/figs/arch.png" alt="arch" width="70%">
+  <img src="assets/arch.png" alt="arch" width="70%">
 </p>
 
 ## Main Results on ImageNet
