@@ -99,7 +99,7 @@ We will release all the pre-trained models in few days!
 
 - For installation, training and testing, please see [modelcard.sh](modelcard.sh) for detailed instructions.
 
-## Cite VMamba:
+## Citation
 
 ```
 @misc{liu2024vmamba,
