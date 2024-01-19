@@ -59,10 +59,6 @@ ADE20K semantic segmentation (`50.8 mIoU` on val), with only 44M parameters for 
 
 **ImageNet-1K VMamba Models**
 
-<p align="center">
-  <img src="srcs/figs/tab2.jpg" alt="table2" width="70%">
-</p>
-
 
 <!-- | name | pretrain | resolution |acc@1 | acc@5 | #params | FLOPs | FPS| 22K model | 1K model |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |:---: |:---: |
@@ -76,10 +72,6 @@ ADE20K semantic segmentation (`50.8 mIoU` on val), with only 44M parameters for 
 
 **COCO Object Detection (2017 val)**
 
-<p align="center">
-  <img src="srcs/figs/tab3.jpg" alt="table3" width="70%">
-</p>
-
 <!-- | Backbone | Method | pretrain | Lr Schd | box mAP | mask mAP | #params | FLOPs |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | VMamba-T | Mask R-CNN | ImageNet-1K | 1x | / | / | 48M | 267G |
@@ -88,10 +80,6 @@ ADE20K semantic segmentation (`50.8 mIoU` on val), with only 44M parameters for 
 
 
 **ADE20K Semantic Segmentation (val)**
-
-<p align="center">
-  <img src="srcs/figs/tab4.jpg" alt="table4" width="70%">
-</p>
 
 <!-- | Backbone | Method | pretrain | Crop Size | Lr Schd | mIoU | mIoU (ms+flip) | #params | FLOPs |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
