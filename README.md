@@ -24,7 +24,7 @@ general-purpose backbone for computer vision with linear complexity and shows th
   <img src="srcs/figs/accuracy_comp.png" alt="accuracy" width="70%">
 </p>
 
-***The base level model is being trained and the top-1 acc1 has reached 83.56 at 210-th epoch. We will update the latest results as soon as possible.*** 
+***The base level model is being trained and the top-1 accuracy has reached to 83.56 at 210-th epoch. We will update the latest results as soon as possible.*** 
 
 **VMamba is linear complexity with 2D-Selective-Scan**
 
