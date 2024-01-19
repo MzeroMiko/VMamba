@@ -11,10 +11,8 @@ This repo is the official implementation of [VMamba: Visual State Space Models](
 
 ## Updates
 
-***01/18/2024***
-
-Initial commits:
-1. The source code for classification, object detection, and semantic segmentation are provided. The pre-trained models will be released in few days!
+***01/19/2024***
+The source code for classification, object detection, and semantic segmentation are provided. The pre-trained models will be released in few days!
 
 
 ## Introduction
