@@ -84,7 +84,7 @@ ADE20K semantic segmentation (`50.8 mIoU` on val), with only 44M parameters for 
 | Swin-B | UPerNet | ImageNet-22K | 640x640 | 160K | 50.04 | 51.66 | 121M | 1841G |
 | Swin-L | UperNet | ImageNet-22K | 640x640 | 160K | 52.05 | 53.53 | 234M | 3230G | -->
 
-## Citing VMamba: Visual State Space Models
+## Cite VMamba:
 
 ```
 @misc{liu2024vmamba,
