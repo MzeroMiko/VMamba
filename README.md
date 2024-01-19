@@ -27,24 +27,24 @@ inspiration from the recently introduced state space model and propose the Visua
 
 ## Overview
 
-[**VMamba**](https://arxiv.org/abs/2401.10166) serves as a general-purpose backbone for computer vision with linear complexity and shows the advantages of global receptive fields and dynamic weights.
+* [**VMamba**](https://arxiv.org/abs/2401.10166) serves as a general-purpose backbone for computer vision with linear complexity and shows the advantages of global receptive fields and dynamic weights.
 
 <p align="center">
   <img src="assets/acc_flow_comp.png" alt="accuracy" width="80%">
 </p>
 
+* **2D-Selective-Scan of VMamba**
 
-**VMamba has global effective receptive field**
+<p align="center">
+  <img src="assets/ss2d.png" alt="arch" width="50%">
+</p>
+
+* **VMamba has global effective receptive field**
 
 <p align="center">
   <img src="assets/erf_comp.png" alt="erf" width="50%">
 </p>
 
-**2D-Selective-Scan of VMamba**
-
-<p align="center">
-  <img src="assets/ss2d.png" alt="arch" width="50%">
-</p>
 
 ## Main Results on ImageNet
 
