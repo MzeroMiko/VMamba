@@ -1,7 +1,0 @@
-MODEL:
-  TYPE: vssm
-  NAME: vssm_tiny
-  DROP_PATH_RATE: 0.2
-  VSSM:
-    EMBED_DIM: 96
-    DEPTHS: [ 2, 2, 9, 2 ]

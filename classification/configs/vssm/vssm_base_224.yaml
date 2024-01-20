@@ -1,8 +1,0 @@
-MODEL:
-  TYPE: vssm
-  NAME: vssm_base
-  DROP_PATH_RATE: 0.5
-  # DROP_PATH_RATE: 0.6
-  VSSM:
-    EMBED_DIM: 128
-    DEPTHS: [ 2, 2, 27, 2 ]
