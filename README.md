@@ -99,7 +99,7 @@ We will release all the pre-trained models/logs in few days!
 
 * Install required packages:
 ```bash
-conda_env="mamba"
+conda_env="vmamba"
 nvcc -V
 conda create -n ${conda_env} --clone base
 python -VV
