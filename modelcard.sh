@@ -1,5 +1,5 @@
 function get_env() {
-    conda_env="mamba"
+    conda_env="vmamba"
     nvcc -V
     conda create -n ${conda_env} --clone base
     python -VV
