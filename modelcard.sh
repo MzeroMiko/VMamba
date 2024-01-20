@@ -162,19 +162,19 @@ function analyze() {
     CUDA_VISIBLE_DEVICES=0 python analyze/get_flops.py > analyze/show/flops/flops.log 2>&1
     CUDA_VISIBLE_DEVICES=0 python analyze/get_loss.py
     # =====================================================
-    export ACTION=flops SCALENET=vssm; CUDA_VISIBLE_DEVICES=0 python analyze/get_scaleup.py >> analyze/show/scaleup.log/flops.log 2>&1
-    export ACTION=tiny SCALENET=vssm; CUDA_VISIBLE_DEVICES=0 python analyze/get_scaleup.py >> analyze/show/scaleup.log/vssmtiny_scale.log 2>&1
+    export ACTION=flops SCALENET=vmamba; CUDA_VISIBLE_DEVICES=0 python analyze/get_scaleup.py >> analyze/show/scaleup.log/flops.log 2>&1
+    export ACTION=tiny SCALENET=vmamba; CUDA_VISIBLE_DEVICES=0 python analyze/get_scaleup.py >> analyze/show/scaleup.log/vmambatiny_scale.log 2>&1
     export ACTION=tiny SCALENET=swin; CUDA_VISIBLE_DEVICES=0 python analyze/get_scaleup.py >> analyze/show/scaleup.log/swintiny_scale.log 2>&1
     export ACTION=tiny SCALENET=convnext; CUDA_VISIBLE_DEVICES=0 python analyze/get_scaleup.py >> analyze/show/scaleup.log/convnexttiny_scale.log 2>&1
     export ACTION=tiny SCALENET=deit; CUDA_VISIBLE_DEVICES=0 python analyze/get_scaleup.py >> analyze/show/scaleup.log/deitsmall_scale.log 2>&1
     export ACTION=tiny SCALENET=resnet; CUDA_VISIBLE_DEVICES=0 python analyze/get_scaleup.py >> analyze/show/scaleup.log/resnet50_scale.log 2>&1
 
-    export ACTION=small SCALENET=vssm; CUDA_VISIBLE_DEVICES=0 python analyze/get_scaleup.py >> analyze/show/scaleup.log/vssmsmall_scale.log 2>&1
+    export ACTION=small SCALENET=vmamba; CUDA_VISIBLE_DEVICES=0 python analyze/get_scaleup.py >> analyze/show/scaleup.log/vmambasmall_scale.log 2>&1
     export ACTION=small SCALENET=swin; CUDA_VISIBLE_DEVICES=0 python analyze/get_scaleup.py >> analyze/show/scaleup.log/swinsmall_scale.log 2>&1
     export ACTION=small SCALENET=convnext; CUDA_VISIBLE_DEVICES=0 python analyze/get_scaleup.py >> analyze/show/scaleup.log/convnextsmall_scale.log 2>&1
     export ACTION=small SCALENET=resnet; CUDA_VISIBLE_DEVICES=0 python analyze/get_scaleup.py >> analyze/show/scaleup.log/resnet101_scale.log 2>&1
     
-    export ACTION=base SCALENET=vssm; CUDA_VISIBLE_DEVICES=0 python analyze/get_scaleup.py >> analyze/show/scaleup.log/vssmbase_scale.log 2>&1
+    export ACTION=base SCALENET=vmamba; CUDA_VISIBLE_DEVICES=0 python analyze/get_scaleup.py >> analyze/show/scaleup.log/vmambabase_scale.log 2>&1
     export ACTION=base SCALENET=swin; CUDA_VISIBLE_DEVICES=0 python analyze/get_scaleup.py >> analyze/show/scaleup.log/swinbase_scale.log 2>&1
     export ACTION=base SCALENET=convnext; CUDA_VISIBLE_DEVICES=0 python analyze/get_scaleup.py >> analyze/show/scaleup.log/convnextbase_scale.log 2>&1
     export ACTION=base SCALENET=deit; CUDA_VISIBLE_DEVICES=0 python analyze/get_scaleup.py >> analyze/show/scaleup.log/deitbase_scale.log 2>&1
