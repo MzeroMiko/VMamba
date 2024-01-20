@@ -62,32 +62,32 @@ function detection() {
 
     # ======================================================
     export CODE=detection PYTHON=python
-    export CONFIG=configs/vssm/mask_rcnn_swin_fpn_coco_tiny.py
-    export CKPT=../../ckpts/classification/vssm/vssmbase/ckpt_epoch_299.pth
+    export CONFIG=configs/vmamba/mask_rcnn_vmamba_fpn_coco_tiny.py
+    export CKPT=../../ckpts/classification/vmamba/vmamba_base/ckpt_epoch_299.pth
     cd $CODE; export GPUS=8 NNODES=${NNODES:-1} NODE_RANK=${NODE_RANK:-0} PORT=${PORT:-29500} MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}; PYTHONPATH="$PWD":$PYTHONPATH $PYTHON -m torch.distributed.launch --nnodes=$NNODES --node_rank=$NODE_RANK --master_addr=$MASTER_ADDR --nproc_per_node=$GPUS --master_port=$PORT ./tools/train.py $CONFIG --launcher pytorch --cfg-options model.backbone.pretrained=$CKPT 
 
     # ======================================================
     export CODE=detection PYTHON=python
-    export CONFIG=configs/vssm/mask_rcnn_swin_fpn_coco_small.py
-    export CKPT=../../ckpts/classification/vssm/vssmsmall/ckpt_epoch_299.pth # TODO: use ema_ckpt_epoch_238.pth !!!
+    export CONFIG=configs/vmamba/mask_rcnn_vmamba_fpn_coco_small.py
+    export CKPT=../../ckpts/classification/vmamba/vmamba_small/ckpt_epoch_299.pth
     cd $CODE; export GPUS=8 NNODES=${NNODES:-1} NODE_RANK=${NODE_RANK:-0} PORT=${PORT:-29500} MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}; PYTHONPATH="$PWD":$PYTHONPATH $PYTHON -m torch.distributed.launch --nnodes=$NNODES --node_rank=$NODE_RANK --master_addr=$MASTER_ADDR --nproc_per_node=$GPUS --master_port=$PORT ./tools/train.py $CONFIG --launcher pytorch --cfg-options model.backbone.pretrained=$CKPT
     
     # ======================================================
     export CODE=detection PYTHON=python
-    export CONFIG=configs/vssm/mask_rcnn_swin_fpn_coco_base.py
-    export CKPT=../../ckpts/classification/vssm/vssmtiny/ckpt_epoch_299.pth
+    export CONFIG=configs/vmamba/mask_rcnn_vmamba_fpn_coco_base.py
+    export CKPT=../../ckpts/classification/vmamba/vmamba_tiny/ckpt_epoch_299.pth
     cd $CODE; export GPUS=8 NNODES=${NNODES:-1} NODE_RANK=${NODE_RANK:-0} PORT=${PORT:-29500} MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}; PYTHONPATH="$PWD":$PYTHONPATH $PYTHON -m torch.distributed.launch --nnodes=$NNODES --node_rank=$NODE_RANK --master_addr=$MASTER_ADDR --nproc_per_node=$GPUS --master_port=$PORT ./tools/train.py $CONFIG --launcher pytorch --cfg-options model.backbone.pretrained=$CKPT
 
     # ======================================================
     export CODE=detection PYTHON=python
-    export CONFIG=configs/vssm/mask_rcnn_swin_fpn_coco_tiny_ms_3x.py
-    export CKPT=../../ckpts/classification/vssm/vssmtiny/ckpt_epoch_299.pth
+    export CONFIG=configs/vmamba/mask_rcnn_vmamba_fpn_coco_tiny_ms_3x.py
+    export CKPT=../../ckpts/classification/vmamba/vmamba_tiny/ckpt_epoch_299.pth
     cd $CODE; export GPUS=8 NNODES=${NNODES:-1} NODE_RANK=${NODE_RANK:-0} PORT=${PORT:-29500} MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}; PYTHONPATH="$PWD":$PYTHONPATH $PYTHON -m torch.distributed.launch --nnodes=$NNODES --node_rank=$NODE_RANK --master_addr=$MASTER_ADDR --nproc_per_node=$GPUS --master_port=$PORT ./tools/train.py $CONFIG --launcher pytorch --cfg-options model.backbone.pretrained=$CKPT 
 
     # ======================================================
     export CODE=detection PYTHON=python
-    export CONFIG=configs/vssm/mask_rcnn_swin_fpn_coco_small_ms_3x.py
-    export CKPT=../../ckpts/classification/vssm/vssmsmall/ckpt_epoch_299.pth 
+    export CONFIG=configs/vmamba/mask_rcnn_vmamba_fpn_coco_small_ms_3x.py
+    export CKPT=../../ckpts/classification/vmamba/vmamba_small/ckpt_epoch_299.pth 
     cd $CODE; export GPUS=8 NNODES=${NNODES:-1} NODE_RANK=${NODE_RANK:-0} PORT=${PORT:-29500} MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}; PYTHONPATH="$PWD":$PYTHONPATH $PYTHON -m torch.distributed.launch --nnodes=$NNODES --node_rank=$NODE_RANK --master_addr=$MASTER_ADDR --nproc_per_node=$GPUS --master_port=$PORT ./tools/train.py $CONFIG --launcher pytorch --cfg-options model.backbone.pretrained=$CKPT 
 
 }
