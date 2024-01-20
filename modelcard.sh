@@ -98,32 +98,32 @@ function segmentation() {
 
     # ======================================================
     export CODE=segmentation PYTHON=python
-    export CONFIG=configs/vssm/upernet_vssm_4xb4-160k_ade20k-512x512_tiny.py
-    export CKPT=../../ckpts/classification/vssm/vssmtiny/ckpt_epoch_299.pth
+    export CONFIG=configs/vmamba/upernet_vmamba_4xb4-160k_ade20k-512x512_tiny.py
+    export CKPT=../../ckpts/classification/vmamba/vmamba_tiny/ckpt_epoch_299.pth
     cd $CODE; export GPUS=8 NNODES=${NNODES:-1} NODE_RANK=${NODE_RANK:-0} PORT=${PORT:-29500} MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}; PYTHONPATH="$PWD":$PYTHONPATH $PYTHON -m torch.distributed.launch --nnodes=$NNODES --node_rank=$NODE_RANK --master_addr=$MASTER_ADDR --nproc_per_node=$GPUS --master_port=$PORT ./tools/train.py $CONFIG --launcher pytorch --cfg-options model.backbone.pretrained=$CKPT 
 
     # ======================================================
     export CODE=segmentation PYTHON=python
-    export CONFIG=configs/vssm/upernet_vssm_4xb4-160k_ade20k-512x512_small.py
-    export CKPT=../../ckpts/classification/vssm/vssmsmall/ema_ckpt_epoch_299.pth
+    export CONFIG=configs/vmamba/upernet_vmamba_4xb4-160k_ade20k-512x512_small.py
+    export CKPT=../../ckpts/classification/vmamba/vmamba_small/ema_ckpt_epoch_299.pth
     cd $CODE; export GPUS=8 NNODES=${NNODES:-1} NODE_RANK=${NODE_RANK:-0} PORT=${PORT:-29500} MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}; PYTHONPATH="$PWD":$PYTHONPATH $PYTHON -m torch.distributed.launch --nnodes=$NNODES --node_rank=$NODE_RANK --master_addr=$MASTER_ADDR --nproc_per_node=$GPUS --master_port=$PORT ./tools/train.py $CONFIG --launcher pytorch --cfg-options model.backbone.pretrained=$CKPT 
 
     # ======================================================
     export CODE=segmentation PYTHON=python
-    export CONFIG=configs/vssm/upernet_vssm_4xb4-160k_ade20k-512x512_base.py
-    export CKPT=../../ckpts/classification/vssm/vssmbase/ckpt_epoch_299.pth
+    export CONFIG=configs/vmamba/upernet_vmamba_4xb4-160k_ade20k-512x512_base.py
+    export CKPT=../../ckpts/classification/vmamba/vmamba_base/ckpt_epoch_299.pth
     cd $CODE; export GPUS=8 NNODES=${NNODES:-1} NODE_RANK=${NODE_RANK:-0} PORT=${PORT:-29500} MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}; PYTHONPATH="$PWD":$PYTHONPATH $PYTHON -m torch.distributed.launch --nnodes=$NNODES --node_rank=$NODE_RANK --master_addr=$MASTER_ADDR --nproc_per_node=$GPUS --master_port=$PORT ./tools/train.py $CONFIG --launcher pytorch --cfg-options model.backbone.pretrained=$CKPT 
 
     # ======================================================
     export CODE=segmentation PYTHON=python
-    export CONFIG=configs/vssm/upernet_vssm_4xb4-160k_ade20k-640x640_small.py
-    export CKPT=../../ckpts/classification/vssm/vssmsmall/ema_ckpt_epoch_299.pth
+    export CONFIG=configs/vmamba/upernet_vmamba_4xb4-160k_ade20k-640x640_small.py
+    export CKPT=../../ckpts/classification/vmamba/vmamba_small/ema_ckpt_epoch_299.pth
     cd $CODE; export GPUS=8 NNODES=${NNODES:-1} NODE_RANK=${NODE_RANK:-0} PORT=${PORT:-29500} MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}; PYTHONPATH="$PWD":$PYTHONPATH $PYTHON -m torch.distributed.launch --nnodes=$NNODES --node_rank=$NODE_RANK --master_addr=$MASTER_ADDR --nproc_per_node=$GPUS --master_port=$PORT ./tools/train.py $CONFIG --launcher pytorch --cfg-options model.backbone.pretrained=$CKPT 
 
     # ======================================================
     export CODE=segmentation PYTHON=python
-    export CONFIG=configs/vssm/upernet_vssm_4xb4-160k_ade20k-896x896_small.py
-    export CKPT=../../ckpts/classification/vssm/vssmsmall/ema_ckpt_epoch_299.pth
+    export CONFIG=configs/vmamba/upernet_vmamba_4xb4-160k_ade20k-896x896_small.py
+    export CKPT=../../ckpts/classification/vmamba/vmamba_small/ema_ckpt_epoch_299.pth
     cd $CODE; export GPUS=8 NNODES=${NNODES:-1} NODE_RANK=${NODE_RANK:-0} PORT=${PORT:-29500} MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}; PYTHONPATH="$PWD":$PYTHONPATH $PYTHON -m torch.distributed.launch --nnodes=$NNODES --node_rank=$NODE_RANK --master_addr=$MASTER_ADDR --nproc_per_node=$GPUS --master_port=$PORT ./tools/train.py $CONFIG --launcher pytorch --cfg-options model.backbone.pretrained=$CKPT 
 }
 
@@ -133,26 +133,26 @@ function segmentation_test_tta() {
 
     # ======================================================
     export CODE=segmentation PYTHON=python
-    export CONFIG=configs/vssm/upernet_vssm_4xb4-160k_ade20k-512x512_tiny.py
-    export CKPT=../../ckpts/segmentation/work_dirs/upernet_vssm_4xb4-160k_ade20k-512x512_tiny/iter_144000.pth
+    export CONFIG=configs/vmamba/upernet_vmamba_4xb4-160k_ade20k-512x512_tiny.py
+    export CKPT=../../ckpts/segmentation/work_dirs/upernet_vmamba_4xb4-160k_ade20k-512x512_tiny/iter_144000.pth
     cd $CODE; export GPUS=8 NNODES=${NNODES:-1} NODE_RANK=${NODE_RANK:-0} PORT=${PORT:-29500} MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}; PYTHONPATH="$PWD":$PYTHONPATH $PYTHON -m torch.distributed.launch --nnodes=$NNODES --node_rank=$NODE_RANK --master_addr=$MASTER_ADDR --nproc_per_node=$GPUS --master_port=$PORT ./tools/test.py $CONFIG $CKPT --launcher pytorch --tta --cfg-options model.backbone.pretrained=None
 
     # ======================================================
     export CODE=segmentation PYTHON=python
-    export CONFIG=configs/vssm/upernet_vssm_4xb4-160k_ade20k-512x512_small.py
-    export CKPT=../../ckpts/segmentation/work_dirs/upernet_vssm_4xb4-160k_ade20k-512x512_small/iter_160000.pth
+    export CONFIG=configs/vmamba/upernet_vmamba_4xb4-160k_ade20k-512x512_small.py
+    export CKPT=../../ckpts/segmentation/work_dirs/upernet_vmamba_4xb4-160k_ade20k-512x512_small/iter_160000.pth
     cd $CODE; export GPUS=8 NNODES=${NNODES:-1} NODE_RANK=${NODE_RANK:-0} PORT=${PORT:-29500} MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}; PYTHONPATH="$PWD":$PYTHONPATH $PYTHON -m torch.distributed.launch --nnodes=$NNODES --node_rank=$NODE_RANK --master_addr=$MASTER_ADDR --nproc_per_node=$GPUS --master_port=$PORT ./tools/test.py $CONFIG $CKPT --launcher pytorch --tta --cfg-options model.backbone.pretrained=None
 
     # ======================================================
     export CODE=segmentation PYTHON=python
-    export CONFIG=configs/vssm/upernet_vssm_4xb4-160k_ade20k-512x512_base.py
-    export CKPT=../../ckpts/segmentation/work_dirs/upernet_vssm_4xb4-160k_ade20k-512x512_base/iter_128000.pth
+    export CONFIG=configs/vmamba/upernet_vmamba_4xb4-160k_ade20k-512x512_base.py
+    export CKPT=../../ckpts/segmentation/work_dirs/upernet_vmamba_4xb4-160k_ade20k-512x512_base/iter_128000.pth
     cd $CODE; export GPUS=8 NNODES=${NNODES:-1} NODE_RANK=${NODE_RANK:-0} PORT=${PORT:-29500} MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}; PYTHONPATH="$PWD":$PYTHONPATH $PYTHON -m torch.distributed.launch --nnodes=$NNODES --node_rank=$NODE_RANK --master_addr=$MASTER_ADDR --nproc_per_node=$GPUS --master_port=$PORT ./tools/test.py $CONFIG $CKPT --launcher pytorch --tta --cfg-options model.backbone.pretrained=None
 
     # ======================================================
     export CODE=segmentation PYTHON=python
-    export CONFIG=configs/vssm/upernet_vssm_4xb4-160k_ade20k-640x640_small.py
-    export CKPT=../../ckpts/segmentation/work_dirs/upernet_vssm_4xb4-160k_ade20k-640x640_small/iter_112000.pth
+    export CONFIG=configs/vmamba/upernet_vmamba_4xb4-160k_ade20k-640x640_small.py
+    export CKPT=../../ckpts/segmentation/work_dirs/upernet_vmamba_4xb4-160k_ade20k-640x640_small/iter_112000.pth
     cd $CODE; export GPUS=8 NNODES=${NNODES:-1} NODE_RANK=${NODE_RANK:-0} PORT=${PORT:-29500} MASTER_ADDR=${MASTER_ADDR:-"127.0.0.1"}; PYTHONPATH="$PWD":$PYTHONPATH $PYTHON -m torch.distributed.launch --nnodes=$NNODES --node_rank=$NODE_RANK --master_addr=$MASTER_ADDR --nproc_per_node=$GPUS --master_port=$PORT ./tools/test.py $CONFIG $CKPT --launcher pytorch --tta --cfg-options model.backbone.pretrained=None
 }
 
