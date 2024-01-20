@@ -1,9 +1,6 @@
 function get_env() {
-    pack_url=/path/to/packages
-    conda_url="~/miniconda3"
     conda_env="mamba"
     nvcc -V
-    bash ${pack_url}/Miniconda3-py310* -bfup ${conda_url}
     conda create -n ${conda_env} --clone base
     python -VV
     pip -V
@@ -13,8 +10,8 @@ function get_env() {
     pip install pytest chardet yacs termcolor
     pip install submitit tensorboardX
     pip install triton==2.0.0
-    pip install ${pack_url}/causal_conv1d*
-    pip install ${pack_url}/mamba_ssm*
+    pip install causal_conv1d==1.0.0  # causal_conv1d-1.0.0+cu118torch1.13cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
+    pip install mamba_ssm==1.0.1  # mamba_ssm-1.0.1+cu118torch1.13cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
 }
 
 
