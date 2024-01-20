@@ -97,7 +97,7 @@ We will release all the pre-trained models/logs in few days!
 
 ## Getting Started
 
-* install required packages:
+* Install required packages:
 ```bash
 conda_env="mamba"
 nvcc -V
