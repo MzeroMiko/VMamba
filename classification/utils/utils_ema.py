@@ -131,10 +131,12 @@ def _load_pretrained(config, model, logger, state_dict):
 def load_pretrained_ema(config, model, logger, model_ema: ModelEma=None):
     logger.info(f"==============> Loading weight {config.MODEL.PRETRAINED} for fine-tuning......")
     checkpoint = torch.load(config.MODEL.PRETRAINED, map_location='cpu')
-    state_dict = checkpoint['model']
-    state_dict_ema = checkpoint['model_ema']
+     state_dict = checkpoint['model']
     _load_pretrained(config, model, logger, state_dict)
-    _load_pretrained(config, model_ema.ema, logger, state_dict_ema)
+    if model_ema is not None:
+        state_dict_ema = checkpoint['model_ema']
+        _load_pretrained(config, model_ema.ema, logger, state_dict_ema)
+
 
 
 def save_checkpoint_ema(config, epoch, model, max_accuracy, optimizer, lr_scheduler, loss_scaler, logger, model_ema: ModelEma=None, max_accuracy_ema=None):
