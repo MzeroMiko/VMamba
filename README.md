@@ -72,7 +72,7 @@ We will release all the pre-trained models/logs in few days!
 | Swin-T | 48M | 267G | MaskRCNN@1x | 42.7| 39.3 |-- |
 | VMamba-T | 42M | 262G | MaskRCNN@1x | 46.5| 42.1 |[ckpt](https://drive.google.com/file/d/1SIQFPpXkVBPB4mx1VO9P9nH4ebvTH0W5/view?usp=sharing)/[log](https://drive.google.com/file/d/15nd3AZuOkHpqlZhVUEXilnsVzd1qn8Kc/view?usp=sharing) |
 | Swin-S | 69M | 354G | MaskRCNN@1x | 44.8| 40.9 |-- |
-| VMamba-S | 64M | 357G | MaskRCNN@1x | 48.2| 43.0 |--/[log](https://drive.google.com/file/d/1TbYZhban4VqC-9kQ8-kuZOPSBX484sSj/view?usp=sharing) |
+| VMamba-S | 64M | 357G | MaskRCNN@1x | 48.2| 43.0 |--()/[log](https://drive.google.com/file/d/1TbYZhban4VqC-9kQ8-kuZOPSBX484sSj/view?usp=sharing) |
 | Swin-B | 107M | 496G | MaskRCNN@1x | 46.9| 42.3 |-- |
 | VMamba-B | 96M | 482G | MaskRCNN@1x | 48.5| 43.1 |waiting |
 | Swin-T | 48M | 267G | MaskRCNN@3x | 46.0| 41.6 |-- |
@@ -85,7 +85,7 @@ We will release all the pre-trained models/logs in few days!
 | Backbone | Input|  #params | FLOPs | Segmentor | mIoU | checkpoints/logs |
 | :---: | :---: | :---: | :---: | :---: | :---: |:---: |
 | Swin-T | 512x512 | 60M | 945G | UperNet@160k | 44.4| -- |
-| VMamba-T| 512x512 | 55M | 939G | UperNet@160k | 47.3| --/[log](https://drive.google.com/file/d/17nh9_hdF9QQxyqj81U86HoGUnMxZQ4nN/view?usp=sharing) |
+| VMamba-T| 512x512 | 55M | 939G | UperNet@160k | 47.3| [ckpy](https://drive.google.com/file/d/1hLAGFBRJfaFSzyPlqsGbKXXN_gQJMLzn/view?usp=sharing)/[log](https://drive.google.com/file/d/17nh9_hdF9QQxyqj81U86HoGUnMxZQ4nN/view?usp=sharing) |
 | Swin-S | 512x512 | 81M | 1039G | UperNet@160k | 47.6| -- |
 | VMamba-S| 512x512 | 76M | 1037G | UperNet@160k | 49.5| --/[log](https://drive.google.com/file/d/1m-Pd4_kPgF6Dt2E33sfIf_g9jVWxfPnG/view?usp=sharing) |
 | Swin-B | 512x512 | 121M | 1188G | UperNet@160k | 48.1| -- |
