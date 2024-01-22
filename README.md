@@ -89,7 +89,7 @@ We will release all the pre-trained models/logs in few days!
 | Swin-T | 512x512 | 60M | 945G | UperNet@160k | 44.4| -- |
 | VMamba-T| 512x512 | 55M | 939G | UperNet@160k | 47.3| [ckpt](https://drive.google.com/file/d/1hLAGFBRJfaFSzyPlqsGbKXXN_gQJMLzn/view?usp=sharing)/[log](https://drive.google.com/file/d/17nh9_hdF9QQxyqj81U86HoGUnMxZQ4nN/view?usp=sharing) |
 | Swin-S | 512x512 | 81M | 1039G | UperNet@160k | 47.6| -- |
-| VMamba-S| 512x512 | 76M | 1037G | UperNet@160k | 49.5| --/[log](https://drive.google.com/file/d/1m-Pd4_kPgF6Dt2E33sfIf_g9jVWxfPnG/view?usp=sharing) |
+| VMamba-S| 512x512 | 76M | 1037G | UperNet@160k | 49.5| [ckpt](https://drive.google.com/file/d/18GReI1A6LckwnPrnEFPXp9at7VB8GiJW/view?usp=sharing)/[log](https://drive.google.com/file/d/1m-Pd4_kPgF6Dt2E33sfIf_g9jVWxfPnG/view?usp=sharing) |
 | Swin-B | 512x512 | 121M | 1188G | UperNet@160k | 48.1| -- |
 | VMamba-B| 512x512 | 110M | 1167G | UperNet@160k | 50.0| waiting |
 | Swin-S | 640x640 | 81M | 1614G | UperNet@160k | 47.9| -- |
