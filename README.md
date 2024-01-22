@@ -70,7 +70,7 @@ We will release all the pre-trained models/logs in few days!
 | Backbone | #params | FLOPs | Detector | box mAP | mask mAP | checkpoints/logs |
 | :---: | :---: | :---: | :---: | :---: | :---: |:---: |
 | Swin-T | 48M | 267G | MaskRCNN@1x | 42.7| 39.3 |-- |
-| VMamba-T | 42M | 262G | MaskRCNN@1x | 46.5| 42.1 |waiting |
+| VMamba-T | 42M | 262G | MaskRCNN@1x | 46.5| 42.1 |--/[log](https://drive.google.com/file/d/15nd3AZuOkHpqlZhVUEXilnsVzd1qn8Kc/view?usp=sharing) |
 | Swin-S | 69M | 354G | MaskRCNN@1x | 44.8| 40.9 |-- |
 | VMamba-S | 64M | 357G | MaskRCNN@1x | 48.2| 43.0 |waiting |
 | Swin-B | 107M | 496G | MaskRCNN@1x | 46.9| 42.3 |-- |
