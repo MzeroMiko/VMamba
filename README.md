@@ -14,7 +14,9 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 
 ## Updates
 
-* **` Jan. 19th, 2024`:** The source code for classification, object detection, and semantic segmentation are provided. The pre-trained models will be released in few days!
+* **` Jan. 22th, 2024`:** We have released VMamba-T/S pre-trained weights. The ema weights should be converted before transferring to downstream tasks to match the module names using [get_ckpt.py](analyza/get_ckpt.py).
+
+* **` Jan. 19th, 2024`:** The source code for classification, object detection, and semantic segmentation are provided. 
 
 
 ## Abstract
