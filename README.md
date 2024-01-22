@@ -61,7 +61,7 @@ We will release all the pre-trained models/logs in few days!
 | Swin-T | ImageNet-1K | 224x224 | 81.2 | 28M | 4.5G | -- |
 | Swin-S | ImageNet-1K | 224x224 | 83.2 | 50M | 8.7G | -- |
 | Swin-B | ImageNet-1K | 224x224 | 83.5 | 88M | 15.4G | -- |
-| VMamba-T | ImageNet-1K | 224x224 | 82.2 | 22M | 4.5G | waiting |
+| VMamba-T | ImageNet-1K | 224x224 | 82.2 | 22M | 4.5G | --/[log](https://drive.google.com/file/d/1mVooWXl1Zj8ZALr1iYuoMLdG_yDbZpRx/view?usp=sharing) |
 | VMamba-S | ImageNet-1K | 224x224 | 83.5 | 44M | 9.1G | waiting |
 | VMamba-B | ImageNet-1K | 224x224 | 84.0 | 75M | 15.2G | waiting |
 
