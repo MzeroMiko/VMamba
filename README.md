@@ -135,31 +135,3 @@ pip install mamba_ssm==1.0.1  # mamba_ssm-1.0.1+cu118torch1.13cxx11abiFALSE-cp31
 This project is based on Mamba ([paper](https://arxiv.org/abs/2312.00752), [code](https://github.com/state-spaces/mamba)), Swin-Transformer ([paper](https://arxiv.org/pdf/2103.14030.pdf), [code](https://github.com/microsoft/Swin-Transformer)), ConvNeXt ([paper](https://arxiv.org/abs/2201.03545), [code](https://github.com/facebookresearch/ConvNeXt)), [OpenMMLab](https://github.com/open-mmlab),
 and the analyze/get_erf.py is adopted from [replknet](https://github.com/DingXiaoH/RepLKNet-pytorch/tree/main/erf), thanks for their excellent works.
 
-
-<!---
-import torch
-import os
-
-def modema(ckpt=None):
-    opath = os.path.join(os.path.dirname(ckpt), f"ema_{os.path.basename(ckpt)}")
-    _ckpt = torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))
-    _ckpt["model_ori"] = _ckpt["model"]
-    _ckpt["model"] = _ckpt["model_ema"]
-    torch.save(_ckpt, open(opath, "wb"))
-
-if __name__ == "__main__":
-    if False:
-        ckpt="./vssmsmall/ema_ckpt_epoch_238.pth"
-        print(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu")).keys())
-        p1 = next(iter(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))["model"].values()))
-        p2 = next(iter(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))["model_ema"].values()))
-        print(p1 == p2)
-
-    if False:
-        modema("./vssmsmall/ckpt_epoch_238.pth")
-
-
-# Readme: How to use ema ckpts:
-# python get_ckpt.py
-
---->
