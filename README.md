@@ -123,10 +123,10 @@ pip install mamba_ssm==1.0.1  # mamba_ssm-1.0.1+cu118torch1.13cxx11abiFALSE-cp31
 
 ```
 @article{liu2024vmamba,
-      title={VMamba: Visual State Space Model}, 
-      author={Yue Liu and Yunjie Tian and Yuzhong Zhao and Hongtian Yu and Lingxi Xie and Yaowei Wang and Qixiang Ye and Yunfan Liu},
-      journal={arXiv preprint arXiv:2401.10166},
-      year={2024}
+  title={VMamba: Visual State Space Model},
+  author={Liu, Yue and Tian, Yunjie and Zhao, Yuzhong and Yu, Hongtian and Xie, Lingxi and Wang, Yaowei and Ye, Qixiang and Liu, Yunfan},
+  journal={arXiv preprint arXiv:2401.10166},
+  year={2024}
 }
 ```
 
