@@ -79,7 +79,7 @@ We will release all the pre-trained models/logs in few days!
 | Swin-B | 107M | 496G | MaskRCNN@1x | 46.9| 42.3 |-- |
 | VMamba-B | 96M | 482G | MaskRCNN@1x | 48.5| 43.1 |waiting |
 | Swin-T | 48M | 267G | MaskRCNN@3x | 46.0| 41.6 |-- |
-| VMamba-T | 42M | 262G | MaskRCNN@3x | 48.5| 43.2 |waiting |
+| VMamba-T | 42M | 262G | MaskRCNN@3x | 48.5| 43.2 |--/[log](https://drive.google.com/file/d/1SmsgM2SR_GbKjq1EkcLcQXCEIlPhA-_r/view?usp=sharing) |
 | Swin-S | 69M | 354G | MaskRCNN@3x | 48.2| 43.2 |-- |
 | VMamba-S | 64M | 357G | MaskRCNN@3x | 49.7| 44.0 |waiting |
 
