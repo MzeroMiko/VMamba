@@ -13,7 +13,7 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 </div>
 
 ## Updates
-* **` Jan. 23th, 2024`:** we add an alternative for mamba_ssm and causal_conv1d. Typing "python setup.py install" in classification/models/selective_scan and you can get rid of those two packages. Just turn "self.forward_core = self.forward_corev0" to "self.forward_core = self.forward_corev1" in classification/models/vmamba/vmamba.py#280 to enjoy that feature. This feature is still on testing...
+* **` Jan. 23th, 2024`:** we add an alternative for mamba_ssm and causal_conv1d. Typing `python setup.py install` in classification/models/selective_scan and you can get rid of those two packages. Just turn `self.forward_core = self.forward_corev0` to `self.forward_core = self.forward_corev1` in classification/models/vmamba/vmamba.py#280 to enjoy that feature. This feature is still on testing...
 
 * **` Jan. 22th, 2024`:** We have released VMamba-T/S pre-trained weights. The ema weights should be converted before transferring to downstream tasks to match the module names using [get_ckpt.py](analyze/get_ckpt.py).
 
