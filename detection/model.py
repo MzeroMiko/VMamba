@@ -64,9 +64,9 @@ class MMDET_VSSM(BaseModule, VSSM):
 
     def forward(self, x):
         x = self.patch_embed(x)
-        if self.ape:
-            x = x + self.absolute_pos_embed
-        x = self.pos_drop(x)
+        # if self.ape:
+        #     x = x + self.absolute_pos_embed
+        # x = self.pos_drop(x)
 
         outs = []
         y = x
@@ -76,7 +76,7 @@ class MMDET_VSSM(BaseModule, VSSM):
                 norm_layer: nn.LayerNorm = getattr(self, f'outnorm{i}')
                 out = norm_layer(x)
                 out = out.permute(0, 3, 1, 2).contiguous()
-            outs.append(out)
+                outs.append(out)
         return outs
 
 
