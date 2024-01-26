@@ -12,9 +12,7 @@ from selective_scan import selective_scan_fn, selective_scan_ref
 @pytest.mark.parametrize('itype', [torch.float32, torch.float16, torch.bfloat16])
 @pytest.mark.parametrize('seqlen', [64, 128, 256, 372, 512, 784, 1024, 1134, 2048, 4096])
 @pytest.mark.parametrize('has_delta_bias', [False, True])
-# @pytest.mark.parametrize('has_delta_bias', [True])
 @pytest.mark.parametrize('delta_softplus', [False, True])
-# @pytest.mark.parametrize('delta_softplus', [True])
 @pytest.mark.parametrize('has_D', [False, True])
 @pytest.mark.parametrize("varBC_groups", [1, 2])
 def test_selective_scan(varBC_groups, has_D, has_delta_bias,
