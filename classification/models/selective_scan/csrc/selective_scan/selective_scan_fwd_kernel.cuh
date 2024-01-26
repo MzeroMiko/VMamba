@@ -200,8 +200,7 @@ void selective_scan_fwd_kernel(SSMParamsBase params) {
                 }
                 #pragma unroll
                 for (int i = 0; i < kNItems; ++i) {
-                    const weight_t C_val = (C_vals[i]);
-                    out_vals[r][i] += thread_data[i].y * C_val;
+                    out_vals[r][i] += thread_data[i].y * C_vals[i];
                 }
             }
         }
