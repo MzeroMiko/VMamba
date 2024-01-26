@@ -281,20 +281,19 @@ void selective_scan_bwd_kernel(SSMParamsBwd params) {
 template<int kNThreads, int kNItems, typename input_t, typename weight_t>
 void selective_scan_bwd_launch(SSMParamsBwd &params, cudaStream_t stream) {
     BOOL_SWITCH(params.seqlen % (kNThreads * kNItems) == 0, kIsEvenLen, [&] {
-                BOOL_SWITCH(params.delta_softplus, kDeltaSoftplus, [&] {
-                        using Ktraits = Selective_Scan_bwd_kernel_traits<kNThreads, kNItems, kIsEvenLen, kDeltaSoftplus, input_t, weight_t>;
-                        // TODO: check this
-                        constexpr int kSmemSize = Ktraits::kSmemSize + MAX_DSTATE * sizeof(typename Ktraits::scan_t) + (kNThreads + 4 * MAX_DSTATE) * sizeof(typename Ktraits::weight_t);
-                        // printf("smem_size = %d\n", kSmemSize);
-                        dim3 grid(params.batch, params.dim);
-                        auto kernel = &selective_scan_bwd_kernel<Ktraits>;
-                        if (kSmemSize >= 48 * 1024) {
-                            C10_CUDA_CHECK(cudaFuncSetAttribute(
-                                kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, kSmemSize));
-                        }
-                        kernel<<<grid, Ktraits::kNThreads, kSmemSize, stream>>>(params);
-                        C10_CUDA_KERNEL_LAUNCH_CHECK();
-                });
+        BOOL_SWITCH(params.delta_softplus, kDeltaSoftplus, [&] {
+            using Ktraits = Selective_Scan_bwd_kernel_traits<kNThreads, kNItems, kIsEvenLen, kDeltaSoftplus, input_t, weight_t>;
+            // TODO: check this
+            constexpr int kSmemSize = Ktraits::kSmemSize + MAX_DSTATE * sizeof(typename Ktraits::scan_t) + (kNThreads + 4 * MAX_DSTATE) * sizeof(typename Ktraits::weight_t);
+            // printf("smem_size = %d\n", kSmemSize);
+            dim3 grid(params.batch, params.dim);
+            auto kernel = &selective_scan_bwd_kernel<Ktraits>;
+            if (kSmemSize >= 48 * 1024) {
+                C10_CUDA_CHECK(cudaFuncSetAttribute(kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, kSmemSize));
+            }
+            kernel<<<grid, Ktraits::kNThreads, kSmemSize, stream>>>(params);
+            C10_CUDA_KERNEL_LAUNCH_CHECK();
+        });
     });
 }
 
