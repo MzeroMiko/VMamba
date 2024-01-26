@@ -114,6 +114,8 @@ pip install timm==0.4.12
 pip install pytest chardet yacs termcolor
 pip install submitit tensorboardX
 pip install triton==2.0.0
+pip install fvcore
+# for packages below (causal_conv1d, mamba_ssm) you can cd into classification/models/selective_scan and python setup.py install as an alternative
 pip install causal_conv1d==1.0.0  # causal_conv1d-1.0.0+cu118torch1.13cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
 pip install mamba_ssm==1.0.1  # mamba_ssm-1.0.1+cu118torch1.13cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
 ```
