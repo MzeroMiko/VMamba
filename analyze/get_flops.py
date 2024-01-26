@@ -15,7 +15,7 @@ from mmengine.analysis import get_model_complexity_info as mm_get_model_complexi
 from vmamba.vmamba import flops_selective_scan_ref, selective_scan_ref
 from vmamba.vmamba import VSSM
 from vmamba.vss import VSS
-from vmamba.vssmd import VSSMD as VSSM
+# from vmamba.vssmd import VSSMD as VSSM
 from functools import partial
 
 
