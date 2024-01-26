@@ -558,16 +558,6 @@ class VSSM(nn.Module):
         self.patch_embed = PatchEmbed2D(patch_size=patch_size, in_chans=in_chans, embed_dim=self.embed_dim,
             norm_layer=norm_layer if patch_norm else None)
 
-        # WASTED absolute position embedding ======================
-        self.ape = False
-        # self.ape = False
-        # drop_rate = 0.0
-        if self.ape:
-            self.patches_resolution = self.patch_embed.patches_resolution
-            self.absolute_pos_embed = nn.Parameter(torch.zeros(1, *self.patches_resolution, self.embed_dim))
-            trunc_normal_(self.absolute_pos_embed, std=.02)
-        self.pos_drop = nn.Dropout(p=drop_rate)
-
         dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]  # stochastic depth decay rule
 
         self.layers = nn.ModuleList()
@@ -609,19 +599,8 @@ class VSSM(nn.Module):
             nn.init.constant_(m.bias, 0)
             nn.init.constant_(m.weight, 1.0)
 
-    @torch.jit.ignore
-    def no_weight_decay(self):
-        return {'absolute_pos_embed'}
-
-    @torch.jit.ignore
-    def no_weight_decay_keywords(self):
-        return {'relative_position_bias_table'}
-
     def forward_features(self, x):
         x = self.patch_embed(x)
-        if self.ape:
-            x = x + self.absolute_pos_embed
-        x = self.pos_drop(x)
 
         for layer in self.layers:
             x = layer(x)
@@ -634,9 +613,6 @@ class VSSM(nn.Module):
 
     def forward_backbone(self, x):
         x = self.patch_embed(x)
-        if self.ape:
-            x = x + self.absolute_pos_embed
-        x = self.pos_drop(x)
 
         for layer in self.layers:
             x = layer(x)
