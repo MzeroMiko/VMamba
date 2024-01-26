@@ -42,7 +42,6 @@ class SelectiveScanFn(torch.autograd.Function):
         du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda.bwd(
             u, delta, A, B, C, D, delta_bias, dout, x, out, ctx.delta_softplus,
         )
-        dz = None
         dB = dB.squeeze(1) if getattr(ctx, "squeeze_B", False) else dB
         dC = dC.squeeze(1) if getattr(ctx, "squeeze_C", False) else dC
         return (du, ddelta, dA, dB, dC,
@@ -99,8 +98,6 @@ def selective_scan_ref(u, delta, A, B, C, D=None, delta_bias=None, delta_softplu
             y = torch.einsum('bdn,bn->bd', x, C[:, :, i])
         else:
             y = torch.einsum('bdn,bdn->bd', x, C[:, :, :, i])
-        if i == u.shape[2] - 1:
-            last_state = x
         ys.append(y)
     y = torch.stack(ys, dim=2) # (batch dim L)
     out = y if D is None else y + u * rearrange(D, "d -> d 1")
