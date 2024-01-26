@@ -13,7 +13,7 @@ try:
 except:
     FusedAdam = None
     FusedLAMB = None
-    print("To use FusedLAMB or FusedAdam, please install apex.")
+    # print("To use FusedLAMB or FusedAdam, please install apex.")
 
 
 def build_optimizer(config, model, simmim=False, is_pretrain=False):
