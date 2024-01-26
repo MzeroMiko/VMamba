@@ -1,39 +1,21 @@
 # Analyze flops ================================
-
+from typing import Callable, Tuple, Union, Tuple, Union, Any
+from functools import partial
 
 import torch
 import torch.nn as nn
 from torch import Tensor
 from torch.nn.modules import Module
-from typing import Callable, Tuple, Union, Tuple, Union, Any
 
 from mmengine.analysis.print_helper import is_tuple_of, FlopAnalyzer, ActivationAnalyzer, parameter_count, _format_size, complexity_stats_table, complexity_stats_str
 from mmengine.analysis.jit_analysis import _IGNORED_OPS
 from mmengine.analysis.complexity_analysis import _DEFAULT_SUPPORTED_FLOP_OPS, _DEFAULT_SUPPORTED_ACT_OPS
 from mmengine.analysis import get_model_complexity_info as mm_get_model_complexity_info
 
-from vmamba.vmamba import flops_selective_scan_ref, selective_scan_ref
+from vmamba.vmamba import VSSM, selective_scan_flop_jit
 from vmamba.vmamba import VSSM
 from vmamba.vss import VSS
 # from vmamba.vssmd import VSSMD as VSSM
-from functools import partial
-
-
-def selective_scan_flop_jit(inputs, outputs):
-    # xs, dts, As, Bs, Cs, Ds (skip), z (skip), dt_projs_bias (skip)
-    assert inputs[0].debugName().startswith("xs") # (B, D, L)
-    assert inputs[2].debugName().startswith("As") # (D, N)
-    assert inputs[3].debugName().startswith("Bs") # (D, N)
-    with_Group = len(inputs[3].type().sizes()) == 4
-    with_D = inputs[5].debugName().startswith("Ds")
-    if not with_D:
-        with_z = inputs[5].debugName().startswith("z")
-    else:
-        with_z = inputs[6].debugName().startswith("z")
-    B, D, L = inputs[0].type().sizes()
-    N = inputs[2].type().sizes()[1]
-    flops = flops_selective_scan_ref(B=B, L=L, D=D, N=N, with_D=with_D, with_Z=with_z, with_Group=with_Group)
-    return flops
 
 
 # modified from mmengine.analysis

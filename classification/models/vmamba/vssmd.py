@@ -8,9 +8,21 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.utils.checkpoint as checkpoint
 from einops import rearrange, repeat
-from timm.models.layers import DropPath, to_2tuple, trunc_normal_
-from mamba_ssm.ops.selective_scan_interface import selective_scan_fn, selective_scan_ref
+from timm.models.layers import DropPath, trunc_normal_
 DropPath.__repr__ = lambda self: f"timm.DropPath({self.drop_prob})"
+
+# import mamba_ssm.selective_scan_fn (in which causal_conv1d is needed)
+try:
+    from mamba_ssm.ops.selective_scan_interface import selective_scan_fn, selective_scan_ref
+except:
+    pass
+
+# an alternative for mamba_ssm
+try:
+    from selective_scan import selective_scan_fn as selective_scan_fn_v1
+    from selective_scan import selective_scan_ref as selective_scan_ref_v1
+except:
+    pass
 
 
 def flops_selective_scan_ref(B=1, L=256, D=768, N=16, with_D=True, with_Z=False, with_Group=True, with_complex=False):
@@ -129,6 +141,23 @@ def flops_selective_scan_ref(B=1, L=256, D=768, N=16, with_D=True, with_Z=False,
         out = out.to(dtype=dtype_in)
         """
     
+    return flops
+
+
+def selective_scan_flop_jit(inputs, outputs):
+    # xs, dts, As, Bs, Cs, Ds (skip), z (skip), dt_projs_bias (skip)
+    assert inputs[0].debugName().startswith("xs") # (B, D, L)
+    assert inputs[2].debugName().startswith("As") # (D, N)
+    assert inputs[3].debugName().startswith("Bs") # (D, N)
+    with_Group = len(inputs[3].type().sizes()) == 4
+    with_D = inputs[5].debugName().startswith("Ds")
+    if not with_D:
+        with_z = inputs[5].debugName().startswith("z")
+    else:
+        with_z = inputs[6].debugName().startswith("z")
+    B, D, L = inputs[0].type().sizes()
+    N = inputs[2].type().sizes()[1]
+    flops = flops_selective_scan_ref(B=B, L=L, D=D, N=N, with_D=with_D, with_Z=with_z, with_Group=with_Group)
     return flops
 
 
