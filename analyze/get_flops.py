@@ -13,7 +13,6 @@ from mmengine.analysis.complexity_analysis import _DEFAULT_SUPPORTED_FLOP_OPS, _
 from mmengine.analysis import get_model_complexity_info as mm_get_model_complexity_info
 
 from vmamba.vmamba import VSSM, selective_scan_flop_jit
-from vmamba.vmamba import VSSM
 from vmamba.vss import VSS
 # from vmamba.vssmd import VSSMD as VSSM
 
