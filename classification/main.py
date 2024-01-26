@@ -31,7 +31,7 @@ from utils.utils import load_checkpoint, load_pretrained, save_checkpoint, Nativ
 
 from timm.utils import ModelEma as ModelEma
 from utils.utils_ema import load_checkpoint_ema, load_pretrained_ema, save_checkpoint_ema
-print(f"================= {torch.multiprocessing.get_start_method()} ==================")
+print(f"||{torch.multiprocessing.get_start_method()}||", end="")
 torch.multiprocessing.set_start_method("spawn", force=True)
 
 
