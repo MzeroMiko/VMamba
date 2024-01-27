@@ -294,8 +294,9 @@ class SS2D(nn.Module):
         self.A_logs = self.A_log_init(self.d_state, self.d_inner, copies=4, merge=True) # (K=4, D, N)
         self.Ds = self.D_init(self.d_inner, copies=4, merge=True) # (K=4, D, N)
 
-        # self.selective_scan = selective_scan_fn
         self.forward_core = self.forward_corev0
+        # self.forward_core = self.forward_corev0_seq
+        # self.forward_core = self.forward_corev1
 
         self.out_norm = nn.LayerNorm(self.d_inner)
         self.out_proj = nn.Linear(self.d_inner, self.d_model, bias=bias, **factory_kwargs)
@@ -359,7 +360,7 @@ class SS2D(nn.Module):
 
     def forward_corev0(self, x: torch.Tensor):
         self.selective_scan = selective_scan_fn
-        
+
         B, C, H, W = x.shape
         L = H * W
         K = 4
@@ -371,12 +372,12 @@ class SS2D(nn.Module):
         # x_dbl = x_dbl + self.x_proj_bias.view(1, K, -1, 1)
         dts, Bs, Cs = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=2)
         dts = torch.einsum("b k r l, k d r -> b k d l", dts.view(B, K, -1, L), self.dt_projs_weight)
-        # dts = dts + self.dt_projs_bias.view(1, K, -1, 1)
 
         xs = xs.float().view(B, -1, L) # (b, k * d, l)
         dts = dts.contiguous().float().view(B, -1, L) # (b, k * d, l)
         Bs = Bs.float().view(B, K, -1, L) # (b, k, d_state, l)
         Cs = Cs.float().view(B, K, -1, L) # (b, k, d_state, l)
+        
         Ds = self.Ds.float().view(-1) # (k * d)
         As = -torch.exp(self.A_logs.float()).view(-1, self.d_state)  # (k * d, d_state)
         dt_projs_bias = self.dt_projs_bias.float().view(-1) # (k * d)
@@ -393,10 +394,57 @@ class SS2D(nn.Module):
         inv_y = torch.flip(out_y[:, 2:4], dims=[-1]).view(B, 2, -1, L)
         wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
         invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
+        y = out_y[:, 0] + inv_y[:, 0] + wh_y + invwh_y
+        y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
+        y = self.out_norm(y).to(x.dtype)
 
-        return out_y[:, 0], inv_y[:, 0], wh_y, invwh_y
+        return y
+    
+    def forward_corev0_seq(self, x: torch.Tensor):
+        self.selective_scan = selective_scan_fn
 
-    # an alternative to forward_corev1
+        B, C, H, W = x.shape
+        L = H * W
+        K = 4
+
+        x_hwwh = torch.stack([x.view(B, -1, L), torch.transpose(x, dim0=2, dim1=3).contiguous().view(B, -1, L)], dim=1).view(B, 2, -1, L)
+        xs = torch.cat([x_hwwh, torch.flip(x_hwwh, dims=[-1])], dim=1) # (b, k, d, l)
+
+        x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs.view(B, K, -1, L), self.x_proj_weight)
+        # x_dbl = x_dbl + self.x_proj_bias.view(1, K, -1, 1)
+        dts, Bs, Cs = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=2)
+        dts = torch.einsum("b k r l, k d r -> b k d l", dts.view(B, K, -1, L), self.dt_projs_weight)
+
+        xs = xs.float().view(B, -1, L) # (b, k * d, l)
+        dts = dts.contiguous().float().view(B, -1, L) # (b, k * d, l)
+        Bs = Bs.float().view(B, K, -1, L) # (b, k, d_state, l)
+        Cs = Cs.float().view(B, K, -1, L) # (b, k, d_state, l)
+        
+        Ds = self.Ds.float().view(-1) # (k * d)
+        As = -torch.exp(self.A_logs.float()).view(-1, self.d_state)  # (k * d, d_state)
+        dt_projs_bias = self.dt_projs_bias.float().view(-1) # (k * d)
+
+        out_y = []
+        for i in range(4):
+            yi = self.selective_scan(
+                xs[:, i], dts[:, i], 
+                As[i], Bs[:, i], Cs[:, i], Ds[i],
+                delta_bias=dt_projs_bias[i],
+                delta_softplus=True,
+            ).view(B, -1, L)
+            out_y.append(yi)
+        out_y = torch.stack(out_y, dim=1)
+        assert out_y.dtype == torch.float
+
+        inv_y = torch.flip(out_y[:, 2:4], dims=[-1]).view(B, 2, -1, L)
+        wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
+        invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
+        y = out_y[:, 0] + inv_y[:, 0] + wh_y + invwh_y
+        y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
+        y = self.out_norm(y).to(x.dtype)
+
+        return y
+
     def forward_corev1(self, x: torch.Tensor):
         self.selective_scan = selective_scan_fn_v1
 
@@ -413,13 +461,16 @@ class SS2D(nn.Module):
         dts = torch.einsum("b k r l, k d r -> b k d l", dts.view(B, K, -1, L), self.dt_projs_weight)
         # dts = dts + self.dt_projs_bias.view(1, K, -1, 1)
 
-        xs = xs.float().view(B, -1, L) # (b, k * d, l)
-        dts = dts.contiguous().float().view(B, -1, L) # (b, k * d, l)
-        Bs = Bs.float().view(B, K, -1, L) # (b, k, d_state, l)
-        Cs = Cs.float().view(B, K, -1, L) # (b, k, d_state, l)
-        Ds = self.Ds.float().view(-1) # (k * d)
+        xs = xs.view(B, -1, L) # (b, k * d, l)
+        dts = dts.contiguous().view(B, -1, L) # (b, k * d, l)
+        Bs = Bs.view(B, K, -1, L) # (b, k, d_state, l)
+        Cs = Cs.view(B, K, -1, L) # (b, k, d_state, l)
+        
         As = -torch.exp(self.A_logs.float()).view(-1, self.d_state)  # (k * d, d_state)
-        dt_projs_bias = self.dt_projs_bias.float().view(-1) # (k * d)
+        Ds = self.Ds.view(-1) # (k * d)
+        dt_projs_bias = self.dt_projs_bias.view(-1) # (k * d)
+
+        # print(self.Ds.dtype, self.A_logs.dtype, self.dt_projs_bias.dtype, flush=True) # fp16, fp16, fp16
 
         out_y = self.selective_scan(
             xs, dts, 
@@ -427,13 +478,16 @@ class SS2D(nn.Module):
             delta_bias=dt_projs_bias,
             delta_softplus=True,
         ).view(B, K, -1, L)
-        assert out_y.dtype == torch.float
+        assert out_y.dtype == torch.float16
 
         inv_y = torch.flip(out_y[:, 2:4], dims=[-1]).view(B, 2, -1, L)
         wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
         invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
+        y = out_y[:, 0].float() + inv_y[:, 0].float() + wh_y.float() + invwh_y.float()
+        y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
+        y = self.out_norm(y).to(x.dtype)
 
-        return out_y[:, 0], inv_y[:, 0], wh_y, invwh_y
+        return y
 
     def forward(self, x: torch.Tensor, **kwargs):
         B, H, W, C = x.shape
@@ -443,11 +497,7 @@ class SS2D(nn.Module):
 
         x = x.permute(0, 3, 1, 2).contiguous()
         x = self.act(self.conv2d(x)) # (b, d, h, w)
-        y1, y2, y3, y4 = self.forward_core(x)
-        assert y1.dtype == torch.float32
-        y = y1 + y2 + y3 + y4
-        y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
-        y = self.out_norm(y)
+        y = self.forward_core(x)
         y = y * F.silu(z)
         out = self.out_proj(y)
         if self.dropout is not None:
