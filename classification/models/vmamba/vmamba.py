@@ -1,5 +1,6 @@
 import time
 import math
+import copy
 from functools import partial
 from typing import Optional, Callable
 
@@ -9,6 +10,7 @@ import torch.nn.functional as F
 import torch.utils.checkpoint as checkpoint
 from einops import rearrange, repeat
 from timm.models.layers import DropPath, trunc_normal_
+from fvcore.nn import FlopCountAnalysis, flop_count_str, flop_count, parameter_count
 DropPath.__repr__ = lambda self: f"timm.DropPath({self.drop_prob})"
 
 # import mamba_ssm.selective_scan_fn (in which causal_conv1d is needed)
@@ -672,6 +674,27 @@ class VSSM(nn.Module):
         x = self.forward_features(x)
         x = self.head(x)
         return x
+
+    def flops(self, shape=(3, 224, 224)):
+        # shape = self.__input_shape__[1:]
+        supported_ops={
+            "aten::silu": None, # as relu is in _IGNORED_OPS
+            "aten::neg": None, # as relu is in _IGNORED_OPS
+            "aten::exp": None, # as relu is in _IGNORED_OPS
+            "aten::flip": None, # as permute is in _IGNORED_OPS
+            "prim::PythonOp.SelectiveScanFn": selective_scan_flop_jit, # latter
+        }
+
+        model = copy.deepcopy(self)
+        model.cuda().eval()
+
+        input = torch.randn((1, *shape), device=next(model.parameters()).device)
+        params = parameter_count(model)[""]
+        Gflops, unsupported = flop_count(model=model, inputs=(input,), supported_ops=supported_ops)
+
+        del model, input
+        return sum(Gflops.values()) * 1e9
+        return f"params {params} GFLOPs {sum(Gflops.values())}"
 
 
 # APIs with VMamba2Dp =================
