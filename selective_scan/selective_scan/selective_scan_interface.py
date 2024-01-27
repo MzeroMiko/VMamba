@@ -33,10 +33,10 @@ class SelectiveScanFn(torch.autograd.Function):
             ctx.squeeze_C = True
         if D is not None and (D.dtype != torch.float):
             ctx._d_dtype = D.dtype
-            # D = D.float()
+            D = D.float()
         if delta_bias is not None and (delta_bias.dtype != torch.float):
             ctx._delta_bias_dtype = delta_bias.dtype
-            # delta_bias = delta_bias.float()
+            delta_bias = delta_bias.float()
         out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus)
         ctx.delta_softplus = delta_softplus
         ctx.save_for_backward(u, delta, A, B, C, D, delta_bias, x)

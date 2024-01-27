@@ -13,7 +13,7 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 </div>
 
 ## Updates
-* **` Jan. 23th, 2024`:** we add an alternative for mamba_ssm and causal_conv1d. Typing `python setup.py install` in `selective_scan` and you can get rid of those two packages. Just turn `self.forward_core = self.forward_corev0` to `self.forward_core = self.forward_corev1` in `classification/models/vmamba/vmamba.py#SS2D.__init__` to enjoy that feature. The training speed is expected to raise from 20min/epoch for tiny in 8x4090GPU to 17min/epoch, GPU memory cost reduces too. We have not trained our model with this feature, and we'll try in the future.
+* **` Jan. 23th, 2024`:** we add an alternative for mamba_ssm and causal_conv1d. Typing `pip install .` in `selective_scan` and you can get rid of those two packages. Just turn `self.forward_core = self.forward_corev0` to `self.forward_core = self.forward_corev1` in `classification/models/vmamba/vmamba.py#SS2D.__init__` to enjoy that feature. The training speed is expected to raise from 20min/epoch for tiny in 8x4090GPU to 17min/epoch, GPU memory cost reduces too. We have not trained our model with this feature, and we'll try in the future.
 
 * **` Jan. 22th, 2024`:** We have released VMamba-T/S pre-trained weights. The ema weights should be converted before transferring to downstream tasks to match the module names using [get_ckpt.py](analyze/get_ckpt.py).
 
@@ -115,7 +115,7 @@ pip install pytest chardet yacs termcolor
 pip install submitit tensorboardX
 pip install triton==2.0.0
 pip install fvcore
-# for packages below (causal_conv1d, mamba_ssm) you can cd into `selective_scan` and `python setup.py install` as an alternative
+# for packages below (causal_conv1d, mamba_ssm) you can cd into `selective_scan` and `pip install .` as an alternative
 pip install causal_conv1d==1.0.0  # causal_conv1d-1.0.0+cu118torch1.13cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
 pip install mamba_ssm==1.0.1  # mamba_ssm-1.0.1+cu118torch1.13cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
 ```
