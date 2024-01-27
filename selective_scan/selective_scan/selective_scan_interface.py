@@ -57,11 +57,15 @@ class SelectiveScanFn(torch.autograd.Function):
         if D is not None:
             if dD.dtype != getattr(ctx, "_d_dtype", dD.dtype):
                 _dD = dD.to(ctx._d_dtype)
+            else:
+                _dD = dD
 
         _ddelta_bias = None
         if delta_bias is not None:
             if ddelta_bias.dtype != getattr(ctx, "_delta_bias_dtype", ddelta_bias.dtype):
                 _ddelta_bias = ddelta_bias.to(ctx._delta_bias_dtype)
+            else:
+                _ddelta_bias = ddelta_bias
 
         return (du, ddelta, dA, dB, dC, _dD, _ddelta_bias, None)
 
