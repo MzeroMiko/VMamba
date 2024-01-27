@@ -12,6 +12,9 @@ class SelectiveScanFn(torch.autograd.Function):
 
     @staticmethod
     def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False):
+        # input_t: float, fp16, bf16; weight_t: float;
+        # u, B, C, delta: input_t
+        # D, delta_bias: float
         if u.stride(-1) != 1:
             u = u.contiguous()
         if delta.stride(-1) != 1:
@@ -28,6 +31,12 @@ class SelectiveScanFn(torch.autograd.Function):
         if C.dim() == 3:
             C = rearrange(C, "b dstate l -> b 1 dstate l")
             ctx.squeeze_C = True
+        if D is not None and (D.dtype != torch.float):
+            ctx._d_dtype = D.dtype
+            # D = D.float()
+        if delta_bias is not None and (delta_bias.dtype != torch.float):
+            ctx._delta_bias_dtype = delta_bias.dtype
+            # delta_bias = delta_bias.float()
         out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus)
         ctx.delta_softplus = delta_softplus
         ctx.save_for_backward(u, delta, A, B, C, D, delta_bias, x)
@@ -36,18 +45,25 @@ class SelectiveScanFn(torch.autograd.Function):
     @staticmethod
     def backward(ctx, dout, *args):
         u, delta, A, B, C, D, delta_bias, x = ctx.saved_tensors
-        out = None
         if dout.stride(-1) != 1:
             dout = dout.contiguous()
         du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda.bwd(
-            u, delta, A, B, C, D, delta_bias, dout, x, out, ctx.delta_softplus,
+            u, delta, A, B, C, D, delta_bias, dout, x, None, ctx.delta_softplus,
         )
         dB = dB.squeeze(1) if getattr(ctx, "squeeze_B", False) else dB
         dC = dC.squeeze(1) if getattr(ctx, "squeeze_C", False) else dC
-        return (du, ddelta, dA, dB, dC,
-                dD if D is not None else None,
-                ddelta_bias if delta_bias is not None else None,
-                None)
+        
+        _dD = None
+        if D is not None:
+            if dD.dtype != getattr(ctx, "_d_dtype", dD.dtype):
+                _dD = dD.to(ctx._d_dtype)
+
+        _ddelta_bias = None
+        if ddelta_bias is not None:
+            if ddelta_bias.dtype != getattr(ctx, "_delta_bias_dtype", ddelta_bias.dtype):
+                _ddelta_bias = ddelta_bias.to(ctx._delta_bias_dtype)
+
+        return (du, ddelta, dA, dB, dC, _dD, _ddelta_bias, None)
 
 
 def selective_scan_fn(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False):
@@ -82,6 +98,7 @@ def selective_scan_ref(u, delta, A, B, C, D=None, delta_bias=None, delta_softplu
     batch, dim, dstate = u.shape[0], A.shape[0], A.shape[1]
     B = B.float()
     C = C.float()
+    
     x = A.new_zeros((batch, dim, dstate))
     ys = []
     deltaA = torch.exp(torch.einsum('bdl,dn->bdln', delta, A))

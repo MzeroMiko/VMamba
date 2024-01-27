@@ -92,9 +92,7 @@ void selective_scan_fwd_kernel(SSMParamsBase params) {
     input_t *delta = reinterpret_cast<input_t *>(params.delta_ptr) + batch_id * params.delta_batch_stride
         + dim_id * kNRows * params.delta_d_stride;
     weight_t *A = reinterpret_cast<weight_t *>(params.A_ptr) + dim_id * kNRows * params.A_d_stride;
-    weight_t *B = reinterpret_cast<weight_t *>(params.B_ptr) + dim_id * kNRows * params.B_d_stride;
     input_t *Bvar = reinterpret_cast<input_t *>(params.B_ptr) + batch_id * params.B_batch_stride + group_id * params.B_group_stride;
-    weight_t *C = reinterpret_cast<weight_t *>(params.C_ptr) + dim_id * kNRows * params.C_d_stride;
     input_t *Cvar = reinterpret_cast<input_t *>(params.C_ptr) + batch_id * params.C_batch_stride + group_id * params.C_group_stride;
     scan_t *x = reinterpret_cast<scan_t *>(params.x_ptr) + (batch_id * params.dim + dim_id * kNRows) * params.n_chunks * params.dstate;
 
@@ -112,11 +110,6 @@ void selective_scan_fwd_kernel(SSMParamsBase params) {
             delta_bias[r] = reinterpret_cast<float *>(params.delta_bias_ptr)[dim_id * kNRows + r];
         }
     }
-
-    // for (int state_idx = threadIdx.x; state_idx < params.dstate; state_idx += blockDim.x) {
-    //     smem_a[state_idx] = A[state_idx * params.A_dstate_stride];
-    //     smem_bc[state_idx] = B[state_idx * params.B_dstate_stride] * C[state_idx * params.C_dstate_stride];
-    // }
 
     constexpr int kChunkSize = kNThreads * kNItems;
     for (int chunk = 0; chunk < params.n_chunks; ++chunk) {
@@ -227,18 +220,17 @@ void selective_scan_fwd_launch(SSMParamsBase &params, cudaStream_t stream) {
     // processing 1 row.
     constexpr int kNRows = 1;
     BOOL_SWITCH(params.seqlen % (kNThreads * kNItems) == 0, kIsEvenLen, [&] {
-                    using Ktraits = Selective_Scan_fwd_kernel_traits<kNThreads, kNItems, kNRows, kIsEvenLen, input_t, weight_t>;
-                    // constexpr int kSmemSize = Ktraits::kSmemSize;
-                    constexpr int kSmemSize = Ktraits::kSmemSize + kNRows * MAX_DSTATE * sizeof(typename Ktraits::scan_t);
-                    // printf("smem_size = %d\n", kSmemSize);
-                    dim3 grid(params.batch, params.dim / kNRows);
-                    auto kernel = &selective_scan_fwd_kernel<Ktraits>;
-                    if (kSmemSize >= 48 * 1024) {
-                        C10_CUDA_CHECK(cudaFuncSetAttribute(
-                            kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, kSmemSize));
-                    }
-                    kernel<<<grid, Ktraits::kNThreads, kSmemSize, stream>>>(params);
-                    C10_CUDA_KERNEL_LAUNCH_CHECK();
+        using Ktraits = Selective_Scan_fwd_kernel_traits<kNThreads, kNItems, kNRows, kIsEvenLen, input_t, weight_t>;
+        // constexpr int kSmemSize = Ktraits::kSmemSize;
+        constexpr int kSmemSize = Ktraits::kSmemSize + kNRows * MAX_DSTATE * sizeof(typename Ktraits::scan_t);
+        // printf("smem_size = %d\n", kSmemSize);
+        dim3 grid(params.batch, params.dim / kNRows);
+        auto kernel = &selective_scan_fwd_kernel<Ktraits>;
+        if (kSmemSize >= 48 * 1024) {
+            C10_CUDA_CHECK(cudaFuncSetAttribute(kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, kSmemSize));
+        }
+        kernel<<<grid, Ktraits::kNThreads, kSmemSize, stream>>>(params);
+        C10_CUDA_KERNEL_LAUNCH_CHECK();
     });
 }
 
