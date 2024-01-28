@@ -4,11 +4,11 @@ _base_ = [
 
 model = dict(
     backbone=dict(
-        type='MMDET_VSSM',
-        depths=(2, 2, 9, 2),
+        type='MM_VSSM',
+        depths=(2, 2, 27, 2),
         dims=96,
         out_indices=(0, 1, 2, 3),
-        pretrained="../../ckpts/vssmtiny/ckpt_epoch_292.pth",
+        pretrained="../../ckpts/vssmsmall/ckpt_epoch_292.pth",
     ),
 )
 

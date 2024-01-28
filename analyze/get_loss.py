@@ -90,7 +90,7 @@ def get_loss_swin(f: list, x1e=torch.tensor(list(range(0, 1253, 10))).view(1, -1
     return x_axis, losses, avglosses
 
 
-def get_acc_swin_mmpretrain(f: list):
+def get_acc_mmpretrain(f: list):
     if isinstance(f, str):
         f = open(f, "r").readlines()
 
@@ -107,7 +107,7 @@ def get_acc_swin_mmpretrain(f: list):
     return x_axis, accs, None
 
 
-def get_loss_swin_mmpretrain(f: list, x1e=torch.tensor(list(range(100, 1201, 100))).view(1, -1) / 1201, scale=1):
+def get_loss_mmpretrain(f: list, x1e=torch.tensor(list(range(100, 1201, 100))).view(1, -1) / 1201, scale=1):
     if isinstance(f, str):
         f = open(f, "r").readlines()
 
@@ -158,8 +158,9 @@ def draw_fig(data: list, xlim=(0, 301), ylim=(68, 84), xstep=None,ystep=None, sa
     from matplotlib import pyplot as plot
     fig, ax = plot.subplots(dpi=300, figsize=(24, 8))
     for d in data:
-        x_axis = d['x']
-        y_axis = d['y']
+        length = min(len(d['x']), len(d['y']))
+        x_axis = d['x'][:length]
+        y_axis = d['y'][:length]
         label = d['label']
         ax.plot(x_axis, y_axis, label=label)
     plot.xlim(xlim)
@@ -175,7 +176,7 @@ def draw_fig(data: list, xlim=(0, 301), ylim=(68, 84), xstep=None,ystep=None, sa
     plot.savefig(save_path)
 
 
-def main():
+def main_vssm():
     logpath = os.path.join(os.path.dirname(__file__), "../../logs")
     showpath = os.path.join(os.path.dirname(__file__), "./show/log")
     
@@ -185,16 +186,6 @@ def main():
     swin_base = f"{logpath}/swin_base_224_b16x64_300e_imagenet_20210616_190742.json"
     convnext_baseline = f"{logpath}/convnext_modelarts-job-68076d57-44e0-4fa8-afac-cea5b1ef12f2-worker-0.log"
 
-    # 2,2,6,2/2,2,18,2 no droppath no dropout  ===
-    vssmtiny2262_nodroppath = f"{logpath}/modelarts-job-6fc83e48-efa2-4036-91f2-693d6bea7ec5-worker-0.log"
-    vssmsmall22182_nodroppath = f"{logpath}/modelarts-job-48c8996e-de0d-4301-b3ba-0f8c0395b759-worker-0.log"
-    vssmbase22182_nodroppath = f"{logpath}/modelarts-job-efa71318-db2d-4c0b-8b68-7e8c9c0c533b-worker-0.log"
-    vssmtiny3393_nodroppath_convnext = f"{logpath}/modelarts-job-e62e8442-6c69-4fa5-b7e8-0ac64b49e9e1-worker-0.log"
-
-    # 2,2,6,2/2,2,18,2 no droppath but with linspace dropout ===
-    vssmtiny2262_nodroppath_dropout = f"{logpath}/modelarts-job-889663a5-7a2b-47d7-a163-76645d71384c-worker-0.log"
-    vssmsmall22182_nodroppath_dropout = f"{logpath}/modelarts-job-e95edd66-3bce-4376-9c10-7f6322bd7e86-worker-0.log"
-    
     # 2,2,9,2/2,2,27,2 no droppath but with linspace dropout ===
     vssmtiny_nodroppath = f"{logpath}/modelarts-job-bc7d1b2d-b288-42ba-83c7-047965cf08e0-worker-0.log"
 
@@ -212,45 +203,21 @@ def main():
     vssmdbase = f"{logpath}/vssmdbaselog_rank0.txt"
 
     # =====================================================================
-    x, accs, emaaccs = get_acc_swin_mmpretrain(swin_tiny)
-    lx, losses, avglosses = get_loss_swin_mmpretrain(swin_tiny)
+    x, accs, emaaccs = get_acc_mmpretrain(swin_tiny)
+    lx, losses, avglosses = get_loss_mmpretrain(swin_tiny)
     swin_tiny = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
 
-    x, accs, emaaccs = get_acc_swin_mmpretrain(swin_small)
-    lx, losses, avglosses = get_loss_swin_mmpretrain(swin_small)
+    x, accs, emaaccs = get_acc_mmpretrain(swin_small)
+    lx, losses, avglosses = get_loss_mmpretrain(swin_small)
     swin_small = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
 
-    x, accs, emaaccs = get_acc_swin_mmpretrain(swin_base)
-    lx, losses, avglosses = get_loss_swin_mmpretrain(swin_base)
+    x, accs, emaaccs = get_acc_mmpretrain(swin_base)
+    lx, losses, avglosses = get_loss_mmpretrain(swin_base)
     swin_base = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
 
     x, accs, emaaccs = get_acc_convnext(convnext_baseline)
     lx, losses, avglosses = get_loss_convnext(convnext_baseline)
     convnext_baseline = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
-
-    x, accs, emaaccs = get_acc_swin(vssmtiny2262_nodroppath)
-    lx, losses, avglosses = get_loss_swin(vssmtiny2262_nodroppath)
-    vssmtiny2262_nodroppath = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
-
-    x, accs, emaaccs = get_acc_swin(vssmsmall22182_nodroppath)
-    lx, losses, avglosses = get_loss_swin(vssmsmall22182_nodroppath)
-    vssmsmall22182_nodroppath = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
-
-    x, accs, emaaccs = get_acc_swin(vssmbase22182_nodroppath)
-    lx, losses, avglosses = get_loss_swin(vssmbase22182_nodroppath)
-    vssmbase22182_nodroppath = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
-
-    x, accs, emaaccs = get_acc_convnext(vssmtiny3393_nodroppath_convnext)
-    lx, losses, avglosses = get_loss_convnext(vssmtiny3393_nodroppath_convnext, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251,)
-    vssmtiny3393_nodroppath_convnext = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
-
-    x, accs, emaaccs = get_acc_swin(vssmtiny2262_nodroppath_dropout)
-    lx, losses, avglosses = get_loss_swin(vssmtiny2262_nodroppath_dropout, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
-    vssmtiny2262_nodroppath_dropout = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
-
-    x, accs, emaaccs = get_acc_swin(vssmsmall22182_nodroppath_dropout)
-    lx, losses, avglosses = get_loss_swin(vssmsmall22182_nodroppath_dropout, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
-    vssmsmall22182_nodroppath_dropout = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
 
     x, accs, emaaccs = get_acc_swin(vssmtiny_nodroppath)
     lx, losses, avglosses = get_loss_swin(vssmtiny_nodroppath, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
@@ -276,42 +243,6 @@ def main():
     lx, losses, avglosses = get_loss_swin(vssmbasedrop06, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
     vssmbasedrop06 = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
 
-    # no droppath + 2262 series =====================================================================
-    if True:
-        draw_fig(data=[
-            dict(x=swin_base['xaxis'], y=swin_base['accs']['acc1'], label="swin_tiny_acc1_baseline"),
-            dict(x=convnext_baseline['xaxis'], y=convnext_baseline['accs']['acc1'], label="convnext_tiny_acc1_baseline"),
-            dict(x=convnext_baseline['xaxis'], y=convnext_baseline['emaaccs']['acc1'], label="convnext_tiny_acc1_baseline_ema"),
-            # ======================================================================
-            dict(x=vssmtiny2262_nodroppath['xaxis'], y=vssmtiny2262_nodroppath['accs']['acc1'], label="vssmtiny2262_nodroppath"),
-            dict(x=vssmsmall22182_nodroppath['xaxis'], y=vssmsmall22182_nodroppath['accs']['acc1'], label="vssmsmall22182_nodroppath"),
-            dict(x=vssmbase22182_nodroppath['xaxis'], y=vssmbase22182_nodroppath['accs']['acc1'], label="vssmbase22182_nodroppath"),
-            # ======================================================================
-            dict(x=vssmtiny2262_nodroppath_dropout['xaxis'], y=vssmtiny2262_nodroppath_dropout['accs']['acc1'], label="vssmtiny2262_nodroppath_dropout"),
-            dict(x=vssmsmall22182_nodroppath_dropout['xaxis'], y=vssmsmall22182_nodroppath_dropout['accs']['acc1'], label="vssmsmall22182_nodroppath_dropout"),
-            # ======================================================================
-            dict(x=vssmtiny3393_nodroppath_convnext['xaxis'], y=vssmtiny3393_nodroppath_convnext['accs']['acc1'], label="vssmtiny3393_nodroppath_convnext"),
-            dict(x=vssmtiny3393_nodroppath_convnext['xaxis'], y=vssmtiny3393_nodroppath_convnext['emaaccs']['acc1'], label="vssmtiny3393_nodroppath_convnext_ema"),
-            # ======================================================================
-        ], xlim=(10, 300), ylim=(65, 85), xstep=5, ystep=0.5, save_path=f"{showpath}/acc_nodroppath.jpg")
-
-    if True:
-        draw_fig(data=[
-            dict(x=swin_base['loss_xaxis'], y=swin_base['avglosses'], label="swin_tiny_acc1_baseline"),
-            dict(x=convnext_baseline['loss_xaxis'], y=convnext_baseline['avglosses'], label="convnext_tiny_acc1_baseline"),
-            # ======================================================================
-            dict(x=vssmtiny2262_nodroppath['loss_xaxis'], y=vssmtiny2262_nodroppath['avglosses'], label="vssmtiny2262_nodroppath"),
-            dict(x=vssmsmall22182_nodroppath['loss_xaxis'], y=vssmsmall22182_nodroppath['avglosses'], label="vssmsmall22182_nodroppath"),
-            dict(x=vssmbase22182_nodroppath['loss_xaxis'], y=vssmbase22182_nodroppath['avglosses'], label="vssmbase22182_nodroppath"),
-            # ======================================================================
-            dict(x=vssmtiny2262_nodroppath_dropout['loss_xaxis'], y=vssmtiny2262_nodroppath_dropout['avglosses'], label="vssmtiny2262_nodroppath_dropout"),
-            dict(x=vssmsmall22182_nodroppath_dropout['loss_xaxis'], y=vssmsmall22182_nodroppath_dropout['avglosses'], label="vssmsmall22182_nodroppath_dropout"),
-            # ======================================================================
-            dict(x=vssmtiny3393_nodroppath_convnext['loss_xaxis'], y=vssmtiny3393_nodroppath_convnext['avglosses'], label="vssmtiny3393_nodroppath_convnext"),
-            # ======================================================================
-        ], xlim=(10, 300), ylim=(0, 7), save_path=f"{showpath}/loss_nodroppath.jpg")
-
-
     # droppath + 2292 =======================================================
     fit_vssmbase = linefit(vssmsmall['xaxis'], vssmsmall['accs']['acc1'], fit_range=[100, 300], out_range=[60, 300])
 
@@ -323,7 +254,6 @@ def main():
             # dict(x=convnext_baseline['xaxis'], y=convnext_baseline['accs']['acc1'], label="convnext_tiny_acc1_baseline"),
             # dict(x=convnext_baseline['xaxis'], y=convnext_baseline['emaaccs']['acc1'], label="convnext_tiny_acc1_ema_baseline"),
             # ======================================================================
-            # dict(x=vssmtiny2262_nodroppath['xaxis'], y=vssmtiny2262_nodroppath['accs']['acc1'], label="vssmtiny2262_nodroppath"),
             # ======================================================================
             dict(x=vssmtiny['xaxis'], y=vssmtiny['accs']['acc1'], label="vssmtiny"),
             # dict(x=vssmtiny_nodroppath['xaxis'], y=vssmtiny_nodroppath['accs']['acc1'], label="vssmtiny_nodroppath"),
@@ -344,12 +274,6 @@ def main():
             dict(x=swin_small['loss_xaxis'], y=swin_small['avglosses'], label="swin_small"),
             dict(x=swin_base['loss_xaxis'], y=swin_base['avglosses'], label="swin_base"),
             # dict(x=convnext_baseline['loss_xaxis'], y=convnext_baseline['avglosses'], label="convnext_tiny_acc1_baseline"),
-            # ======================================================================
-            # dict(x=vssmtiny2262_nodroppath['loss_xaxis'], y=vssmtiny2262_nodroppath['avglosses'], label="vssmtiny2262_nodroppath"),
-            # dict(x=vssmsmall22182_nodroppath['loss_xaxis'], y=vssmsmall22182_nodroppath['avglosses'], label="vssmsmall22182_nodroppath"),
-            # dict(x=vssmbase22182_nodroppath['loss_xaxis'], y=vssmbase22182_nodroppath['avglosses'], label="vssmbase22182_nodroppath"),
-            # ======================================================================
-            # dict(x=vssmtiny3393_nodroppath_convnext['loss_xaxis'], y=vssmtiny3393_nodroppath_convnext['avglosses'], label="vssmtiny3393_nodroppath_convnext"),
             # ======================================================================
             # dict(x=vssmtiny_nodroppath['loss_xaxis'], y=vssmtiny_nodroppath['avglosses'], label="vssmtiny_nodroppath"),
             # ======================================================================
@@ -403,7 +327,203 @@ def main():
         ], xlim=(10, 300), ylim=(2,5), save_path=f"{showpath}/loss_vssmd.jpg")
 
 
+def main_heat():
+    logpath = os.path.join(os.path.dirname(__file__), "../../logs")
+    showpath = os.path.join(os.path.dirname(__file__), "./show/log")
+    
+    # baseline ===
+    swin_tiny = f"{logpath}/swin_tiny_224_b16x64_300e_imagenet_20210616_090925.json"
+    swin_small = f"{logpath}/swin_small_224_b16x64_300e_imagenet_20210615_110219.json"
+    swin_base = f"{logpath}/swin_base_224_b16x64_300e_imagenet_20210616_190742.json"
+    convnext_baseline = f"{logpath}/convnext_modelarts-job-68076d57-44e0-4fa8-afac-cea5b1ef12f2-worker-0.log"
+
+    heat_mini = "/home/LiuYue/Workspace/Visualize/output/heat_mini/rank0.log"
+    heat_tiny = "/home/LiuYue/Workspace/Visualize/output/heat_tiny/default/log_rank0.txt"
+    heat_base = "/home/LiuYue/Workspace/Visualize/output/heat_base/rank0.log"
+
+    # =====================================================================
+    x, accs, emaaccs = get_acc_mmpretrain(swin_tiny)
+    lx, losses, avglosses = get_loss_mmpretrain(swin_tiny)
+    swin_tiny = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    x, accs, emaaccs = get_acc_mmpretrain(swin_small)
+    lx, losses, avglosses = get_loss_mmpretrain(swin_small)
+    swin_small = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    x, accs, emaaccs = get_acc_mmpretrain(swin_base)
+    lx, losses, avglosses = get_loss_mmpretrain(swin_base)
+    swin_base = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    x, accs, emaaccs = get_acc_convnext(convnext_baseline)
+    lx, losses, avglosses = get_loss_convnext(convnext_baseline)
+    convnext_baseline = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    x, accs, emaaccs = get_acc_swin(heat_mini, split_ema=True)
+    lx, losses, avglosses = get_loss_swin(heat_mini, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
+    heat_mini = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    x, accs, emaaccs = get_acc_swin(heat_tiny, split_ema=True)
+    lx, losses, avglosses = get_loss_swin(heat_tiny, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
+    heat_tiny = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    x, accs, emaaccs = get_acc_swin(heat_base, split_ema=True)
+    lx, losses, avglosses = get_loss_swin(heat_base, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
+    heat_base = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    if True:
+        draw_fig(data=[
+            dict(x=swin_tiny['xaxis'], y=swin_tiny['accs']['acc1'], label="swin_tiny"),
+            dict(x=swin_small['xaxis'], y=swin_small['accs']['acc1'], label="swin_small"),
+            dict(x=swin_base['xaxis'], y=swin_base['accs']['acc1'], label="swin_base"),
+            dict(x=heat_mini['xaxis'], y=heat_mini['accs']['acc1'], label="heat_mini"),
+            dict(x=heat_tiny['xaxis'], y=heat_tiny['accs']['acc1'], label="heat_tiny"),
+            dict(x=heat_base['xaxis'], y=heat_base['accs']['acc1'], label="heat_base"),
+            # ======================================================================
+            dict(x=heat_mini['xaxis'], y=heat_mini['emaaccs']['acc1'], label="heat_mini_ema"),
+            dict(x=heat_tiny['xaxis'], y=heat_tiny['emaaccs']['acc1'], label="heat_tiny_ema"),
+            dict(x=heat_base['xaxis'], y=heat_base['emaaccs']['acc1'], label="heat_base_ema"),
+            # ======================================================================
+        ], xlim=(30, 300), ylim=(60, 80), xstep=5, ystep=0.5, save_path=f"{showpath}/acc_heat.jpg")
+
+    if True:
+        draw_fig(data=[
+            dict(x=swin_tiny['loss_xaxis'], y=swin_tiny['avglosses'], label="swin_tiny"),
+            dict(x=swin_small['loss_xaxis'], y=swin_small['avglosses'], label="swin_small"),
+            dict(x=swin_base['loss_xaxis'], y=swin_base['avglosses'], label="swin_base"),
+            # ======================================================================
+            dict(x=heat_mini['loss_xaxis'], y=heat_mini['avglosses'], label="heat_mini"),
+            dict(x=heat_tiny['loss_xaxis'], y=heat_tiny['avglosses'], label="heat_tiny"),
+            dict(x=heat_base['loss_xaxis'], y=heat_base['avglosses'], label="heat_base"),
+            # ======================================================================
+        ], xlim=(10, 300), ylim=(2,5), save_path=f"{showpath}/loss_heat.jpg")
+
+
+def main_heatwzz():
+    logpath = os.path.join(os.path.dirname(__file__), "../../logs")
+    showpath = os.path.join(os.path.dirname(__file__), "./show/log")
+    
+    # baseline ===
+    swin_tiny = f"{logpath}/swin_tiny_224_b16x64_300e_imagenet_20210616_090925.json"
+    swin_small = f"{logpath}/swin_small_224_b16x64_300e_imagenet_20210615_110219.json"
+    swin_base = f"{logpath}/swin_base_224_b16x64_300e_imagenet_20210616_190742.json"
+    convnext_baseline = f"{logpath}/convnext_modelarts-job-68076d57-44e0-4fa8-afac-cea5b1ef12f2-worker-0.log"
+
+    heat_base_d005 = "/home/LiuYue/Workspace/Visualize/output/wzz/vit_heat_noshift_base_224_14layers_clipgrad5.0.txt"
+    heat_base_d01 = "/home/LiuYue/Workspace/Visualize/output/wzz/vit_heat_noshift_base_224_14layers_dp0.1.txt"
+
+    # =====================================================================
+    x, accs, emaaccs = get_acc_mmpretrain(swin_tiny)
+    lx, losses, avglosses = get_loss_mmpretrain(swin_tiny)
+    swin_tiny = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    x, accs, emaaccs = get_acc_mmpretrain(swin_small)
+    lx, losses, avglosses = get_loss_mmpretrain(swin_small)
+    swin_small = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    x, accs, emaaccs = get_acc_mmpretrain(swin_base)
+    lx, losses, avglosses = get_loss_mmpretrain(swin_base)
+    swin_base = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    x, accs, emaaccs = get_acc_convnext(convnext_baseline)
+    lx, losses, avglosses = get_loss_convnext(convnext_baseline)
+    convnext_baseline = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    x, accs, emaaccs = get_acc_swin(heat_base_d005, split_ema=False)
+    lx, losses, avglosses = get_loss_swin(heat_base_d005, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
+    heat_base_d005 = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    x, accs, emaaccs = get_acc_swin(heat_base_d01, split_ema=False)
+    lx, losses, avglosses = get_loss_swin(heat_base_d01, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
+    heat_base_d01 = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    fit_heatbase = linefit(heat_base_d005['xaxis'], heat_base_d005['accs']['acc1'], fit_range=[100, 300], out_range=[60, 300])
+
+    if True:
+        draw_fig(data=[
+            dict(x=swin_tiny['xaxis'], y=swin_tiny['accs']['acc1'], label="swin_tiny"),
+            dict(x=swin_small['xaxis'], y=swin_small['accs']['acc1'], label="swin_small"),
+            dict(x=swin_base['xaxis'], y=swin_base['accs']['acc1'], label="swin_base"),
+            dict(x=heat_base_d005['xaxis'], y=heat_base_d005['accs']['acc1'], label="heat_base_d005"),
+            dict(x=heat_base_d01['xaxis'], y=heat_base_d01['accs']['acc1'], label="heat_base_d01"),
+            dict(x=fit_heatbase[0], y=fit_heatbase[1], label="fit_heatbase"),
+            # ======================================================================
+        ], xlim=(30, 300), ylim=(60, 85), xstep=5, ystep=0.5, save_path=f"{showpath}/acc_heatwzz.jpg")
+
+    if True:
+        draw_fig(data=[
+            dict(x=swin_tiny['loss_xaxis'], y=swin_tiny['avglosses'], label="swin_tiny"),
+            dict(x=swin_small['loss_xaxis'], y=swin_small['avglosses'], label="swin_small"),
+            dict(x=swin_base['loss_xaxis'], y=swin_base['avglosses'], label="swin_base"),
+            # ======================================================================
+            dict(x=heat_base_d005['loss_xaxis'], y=heat_base_d005['avglosses'], label="heat_base_d005"),
+            dict(x=heat_base_d01['loss_xaxis'], y=heat_base_d01['avglosses'], label="heat_base_d01"),
+            # ======================================================================
+        ], xlim=(10, 300), ylim=(2,5), save_path=f"{showpath}/loss_heatwzz.jpg")
+
+
+def main_heat2():
+    logpath = os.path.join(os.path.dirname(__file__), "../../logs")
+    showpath = os.path.join(os.path.dirname(__file__), "./show/log")
+    
+    # baseline ===
+    swin_tiny = f"{logpath}/swin_tiny_224_b16x64_300e_imagenet_20210616_090925.json"
+    swin_small = f"{logpath}/swin_small_224_b16x64_300e_imagenet_20210615_110219.json"
+    swin_base = f"{logpath}/swin_base_224_b16x64_300e_imagenet_20210616_190742.json"
+    convnext_baseline = f"{logpath}/convnext_modelarts-job-68076d57-44e0-4fa8-afac-cea5b1ef12f2-worker-0.log"
+
+    heat_mini = "/home/LiuYue/Workspace/Visualize/output/h2/heat_mini.log"
+    heat_base = "/home/LiuYue/Workspace/Visualize/output/h2/heat_base.log"
+    
+    # =====================================================================
+    x, accs, emaaccs = get_acc_mmpretrain(swin_tiny)
+    lx, losses, avglosses = get_loss_mmpretrain(swin_tiny)
+    swin_tiny = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    x, accs, emaaccs = get_acc_mmpretrain(swin_small)
+    lx, losses, avglosses = get_loss_mmpretrain(swin_small)
+    swin_small = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    x, accs, emaaccs = get_acc_mmpretrain(swin_base)
+    lx, losses, avglosses = get_loss_mmpretrain(swin_base)
+    swin_base = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    x, accs, emaaccs = get_acc_convnext(convnext_baseline)
+    lx, losses, avglosses = get_loss_convnext(convnext_baseline)
+    convnext_baseline = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    x, accs, emaaccs = get_acc_swin(heat_mini, split_ema=True)
+    lx, losses, avglosses = get_loss_swin(heat_mini, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
+    heat_mini = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    x, accs, emaaccs = get_acc_swin(heat_base, split_ema=True)
+    lx, losses, avglosses = get_loss_swin(heat_base, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
+    heat_base = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    if True:
+        draw_fig(data=[
+            dict(x=swin_tiny['xaxis'], y=swin_tiny['accs']['acc1'], label="swin_tiny"),
+            dict(x=swin_small['xaxis'], y=swin_small['accs']['acc1'], label="swin_small"),
+            dict(x=swin_base['xaxis'], y=swin_base['accs']['acc1'], label="swin_base"),
+            dict(x=heat_mini['xaxis'], y=heat_mini['accs']['acc1'], label="heat_mini"),
+            dict(x=heat_base['xaxis'], y=heat_base['accs']['acc1'], label="heat_base"),
+            # ======================================================================
+            dict(x=heat_mini['xaxis'], y=heat_mini['emaaccs']['acc1'], label="heat_mini_ema"),
+            dict(x=heat_base['xaxis'], y=heat_base['emaaccs']['acc1'], label="heat_base_ema"),
+            # ======================================================================
+        ], xlim=(30, 300), ylim=(60, 85), xstep=5, ystep=0.5, save_path=f"{showpath}/acc_heat2.jpg")
+
+    if True:
+        draw_fig(data=[
+            dict(x=swin_tiny['loss_xaxis'], y=swin_tiny['avglosses'], label="swin_tiny"),
+            dict(x=swin_small['loss_xaxis'], y=swin_small['avglosses'], label="swin_small"),
+            dict(x=swin_base['loss_xaxis'], y=swin_base['avglosses'], label="swin_base"),
+            # ======================================================================
+            dict(x=heat_mini['loss_xaxis'], y=heat_mini['avglosses'], label="heat_mini"),
+            dict(x=heat_base['loss_xaxis'], y=heat_base['avglosses'], label="heat_base"),
+            # ======================================================================
+        ], xlim=(10, 300), ylim=(2,5), save_path=f"{showpath}/loss_heat2.jpg")
+
 
 if __name__ == "__main__":
-    main()
+    main_heat2()
 

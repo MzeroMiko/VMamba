@@ -138,7 +138,6 @@ def load_pretrained_ema(config, model, logger, model_ema: ModelEma=None):
         _load_pretrained(config, model_ema.ema, logger, state_dict_ema)
 
 
-
 def save_checkpoint_ema(config, epoch, model, max_accuracy, optimizer, lr_scheduler, loss_scaler, logger, model_ema: ModelEma=None, max_accuracy_ema=None):
     save_state = {'model': model.state_dict(),
                   'optimizer': optimizer.state_dict(),

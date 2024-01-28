@@ -121,7 +121,7 @@ print("swin_base:", swin_base)
 print("convnext_base:", convnext_base)
 print("replknet_31B:", replknet_31B)
 
-if False:
+if True:
     draw_fig([
         dict(x=[224, 224], y=[0, 85], label="where all the models are trained"),
         dict(x=vssm_tiny[1], y=vssm_tiny[2], label="vssm_tiny"),
@@ -130,7 +130,7 @@ if False:
         dict(x=deit_small[1], y=deit_small[2], label="deit_small (equal to tiny model)"),
         dict(x=resnet50[1], y=resnet50[2], label="resnet50 (equal to tiny model)"),
         dict(x=vssm_tiny[1], y=vssm_tiny[2], label="vssm_tiny"),
-        # dict(x=replknet_31B[1], y=replknet_31B[2], label="replknet_31B (equal to *base model, 1024 is too big to test)"),
-    ], xlim=(64, 1300), ylim=(0, 85), save_path="analyze/show/show_scaleup_acc.jpg")
+        dict(x=replknet_31B[1], y=replknet_31B[2], label="replknet_31B (equal to *base model, 1024 is too big to test)"),
+    ], xlim=(64, 1030), ylim=(0, 85), save_path="analyze/show/show_scaleup_acc.jpg")
 
 

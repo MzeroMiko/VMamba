@@ -14,6 +14,7 @@ from mmdet.evaluation import DumpDetResults
 from mmdet.registry import RUNNERS
 from mmdet.utils import setup_cache_size_limit_of_dynamo
 
+import model
 
 # TODO: support fuse_conv_bn and format_only
 def parse_args():

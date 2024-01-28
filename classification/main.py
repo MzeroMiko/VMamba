@@ -29,7 +29,8 @@ from utils.logger import create_logger
 from utils.utils import load_checkpoint, load_pretrained, save_checkpoint, NativeScalerWithGradNormCount, auto_resume_helper, \
     reduce_tensor
 
-from fvcore.nn import FlopCountAnalysis, flop_count_str
+from fvcore.nn import FlopCountAnalysis, flop_count_str, flop_count
+
 from timm.utils import ModelEma as ModelEma
 from utils.utils_ema import load_checkpoint_ema, load_pretrained_ema, save_checkpoint_ema
 print(f"||{torch.multiprocessing.get_start_method()}||", end="")
@@ -112,16 +113,16 @@ def main(config):
 
     logger.info(f"Creating model:{config.MODEL.TYPE}/{config.MODEL.NAME}")
     model = build_model(config)
-    try:
+    
+    if False:
         logger.info(flop_count_str(FlopCountAnalysis(model, (dataset_val[0][0][None],))))
-    except Exception as e:
+    if True:
         logger.info(str(model))
         n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
         logger.info(f"number of params: {n_parameters}")
         if hasattr(model, 'flops'):
             flops = model.flops()
             logger.info(f"number of GFLOPs: {flops / 1e9}")
-
 
     model.cuda()
     model_without_ddp = model

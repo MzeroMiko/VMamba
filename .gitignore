@@ -1,0 +1,30 @@
+# global
+**/__pycache__
+**/_ignore
+**/.dist_test
+**/.pytest_cache
+**/*.egg-info
+**/*.TAG
+tmp
+output
+work_dirs
+logs
+ckpts
+log
+ckpt
+
+analyze/show
+
+# we do not release code of heat series
+classification/configs/heat
+classification/models/heat
+classification/models/heat.py
+
+detection/data
+detection/work_dirs
+
+segmentation/data
+segmentation/work_dirs
+
+selective_scan/build
+

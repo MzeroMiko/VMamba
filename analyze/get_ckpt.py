@@ -8,9 +8,7 @@ def modema(ckpt=None):
     _ckpt["model"] = _ckpt["model_ema"]
     torch.save(_ckpt, open(opath, "wb"))
 
-
 if __name__ == "__main__":
-
     modema("./vmamba_small_e238_ema.pth")
 
 # Readme: How to use ema ckpts:

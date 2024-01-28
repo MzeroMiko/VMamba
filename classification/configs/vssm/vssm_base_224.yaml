@@ -1,0 +1,14 @@
+MODEL:
+  TYPE: vssm
+  NAME: vssm_base
+  DROP_PATH_RATE: 0.5
+  # DROP_PATH_RATE: 0.6
+  VSSM:
+    EMBED_DIM: 128
+    DEPTHS: [ 2, 2, 27, 2 ]
+    D_STATE: 16
+    DT_RANK: "auto"
+    SSM_RATIO: 2.0
+    MLP_RATIO: 0.0
+    DOWNSAMPLE: "v1"
+

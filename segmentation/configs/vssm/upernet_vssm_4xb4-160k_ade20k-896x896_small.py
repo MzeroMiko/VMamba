@@ -3,7 +3,7 @@ _base_ = [
 ]
 model = dict(
     backbone=dict(
-        type='MMSEG_VSSM',
+        type='MM_VSSM',
         depths=(2, 2, 27, 2),
         dims=96,
         out_indices=(0, 1, 2, 3),

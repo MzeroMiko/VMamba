@@ -4,7 +4,7 @@ _base_ = [
 
 model = dict(
     backbone=dict(
-        type='MMDET_VSSM',
+        type='MM_VSSM',
         depths=(2, 2, 27, 2),
         dims=128,
         out_indices=(0, 1, 2, 3),
