@@ -13,9 +13,12 @@ function get_env() {
     pip install triton==2.0.0
     pip install fvcore
     pip install seaborn
-    # for packages below (causal_conv1d, mamba_ssm) you can cd into `selective_scan` and `pip install .` as an alternative
-    pip install causal_conv1d==1.0.0  # causal_conv1d-1.0.0+cu118torch1.13cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
-    pip install mamba_ssm==1.0.1  # mamba_ssm-1.0.1+cu118torch1.13cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
+
+    cd selective_scan && pip install . && pytest
+    # you can also install packages below as an alternative...
+    # pip install triton==2.0.0
+    # pip install causal_conv1d==1.0.0  # causal_conv1d-1.0.0+cu118torch1.13cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
+    # pip install mamba_ssm==1.0.1  # mamba_ssm-1.0.1+cu118torch1.13cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
 }
 
 function get_env_mmdet() {
