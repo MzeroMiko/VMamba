@@ -340,6 +340,9 @@ class SS2D(nn.Module):
         Ds = self.Ds.float() # (k * d)
         dt_projs_bias = self.dt_projs_bias.float().view(-1) # (k * d)
 
+        # assert len(xs.shape) == 3 and len(dts.shape) == 3 and len(Bs.shape) == 4 and len(Cs.shape) == 4
+        # assert len(As.shape) == 2 and len(Ds.shape) == 1 and len(dt_projs_bias.shape) == 1
+
         out_y = self.selective_scan(
             xs, dts, 
             As, Bs, Cs, Ds, z=None,
@@ -378,9 +381,12 @@ class SS2D(nn.Module):
         Bs = Bs.float() # (b, k, d_state, l)
         Cs = Cs.float() # (b, k, d_state, l)
         
-        As = -torch.exp(self.A_logs.float()).view(K, -1, self.d_state)  # (k * d, d_state)
-        Ds = self.Ds.float().view(K, -1) # (k * d)
-        dt_projs_bias = self.dt_projs_bias.float().view(K, -1) # (k * d)
+        As = -torch.exp(self.A_logs.float()).view(K, -1, self.d_state)  # (k, d, d_state)
+        Ds = self.Ds.float().view(K, -1) # (k, d)
+        dt_projs_bias = self.dt_projs_bias.float().view(K, -1) # (k, d)
+
+        # assert len(xs.shape) == 4 and len(dts.shape) == 4 and len(Bs.shape) == 4 and len(Cs.shape) == 4
+        # assert len(As.shape) == 3 and len(Ds.shape) == 2 and len(dt_projs_bias.shape) == 2
 
         out_y = []
         for i in range(4):
@@ -430,6 +436,8 @@ class SS2D(nn.Module):
             Ds = self.Ds # (k * d)
             dt_projs_bias = self.dt_projs_bias.view(-1) # (k * d)
 
+            # assert len(xs.shape) == 3 and len(dts.shape) == 3 and len(Bs.shape) == 4 and len(Cs.shape) == 4
+            # assert len(As.shape) == 2 and len(Ds.shape) == 1 and len(dt_projs_bias.shape) == 1
             # print(self.Ds.dtype, self.A_logs.dtype, self.dt_projs_bias.dtype, flush=True) # fp16, fp16, fp16
 
             out_y = self.selective_scan(
@@ -456,6 +464,9 @@ class SS2D(nn.Module):
             As = -torch.exp(self.A_logs.float()).repeat(4, 1) # (k * d, d_state)
             Ds = self.Ds.repeat(4) # (k * d)
             dt_projs_bias = self.dt_projs_bias.view(-1).repeat(4) # (k * d)
+
+            # assert len(xs.shape) == 3 and len(dts.shape) == 3 and len(Bs.shape) == 4 and len(Cs.shape) == 4
+            # assert len(As.shape) == 2 and len(Ds.shape) == 1 and len(dt_projs_bias.shape) == 1
 
             out_y = self.selective_scan(
                 xs, dts, 
@@ -1179,6 +1190,7 @@ def check_profile():
 if __name__ == "__main__":
     check_vssm_equals_vmambadp()
     check_vssm1_equals_vssm(ss2dfwd=SS2D.forward_corev0)
+    check_vssm1_equals_vssm(ss2dfwd=SS2D.forward_corev0_seq)
     check_vssm1_equals_vssm(ss2dfwd=SS2D.forward_core)
     check_vssm1_equals_vssm(ss2dfwd=lambda *args, **kwargs: SS2D.forward_corev1(*args, **kwargs).float())
     check_vssm1_shared_params()
