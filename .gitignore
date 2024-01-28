@@ -5,6 +5,7 @@
 **/.pytest_cache
 **/*.egg-info
 **/*.TAG
+**/dist
 tmp
 output
 work_dirs
