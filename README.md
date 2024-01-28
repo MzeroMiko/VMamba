@@ -96,7 +96,7 @@ We will release all the pre-trained models/logs in few days!
 | Swin-B | 512x512 | 121M | 1188G | UperNet@160k | 48.1| -- |
 | VMamba-B| 512x512 | 110M | 1167G | UperNet@160k | 50.0| waiting |
 | Swin-S | 640x640 | 81M | 1614G | UperNet@160k | 47.9| -- |
-| VMamba-S| 640x640 | 76M | 1620G | UperNet@160k | 50.8| waiting |
+| VMamba-S| 640x640 | 76M | 1620G | UperNet@160k | 50.8| [ckpt](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main)/[log](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main) |
 
 
 
