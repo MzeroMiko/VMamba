@@ -13,6 +13,8 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 </div>
 
 ## Updates
+* **` Jan. 28th, 2024`:** we cloned main into a new branch called `20240128-achieve`, the main branch will have a great update in a few days. The coming update will makes the code easier to use in your own project! 
+
 * **` Jan. 23th, 2024`:** we add an alternative for mamba_ssm and causal_conv1d. Typing `pip install .` in `selective_scan` and you can get rid of those two packages. Just turn `self.forward_core = self.forward_corev0` to `self.forward_core = self.forward_corev1` in `classification/models/vmamba/vmamba.py#SS2D.__init__` to enjoy that feature. The training speed is expected to raise from 20min/epoch for tiny in 8x4090GPU to 17min/epoch, GPU memory cost reduces too. We have not trained our model with this feature, and we'll try in the future.
 
 * **` Jan. 22th, 2024`:** We have released VMamba-T/S pre-trained weights. The ema weights should be converted before transferring to downstream tasks to match the module names using [get_ckpt.py](analyze/get_ckpt.py).
