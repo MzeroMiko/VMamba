@@ -22,7 +22,7 @@ def build_vssm_model(config, is_pretrain=False):
             dims=config.MODEL.VSSM.EMBED_DIM, 
             # ===================
             d_state=config.MODEL.VSSM.D_STATE,
-            dt_rank=config.MODEL.VSSM.DT_RANK,
+            dt_rank=("auto" if config.MODEL.VSSM.DT_RANK == "auto" else int(config.MODEL.VSSM.DT_RANK)),
             ssm_ratio=config.MODEL.VSSM.SSM_RATIO,
             attn_drop_rate=0.0,
             # ===================
@@ -32,7 +32,7 @@ def build_vssm_model(config, is_pretrain=False):
             patch_norm=True,
             # norm_layer=nn.LayerNorm,
             downsample_version=config.MODEL.VSSM.DOWNSAMPLE,
-            use_checkpoint=config.MODEL.TRAIN.USE_CHECKPOINT,
+            use_checkpoint=config.TRAIN.USE_CHECKPOINT,
         )
         return model
 

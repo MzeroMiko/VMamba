@@ -38,26 +38,23 @@ function dataset_to_memory() {
 }
 
 function classification() {
-    # test ok
     # ======================================================
-    export CODE=classification PYTHON=python log_url="/tmp/logs/classification"
+    export CODE=classification PYTHON=python
     export nnodes=1 nrank=0 nprocs=8 mport=29501 maddr="127.0.0.1"
     export pycmds="main.py --cfg configs/vssm/vssm_tiny_224.yaml --batch-size 64 --data-path /dataset/ImageNet2012 --output /tmp"
-    cd ${CODE}; ${PYTHON} -m torch.distributed.launch --nnodes ${nnodes} --node_rank ${nrank} --nproc_per_node ${nprocs} --master_addr ${maddr} --master_port ${mport} --log_dir ${log_url} ${pycmds}
+    cd ${CODE}; ${PYTHON} -m torch.distributed.launch --nnodes ${nnodes} --node_rank ${nrank} --nproc_per_node ${nprocs} --master_addr ${maddr} --master_port ${mport} ${pycmds}
 
-    # test ok
     # ======================================================
-    export CODE=classification PYTHON=python log_url="logs/classification"
+    export CODE=classification PYTHON=python
     export nnodes=1 nrank=0 nprocs=8 mport=29501 maddr="127.0.0.1"
     export pycmds="main.py --cfg configs/vssm/vssm_small_224.yaml --batch-size 64 --data-path /dataset/ImageNet2012 --output /tmp"
-    cd ${CODE}; ${PYTHON} -m torch.distributed.launch --nnodes ${nnodes} --node_rank ${nrank} --nproc_per_node ${nprocs} --master_addr ${maddr} --master_port ${mport} --log_dir ${log_url} ${pycmds}
+    cd ${CODE}; ${PYTHON} -m torch.distributed.launch --nnodes ${nnodes} --node_rank ${nrank} --nproc_per_node ${nprocs} --master_addr ${maddr} --master_port ${mport} ${pycmds}
 
-    # test ok
     # ======================================================
-    export CODE=classification PYTHON=python log_url="logs/classification"
+    export CODE=classification PYTHON=python
     export nnodes=1 nrank=0 nprocs=8 mport=29501 maddr="127.0.0.1"
     export pycmds="main.py --cfg configs/vssm/vssm_base_224.yaml --batch-size 64 --data-path /dataset/ImageNet2012 --output /tmp"
-    cd ${CODE}; ${PYTHON} -m torch.distributed.launch --nnodes ${nnodes} --node_rank ${nrank} --nproc_per_node ${nprocs} --master_addr ${maddr} --master_port ${mport} --log_dir ${log_url} ${pycmds}
+    cd ${CODE}; ${PYTHON} -m torch.distributed.launch --nnodes ${nnodes} --node_rank ${nrank} --nproc_per_node ${nprocs} --master_addr ${maddr} --master_port ${mport} ${pycmds}
 }
 
 function detection() {
