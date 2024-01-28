@@ -231,59 +231,6 @@ def fvcore_flop_count(model: nn.Module, inputs=None, input_shape=(3, 224, 224), 
     return params, flops
 
 # ==============================
-
-def build_models(model="vssm"):
-    if model in ["vssm"]:
-        model = VSSM(depths=[2, 2, 9, 2], dims=96)
-        def forward_backbone(self: VSSM, x):
-            x = self.patch_embed(x)
-            if self.ape:
-                x = x + self.absolute_pos_embed
-            x = self.pos_drop(x)
-            for layer in self.layers:
-                x = layer(x)
-            return x
-
-        model.forward = partial(forward_backbone, model)
-        del model.norm
-        del model.avgpool
-        del model.head
-        model.cuda().eval()
-        return model
-    elif model in ["swin"]:
-        from mmpretrain.models.backbones import SwinTransformer
-        model = SwinTransformer(arch="tiny")
-        [setattr(model, f"norm{i}", nn.Identity()) for i in model.out_indices]
-        model.cuda().eval()
-        return model
-    elif model in ["convnext"]:
-        from mmpretrain.models.backbones import ConvNeXt
-        model = ConvNeXt(arch="tiny")
-        model.gap_before_final_norm = False
-        [setattr(model, f"norm{i}", nn.Identity()) for i in model.out_indices]
-        model.cuda().eval()
-        return model
-    elif model in ["replknet"]:
-        # norm here is hard to delete
-        from mmpretrain.models.backbones import RepLKNet
-        model = RepLKNet(arch="31B")
-        model.cuda().eval()
-        return model
-    elif model in ["deit"]:
-        from mmpretrain.models.backbones import VisionTransformer
-        model = VisionTransformer(arch="deit-small")
-        model.out_type = 'featmap'
-        model.cuda().eval()
-        return model
-    elif model in ["resnet50"]:
-        from mmpretrain.models.backbones import ResNet
-        model = ResNet(depth=50)
-        model.cuda().eval()
-        return model
-    else:
-        raise NotImplementedError
-
-
 def build_model_vssm(depths=[2, 2, 9, 2], embed_dim=96):
     model = VSSM(depths=depths, dims=embed_dim, drop_path_rate=0.2)
     def forward_backbone(self: VSSM, x):
@@ -304,45 +251,6 @@ def build_model_vssm(depths=[2, 2, 9, 2], embed_dim=96):
     
 
 def get_flops_vssm(core="fvcore"):
-    """
-    convnext: bs4096
-          # 224 tiny
-          FLOPs: 4457472768 Parameters: 28589128 FLOPs: 13135236864
-          Top 1 Accuracy: 82.14
-          Top 1 Accuracy: 81.95 # noema
-          Top 1 Accuracy: 82.90 # 21kpre
-          Top 1 Accuracy: 84.11 # 21kpre + 384
-
-          # 224 small
-          FLOPs: 8687008512 Parameters: 50223688 FLOPs: 25580818176
-          Top 1 Accuracy: 83.16
-          Top 1 Accuracy: 83.21 # noema
-          Top 1 Accuracy: 84.59 # 21kpre
-          Top 1 Accuracy: 85.75 # 21kpre + 384
-
-          # 224 base
-          FLOPs: 15359124480 Parameters: 88591464 FLOPs: 45205885952
-          Top 1 Accuracy: 83.66
-          Top 1 Accuracy: 83.64 # noema
-          Top 1 Accuracy: 85.81 # 21kpre
-          Top 1 Accuracy: 86.82 # 21kpre + 384
-    swin: bs1024
-          # 224 tiny
-          FLOPs: 4360000000 Parameters: 28290000
-          Top 1 Accuracy: 81.18
-
-          # 224 small
-          FLOPs: 8520000000 Parameters: 49610000
-          Top 1 Accuracy: 83.02
-
-          # 224 base
-          FLOPs: 15140000000 Parameters: 87770000 FLOPs: 44490000000
-          Top 1 Accuracy: 83.36
-          Top 1 Accuracy: 84.49 # 384
-          Top 1 Accuracy: 85.16 # 21kpre
-          Top 1 Accuracy: 86.44 # 21kpre, 384
-    """
-
     _flops_count = fvcore_flop_count
     if core.startswith("mm"):
         _flops_count = mmengine_flop_count
@@ -372,21 +280,6 @@ def get_flops_vssm(core="fvcore"):
     _flops_count(build_vmamba(depths=[2, 2, 27, 2], embed_dim=96), input_shape=(3, 224, 224))
     _flops_count(build_vmamba(depths=[2, 2, 27, 2], embed_dim=128), input_shape=(3, 224, 224))
     # 4.46 + 22.1, 9.11 + 43.6, 15.2 + 75.2
-
-
-def get_scale_up():
-    _flops_count = fvcore_flop_count
-    for model in ["vssm", "swin", "convnext", "replknet", "deit", "resnet50"]:
-        print(f"FLOPs for model {model} with different input shapes ==")
-        build_model = lambda *args: build_models(model)
-        for input_shape in [64, 112, 224, 384, 512, 640, 768, 1024, 1120, 1280]:
-            try:
-                _model = build_model()
-                params, gflops = _flops_count(_model, input_shape=(3, input_shape, input_shape))
-                print(f"model {model} + input shape {input_shape} => params {params} GFLOPs {gflops}", flush=True)
-            except Exception as e:
-                print(e)
-
 
 def mmdet_mmseg_vssm(FORCE_BUILD=True):
     from mmdet.models.backbones.swin import BaseModule, MODELS
@@ -535,12 +428,11 @@ if __name__ == '__main__':
         print("mmengine flops count for vssm ====================", flush=True)
         get_flops_vssm("mm") # same as fvcore
         print("flops count for models with bigger inputs ====================", flush=True)
-        get_scale_up()  
-
+    
+    segpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../segmentation/configs")
+    detpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../detection/configs")
     if True:
         mmdet_mmseg_vssm()
-        segpath = "segmentation/configs"
-        detpath = "detection/configs"
         if True:
             mmseg_flops(config=f"{segpath}/upernet/upernet_r50_4xb4-160k_ade20k-512x512.py", input_shape=(3, 512, 2048)) # GFlops:  952.616667136 Params:  66516108
             mmseg_flops(config=f"{segpath}/upernet/upernet_r101_4xb4-160k_ade20k-512x512.py", input_shape=(3, 512, 2048)) # GFlops:  1030.4084234239997 Params:  85508236
