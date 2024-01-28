@@ -83,7 +83,7 @@ We will release all the pre-trained models/logs in few days!
 | Swin-T | 48M | 267G | MaskRCNN@3x | 46.0| 41.6 |-- |
 | VMamba-T | 42M | 262G | MaskRCNN@3x | 48.5| 43.2 |[ckpt](https://drive.google.com/file/d/1SmsgM2SR_GbKjq1EkcLcQXCEIlPhA-_r/view?usp=sharing)/[log](https://drive.google.com/file/d/1EVUKFsPQI3bqelX7-WlTKFdToXjwmcXU/view?usp=sharing) |
 | Swin-S | 69M | 354G | MaskRCNN@3x | 48.2| 43.2 |-- |
-| VMamba-S | 64M | 357G | MaskRCNN@3x | 49.7| 44.0 |waiting |
+| VMamba-S | 64M | 357G | MaskRCNN@3x | 49.7| 44.0 |[ckpt](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main)|[log](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main) |
 
 * **Semantic Segmentation on ADE20K**
 
