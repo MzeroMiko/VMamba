@@ -68,7 +68,7 @@ We will release all the pre-trained models/logs in few days!
 | Swin-B | ImageNet-1K | 224x224 | 83.5 | 88M | 15.4G | -- |
 | VMamba-T | ImageNet-1K | 224x224 | 82.2 | 22M | 4.5G | [ckpt](https://drive.google.com/file/d/1ml7nZM-YPYbQurHiodf4dpXHw88dXFfP/view?usp=sharing)/[log](https://drive.google.com/file/d/1mVooWXl1Zj8ZALr1iYuoMLdG_yDbZpRx/view?usp=sharing) |
 | VMamba-S | ImageNet-1K | 224x224 | 83.5 | 44M | 9.1G | [ckpt](https://drive.google.com/file/d/1gUlRxeHxkn4JG2QR_DoAPbzSFYAoSxDy/view?usp=sharing)/[log](https://drive.google.com/file/d/12l81-VsPcCRjyIByWQzyO_EsovVj_00v/view?usp=sharing) |
-| VMamba-B | ImageNet-1K | 224x224 | 84.0 | 75M | 15.2G | [ckpt](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main)/[log](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main) |
+| VMamba-B | ImageNet-1K | 224x224 | 84.0 | 75M | 15.2G | waiting |
 
 * **Object Detection on COCO**
   
@@ -79,7 +79,7 @@ We will release all the pre-trained models/logs in few days!
 | Swin-S | 69M | 354G | MaskRCNN@1x | 44.8| 40.9 |-- |
 | VMamba-S | 64M | 357G | MaskRCNN@1x | 48.2| 43.0 |[ckpt](https://drive.google.com/file/d/1LzytVo2wTKgOxyBadstzacslwol8Dvhq/view?usp=sharing)/[log](https://drive.google.com/file/d/1TbYZhban4VqC-9kQ8-kuZOPSBX484sSj/view?usp=sharing) |
 | Swin-B | 107M | 496G | MaskRCNN@1x | 46.9| 42.3 |-- |
-| VMamba-B | 96M | 482G | MaskRCNN@1x | 48.5| 43.1 |waiting |
+| VMamba-B | 96M | 482G | MaskRCNN@1x | 48.5| 43.1 |[ckpt](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main)/[log](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main) |
 | Swin-T | 48M | 267G | MaskRCNN@3x | 46.0| 41.6 |-- |
 | VMamba-T | 42M | 262G | MaskRCNN@3x | 48.5| 43.2 |[ckpt](https://drive.google.com/file/d/1SmsgM2SR_GbKjq1EkcLcQXCEIlPhA-_r/view?usp=sharing)/[log](https://drive.google.com/file/d/1EVUKFsPQI3bqelX7-WlTKFdToXjwmcXU/view?usp=sharing) |
 | Swin-S | 69M | 354G | MaskRCNN@3x | 48.2| 43.2 |-- |
