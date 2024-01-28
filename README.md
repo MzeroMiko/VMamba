@@ -68,7 +68,7 @@ We will release all the pre-trained models/logs in few days!
 | Swin-B | ImageNet-1K | 224x224 | 83.5 | 88M | 15.4G | -- |
 | VMamba-T | ImageNet-1K | 224x224 | 82.2 | 22M | 4.5G | [ckpt](https://drive.google.com/file/d/1ml7nZM-YPYbQurHiodf4dpXHw88dXFfP/view?usp=sharing)/[log](https://drive.google.com/file/d/1mVooWXl1Zj8ZALr1iYuoMLdG_yDbZpRx/view?usp=sharing) |
 | VMamba-S | ImageNet-1K | 224x224 | 83.5 | 44M | 9.1G | [ckpt](https://drive.google.com/file/d/1gUlRxeHxkn4JG2QR_DoAPbzSFYAoSxDy/view?usp=sharing)/[log](https://drive.google.com/file/d/12l81-VsPcCRjyIByWQzyO_EsovVj_00v/view?usp=sharing) |
-| VMamba-B | ImageNet-1K | 224x224 | 84.0 | 75M | 15.2G | waiting |
+| VMamba-B | ImageNet-1K | 224x224 | 84.0 | 75M | 15.2G | [ckpt](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main)/[log](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main) |
 
 * **Object Detection on COCO**
   
