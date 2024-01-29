@@ -25,6 +25,8 @@ def build_vssm_model(config, is_pretrain=False):
             dt_rank=("auto" if config.MODEL.VSSM.DT_RANK == "auto" else int(config.MODEL.VSSM.DT_RANK)),
             ssm_ratio=config.MODEL.VSSM.SSM_RATIO,
             attn_drop_rate=0.0,
+            shared_ssm=config.MODEL.VSSM.SHARED_SSM,
+            softmax_version=config.MODEL.VSSM.SOFTMAX,
             # ===================
             drop_rate=0.0,
             drop_path_rate=config.MODEL.DROP_PATH_RATE,

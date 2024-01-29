@@ -471,8 +471,10 @@ def main_heat2():
     swin_base = f"{logpath}/swin_base_224_b16x64_300e_imagenet_20210616_190742.json"
     convnext_baseline = f"{logpath}/convnext_modelarts-job-68076d57-44e0-4fa8-afac-cea5b1ef12f2-worker-0.log"
 
-    heat_mini = "/home/LiuYue/Workspace/Visualize/output/h2/heat_mini.log"
-    heat_base = "/home/LiuYue/Workspace/Visualize/output/h2/heat_base.log"
+    heat_mini = f"{logpath}/h2/heat_mini_dp005.log"
+    heat_tiny = f"{logpath}/h2/heat_tiny.log"
+    heat_small = f"{logpath}/h2/heat_small.log"
+    heat_base = f"{logpath}/h2/heat_base.log"
     
     # =====================================================================
     x, accs, emaaccs = get_acc_mmpretrain(swin_tiny)
@@ -495,6 +497,14 @@ def main_heat2():
     lx, losses, avglosses = get_loss_swin(heat_mini, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
     heat_mini = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
 
+    x, accs, emaaccs = get_acc_swin(heat_tiny, split_ema=True)
+    lx, losses, avglosses = get_loss_swin(heat_tiny, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
+    heat_tiny = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
+    x, accs, emaaccs = get_acc_swin(heat_small, split_ema=True)
+    lx, losses, avglosses = get_loss_swin(heat_small, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
+    heat_small = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+
     x, accs, emaaccs = get_acc_swin(heat_base, split_ema=True)
     lx, losses, avglosses = get_loss_swin(heat_base, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
     heat_base = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
@@ -505,9 +515,13 @@ def main_heat2():
             dict(x=swin_small['xaxis'], y=swin_small['accs']['acc1'], label="swin_small"),
             dict(x=swin_base['xaxis'], y=swin_base['accs']['acc1'], label="swin_base"),
             dict(x=heat_mini['xaxis'], y=heat_mini['accs']['acc1'], label="heat_mini"),
+            dict(x=heat_tiny['xaxis'], y=heat_tiny['accs']['acc1'], label="heat_tiny"),
+            dict(x=heat_small['xaxis'], y=heat_small['accs']['acc1'], label="heat_small"),
             dict(x=heat_base['xaxis'], y=heat_base['accs']['acc1'], label="heat_base"),
             # ======================================================================
             dict(x=heat_mini['xaxis'], y=heat_mini['emaaccs']['acc1'], label="heat_mini_ema"),
+            dict(x=heat_tiny['xaxis'], y=heat_tiny['emaaccs']['acc1'], label="heat_tiny_ema"),
+            dict(x=heat_small['xaxis'], y=heat_small['emaaccs']['acc1'], label="heat_small_ema"),
             dict(x=heat_base['xaxis'], y=heat_base['emaaccs']['acc1'], label="heat_base_ema"),
             # ======================================================================
         ], xlim=(30, 300), ylim=(60, 85), xstep=5, ystep=0.5, save_path=f"{showpath}/acc_heat2.jpg")
@@ -519,6 +533,8 @@ def main_heat2():
             dict(x=swin_base['loss_xaxis'], y=swin_base['avglosses'], label="swin_base"),
             # ======================================================================
             dict(x=heat_mini['loss_xaxis'], y=heat_mini['avglosses'], label="heat_mini"),
+            dict(x=heat_tiny['loss_xaxis'], y=heat_tiny['avglosses'], label="heat_tiny"),
+            dict(x=heat_small['loss_xaxis'], y=heat_small['avglosses'], label="heat_small"),
             dict(x=heat_base['loss_xaxis'], y=heat_base['avglosses'], label="heat_base"),
             # ======================================================================
         ], xlim=(10, 300), ylim=(2,5), save_path=f"{showpath}/loss_heat2.jpg")
