@@ -419,8 +419,8 @@ class SS2D(nn.Module):
         L = H * W
 
         def cross_scan_2d(x):
-            # x: (B, C, H, W)
-            x_hwwh = torch.stack([x.view(B, -1, L), torch.transpose(x, dim0=2, dim1=3).contiguous().view(B, -1, L)], dim=1).view(B, 2, -1, L)
+            # (B, C, H, W) => (B, K, C, H * W) with K = len([HW, WH, FHW, FWH])
+            x_hwwh = torch.stack([x.flatten(2, 3), x.transpose(dim0=2, dim1=3).contiguous().flatten(2, 3)], dim=1)
             xs = torch.cat([x_hwwh, torch.flip(x_hwwh, dims=[-1])], dim=1) # (b, k, d, l)
             return xs
 
