@@ -213,11 +213,13 @@ class SS2D(nn.Module):
         dt_init_floor=1e-4,
         # ======================
         shared_ssm=False,
+        softmax_version=False,
         # ======================
         **kwargs,
     ):
         factory_kwargs = {"device": None, "dtype": dtype}
         super().__init__()
+        self.softmax_version = softmax_version
         self.d_model = d_model
         self.d_state = math.ceil(self.d_model / 6) if d_state == "auto" else d_state # 20240109
         self.d_conv = d_conv
@@ -256,7 +258,8 @@ class SS2D(nn.Module):
         self.A_logs = self.A_log_init(self.d_state, self.d_inner, copies=self.K, merge=True) # (K * D, N)
         self.Ds = self.D_init(self.d_inner, copies=self.K, merge=True) # (K * D)
 
-        self.out_norm = nn.LayerNorm(self.d_inner)
+        if not self.softmax_version:
+            self.out_norm = nn.LayerNorm(self.d_inner)
         self.out_proj = nn.Linear(self.d_inner, self.d_model, bias=bias, **factory_kwargs)
         self.dropout = nn.Dropout(dropout) if dropout > 0. else None
 
@@ -480,9 +483,14 @@ class SS2D(nn.Module):
         wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
         invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
         y = out_y[:, 0].float() + inv_y[:, 0].float() + wh_y.float() + invwh_y.float()
-        y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
-        y = self.out_norm(y).to(x.dtype)
-
+        
+        if self.softmax_version:
+            y = torch.softmax(y, dim=-1).to(x.dtype)
+            y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
+        else:
+            y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
+            y = self.out_norm(y).to(x.dtype)
+        
         return y
 
     forward_core = forward_corev1
@@ -543,6 +551,7 @@ class VSSBlock(nn.Module):
         dt_rank: Any = "auto",
         ssm_ratio=2.0,
         shared_ssm=False,
+        softmax_version=False,
         use_checkpoint: bool = False,
         mlp_ratio=4.0,
         act_layer=nn.GELU,
@@ -559,6 +568,7 @@ class VSSBlock(nn.Module):
             ssm_ratio=ssm_ratio, 
             dt_rank=dt_rank,
             shared_ssm=shared_ssm,
+            softmax_version=softmax_version,
             **kwargs
         )
         self.drop_path = DropPath(drop_path)
@@ -596,6 +606,7 @@ class VSSM(nn.Module):
             ssm_ratio=2.0, 
             attn_drop_rate=0., 
             shared_ssm=False,
+            softmax_version=False,
             # =========================
             drop_rate=0., 
             drop_path_rate=0.1, 
@@ -651,6 +662,7 @@ class VSSM(nn.Module):
                 ssm_ratio=ssm_ratio,
                 attn_drop_rate=attn_drop_rate,
                 shared_ssm=shared_ssm,
+                softmax_version=softmax_version,
                 mlp_ratio=mlp_ratio,
                 drop_rate=drop_rate,
             ))
@@ -697,6 +709,7 @@ class VSSM(nn.Module):
         ssm_ratio=2.0,
         attn_drop_rate=0.0, 
         shared_ssm=False,
+        softmax_version=False,
         # ===========================
         mlp_ratio=4.0,
         drop_rate=0.0,
@@ -714,6 +727,7 @@ class VSSM(nn.Module):
                 dt_rank=dt_rank,
                 ssm_ratio=ssm_ratio,
                 shared_ssm=shared_ssm,
+                softmax_version=softmax_version,
                 use_checkpoint=use_checkpoint,
                 mlp_ratio=mlp_ratio,
                 act_layer=nn.GELU,
