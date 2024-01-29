@@ -47,12 +47,8 @@ struct SSMParamsBase {
     index_t u_d_stride;
     index_t delta_batch_stride;
     index_t delta_d_stride;
-    index_t z_batch_stride;
-    index_t z_d_stride;
     index_t out_batch_stride;
     index_t out_d_stride;
-    index_t out_z_batch_stride;
-    index_t out_z_d_stride;
 
     // Common data pointers.
     void *__restrict__ A_ptr;
@@ -64,8 +60,6 @@ struct SSMParamsBase {
     void *__restrict__ delta_bias_ptr;
     void *__restrict__ out_ptr;
     void *__restrict__ x_ptr;
-    void *__restrict__ z_ptr;
-    void *__restrict__ out_z_ptr;
 };
 
 struct SSMParamsBwd: public SSMParamsBase {
@@ -83,8 +77,6 @@ struct SSMParamsBwd: public SSMParamsBase {
     index_t dC_dstate_stride;
     index_t du_batch_stride;
     index_t du_d_stride;
-    index_t dz_batch_stride;
-    index_t dz_d_stride;
     index_t ddelta_batch_stride;
     index_t ddelta_d_stride;
 
@@ -95,7 +87,6 @@ struct SSMParamsBwd: public SSMParamsBase {
     void *__restrict__ dC_ptr;
     void *__restrict__ dD_ptr;
     void *__restrict__ du_ptr;
-    void *__restrict__ dz_ptr;
     void *__restrict__ ddelta_ptr;
     void *__restrict__ ddelta_bias_ptr;
 };
