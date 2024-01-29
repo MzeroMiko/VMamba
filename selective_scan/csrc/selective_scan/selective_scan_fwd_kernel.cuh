@@ -152,9 +152,6 @@ void selective_scan_fwd_kernel(SSMParamsBase params) {
                 constexpr float kLog2e = M_LOG2E;
                 A_val[r] *= kLog2e;
             }
-            // This variable holds B * C if both B and C are constant across seqlen. If only B varies
-            // across seqlen, this holds C. If only C varies across seqlen, this holds B.
-            // If both B and C vary, this is unused.
             weight_t B_vals[kNItems], C_vals[kNItems];
             load_weight<Ktraits>(Bvar + state_idx * params.B_dstate_stride, B_vals,
                     smem_load_weight, (params.seqlen - chunk * kChunkSize));
