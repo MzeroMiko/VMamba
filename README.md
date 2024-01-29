@@ -107,6 +107,7 @@ We will release all the pre-trained models/logs in few days!
 conda_env="vmamba"
 nvcc -V
 conda create -n ${conda_env} --clone base
+conda init bash && source ~/.bashrc && conda activate vmamba
 python -VV
 pip -V
 pip install torch==1.13.0 torchvision==0.14.0 torchaudio==0.13.0 --extra-index-url https://download.pytorch.org/whl/cu117
