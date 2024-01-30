@@ -28,8 +28,6 @@ struct SSMParamsBase {
 
     int batch, dim, seqlen, dstate, n_groups, n_chunks;
     int dim_ngroups_ratio;
-    bool is_variable_B;
-    bool is_variable_C;
 
     bool delta_softplus;
 
