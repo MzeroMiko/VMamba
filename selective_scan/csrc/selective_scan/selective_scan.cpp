@@ -186,7 +186,7 @@ selective_scan_fwd(const at::Tensor &u, const at::Tensor &delta,
     const int dstate = A.size(1);
     const int n_groups = B.size(1);
 
-    TORCH_CHECK(dstate <= MAX_DSTATE "selective_scan only supports state dimension <= MAX_DSTATE");
+    TORCH_CHECK(dstate <= MAX_DSTATE, "selective_scan only supports state dimension <= 256");
 
     CHECK_SHAPE(u, batch_size, dim, seqlen);
     CHECK_SHAPE(delta, batch_size, dim, seqlen);
