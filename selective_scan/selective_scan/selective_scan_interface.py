@@ -48,7 +48,7 @@ class SelectiveScanFn(torch.autograd.Function):
         if dout.stride(-1) != 1:
             dout = dout.contiguous()
         du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda.bwd(
-            u, delta, A, B, C, D, delta_bias, dout, x, None, ctx.delta_softplus,
+            u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus,
         )
         dB = dB.squeeze(1) if getattr(ctx, "squeeze_B", False) else dB
         dC = dC.squeeze(1) if getattr(ctx, "squeeze_C", False) else dC
