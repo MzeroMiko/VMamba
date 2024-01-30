@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "selective_scan.h"
+#define MAX_DSTATE 256
 
 #define CHECK_SHAPE(x, ...) TORCH_CHECK(x.sizes() == torch::IntArrayRef({__VA_ARGS__}), #x " must have shape (" #__VA_ARGS__ ")")
 using weight_t = float;
@@ -185,7 +186,7 @@ selective_scan_fwd(const at::Tensor &u, const at::Tensor &delta,
     const int dstate = A.size(1);
     const int n_groups = B.size(1);
 
-    TORCH_CHECK(dstate <= 256, "selective_scan only supports state dimension <= 256");
+    TORCH_CHECK(dstate <= MAX_DSTATE "selective_scan only supports state dimension <= MAX_DSTATE");
 
     CHECK_SHAPE(u, batch_size, dim, seqlen);
     CHECK_SHAPE(delta, batch_size, dim, seqlen);
@@ -245,7 +246,6 @@ selective_scan_bwd(const at::Tensor &u, const at::Tensor &delta,
                   const c10::optional<at::Tensor> &delta_bias_,
                   const at::Tensor &dout,
                   const c10::optional<at::Tensor> &x_,
-                  const c10::optional<at::Tensor> &out_,
                   bool delta_softplus) {
     auto input_type = u.scalar_type();
     auto weight_type = A.scalar_type();
