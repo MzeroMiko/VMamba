@@ -233,6 +233,93 @@ def build_vssm_models_(cfg="vssm_tiny", ckpt=True, only_backbone=False, with_nor
     return model
 
 
+# used for analyze
+def build_heat_models_(cfg="heat_tiny", ckpt=True, only_backbone=False, with_norm=True,
+    CFGS = dict(
+        heat_mini=dict(
+            model=dict(
+                depths=[2, 2, 2, 1], 
+                dims=96, 
+                drop_path_rate=0.05, 
+                mlp_ratio=0.0,
+            ), 
+            ckpt=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../ckpts/classification/heat/heat_mini/ckpt_epoch_296.pth"),
+            tag="model_ema",
+        ),
+        heat_tiny=dict(
+            model=dict(
+                depths=[2, 2, 6, 2], 
+                dims=96, 
+                drop_path_rate=0.2, 
+            ), 
+            ckpt=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../ckpts/classification/heat/heat_tiny/ckpt_epoch_288.pth"),
+            tag="model",
+        ),
+        heat_small=dict(
+            model=dict(
+                depths=[2, 2, 18, 2], 
+                dims=96, 
+                drop_path_rate=0.3, 
+            ), 
+            ckpt=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../ckpts/classification/vssm/vssmsmall/ema_ckpt_epoch_276.pth"),
+            tag="model_ema",
+            comment="not finish...",
+        ),
+        heat_base=dict(
+            model=dict(
+                depths=[2, 2, 18, 2], 
+                dims=128, 
+                drop_path_rate=0.5, 
+            ),  
+            ckpt=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../ckpts/classification/heat/heat_base/ckpt_epoch_288.pth"),
+            tag="model",
+        ),
+    ),
+    **kwargs):
+    if cfg not in CFGS:
+        return None
+    
+    model_params = CFGS[cfg]["model"]
+    model_ckpt = CFGS[cfg]["ckpt"]
+    ckpt_key = CFGS[cfg]["tag"]
+
+    model = HeatM(**model_params)
+    if only_backbone:
+        if with_norm:
+            def forward(self: HeatM, x: torch.Tensor):
+                x = self.patch_embed(x)
+                for layer in self.layers:
+                    x = layer(x)
+                x = self.classifier.norm(x)
+                # x = x.permute(0, 3, 1, 2).contiguous()
+                return x
+            model.forward = partial(forward, model)
+            del model.classifier.norm
+            del model.classifier.head
+            del model.classifier.avgpool
+        else:
+            def forward(self: VSSM, x: torch.Tensor):
+                x = self.patch_embed(x)
+                for layer in self.layers:
+                    x = layer(x)
+                # x = x.permute(0, 3, 1, 2).contiguous()
+                return x
+            model.forward = partial(forward, model)
+            del model.classifier
+
+    if ckpt:
+        ckpt = model_ckpt
+        try:
+            _ckpt = torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))
+            print(f"Successfully load ckpt {ckpt}")
+            incompatibleKeys = model.load_state_dict(_ckpt[ckpt_key], strict=False)
+            print(incompatibleKeys)        
+        except Exception as e:
+            print(f"Failed loading checkpoint form {ckpt}: {e}")
+
+    return model
+
+
 def build_model(config, is_pretrain=False):
     model = None
     

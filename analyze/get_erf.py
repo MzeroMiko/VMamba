@@ -56,6 +56,7 @@ build = import_abspy(
 )
 build_mmpretrain_models: Callable = build.build_mmpretrain_models
 build_vssm_models: Callable = build.build_vssm_models_
+build_heat_models: Callable = build.build_heat_models_
 
 
 # copied from https://github.com/DingXiaoH/RepLKNet-pytorch
@@ -174,11 +175,14 @@ def build_models(**kwargs):
         model = build_mmpretrain_models(**kwargs)
     if model is None:
         model = build_vssm_models(**kwargs)
+    if model is None:
+        model = build_heat_models(**kwargs)
     return model
 
 
 NAMES = dict(
     tiny=dict(
+        heat="heat_tiny",
         vssm="vssm_tiny",
         swin="swin_tiny",
         convnext="convnext_tiny",
@@ -186,12 +190,14 @@ NAMES = dict(
         resnet="resnet50",
     ),
     small=dict(
+        heat="heat_small",
         vssm="vssm_small",
         swin="swin_small",
         convnext="convnext_small",
         resnet="resnet101",
     ),
     base=dict(
+        heat="heat_base",
         vssm="vssm_base",
         swin="swin_base",
         convnext="convnext_base",
@@ -204,7 +210,7 @@ NAMES = dict(
 def main():
     showpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "./show/erf")
     kwargs = dict(only_backbone=True, with_norm=False)
-    for model in ["vssm", "swin", "convnext", "replknet", "deit", "resnet50"]:
+    for model in ["heat", "vssm", "swin", "convnext", "replknet", "deit", "resnet50"]:
         try:
             cfg=NAMES["tiny"][model]
         except:

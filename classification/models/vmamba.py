@@ -423,7 +423,7 @@ class SS2D(nn.Module):
             x_hwwh = torch.stack([x.flatten(2, 3), x.transpose(dim0=2, dim1=3).contiguous().flatten(2, 3)], dim=1)
             xs = torch.cat([x_hwwh, torch.flip(x_hwwh, dims=[-1])], dim=1) # (b, k, d, l)
             return xs
-
+        
         if self.K == 4:
             # K = 4
             xs = cross_scan_2d(x) # (b, k, d, l)
@@ -770,6 +770,17 @@ class VSSM(nn.Module):
 
     # used to load ckpt from previous training code
     def _load_from_state_dict(self, state_dict, prefix, local_metadata, strict, missing_keys, unexpected_keys, error_msgs):
+
+        def check_name(src, state_dict: dict = state_dict, strict=False):
+            if strict:
+                if prefix + src in list(state_dict.keys()):
+                    return True
+            else:
+                key = prefix + src
+                for k in list(state_dict.keys()):
+                    if k.startswith(key):
+                        return True
+            return False
 
         def change_name(src, dst, state_dict: dict = state_dict, strict=False):
             if strict:
