@@ -11,7 +11,7 @@ import selective_scan_cuda_core as selective_scan_cuda
 class SelectiveScanFn(torch.autograd.Function):
 
     @staticmethod
-    def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False):
+    def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, nrows=1):
         # input_t: float, fp16, bf16; weight_t: float;
         # u, B, C, delta: input_t
         # D, delta_bias: float
@@ -37,8 +37,13 @@ class SelectiveScanFn(torch.autograd.Function):
         if delta_bias is not None and (delta_bias.dtype != torch.float):
             ctx._delta_bias_dtype = delta_bias.dtype
             delta_bias = delta_bias.float()
-        out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus)
+        
+        assert u.shape[1] % (B.shape[1] * nrows) == 0 
+        assert nrows in [1, 2, 4] # 8+ is too slow to compile
+
+        out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows)
         ctx.delta_softplus = delta_softplus
+        ctx.nrows = nrows
         ctx.save_for_backward(u, delta, A, B, C, D, delta_bias, x)
         return out
 
@@ -48,7 +53,8 @@ class SelectiveScanFn(torch.autograd.Function):
         if dout.stride(-1) != 1:
             dout = dout.contiguous()
         du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda.bwd(
-            u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus,
+            u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus, 1
+            # u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus, ctx.nrows,
         )
         dB = dB.squeeze(1) if getattr(ctx, "squeeze_B", False) else dB
         dC = dC.squeeze(1) if getattr(ctx, "squeeze_C", False) else dC
@@ -67,15 +73,15 @@ class SelectiveScanFn(torch.autograd.Function):
             else:
                 _ddelta_bias = ddelta_bias
 
-        return (du, ddelta, dA, dB, dC, _dD, _ddelta_bias, None)
+        return (du, ddelta, dA, dB, dC, _dD, _ddelta_bias, None, None)
 
 
-def selective_scan_fn(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False):
+def selective_scan_fn(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, nrows=1):
     """if return_last_state is True, returns (out, last_state)
     last_state has shape (batch, dim, dstate). Note that the gradient of the last state is
     not considered in the backward pass.
     """
-    return SelectiveScanFn.apply(u, delta, A, B, C, D, delta_bias, delta_softplus)
+    return SelectiveScanFn.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows)
 
 
 def selective_scan_ref(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False):

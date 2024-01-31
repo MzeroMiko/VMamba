@@ -15,8 +15,9 @@ from selective_scan import selective_scan_fn, selective_scan_ref
 @pytest.mark.parametrize('delta_softplus', [False, True])
 @pytest.mark.parametrize('has_D', [False, True])
 @pytest.mark.parametrize("varBC_groups", [1, 2])
+@pytest.mark.parametrize("nrows", [1, 4])
 def test_selective_scan(varBC_groups, has_D, has_delta_bias,
-                        delta_softplus, seqlen, itype, wtype):
+                        delta_softplus, seqlen, itype, wtype, nrows):
     device = 'cuda'
     rtol, atol = (6e-4, 2e-3) if itype == torch.float32 else (3e-3, 5e-3)
     if itype == torch.bfloat16:
@@ -25,7 +26,7 @@ def test_selective_scan(varBC_groups, has_D, has_delta_bias,
     # set seed
     torch.random.manual_seed(0)
     batch_size = 2
-    dim = 4
+    dim = 8
     dstate = 8
     A = (-0.5 * torch.rand(dim, dstate, device=device, dtype=wtype)).requires_grad_()
     if varBC_groups == 1:
@@ -59,7 +60,7 @@ def test_selective_scan(varBC_groups, has_D, has_delta_bias,
     delta_bias_ref = delta_bias.detach().clone().requires_grad_() if delta_bias is not None else None
     out, *rest = selective_scan_fn(
         u, delta, A, B, C, D,
-        delta_bias=delta_bias, delta_softplus=delta_softplus,
+        delta_bias=delta_bias, delta_softplus=delta_softplus, nrows=nrows,
     )
     out_ref, *rest = selective_scan_ref(
         u_ref, delta_ref, A_ref, B_ref, C_ref, D_ref,
