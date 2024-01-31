@@ -73,6 +73,8 @@ def get_ext():
             sources=[
                 "csrc/selective_scan/selective_scan.cpp",
                 "csrc/selective_scan/selective_scan_core.cu",
+                "csrc/selective_scan/selective_scan_core_fwd2.cu",
+                "csrc/selective_scan/selective_scan_core_fwd4.cu",
             ],
             extra_compile_args={
                 "cxx": ["-O3", "-std=c++17"],
