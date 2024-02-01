@@ -15,7 +15,7 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 ## Updates
 * **` Feb. 1st, 2024`:** Fix bug: we now calculate FLOPs with the algrithm [@albertgu](https://github.com/albertfgu) [provides](https://github.com/state-spaces/mamba/issues/110), which will be bigger than previous calculation (which is based on the `selective_scan_ref` function, and ignores the hardware-aware algrithm). We plan to update tables below later.
 
-* **` Jan. 31st, 2024`:** Add feature: `selective_scan` now supports an extra argument `nrow` in `[1, 2, 4]`. If you find your device is strong and the time consumption keeps as `d_state` rises, try this feature to speed up `nrows` x without any cost ! Note this feature is actually a `bug fix` for [mamba](https://github.com/state-spaces/mamba).
+* **` Jan. 31st, 2024`:** Add feature: `selective_scan` now supports an extra argument `nrow` in `[1, 2, 4]`. If you find your device is strong and the time consumption keeps as `d_state` rises, try this feature to speed up `nrows` x without any cost ! Note that this feature is actually a `bug fix` for [mamba](https://github.com/state-spaces/mamba).
 
 * **` Jan. 28th, 2024`:** we cloned main into a new branch called `20240128-achieve`, the main branch has experienced a great update now. The code now are much easier to use in your own project, and the training speed is faster! This new version is totally compatible with original one, and you can use previous checkpoints without any modification. But if you want to use exactly the same models as original ones, just change `forward_core = self.forward_corev1` into `forward_core = self.forward_corev0` in `classification/models/vmamba/vmamba.py#SS2D` or you can change into the branch `20240128-archive` instead.
 
