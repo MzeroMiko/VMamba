@@ -221,7 +221,7 @@ selective_scan_fwd(const at::Tensor &u, const at::Tensor &delta,
         CHECK_SHAPE(delta_bias, dim);
     }
 
-    const int n_chunks = (seqlen + 2048 - 1) / 2048;
+    const int n_chunks = (seqlen + 2048 - 1) / 2048; // max is 128 * 16 = 2048 in fwd_kernel
     at::Tensor out = torch::empty_like(delta);
     at::Tensor x;
     x = torch::empty({batch_size, dim, n_chunks, dstate * 2}, u.options().dtype(weight_type));
