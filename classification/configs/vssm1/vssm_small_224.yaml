@@ -1,12 +1,13 @@
 MODEL:
   TYPE: vssm
-  NAME: vssm_small
+  NAME: vssm1_small
   DROP_PATH_RATE: 0.3
   VSSM:
     EMBED_DIM: 96
-    DEPTHS: [ 2, 2, 27, 2 ]
+    DEPTHS: [ 2, 2, 16, 2 ]
     D_STATE: 16
     DT_RANK: "auto"
-    SSM_RATIO: 2.0
-    MLP_RATIO: 0.0
-    DOWNSAMPLE: "v1"
+    SSM_RATIO: 1.6
+    MLP_RATIO: 2.0
+
+# 40M + 8.83G + 21min

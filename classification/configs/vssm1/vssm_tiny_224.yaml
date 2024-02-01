@@ -9,6 +9,5 @@ MODEL:
     DT_RANK: "auto"
     SSM_RATIO: 1.6
     MLP_RATIO: 2.0
-    # DOWNSAMPLE: "v1"
 
 # 21M + 4.45G + 12.5min
