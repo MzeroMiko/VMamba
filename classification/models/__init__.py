@@ -9,10 +9,10 @@ try:
 except:
     HeatM = None
 
-try:
-    from .vim import build_vim
-except Exception as e:
-    build_vim = lambda *args, **kwargs: None
+# try:
+#     from .vim import build_vim
+# except Exception as e:
+#     build_vim = lambda *args, **kwargs: None
 
 
 # still on developing...
@@ -266,7 +266,7 @@ def build_heat_models_(cfg="heat_tiny", ckpt=True, only_backbone=False, with_nor
                 dims=96, 
                 drop_path_rate=0.3, 
             ), 
-            ckpt=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../ckpts/classification/vssm/vssmsmall/ckpt_epoch_276.pth"),
+            ckpt=os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../ckpts/classification/vssm/vssmsmall/ema_ckpt_epoch_276.pth"),
             tag="model_ema",
             comment="not finish...",
         ),
@@ -334,7 +334,8 @@ def build_model(config, is_pretrain=False):
         model = build_heat_model(config, is_pretrain)
     if model is None:
         model = build_mmpretrain_models(config.MODEL.TYPE, ckpt=config.MODEL.MMCKPT)
-    
+    if model is None:
+        model = build_vim(config, is_pretrain)
     return model
 
 

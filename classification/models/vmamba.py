@@ -189,14 +189,16 @@ def selective_scan_flop_jit(inputs, outputs):
 
     # xs, dts, As, Bs, Cs, Ds (skip), z (skip), dt_projs_bias (skip)
     assert inputs[0].debugName().startswith("xs") # (B, D, L)
+    assert inputs[1].debugName().startswith("dts") # (B, D, L)
     assert inputs[2].debugName().startswith("As") # (D, N)
     assert inputs[3].debugName().startswith("Bs") # (D, N)
+    assert inputs[4].debugName().startswith("Cs") # (D, N)
     with_Group = len(inputs[3].type().sizes()) == 4
     with_D = inputs[5].debugName().startswith("Ds")
     if not with_D:
-        with_z = inputs[5].debugName().startswith("z")
+        with_z = len(inputs) > 5 and inputs[5].debugName().startswith("z")
     else:
-        with_z = inputs[6].debugName().startswith("z")
+        with_z = len(inputs) > 6 and inputs[6].debugName().startswith("z")
     B, D, L = inputs[0].type().sizes()
     N = inputs[2].type().sizes()[1]
     flops = flops_selective_scan_fn(B=B, L=L, D=D, N=N, with_D=with_D, with_Z=with_z, with_Group=with_Group)
@@ -295,8 +297,12 @@ class SS2D(nn.Module):
         self.dt_projs_bias = nn.Parameter(torch.stack([t.bias for t in self.dt_projs], dim=0)) # (K * inner)
         del self.dt_projs
         
-        self.A_logs = self.A_log_init(self.d_state, self.d_inner, copies=self.K, merge=True) # (K * D, N)
-        self.Ds = self.D_init(self.d_inner, copies=self.K, merge=True) # (K * D)
+        if self.forward_core == self.forward_core_share_a:
+            self.A_logs = self.A_log_init(self.d_state, self.d_inner, copies=1, merge=True) # (K * D, N)
+            self.Ds = self.D_init(self.d_inner, copies=1, merge=True) # (K * D)
+        else:
+            self.A_logs = self.A_log_init(self.d_state, self.d_inner, copies=self.K, merge=True) # (K * D, N)
+            self.Ds = self.D_init(self.d_inner, copies=self.K, merge=True) # (K * D)
 
         if not self.softmax_version:
             self.out_norm = nn.LayerNorm(self.d_inner)
@@ -453,7 +459,11 @@ class SS2D(nn.Module):
         return y
 
     def forward_corev1(self, x: torch.Tensor):
-        self.selective_scan = selective_scan_fn_v1
+        selective_scan = selective_scan_fn_v1
+
+        # if this shows potential, we can raise the speed later by modifying selective_scan
+        if self.K == 1:
+            return self.forward_core_share_ssm(x)
 
         B, C, H, W = x.shape
         L = H * W
@@ -464,60 +474,31 @@ class SS2D(nn.Module):
             xs = torch.cat([x_hwwh, torch.flip(x_hwwh, dims=[-1])], dim=1) # (b, k, d, l)
             return xs
         
-        if self.K == 4:
-            # K = 4
-            xs = cross_scan_2d(x) # (b, k, d, l)
+        # K = 4
+        xs = cross_scan_2d(x) # (b, k, d, l)
 
-            x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, self.x_proj_weight)
-            # x_dbl = x_dbl + self.x_proj_bias.view(1, K, -1, 1)
-            dts, Bs, Cs = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=2)
-            dts = torch.einsum("b k r l, k d r -> b k d l", dts, self.dt_projs_weight)
+        x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, self.x_proj_weight)
+        # x_dbl = x_dbl + self.x_proj_bias.view(1, K, -1, 1)
+        dts, Bs, Cs = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=2)
+        dts = torch.einsum("b k r l, k d r -> b k d l", dts, self.dt_projs_weight)
 
-            xs = xs.view(B, -1, L) # (b, k * d, l)
-            dts = dts.contiguous().view(B, -1, L) # (b, k * d, l)
-            As = -torch.exp(self.A_logs.float())  # (k * d, d_state)
-            Ds = self.Ds # (k * d)
-            dt_projs_bias = self.dt_projs_bias.view(-1) # (k * d)
+        xs = xs.view(B, -1, L) # (b, k * d, l)
+        dts = dts.contiguous().view(B, -1, L) # (b, k * d, l)
+        As = -torch.exp(self.A_logs.float())  # (k * d, d_state)
+        Ds = self.Ds # (k * d)
+        dt_projs_bias = self.dt_projs_bias.view(-1) # (k * d)
 
-            # assert len(xs.shape) == 3 and len(dts.shape) == 3 and len(Bs.shape) == 4 and len(Cs.shape) == 4
-            # assert len(As.shape) == 2 and len(Ds.shape) == 1 and len(dt_projs_bias.shape) == 1
-            # print(self.Ds.dtype, self.A_logs.dtype, self.dt_projs_bias.dtype, flush=True) # fp16, fp16, fp16
+        # assert len(xs.shape) == 3 and len(dts.shape) == 3 and len(Bs.shape) == 4 and len(Cs.shape) == 4
+        # assert len(As.shape) == 2 and len(Ds.shape) == 1 and len(dt_projs_bias.shape) == 1
+        # print(self.Ds.dtype, self.A_logs.dtype, self.dt_projs_bias.dtype, flush=True) # fp16, fp16, fp16
 
-            out_y = self.selective_scan(
-                xs, dts, 
-                As, Bs, Cs, Ds,
-                delta_bias=dt_projs_bias,
-                delta_softplus=True,
-            ).view(B, 4, -1, L)
-            # assert out_y.dtype == torch.float16
-
-        # if this shows potential, we can raise the speed later by modifying selective_scan
-        elif self.K == 1:
-            x_dbl = torch.einsum("b d l, c d -> b c l", x.view(B, -1, L), self.x_proj_weight[0])
-            # x_dbl = x_dbl + self.x_proj_bias.view(1, -1, 1)
-            dt, BC = torch.split(x_dbl, [self.dt_rank, 2 * self.d_state], dim=1)
-            dt = torch.einsum("b r l, d r -> b d l", dt, self.dt_projs_weight[0])
-            x_dt_BC = torch.cat([x, dt.view(B, -1, H, W), BC.view(B, -1, H, W)], dim=1) # (b, -1, h, w)
-
-            x_dt_BCs = cross_scan_2d(x_dt_BC) # (b, k, d, l)
-            xs, dts, Bs, Cs = torch.split(x_dt_BCs, [self.d_inner, self.d_inner, self.d_state, self.d_state], dim=2)
-
-            xs = xs.contiguous().view(B, -1, L) # (b, k * d, l)
-            dts = dts.contiguous().view(B, -1, L) # (b, k * d, l)
-            As = -torch.exp(self.A_logs.float()).repeat(4, 1) # (k * d, d_state)
-            Ds = self.Ds.repeat(4) # (k * d)
-            dt_projs_bias = self.dt_projs_bias.view(-1).repeat(4) # (k * d)
-
-            # assert len(xs.shape) == 3 and len(dts.shape) == 3 and len(Bs.shape) == 4 and len(Cs.shape) == 4
-            # assert len(As.shape) == 2 and len(Ds.shape) == 1 and len(dt_projs_bias.shape) == 1
-
-            out_y = self.selective_scan(
-                xs, dts, 
-                As, Bs, Cs, Ds,
-                delta_bias=dt_projs_bias,
-                delta_softplus=True,
-            ).view(B, 4, -1, L)
-            # assert out_y.dtype == torch.float16
+        out_y = selective_scan(
+            xs, dts, 
+            As, Bs, Cs, Ds,
+            delta_bias=dt_projs_bias,
+            delta_softplus=True,
+        ).view(B, 4, -1, L)
+        # assert out_y.dtype == torch.float16
 
         inv_y = torch.flip(out_y[:, 2:4], dims=[-1]).view(B, 2, -1, L)
         wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
@@ -533,8 +514,115 @@ class SS2D(nn.Module):
         
         return y
 
-    forward_core = forward_corev1
-    # forward_core = forward_corev0
+    def forward_core_share_ssm(self, x: torch.Tensor):
+        selective_scan = selective_scan_fn_v1
+
+        B, C, H, W = x.shape
+        L = H * W
+
+        def cross_scan_2d(x):
+            # (B, C, H, W) => (B, K, C, H * W) with K = len([HW, WH, FHW, FWH])
+            x_hwwh = torch.stack([x.flatten(2, 3), x.transpose(dim0=2, dim1=3).contiguous().flatten(2, 3)], dim=1)
+            xs = torch.cat([x_hwwh, torch.flip(x_hwwh, dims=[-1])], dim=1) # (b, k, d, l)
+            return xs
+        
+        x_dbl = torch.einsum("b d l, c d -> b c l", x.view(B, -1, L), self.x_proj_weight[0])
+        # x_dbl = x_dbl + self.x_proj_bias.view(1, -1, 1)
+        dt, BC = torch.split(x_dbl, [self.dt_rank, 2 * self.d_state], dim=1)
+        dt = torch.einsum("b r l, d r -> b d l", dt, self.dt_projs_weight[0])
+        x_dt_BC = torch.cat([x, dt.view(B, -1, H, W), BC.view(B, -1, H, W)], dim=1) # (b, -1, h, w)
+
+        x_dt_BCs = cross_scan_2d(x_dt_BC) # (b, k, d, l)
+        xs, dts, Bs, Cs = torch.split(x_dt_BCs, [self.d_inner, self.d_inner, self.d_state, self.d_state], dim=2)
+
+        xs = xs.contiguous().view(B, -1, L) # (b, k * d, l)
+        dts = dts.contiguous().view(B, -1, L) # (b, k * d, l)
+        As = -torch.exp(self.A_logs.float()).repeat(4, 1) # (k * d, d_state)
+        Ds = self.Ds.repeat(4) # (k * d)
+        dt_projs_bias = self.dt_projs_bias.view(-1).repeat(4) # (k * d)
+
+        # assert len(xs.shape) == 3 and len(dts.shape) == 3 and len(Bs.shape) == 4 and len(Cs.shape) == 4
+        # assert len(As.shape) == 2 and len(Ds.shape) == 1 and len(dt_projs_bias.shape) == 1
+
+        out_y = selective_scan(
+            xs, dts, 
+            As, Bs, Cs, Ds,
+            delta_bias=dt_projs_bias,
+            delta_softplus=True,
+        ).view(B, 4, -1, L)
+        # assert out_y.dtype == torch.float16
+
+        inv_y = torch.flip(out_y[:, 2:4], dims=[-1]).view(B, 2, -1, L)
+        wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
+        invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
+        y = out_y[:, 0].float() + inv_y[:, 0].float() + wh_y.float() + invwh_y.float()
+        
+        if self.softmax_version:
+            y = torch.softmax(y, dim=-1).to(x.dtype)
+            y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
+        else:
+            y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
+            y = self.out_norm(y).to(x.dtype)
+        
+        return y
+
+    def forward_core_share_a(self, x: torch.Tensor):
+        selective_scan = selective_scan_fn_v1
+
+        B, C, H, W = x.shape
+        L = H * W
+
+        def cross_scan_2d(x, dim=1):
+            # (B, C, H, W) => (B, K, C, H * W) with K = len([HW, WH, FHW, FWH])
+            x_hwwh = torch.stack([x.flatten(2, 3), x.transpose(dim0=2, dim1=3).contiguous().flatten(2, 3)], dim=dim)
+            xs = torch.cat([x_hwwh, torch.flip(x_hwwh, dims=[-1])], dim=dim) # (b, k, d, l)
+            return xs
+        
+        K = 4
+        xs = cross_scan_2d(x, dim=1) # (b, d, k, l)
+
+        x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, self.x_proj_weight)
+        # x_dbl = x_dbl + self.x_proj_bias.view(1, K, -1, 1)
+        dts, Bs, Cs = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=2)
+        dts = torch.einsum("b k r l, k d r -> b k d l", dts, self.dt_projs_weight)
+        dts = dts + self.dt_projs_bias.to(xs.dtype).view(1, K, -1, 1)
+
+        xs = xs.transpose(dim0=1, dim1=2).contiguous().view(B, -1, K * L)
+        dts = dts.transpose(dim0=1, dim1=2).contiguous().view(B, -1, K * L)
+        As = -torch.exp(self.A_logs.float()) # (D, N)
+        Ds = self.Ds.view(-1) # (D)
+        Bs = Bs.transpose(dim0=1, dim1=2).contiguous().view(B, 1, -1, K * L)
+        Cs = Cs.transpose(dim0=1, dim1=2).contiguous().view(B, 1, -1, K * L)
+
+        # assert len(xs.shape) == 3 and len(dts.shape) == 3 and len(Bs.shape) == 4 and len(Cs.shape) == 4
+        # assert len(As.shape) == 2 and len(Ds.shape) == 1 and len(dt_projs_bias.shape) == 1
+        # print(self.Ds.dtype, self.A_logs.dtype, self.dt_projs_bias.dtype, flush=True) # fp16, fp16, fp16
+
+        out_y = selective_scan(
+            xs, dts, 
+            As, Bs, Cs, Ds,
+            delta_bias=None,
+            delta_softplus=True,
+        ).view(B, -1, 4, L)
+        # assert out_y.dtype == torch.float16
+
+        inv_y = torch.flip(out_y[:, :, 2:4], dims=[-1]).view(B, -1, 2, L)
+        wh_y = torch.transpose(out_y[:, :, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
+        invwh_y = torch.transpose(inv_y[:, :, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
+        y = out_y[:, :, 0].float() + inv_y[:, :, 0].float() + wh_y.float() + invwh_y.float()
+        
+        if self.softmax_version:
+            y = torch.softmax(y, dim=-1).to(x.dtype)
+            y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
+        else:
+            y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
+            y = self.out_norm(y).to(x.dtype)
+        
+        return y
+
+    # forward_core = forward_core_share_a # 18min
+    forward_core = forward_corev1 # 16min
+    # forward_core = forward_corev0 # 21min
 
     def forward(self, x: torch.Tensor, **kwargs):
         xz = self.in_proj(x)
