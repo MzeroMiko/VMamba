@@ -285,7 +285,8 @@ selective_scan_bwd(const at::Tensor &u, const at::Tensor &delta,
     const int dstate = A.size(1);
     const int n_groups = B.size(1);
 
-    TORCH_CHECK(dstate <= 256, "selective_scan only supports state dimension <= 256");
+    TORCH_CHECK(dim % (n_groups * nrows) == 0, "dims should be dividable by n_groups * nrows");
+    TORCH_CHECK(dstate <= MAX_DSTATE / nrows, "selective_scan only supports state dimension <= 256 / nrows");
 
     CHECK_SHAPE(u, batch_size, dim, seqlen);
     CHECK_SHAPE(delta, batch_size, dim, seqlen);
@@ -313,8 +314,7 @@ selective_scan_bwd(const at::Tensor &u, const at::Tensor &delta,
     }
 
     at::Tensor out;
-    const int n_chunks = (seqlen + 2048 - 1) / 2048;
-    // const int n_chunks = (seqlen + 1024 - 1) / 1024;
+    const int n_chunks = (seqlen + 2048 - 1) / 2048;  // max is 128 * 16 = 2048 in fwd_kernel
     if (n_chunks > 1) { TORCH_CHECK(x_.has_value()); }
     if (x_.has_value()) {
         auto x = x_.value();

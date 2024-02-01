@@ -9,6 +9,11 @@ try:
 except:
     HeatM = None
 
+try:
+    from .vim import build_vim
+except Exception as e:
+    build_vim = lambda *args, **kwargs: None
+
 
 # still on developing...
 def build_vssm_model(config, is_pretrain=False):

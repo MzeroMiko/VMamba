@@ -28,6 +28,31 @@ try:
 except:
     pass
 
+# fvcore flops =======================================
+
+def flops_selective_scan_fn(B=1, L=256, D=768, N=16, with_D=True, with_Z=False, with_Group=True, with_complex=False):
+    """
+    u: r(B D L)
+    delta: r(B D L)
+    A: r(D N)
+    B: r(B N L)
+    C: r(B N L)
+    D: r(D)
+    z: r(B D L)
+    delta_bias: r(D), fp32
+    
+    ignores:
+        [.float(), +, .softplus, .shape, new_zeros, repeat, stack, to(dtype), silu] 
+    """
+    assert not with_complex 
+    # https://github.com/state-spaces/mamba/issues/110
+    flops = 9 * B * L * D * N
+    if with_D:
+        flops += B * D * L
+    if with_Z:
+        flops += B * D * L    
+    return flops
+
 
 def flops_selective_scan_ref(B=1, L=256, D=768, N=16, with_D=True, with_Z=False, with_Group=True, with_complex=False):
     """
@@ -148,7 +173,20 @@ def flops_selective_scan_ref(B=1, L=256, D=768, N=16, with_D=True, with_Z=False,
     return flops
 
 
+def print_jit_input_names(inputs):
+    # tensor.11, dt.1, A.1, B.1, C.1, D.1, z.1, None
+    try: 
+        print("input params: ", end=" ", flush=True)
+        for i in range(10):
+            print(inputs[i].debugName(), end=" ", flush=True)
+    except Exception as e:
+        pass
+    print("", flush=True)
+
+
 def selective_scan_flop_jit(inputs, outputs):
+    print_jit_input_names(inputs)
+
     # xs, dts, As, Bs, Cs, Ds (skip), z (skip), dt_projs_bias (skip)
     assert inputs[0].debugName().startswith("xs") # (B, D, L)
     assert inputs[2].debugName().startswith("As") # (D, N)
@@ -161,9 +199,11 @@ def selective_scan_flop_jit(inputs, outputs):
         with_z = inputs[6].debugName().startswith("z")
     B, D, L = inputs[0].type().sizes()
     N = inputs[2].type().sizes()[1]
-    flops = flops_selective_scan_ref(B=B, L=L, D=D, N=N, with_D=with_D, with_Z=with_z, with_Group=with_Group)
+    flops = flops_selective_scan_fn(B=B, L=L, D=D, N=N, with_D=with_D, with_Z=with_z, with_Group=with_Group)
+    # flops = flops_selective_scan_ref(B=B, L=L, D=D, N=N, with_D=with_D, with_Z=with_z, with_Group=with_Group)
     return flops
 
+# =====================================================
 
 class PatchMerging2D(nn.Module):
     def __init__(self, dim, out_dim=-1, norm_layer=nn.LayerNorm):

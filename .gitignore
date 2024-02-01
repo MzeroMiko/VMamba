@@ -20,6 +20,7 @@ analyze/show
 classification/configs/heat
 classification/models/heat
 classification/models/heat.py
+classification/models/vim.py
 
 detection/data
 detection/work_dirs
