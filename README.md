@@ -106,31 +106,86 @@ We will release all the pre-trained models/logs in few days!
 
 ## Getting Started
 
-* Install required packages:
-```bash
-conda_env="vmamba"
-nvcc -V
-conda create -n ${conda_env} --clone base
-conda init bash && source ~/.bashrc && conda activate vmamba
-python -VV
-pip -V
-pip install torch==1.13.0 torchvision==0.14.0 torchaudio==0.13.0 --extra-index-url https://download.pytorch.org/whl/cu117
-# We use py110 cu117 torch113
-pip install packaging
-pip install timm==0.4.12
-pip install pytest chardet yacs termcolor
-pip install submitit tensorboardX
-pip install fvcore
-pip install seaborn
+### Installation
 
-cd selective_scan && pip install . && pytest
-# you can also install packages below as an alternative...
-# pip install triton==2.0.0
-# pip install causal_conv1d==1.0.0  # causal_conv1d-1.0.0+cu118torch1.13cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
-# pip install mamba_ssm==1.0.1  # mamba_ssm-1.0.1+cu118torch1.13cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
+**step1:Clone the VMamba repository:**
+
+To get started, first clone the VMamba repository and navigate to the project directory:
+
+```bash
+git clone https://github.com/MzeroMiko/VMamba.git
+cd VMamba
+
 ```
 
-* See more details at [modelcard.sh](modelcard.sh).
+**step2:Environment Setup:**
+
+VMamba recommends setting up a conda environment and installing dependencies via pip. Use the following commands to set up your environment:
+#### Create and activate a new conda environment
+
+```bash
+conda create -n vmamba
+conda activate vmamba
+```
+#### Install Dependencies.
+```bash
+pip install -r requirements.txt
+# Install selective_scan and its dependencies
+cd selective_scan && pip install . && pytest
+```
+
+
+
+Optional Dependencies for Model Detection and Segmentation:
+```bash
+pip install mmengine==0.10.1 mmcv==2.1.0 opencv-python-headless ftfy
+pip install mmdet==3.3.0 mmsegmentation==1.2.2 mmpretrain==1.2.0
+```
+
+### Model Training and Inference
+
+**Classification:**
+
+To train VMamba models for classification on ImageNet, use the following commands for different configurations:
+
+```bash
+# For VMamba Tiny
+python -m torch.distributed.launch --nnodes=1 --node_rank=0 --nproc_per_node=8 --master_addr="127.0.0.1" --master_port=29501 main.py --cfg configs/vssm/vssm_tiny_224.yaml --batch-size 64 --data-path /dataset/ImageNet2012 --output /tmp
+
+# For VMamba Small
+python -m torch.distributed.launch --nnodes=1 --node_rank=0 --nproc_per_node=8 --master_addr="127.0.0.1" --master_port=29501 main.py --cfg configs/vssm/vssm_small_224.yaml --batch-size 64 --data-path /dataset/ImageNet2012 --output /tmp
+
+# For VMamba Base
+python -m torch.distributed.launch --nnodes=1 --node_rank=0 --nproc_per_node=8 --master_addr="127.0.0.1" --master_port=29501 main.py --cfg configs/vssm/vssm_base_224.yaml --batch-size 64 --data-path /dataset/ImageNet2012 --output /tmp
+
+```
+
+**Detection and Segmentation:**
+
+For detection and segmentation tasks, follow similar steps using the appropriate config files from the `configs/vssm` directory. Adjust the `--cfg`, `--data-path`, and `--output` parameters according to your dataset and desired output location.
+
+### Analysis Tools
+
+VMamba includes tools for analyzing the effective receptive field, FLOPs, loss, and scaling behavior of the models. Use the following commands to perform analysis:
+
+```bash
+# Analyze the effective receptive field
+CUDA_VISIBLE_DEVICES=0 python analyze/get_erf.py > analyze/show/erf/get_erf.log 2>&1
+
+# Analyze FLOPs
+CUDA_VISIBLE_DEVICES=0 python analyze/get_flops.py > analyze/show/flops/flops.log 2>&1
+
+# Analyze loss
+CUDA_VISIBLE_DEVICES=0 python analyze/get_loss.py
+
+# Further analysis on scaling behavior
+python analyze/scaleup_show.py
+
+```
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=MzeroMiko/VMamba&type=Date)](https://star-history.com/#MzeroMiko/VMamba&Date)
 
 ## Citation
 
@@ -149,4 +204,3 @@ This project is based on Mamba ([paper](https://arxiv.org/abs/2312.00752), [code
 and the `analyze/get_erf.py` is adopted from [replknet](https://github.com/DingXiaoH/RepLKNet-pytorch/tree/main/erf), thanks for their excellent works.
 
 * We release [Fast-iTPN](https://github.com/sunsmarterjie/iTPN/tree/main/fast_itpn) recently, which reports the best performance on ImageNet-1K at Tiny/Small/Base level models as far as we know. (Tiny-24M-86.5%, Small-40M-87.8%, Base-85M-88.75%)
-
