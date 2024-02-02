@@ -10,6 +10,8 @@
 Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 
 
+</div>
+
 ## Updates
 * **` Feb. 1st, 2024`:** Fix bug: we now calculate FLOPs with the algrithm [@albertgu](https://github.com/albertfgu) [provides](https://github.com/state-spaces/mamba/issues/110), which will be bigger than previous calculation (which is based on the `selective_scan_ref` function, and ignores the hardware-aware algrithm). We plan to update tables below later.
 
