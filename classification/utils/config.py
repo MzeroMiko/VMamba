@@ -48,9 +48,9 @@ _C.DATA.MASK_RATIO = 0.6
 # -----------------------------------------------------------------------------
 _C.MODEL = CN()
 # Model type
-_C.MODEL.TYPE = 'swin'
+_C.MODEL.TYPE = 'vssm'
 # Model name
-_C.MODEL.NAME = 'swin_tiny_patch4_window7_224'
+_C.MODEL.NAME = 'vssm_tiny_224'
 # Pretrained weight from checkpoint, could be imagenet22k pretrained weight
 # could be overwritten by command line argument
 _C.MODEL.PRETRAINED = ''
@@ -83,21 +83,6 @@ _C.MODEL.VSSM.SOFTMAX = False
 _C.MODEL.VSSM.MLP_RATIO = 4.
 _C.MODEL.VSSM.PATCH_NORM = True
 _C.MODEL.VSSM.DOWNSAMPLE = "v2"
-
-# Swin Transformer parameters
-_C.MODEL.SWIN = CN()
-_C.MODEL.SWIN.PATCH_SIZE = 4
-_C.MODEL.SWIN.IN_CHANS = 3
-_C.MODEL.SWIN.EMBED_DIM = 96
-_C.MODEL.SWIN.DEPTHS = [2, 2, 6, 2]
-_C.MODEL.SWIN.NUM_HEADS = [3, 6, 12, 24]
-_C.MODEL.SWIN.WINDOW_SIZE = 7
-_C.MODEL.SWIN.MLP_RATIO = 4.
-_C.MODEL.SWIN.QKV_BIAS = True
-_C.MODEL.SWIN.QK_SCALE = None
-_C.MODEL.SWIN.APE = False
-_C.MODEL.SWIN.PATCH_NORM = True
-
 
 # -----------------------------------------------------------------------------
 # Training settings
@@ -283,8 +268,6 @@ def update_config(config, args):
         config.ENABLE_AMP = args.enable_amp
 
     # for acceleration
-    if _check_args('fused_window_process'):
-        config.FUSED_WINDOW_PROCESS = True
     if _check_args('fused_layernorm'):
         config.FUSED_LAYERNORM = True
     ## Overwrite optimizer if not None, currently we use it for [fused_adam, fused_lamb]
