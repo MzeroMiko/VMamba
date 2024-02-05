@@ -21,6 +21,7 @@ classification/configs/heat
 classification/models/heat
 classification/models/heat.py
 classification/models/vim.py
+classification/models/pscan.py
 
 detection/data
 detection/work_dirs
