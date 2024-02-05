@@ -26,13 +26,12 @@ from data import build_loader
 from utils.lr_scheduler import build_scheduler
 from utils.optimizer import build_optimizer
 from utils.logger import create_logger
-from utils.utils import load_checkpoint, load_pretrained, save_checkpoint, NativeScalerWithGradNormCount, auto_resume_helper, \
-    reduce_tensor
+from utils.utils import  NativeScalerWithGradNormCount, auto_resume_helper, reduce_tensor
+from utils.utils import load_checkpoint_ema, load_pretrained_ema, save_checkpoint_ema
 
 from fvcore.nn import FlopCountAnalysis, flop_count_str, flop_count
 
 from timm.utils import ModelEma as ModelEma
-from utils.utils_ema import load_checkpoint_ema, load_pretrained_ema, save_checkpoint_ema
 print(f"||{torch.multiprocessing.get_start_method()}||", end="")
 torch.multiprocessing.set_start_method("spawn", force=True)
 
