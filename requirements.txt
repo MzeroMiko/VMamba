@@ -4,7 +4,11 @@ torchvision==0.14.1
 torchaudio==0.13.1
 packaging
 timm==0.4.12
-pytest chardet yacs termcolor
-submitit tensorboardX
+pytest 
+chardet 
+yacs 
+termcolor
+submitit 
+tensorboardX
 fvcore
 seaborn
