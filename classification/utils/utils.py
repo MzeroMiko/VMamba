@@ -10,7 +10,11 @@
 import os
 import torch
 import torch.distributed as dist
-from torch._six import inf
+try:
+    from torch import inf
+except:
+    from torch._six import inf
+    
 from timm.utils import ModelEma as ModelEma
 
 
