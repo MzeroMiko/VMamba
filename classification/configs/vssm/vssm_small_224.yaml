@@ -5,8 +5,9 @@ MODEL:
   VSSM:
     EMBED_DIM: 96
     DEPTHS: [ 2, 2, 27, 2 ]
-    D_STATE: 16
-    DT_RANK: "auto"
+    SSM_D_STATE: 16
+    SSM_DT_RANK: "auto"
     SSM_RATIO: 2.0
     MLP_RATIO: 0.0
     DOWNSAMPLE: "v1"
+    PATCHEMBED: "v1"
