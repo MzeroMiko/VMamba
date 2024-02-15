@@ -1,14 +1,16 @@
 MODEL:
   TYPE: vssm
-  NAME: vssm1_tiny
-  DROP_PATH_RATE: 0.2
+  NAME: vssm1_tiny_1v1
+  DROP_PATH_RATE: 0.1
   VSSM:
     EMBED_DIM: 96
     DEPTHS: [ 2, 2, 4, 2 ]
     SSM_D_STATE: 16
     SSM_DT_RANK: "auto"
     SSM_RATIO: 1.2
+    SSM_CONV: -1
     MLP_RATIO: 4.0
-
+    DOWNSAMPLE: "v2"
+    PATCHEMBED: "v1"
 
 # PRINT_FREQ: 1 # for debug

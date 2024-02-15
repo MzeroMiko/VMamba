@@ -5,8 +5,8 @@ MODEL:
   VSSM:
     EMBED_DIM: 128
     DEPTHS: [ 2, 2, 16, 2 ]
-    D_STATE: 16
-    DT_RANK: "auto"
+    SSM_D_STATE: 16
+    SSM_DT_RANK: "auto"
     SSM_RATIO: 1.2
     MLP_RATIO: 4.0
 

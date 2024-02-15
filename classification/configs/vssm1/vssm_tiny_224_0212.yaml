@@ -1,0 +1,16 @@
+MODEL:
+  TYPE: vssm
+  NAME: vssm1_tiny_0212
+  DROP_PATH_RATE: 0.2
+  VSSM:
+    EMBED_DIM: 64
+    # DEPTHS: [ 4, 4, 18, 4 ] # 36 + 6.12
+    # DEPTHS: [3, 4, 12, 4] # 30 + 4.7
+    DEPTHS: [3, 3, 12, 3] # 26 + 4.3
+    SSM_D_STATE: 1
+    SSM_DT_RANK: "auto"
+    SSM_RATIO: 2.0
+    SSM_CONV: -1
+    MLP_RATIO: 4.0
+    DOWNSAMPLE: "v2"
+    PATCHEMBED: "v1"
