@@ -65,7 +65,6 @@ _C.MODEL.DROP_PATH_RATE = 0.1
 # Label Smoothing
 _C.MODEL.LABEL_SMOOTHING = 0.1
 
-
 # MMpretrain models for test
 _C.MODEL.MMCKPT = False
 
@@ -75,14 +74,20 @@ _C.MODEL.VSSM.PATCH_SIZE = 4
 _C.MODEL.VSSM.IN_CHANS = 3
 _C.MODEL.VSSM.DEPTHS = [2, 2, 9, 2]
 _C.MODEL.VSSM.EMBED_DIM = 96
-_C.MODEL.VSSM.D_STATE = 16
-_C.MODEL.VSSM.DT_RANK = "auto"
-_C.MODEL.VSSM.SSM_RATIO = 2.
-_C.MODEL.VSSM.SHARED_SSM = False
-_C.MODEL.VSSM.SOFTMAX = False
-_C.MODEL.VSSM.MLP_RATIO = 4.
+_C.MODEL.VSSM.SSM_D_STATE = 16
+_C.MODEL.VSSM.SSM_RATIO = 2.0
+_C.MODEL.VSSM.SSM_RANK_RATIO = 2.0
+_C.MODEL.VSSM.SSM_DT_RANK = "auto"
+_C.MODEL.VSSM.SSM_CONV = 3
+_C.MODEL.VSSM.SSM_CONV_BIAS = True
+_C.MODEL.VSSM.SSM_DROP_RATE = 0.0
+_C.MODEL.VSSM.SSM_SOFTMAX = False
+_C.MODEL.VSSM.SSM_FORWARDTYPE = "v2"
+_C.MODEL.VSSM.MLP_RATIO = 4.0
+_C.MODEL.VSSM.MLP_DROP_RATE = 0.0
 _C.MODEL.VSSM.PATCH_NORM = True
 _C.MODEL.VSSM.DOWNSAMPLE = "v2"
+_C.MODEL.VSSM.PATCHEMBED = "v2"
 
 # -----------------------------------------------------------------------------
 # Training settings
@@ -248,10 +253,6 @@ def update_config(config, args):
         config.TRAIN.ACCUMULATION_STEPS = args.accumulation_steps
     if _check_args('use_checkpoint'):
         config.TRAIN.USE_CHECKPOINT = True
-    if _check_args('amp_opt_level'):
-        print("[warning] Apex amp has been deprecated, please use pytorch amp instead!")
-        if args.amp_opt_level == 'O0':
-            config.AMP_ENABLE = False
     if _check_args('disable_amp'):
         config.AMP_ENABLE = False
     if _check_args('output'):

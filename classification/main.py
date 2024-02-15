@@ -20,7 +20,7 @@ import torch.distributed as dist
 from timm.loss import LabelSmoothingCrossEntropy, SoftTargetCrossEntropy
 from timm.utils import accuracy, AverageMeter
 
-from utils.config import get_config
+from config import get_config
 from models import build_model
 from data import build_loader
 from utils.lr_scheduler import build_scheduler
@@ -76,8 +76,6 @@ def parse_option():
     parser.add_argument('--use-checkpoint', action='store_true',
                         help="whether to use gradient checkpointing to save memory")
     parser.add_argument('--disable_amp', action='store_true', help='Disable pytorch amp')
-    parser.add_argument('--amp-opt-level', type=str, choices=['O0', 'O1', 'O2'],
-                        help='mixed precision opt level, if O0, no amp is used (deprecated!)')
     parser.add_argument('--output', default='output', type=str, metavar='PATH',
                         help='root of output folder, the full path is <output>/<model_name>/<tag> (default: output)')
     parser.add_argument('--tag', help='tag of experiment')
@@ -85,7 +83,7 @@ def parse_option():
     parser.add_argument('--throughput', action='store_true', help='Test throughput only')
 
     # distributed training
-    parser.add_argument("--local_rank", type=int, required=True, help='local rank for DistributedDataParallel')
+    # parser.add_argument("--local_rank", type=int, help='local rank for DistributedDataParallel')
 
     # for acceleration
     # parser.add_argument('--fused_window_process', action='store_true',
@@ -113,15 +111,16 @@ def main(config):
     logger.info(f"Creating model:{config.MODEL.TYPE}/{config.MODEL.NAME}")
     model = build_model(config)
     
-    if False:
-        logger.info(flop_count_str(FlopCountAnalysis(model, (dataset_val[0][0][None],))))
-    if True:
-        logger.info(str(model))
-        n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
-        logger.info(f"number of params: {n_parameters}")
-        if hasattr(model, 'flops'):
-            flops = model.flops()
-            logger.info(f"number of GFLOPs: {flops / 1e9}")
+    if dist.get_rank() == 0:
+        if False:
+            logger.info(flop_count_str(FlopCountAnalysis(model, (dataset_val[0][0][None],))))
+        if True:
+            logger.info(str(model))
+            n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
+            logger.info(f"number of params: {n_parameters}")
+            if hasattr(model, 'flops'):
+                flops = model.flops()
+                logger.info(f"number of GFLOPs: {flops / 1e9}")
 
     model.cuda()
     model_without_ddp = model
@@ -138,7 +137,7 @@ def main(config):
 
 
     optimizer = build_optimizer(config, model)
-    model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[config.LOCAL_RANK], broadcast_buffers=False)
+    model = torch.nn.parallel.DistributedDataParallel(model, broadcast_buffers=False)
     loss_scaler = NativeScalerWithGradNormCount()
 
     if config.TRAIN.ACCUMULATION_STEPS > 1:
@@ -366,7 +365,7 @@ if __name__ == '__main__':
     else:
         rank = -1
         world_size = -1
-    torch.cuda.set_device(config.LOCAL_RANK)
+    torch.cuda.set_device(rank)
     torch.distributed.init_process_group(backend='nccl', init_method='env://', world_size=world_size, rank=rank)
     torch.distributed.barrier()
 
