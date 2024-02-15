@@ -10,147 +10,135 @@ import torch.nn.functional as F
 from torch.cuda.amp import custom_bwd, custom_fwd
 from einops import rearrange, repeat
 
-MODE = "mamba_ssm"
-# MODE = "sscore"
-# MODE = "sstest"
 
-if MODE in ["mamba_ssm"]:
-    import selective_scan_cuda as selective_scan_cuda
-elif MODE in ["sscore"]:
-    import selective_scan_cuda_core as selective_scan_cuda
-elif MODE in ["sstest"]:
-    import selective_scan_cuda_test as selective_scan_cuda
-else:
-    raise NotImplementedError
+def build_selective_scan_fn(selective_scan_cuda: object = None, mode="mamba_ssm"):
+    MODE = mode
 
-print("use selective scan:", selective_scan_cuda)
-import time; time.sleep(10)
+    class SelectiveScanFn(torch.autograd.Function):
+        @staticmethod
+        def forward(ctx, u, delta, A, B, C, D=None, z=None, delta_bias=None, delta_softplus=False, return_last_state=False, nrows=1, backnrows=-1):
+            if u.stride(-1) != 1:
+                u = u.contiguous()
+            if delta.stride(-1) != 1:
+                delta = delta.contiguous()
+            if D is not None:
+                D = D.contiguous()
+            if B.stride(-1) != 1:
+                B = B.contiguous()
+            if C.stride(-1) != 1:
+                C = C.contiguous()
+            if z is not None and z.stride(-1) != 1:
+                z = z.contiguous()
+            if B.dim() == 3:
+                B = rearrange(B, "b dstate l -> b 1 dstate l")
+                ctx.squeeze_B = True
+            if C.dim() == 3:
+                C = rearrange(C, "b dstate l -> b 1 dstate l")
+                ctx.squeeze_C = True
+            if D is not None and (D.dtype != torch.float):
+                ctx._d_dtype = D.dtype
+                D = D.float()
+            if delta_bias is not None and (delta_bias.dtype != torch.float):
+                ctx._delta_bias_dtype = delta_bias.dtype
+                delta_bias = delta_bias.float()
 
-class SelectiveScanFn(torch.autograd.Function):
+            assert u.shape[1] % (B.shape[1] * nrows) == 0 
+            assert nrows in [1, 2, 3, 4] # 8+ is too slow to compile
 
-    @staticmethod
-    def forward(ctx, u, delta, A, B, C, D=None, z=None, delta_bias=None, delta_softplus=False, return_last_state=False, nrows=1, backnrows=-1):
-        if u.stride(-1) != 1:
-            u = u.contiguous()
-        if delta.stride(-1) != 1:
-            delta = delta.contiguous()
-        if D is not None:
-            D = D.contiguous()
-        if B.stride(-1) != 1:
-            B = B.contiguous()
-        if C.stride(-1) != 1:
-            C = C.contiguous()
-        if z is not None and z.stride(-1) != 1:
-            z = z.contiguous()
-        if B.dim() == 3:
-            B = rearrange(B, "b dstate l -> b 1 dstate l")
-            ctx.squeeze_B = True
-        if C.dim() == 3:
-            C = rearrange(C, "b dstate l -> b 1 dstate l")
-            ctx.squeeze_C = True
-        if D is not None and (D.dtype != torch.float):
-            ctx._d_dtype = D.dtype
-            D = D.float()
-        if delta_bias is not None and (delta_bias.dtype != torch.float):
-            ctx._delta_bias_dtype = delta_bias.dtype
-            delta_bias = delta_bias.float()
+            if backnrows > 0:
+                assert u.shape[1] % (B.shape[1] * backnrows) == 0 
+                assert backnrows in [1, 2, 3, 4] # 8+ is too slow to compile
+            else:
+                backnrows = nrows
+            ctx.backnrows = backnrows
+            
+            if MODE in ["mamba_ssm"]:
+                out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, z, delta_bias, delta_softplus)
 
-        assert u.shape[1] % (B.shape[1] * nrows) == 0 
-        assert nrows in [1, 2, 3, 4] # 8+ is too slow to compile
-
-        if backnrows > 0:
-            assert u.shape[1] % (B.shape[1] * backnrows) == 0 
-            assert backnrows in [1, 2, 3, 4] # 8+ is too slow to compile
-        else:
-            backnrows = nrows
-        ctx.backnrows = backnrows
-        
-        if MODE in ["mamba_ssm"]:
-            out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, z, delta_bias, delta_softplus)
-
-        elif MODE in ["sscore"]:
-            out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows)
-        elif MODE in ["sstest"]:
-            out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, z, delta_bias, delta_softplus, nrows)
-        else:
-            raise NotImplementedError
-
-        ctx.delta_softplus = delta_softplus
-        ctx.has_z = z is not None
-
-        last_state = x[:, :, -1, 1::2]  # (batch, dim, dstate)
-        if not ctx.has_z:
-            ctx.save_for_backward(u, delta, A, B, C, D, delta_bias, x)
-            return out if not return_last_state else (out, last_state)
-        else:
-            ctx.save_for_backward(u, delta, A, B, C, D, z, delta_bias, x, out)
-            if MODE in ["mamba_ssm", "sstest"]:
-                out_z = rest[0]
-                return out_z if not return_last_state else (out_z, last_state)
             elif MODE in ["sscore"]:
+                out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows)
+            elif MODE in ["sstest"]:
+                out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, z, delta_bias, delta_softplus, nrows)
+            else:
+                raise NotImplementedError
+
+            ctx.delta_softplus = delta_softplus
+            ctx.has_z = z is not None
+
+            last_state = x[:, :, -1, 1::2]  # (batch, dim, dstate)
+            if not ctx.has_z:
+                ctx.save_for_backward(u, delta, A, B, C, D, delta_bias, x)
                 return out if not return_last_state else (out, last_state)
-
-    @staticmethod
-    def backward(ctx, dout, *args):
-        if not ctx.has_z:
-            u, delta, A, B, C, D, delta_bias, x = ctx.saved_tensors
-            z = None
-            out = None
-        else:
-            u, delta, A, B, C, D, z, delta_bias, x, out = ctx.saved_tensors
-        if dout.stride(-1) != 1:
-            dout = dout.contiguous()
-# The kernel supports passing in a pre-allocated dz (e.g., in case we want to fuse the
-        # backward of selective_scan_cuda with the backward of chunk).
-        # Here we just pass in None and dz will be allocated in the C++ code.
-        if MODE in ["mamba_ssm"]:
-            du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda.bwd(
-                u, delta, A, B, C, D, z, delta_bias, dout, x, out, None, ctx.delta_softplus,
-                False # option to recompute out_z, not used here
-            )
-        elif MODE in ["sstest"]:
-            du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda.bwd(
-                u, delta, A, B, C, D, z, delta_bias, dout, x, out, None, ctx.delta_softplus,
-                False, ctx.backnrows  # option to recompute out_z, not used here
-            )
-        elif MODE in ["sscore"]:
-            du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda.bwd(
-                u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus, ctx.backnrows
-            )
-        else:
-            raise NotImplementedError
-        
-        dz = rest[0] if ctx.has_z else None
-        dB = dB.squeeze(1) if getattr(ctx, "squeeze_B", False) else dB
-        dC = dC.squeeze(1) if getattr(ctx, "squeeze_C", False) else dC
-        
-        _dD = None
-        if D is not None:
-            if dD.dtype != getattr(ctx, "_d_dtype", dD.dtype):
-                _dD = dD.to(ctx._d_dtype)
             else:
-                _dD = dD
+                ctx.save_for_backward(u, delta, A, B, C, D, z, delta_bias, x, out)
+                if MODE in ["mamba_ssm", "sstest"]:
+                    out_z = rest[0]
+                    return out_z if not return_last_state else (out_z, last_state)
+                elif MODE in ["sscore"]:
+                    return out if not return_last_state else (out, last_state)
 
-        _ddelta_bias = None
-        if delta_bias is not None:
-            if ddelta_bias.dtype != getattr(ctx, "_delta_bias_dtype", ddelta_bias.dtype):
-                _ddelta_bias = ddelta_bias.to(ctx._delta_bias_dtype)
+        @staticmethod
+        def backward(ctx, dout, *args):
+            if not ctx.has_z:
+                u, delta, A, B, C, D, delta_bias, x = ctx.saved_tensors
+                z = None
+                out = None
             else:
-                _ddelta_bias = ddelta_bias
+                u, delta, A, B, C, D, z, delta_bias, x, out = ctx.saved_tensors
+            if dout.stride(-1) != 1:
+                dout = dout.contiguous()
+            # The kernel supports passing in a pre-allocated dz (e.g., in case we want to fuse the
+            # backward of selective_scan_cuda with the backward of chunk).
+            # Here we just pass in None and dz will be allocated in the C++ code.
+            if MODE in ["mamba_ssm"]:
+                du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda.bwd(
+                    u, delta, A, B, C, D, z, delta_bias, dout, x, out, None, ctx.delta_softplus,
+                    False # option to recompute out_z, not used here
+                )
+            elif MODE in ["sstest"]:
+                du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda.bwd(
+                    u, delta, A, B, C, D, z, delta_bias, dout, x, out, None, ctx.delta_softplus,
+                    False, ctx.backnrows  # option to recompute out_z, not used here
+                )
+            elif MODE in ["sscore"]:
+                du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda.bwd(
+                    u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus, ctx.backnrows
+                )
+            else:
+                raise NotImplementedError
+            
+            dz = rest[0] if ctx.has_z else None
+            dB = dB.squeeze(1) if getattr(ctx, "squeeze_B", False) else dB
+            dC = dC.squeeze(1) if getattr(ctx, "squeeze_C", False) else dC
+            
+            _dD = None
+            if D is not None:
+                if dD.dtype != getattr(ctx, "_d_dtype", dD.dtype):
+                    _dD = dD.to(ctx._d_dtype)
+                else:
+                    _dD = dD
 
-        return (du, ddelta, dA, dB, dC,
-                    dD if D is not None else None,
-                    dz,
-                    ddelta_bias if delta_bias is not None else None,
-                    None, None, None, None)
+            _ddelta_bias = None
+            if delta_bias is not None:
+                if ddelta_bias.dtype != getattr(ctx, "_delta_bias_dtype", ddelta_bias.dtype):
+                    _ddelta_bias = ddelta_bias.to(ctx._delta_bias_dtype)
+                else:
+                    _ddelta_bias = ddelta_bias
 
+            return (du, ddelta, dA, dB, dC,
+                        dD if D is not None else None,
+                        dz,
+                        ddelta_bias if delta_bias is not None else None,
+                        None, None, None, None)
 
-def selective_scan_fn(u, delta, A, B, C, D=None, z=None, delta_bias=None, delta_softplus=False, return_last_state=False, nrows=1, backnrows=-1):
-    """if return_last_state is True, returns (out, last_state)
-    last_state has shape (batch, dim, dstate). Note that the gradient of the last state is
-    not considered in the backward pass.
-    """
-    return SelectiveScanFn.apply(u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state, nrows, backnrows)
+    def selective_scan_fn(u, delta, A, B, C, D=None, z=None, delta_bias=None, delta_softplus=False, return_last_state=False, nrows=1, backnrows=-1):
+        """if return_last_state is True, returns (out, last_state)
+        last_state has shape (batch, dim, dstate). Note that the gradient of the last state is
+        not considered in the backward pass.
+        """
+        return SelectiveScanFn.apply(u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state, nrows, backnrows)
+
+    return selective_scan_fn
 
 
 def selective_scan_ref(u, delta, A, B, C, D=None, z=None, delta_bias=None, delta_softplus=False,
@@ -222,10 +210,44 @@ def selective_scan_ref(u, delta, A, B, C, D=None, z=None, delta_bias=None, delta
     return out if not return_last_state else (out, last_state)
 
 
+# MODE = "mamba_ssm"
+# MODE = "sscore"
+# MODE = "sstest"
+MODE = "mamba_ssm_sscore" # 1344 items pass
+
+if MODE in ["mamba_ssm"]:
+    import selective_scan_cuda as selective_scan_cuda
+    selective_scan_fn = build_selective_scan_fn(selective_scan_cuda, mode=MODE)
+    selective_scan_ref = selective_scan_ref
+elif MODE in ["sscore"]:
+    import selective_scan_cuda_core
+    selective_scan_fn = build_selective_scan_fn(selective_scan_cuda_core, mode=MODE)
+    selective_scan_ref = selective_scan_ref
+elif MODE in ["sstest"]:
+    import selective_scan_cuda_test
+    selective_scan_fn = build_selective_scan_fn(selective_scan_cuda_test, mode=MODE)
+    selective_scan_ref = selective_scan_ref
+elif MODE in ["mamba_ssm_sscore"]:
+    import selective_scan_cuda_core
+    import selective_scan_cuda
+    selective_scan_fn = build_selective_scan_fn(selective_scan_cuda_core, mode="sscore")
+    selective_scan_ref = build_selective_scan_fn(selective_scan_cuda, mode="mamba_ssm")
+elif MODE in ["mamba_ssm_sstest"]:
+    import selective_scan_cuda_test
+    import selective_scan_cuda
+    selective_scan_fn = build_selective_scan_fn(selective_scan_cuda_test, mode="sstest")
+    selective_scan_ref = build_selective_scan_fn(selective_scan_cuda, mode="mamba_ssm")
+else:
+    raise NotImplementedError
+
+print("use MODE:", MODE)
+import time; time.sleep(10)
+
+
 # @pytest.mark.parametrize('wtype', [torch.float32, torch.complex64])
 @pytest.mark.parametrize('wtype', [torch.float32])
-# @pytest.mark.parametrize('itype', [torch.float32, torch.float16, torch.bfloat16])
-@pytest.mark.parametrize('itype', [torch.float32])
+@pytest.mark.parametrize('itype', [torch.float32, torch.float16, torch.bfloat16])
+# @pytest.mark.parametrize('itype', [torch.float32])
 @pytest.mark.parametrize('seqlen', [64, 128, 256, 512, 1024, 2048, 4096])
 @pytest.mark.parametrize("return_last_state", [True])
 @pytest.mark.parametrize('has_delta_bias', [False, True])
