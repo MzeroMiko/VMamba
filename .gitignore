@@ -16,6 +16,10 @@ ckpt
 
 analyze/show
 
+cross_selective_scan
+
+classification/models/pscan.py
+
 # we do not release code of heat series
 classification/configs/heat
 classification/models/heat
