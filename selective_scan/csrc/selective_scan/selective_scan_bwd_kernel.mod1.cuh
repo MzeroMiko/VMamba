@@ -88,8 +88,7 @@ void selective_scan_bwd_kernel(SSMParamsBwd params) {
     auto& smem_scan = *reinterpret_cast<typename Ktraits::BlockScanT::TempStorage*>(reinterpret_cast<char *>(&smem_reduce) + Ktraits::kSmemReduceSize);
     auto& smem_reverse_scan = *reinterpret_cast<typename Ktraits::BlockReverseScanT::TempStorage*>(reinterpret_cast<char *>(&smem_scan) + sizeof(typename Ktraits::BlockScanT::TempStorage));
     weight_t *smem_delta_a = reinterpret_cast<weight_t *>(smem_ + Ktraits::kSmemSize);
-    // scan_t *smem_running_postfix = reinterpret_cast<scan_t *>(smem_delta_a + kNRows * (2 * Ktraits::MaxDState + kNThreads));
-    scan_t *smem_running_postfix = reinterpret_cast<scan_t *>(smem_delta_a + kNRows * 2 * Ktraits::MaxDState + kNThreads);
+    scan_t *smem_running_postfix = reinterpret_cast<scan_t *>(smem_delta_a + kNRows * (2 * Ktraits::MaxDState + kNThreads));
     weight_t *smem_da = reinterpret_cast<weight_t *>(smem_running_postfix + kNRows * Ktraits::MaxDState);
 
     const int batch_id = blockIdx.x;
@@ -186,9 +185,7 @@ void selective_scan_bwd_kernel(SSMParamsBwd params) {
                     const float delta_a_exp = exp2f(delta_vals[r][i] * A_scaled[r]);
                     thread_data[i] = make_float2(delta_a_exp, delta_vals[r][i] * float(u_vals[r][i]) * B_vals[i]);
                     if (i == 0) {
-                        // smem_delta_a[threadIdx.x == 0 ? state_idx + (chunk % 2) * Ktraits::MaxDState + r * (2 * Ktraits::MaxDState + kNThreads) : threadIdx.x + 2 * Ktraits::MaxDState + r * (2 * Ktraits::MaxDState + kNThreads)] = delta_a_exp;
-                        smem_delta_a[threadIdx.x == 0 ? state_idx + (chunk % 2) * Ktraits::MaxDState + r * 2 * Ktraits::MaxDState : threadIdx.x + kNRows * 2 * Ktraits::MaxDState] = delta_a_exp;
-                        
+                        smem_delta_a[threadIdx.x == 0 ? state_idx + (chunk % 2) * Ktraits::MaxDState + r * (2 * Ktraits::MaxDState + kNThreads) : threadIdx.x + 2 * Ktraits::MaxDState + r * (2 * Ktraits::MaxDState + kNThreads)] = delta_a_exp;
                     } else {
                         thread_reverse_data[i - 1].x = delta_a_exp;
                     }
@@ -196,10 +193,8 @@ void selective_scan_bwd_kernel(SSMParamsBwd params) {
                 }
                 __syncthreads();
                 thread_reverse_data[kNItems - 1].x = threadIdx.x == kNThreads - 1
-                    // ? (chunk == params.n_chunks - 1 ? 1.f : smem_delta_a[state_idx + ((chunk + 1) % 2) * Ktraits::MaxDState + r * (2 * Ktraits::MaxDState + kNThreads)])
-                    // : smem_delta_a[threadIdx.x + 1 + 2 * Ktraits::MaxDState + r * (2 * Ktraits::MaxDState + kNThreads)];
-                    ? (chunk == params.n_chunks - 1 ? 1.f : smem_delta_a[state_idx + ((chunk + 1) % 2) * Ktraits::MaxDState + r * 2 * Ktraits::MaxDState])
-                    : smem_delta_a[threadIdx.x + 1 + kNRows * 2 * Ktraits::MaxDState];
+                    ? (chunk == params.n_chunks - 1 ? 1.f : smem_delta_a[state_idx + ((chunk + 1) % 2) * Ktraits::MaxDState + r * (2 * Ktraits::MaxDState + kNThreads)])
+                    : smem_delta_a[threadIdx.x + 1 +  2 * Ktraits::MaxDState + r * (2 * Ktraits::MaxDState + kNThreads)];
                 // Initialize running total
                 scan_t running_prefix = chunk > 0 && threadIdx.x % 32 == 0 ? x[(r * params.n_chunks + chunk - 1) * params.dstate + state_idx] : make_float2(1.f, 0.f);
                 SSMScanPrefixCallbackOp<weight_t> prefix_op(running_prefix);
