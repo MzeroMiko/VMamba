@@ -28,6 +28,94 @@ try:
 except:
     pass
 
+# fvcore flops =======================================
+
+def flops_selective_scan_fn(B=1, L=256, D=768, N=16, with_D=True, with_Z=False, with_Group=True, with_complex=False):
+    """
+    u: r(B D L)
+    delta: r(B D L)
+    A: r(D N)
+    B: r(B N L)
+    C: r(B N L)
+    D: r(D)
+    z: r(B D L)
+    delta_bias: r(D), fp32
+    
+    ignores:
+        [.float(), +, .softplus, .shape, new_zeros, repeat, stack, to(dtype), silu] 
+    """
+    assert not with_complex 
+    # https://github.com/state-spaces/mamba/issues/110
+    flops = 9 * B * L * D * N
+    if with_D:
+        flops += B * D * L
+    if with_Z:
+        flops += B * D * L    
+    return flops
+
+
+# this is only for selective_scan_ref...
+def flops_selective_scan_ref(B=1, L=256, D=768, N=16, with_D=True, with_Z=False, with_Group=True, with_complex=False):
+    """
+    u: r(B D L)
+    delta: r(B D L)
+    A: r(D N)
+    B: r(B N L)
+    C: r(B N L)
+    D: r(D)
+    z: r(B D L)
+    delta_bias: r(D), fp32
+    
+    ignores:
+        [.float(), +, .softplus, .shape, new_zeros, repeat, stack, to(dtype), silu] 
+    """
+    import numpy as np
+    
+    # fvcore.nn.jit_handles
+    def get_flops_einsum(input_shapes, equation):
+        np_arrs = [np.zeros(s) for s in input_shapes]
+        optim = np.einsum_path(equation, *np_arrs, optimize="optimal")[1]
+        for line in optim.split("\n"):
+            if "optimized flop" in line.lower():
+                # divided by 2 because we count MAC (multiply-add counted as one flop)
+                flop = float(np.floor(float(line.split(":")[-1]) / 2))
+                return flop
+    
+
+    assert not with_complex
+
+    flops = 0 # below code flops = 0
+
+    flops += get_flops_einsum([[B, D, L], [D, N]], "bdl,dn->bdln")
+    if with_Group:
+        flops += get_flops_einsum([[B, D, L], [B, N, L], [B, D, L]], "bdl,bnl,bdl->bdln")
+    else:
+        flops += get_flops_einsum([[B, D, L], [B, D, N, L], [B, D, L]], "bdl,bdnl,bdl->bdln")
+  
+    in_for_flops = B * D * N   
+    if with_Group:
+        in_for_flops += get_flops_einsum([[B, D, N], [B, D, N]], "bdn,bdn->bd")
+    else:
+        in_for_flops += get_flops_einsum([[B, D, N], [B, N]], "bdn,bn->bd")
+    flops += L * in_for_flops 
+    if with_D:
+        flops += B * D * L
+    if with_Z:
+        flops += B * D * L  
+    return flops
+
+
+def print_jit_input_names(inputs):
+    # tensor.11, dt.1, A.1, B.1, C.1, D.1, z.1, None
+    try: 
+        print("input params: ", end=" ", flush=True)
+        for i in range(10):
+            print(inputs[i].debugName(), end=" ", flush=True)
+    except Exception as e:
+        pass
+    print("", flush=True)
+
+
 # cross selective scan ===============================
 if True:
     import selective_scan_cuda_core as selective_scan_cuda
@@ -165,7 +253,6 @@ if True:
         Ds = Ds.to(torch.float) # (K * c)
         delta_bias = dt_projs_bias.view(-1).to(torch.float)
          
-        # to enable fvcore.nn.jit_analysis: inputs[i].debugName
         def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True, nrows=1):
             return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows)
 
@@ -173,10 +260,10 @@ if True:
             xs, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus, nrows,
         ).view(B, K, -1, H, W)
         
-        y = CrossMerge.apply(ys)
+        y: torch.Tensor = CrossMerge.apply(ys)
 
         if softmax_version:
-            y = y.softmax(y, dim=-1).to(x.dtype)
+            y = y.softmax(dim=-1).to(x.dtype)
             y = y.transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1)
         else:
             y = y.transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1)
@@ -184,183 +271,35 @@ if True:
         
         return y
 
+    def selective_scan_flop_jit(inputs, outputs):
+        print_jit_input_names(inputs)
+        B, D, L = inputs[0].type().sizes()
+        N = inputs[2].type().sizes()[1]
+        flops = flops_selective_scan_fn(B=B, L=L, D=D, N=N, with_D=True, with_Z=False, with_Group=True)
+        return flops
 
-# fvcore flops =======================================
+else:
+    def selective_scan_flop_jit(inputs, outputs):
+        print_jit_input_names(inputs)
 
-def flops_selective_scan_fn(B=1, L=256, D=768, N=16, with_D=True, with_Z=False, with_Group=True, with_complex=False):
-    """
-    u: r(B D L)
-    delta: r(B D L)
-    A: r(D N)
-    B: r(B N L)
-    C: r(B N L)
-    D: r(D)
-    z: r(B D L)
-    delta_bias: r(D), fp32
-    
-    ignores:
-        [.float(), +, .softplus, .shape, new_zeros, repeat, stack, to(dtype), silu] 
-    """
-    assert not with_complex 
-    # https://github.com/state-spaces/mamba/issues/110
-    flops = 9 * B * L * D * N
-    if with_D:
-        flops += B * D * L
-    if with_Z:
-        flops += B * D * L    
-    return flops
-
-
-def flops_selective_scan_ref(B=1, L=256, D=768, N=16, with_D=True, with_Z=False, with_Group=True, with_complex=False):
-    """
-    u: r(B D L)
-    delta: r(B D L)
-    A: r(D N)
-    B: r(B N L)
-    C: r(B N L)
-    D: r(D)
-    z: r(B D L)
-    delta_bias: r(D), fp32
-    
-    ignores:
-        [.float(), +, .softplus, .shape, new_zeros, repeat, stack, to(dtype), silu] 
-    """
-    import numpy as np
-    
-    # fvcore.nn.jit_handles
-    def get_flops_einsum(input_shapes, equation):
-        np_arrs = [np.zeros(s) for s in input_shapes]
-        optim = np.einsum_path(equation, *np_arrs, optimize="optimal")[1]
-        for line in optim.split("\n"):
-            if "optimized flop" in line.lower():
-                # divided by 2 because we count MAC (multiply-add counted as one flop)
-                flop = float(np.floor(float(line.split(":")[-1]) / 2))
-                return flop
-    
-
-    assert not with_complex
-
-    flops = 0 # below code flops = 0
-    if False:
-        ...
-        """
-        dtype_in = u.dtype
-        u = u.float()
-        delta = delta.float()
-        if delta_bias is not None:
-            delta = delta + delta_bias[..., None].float()
-        if delta_softplus:
-            delta = F.softplus(delta)
-        batch, dim, dstate = u.shape[0], A.shape[0], A.shape[1]
-        is_variable_B = B.dim() >= 3
-        is_variable_C = C.dim() >= 3
-        if A.is_complex():
-            if is_variable_B:
-                B = torch.view_as_complex(rearrange(B.float(), "... (L two) -> ... L two", two=2))
-            if is_variable_C:
-                C = torch.view_as_complex(rearrange(C.float(), "... (L two) -> ... L two", two=2))
+        # xs, dts, As, Bs, Cs, Ds (skip), z (skip), dt_projs_bias (skip)
+        assert inputs[0].debugName().startswith("xs") # (B, D, L)
+        assert inputs[1].debugName().startswith("dts") # (B, D, L)
+        assert inputs[2].debugName().startswith("As") # (D, N)
+        assert inputs[3].debugName().startswith("Bs") # (D, N)
+        assert inputs[4].debugName().startswith("Cs") # (D, N)
+        with_Group = len(inputs[3].type().sizes()) == 4
+        with_D = inputs[5].debugName().startswith("Ds")
+        if not with_D:
+            with_z = len(inputs) > 5 and inputs[5].debugName().startswith("z")
         else:
-            B = B.float()
-            C = C.float()
-        x = A.new_zeros((batch, dim, dstate))
-        ys = []
-        """
+            with_z = len(inputs) > 6 and inputs[6].debugName().startswith("z")
+        B, D, L = inputs[0].type().sizes()
+        N = inputs[2].type().sizes()[1]
+        flops = flops_selective_scan_fn(B=B, L=L, D=D, N=N, with_D=with_D, with_Z=with_z, with_Group=with_Group)
+        # flops = flops_selective_scan_ref(B=B, L=L, D=D, N=N, with_D=with_D, with_Z=with_z, with_Group=with_Group)
+        return flops
 
-    flops += get_flops_einsum([[B, D, L], [D, N]], "bdl,dn->bdln")
-    if with_Group:
-        flops += get_flops_einsum([[B, D, L], [B, N, L], [B, D, L]], "bdl,bnl,bdl->bdln")
-    else:
-        flops += get_flops_einsum([[B, D, L], [B, D, N, L], [B, D, L]], "bdl,bdnl,bdl->bdln")
-    if False:
-        ...
-        """
-        deltaA = torch.exp(torch.einsum('bdl,dn->bdln', delta, A))
-        if not is_variable_B:
-            deltaB_u = torch.einsum('bdl,dn,bdl->bdln', delta, B, u)
-        else:
-            if B.dim() == 3:
-                deltaB_u = torch.einsum('bdl,bnl,bdl->bdln', delta, B, u)
-            else:
-                B = repeat(B, "B G N L -> B (G H) N L", H=dim // B.shape[1])
-                deltaB_u = torch.einsum('bdl,bdnl,bdl->bdln', delta, B, u)
-        if is_variable_C and C.dim() == 4:
-            C = repeat(C, "B G N L -> B (G H) N L", H=dim // C.shape[1])
-        last_state = None
-        """
-    
-    in_for_flops = B * D * N   
-    if with_Group:
-        in_for_flops += get_flops_einsum([[B, D, N], [B, D, N]], "bdn,bdn->bd")
-    else:
-        in_for_flops += get_flops_einsum([[B, D, N], [B, N]], "bdn,bn->bd")
-    flops += L * in_for_flops 
-    if False:
-        ...
-        """
-        for i in range(u.shape[2]):
-            x = deltaA[:, :, i] * x + deltaB_u[:, :, i]
-            if not is_variable_C:
-                y = torch.einsum('bdn,dn->bd', x, C)
-            else:
-                if C.dim() == 3:
-                    y = torch.einsum('bdn,bn->bd', x, C[:, :, i])
-                else:
-                    y = torch.einsum('bdn,bdn->bd', x, C[:, :, :, i])
-            if i == u.shape[2] - 1:
-                last_state = x
-            if y.is_complex():
-                y = y.real * 2
-            ys.append(y)
-        y = torch.stack(ys, dim=2) # (batch dim L)
-        """
-
-    if with_D:
-        flops += B * D * L
-    if with_Z:
-        flops += B * D * L
-    if False:
-        ...
-        """
-        out = y if D is None else y + u * rearrange(D, "d -> d 1")
-        if z is not None:
-            out = out * F.silu(z)
-        out = out.to(dtype=dtype_in)
-        """
-    
-    return flops
-
-
-def print_jit_input_names(inputs):
-    # tensor.11, dt.1, A.1, B.1, C.1, D.1, z.1, None
-    try: 
-        print("input params: ", end=" ", flush=True)
-        for i in range(10):
-            print(inputs[i].debugName(), end=" ", flush=True)
-    except Exception as e:
-        pass
-    print("", flush=True)
-
-
-def selective_scan_flop_jit(inputs, outputs):
-    print_jit_input_names(inputs)
-
-    # xs, dts, As, Bs, Cs, Ds (skip), z (skip), dt_projs_bias (skip)
-    assert inputs[0].debugName().startswith("xs") # (B, D, L)
-    assert inputs[1].debugName().startswith("dts") # (B, D, L)
-    assert inputs[2].debugName().startswith("As") # (D, N)
-    assert inputs[3].debugName().startswith("Bs") # (D, N)
-    assert inputs[4].debugName().startswith("Cs") # (D, N)
-    with_Group = len(inputs[3].type().sizes()) == 4
-    with_D = inputs[5].debugName().startswith("Ds")
-    if not with_D:
-        with_z = len(inputs) > 5 and inputs[5].debugName().startswith("z")
-    else:
-        with_z = len(inputs) > 6 and inputs[6].debugName().startswith("z")
-    B, D, L = inputs[0].type().sizes()
-    N = inputs[2].type().sizes()[1]
-    flops = flops_selective_scan_fn(B=B, L=L, D=D, N=N, with_D=with_D, with_Z=with_z, with_Group=with_Group)
-    # flops = flops_selective_scan_ref(B=B, L=L, D=D, N=N, with_D=with_D, with_Z=with_z, with_Group=with_Group)
-    return flops
 
 # =====================================================
 
@@ -391,21 +330,20 @@ class PatchMerging2D(nn.Module):
         return x
 
 
-DEV = False
 class SS2D(nn.Module):
     def __init__(
         self,
         # basic dims ===========
         d_model=96,
         d_state=16,
-        ssm_ratio=2,
+        ssm_ratio=2.0,
+        ssm_rank_ratio=2.0,
         dt_rank="auto",
         # dwconv ===============
-        # d_conv=-1, # < 2 means no conv 
         d_conv=3, # < 2 means no conv 
         conv_bias=True,
         # ======================
-        dropout=0.,
+        dropout=0.0,
         bias=False,
         # dt init ==============
         dt_min=0.001,
@@ -415,12 +353,13 @@ class SS2D(nn.Module):
         dt_init_floor=1e-4,
         # ======================
         softmax_version=False,
+        forward_type="v2",
         # ======================
         **kwargs,
     ):
-        if DEV:
-            d_conv = -1
-            
+        """
+        ssm_rank_ratio would be used in the future...
+        """
         factory_kwargs = {"device": None, "dtype": None}
         super().__init__()
         self.softmax_version = softmax_version
@@ -431,6 +370,27 @@ class SS2D(nn.Module):
         self.d_inner = int(self.expand * self.d_model)
         self.dt_rank = math.ceil(self.d_model / 16) if dt_rank == "auto" else dt_rank
 
+        # forward_type =======================================
+        self.forward_core = self.forward_corev2
+        if forward_type in ["v0"]:
+            self.forward_core = self.forward_corev0
+        elif forward_type in ["v0_seq"]:
+            self.forward_core = self.forward_corev0_seq
+        elif forward_type in ["v1", "v2"]:
+            if forward_type in ["v1"]:
+                print("v1 is deprecated as float16 training would cause loss nan. use v2 instead")
+            self.forward_core = self.forward_corev2
+        elif forward_type in ["share_ssm"]:
+            self.forward_core = self.forward_corev0_share_ssm
+        elif forward_type in ["share_a"]:
+            self.forward_core = self.forward_corev0_share_a
+        else:
+            raise NotImplementedError
+
+        self.K = 4 if forward_type not in ["share_ssm"] else 1
+        self.K2 = self.K if forward_type not in ["share_a"] else 1
+
+        # in proj =======================================
         self.in_proj = nn.Linear(self.d_model, self.d_inner * 2, bias=bias, **factory_kwargs)
         
         # conv =======================================
@@ -447,7 +407,6 @@ class SS2D(nn.Module):
             self.act = nn.SiLU()
 
         # x proj; dt proj ============================
-        self.K = 4 if not (self.forward_core == self.forward_corev1_share_ssm) else 1
         self.x_proj = [
             nn.Linear(self.d_inner, (self.dt_rank + self.d_state * 2), bias=False, **factory_kwargs)
             for _ in range(self.K)
@@ -464,7 +423,6 @@ class SS2D(nn.Module):
         del self.dt_projs
         
         # A, D =======================================
-        self.K2 = self.K if not (self.forward_core == self.forward_corev1_share_a) else 1
         self.A_logs = self.A_log_init(self.d_state, self.d_inner, copies=self.K2, merge=True) # (K * D, N)
         self.Ds = self.D_init(self.d_inner, copies=self.K2, merge=True) # (K * D)
 
@@ -473,6 +431,7 @@ class SS2D(nn.Module):
             self.out_norm = nn.LayerNorm(self.d_inner)
         self.out_proj = nn.Linear(self.d_inner, self.d_model, bias=bias, **factory_kwargs)
         self.dropout = nn.Dropout(dropout) if dropout > 0. else nn.Identity()
+
 
     @staticmethod
     def dt_init(dt_rank, d_inner, dt_scale=1.0, dt_init="random", dt_min=0.001, dt_max=0.1, dt_init_floor=1e-4, **factory_kwargs):
@@ -564,17 +523,24 @@ class SS2D(nn.Module):
             delta_softplus=True,
             return_last_state=False,
         ).view(B, K, -1, L)
+        
+
         # assert out_y.dtype == torch.float
 
         inv_y = torch.flip(out_y[:, 2:4], dims=[-1]).view(B, 2, -1, L)
         wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
         invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
         y = out_y[:, 0] + inv_y[:, 0] + wh_y + invwh_y
-        y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
-        y = self.out_norm(y)
+        if self.softmax_version:
+            y = y.softmax(dim=-1).to(x.dtype)
+            y = y.transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1)
+        else:
+            y = y.transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1)
+            y = self.out_norm(y).to(x.dtype)
 
         return y
     
+    # only with speed difference with v0
     def forward_corev0_seq(self, x: torch.Tensor):
         selective_scan = selective_scan_fn
 
@@ -585,10 +551,10 @@ class SS2D(nn.Module):
         x_hwwh = torch.stack([x.view(B, -1, L), torch.transpose(x, dim0=2, dim1=3).contiguous().view(B, -1, L)], dim=1).view(B, 2, -1, L)
         xs = torch.cat([x_hwwh, torch.flip(x_hwwh, dims=[-1])], dim=1) # (b, k, d, l)
 
-        x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs.view(B, K, -1, L), self.x_proj_weight)
+        x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, self.x_proj_weight)
         # x_dbl = x_dbl + self.x_proj_bias.view(1, K, -1, 1)
         dts, Bs, Cs = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=2)
-        dts = torch.einsum("b k r l, k d r -> b k d l", dts.view(B, K, -1, L), self.dt_projs_weight)
+        dts = torch.einsum("b k r l, k d r -> b k d l", dts, self.dt_projs_weight)
 
         xs = xs.float() # (b, k, d, l)
         dts = dts.contiguous().float() # (b, k, d, l)
@@ -618,192 +584,35 @@ class SS2D(nn.Module):
         wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
         invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
         y = out_y[:, 0] + inv_y[:, 0] + wh_y + invwh_y
-        y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
-        y = self.out_norm(y)
-
-        return y
-
-    def forward_corev1(self, x: torch.Tensor, float32=True):
-        # float32 should be true in training!!!! otherwise, the output of selective_scan would be inf...
-        selective_scan = selective_scan_fn_v1
-
-        B, C, H, W = x.shape
-        L = H * W
-
-        xs = torch.stack([x.flatten(2, 3), x.transpose(dim0=2, dim1=3).contiguous().flatten(2, 3)], dim=1)
-        xs = torch.cat([xs, torch.flip(xs, dims=[-1])], dim=1) # (b, k, d, l)
-
-        x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, self.x_proj_weight)
-        # x_dbl = x_dbl + self.x_proj_bias.view(1, K, -1, 1)
-        dts, Bs, Cs = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=2)
-        dts = torch.einsum("b k r l, k d r -> b k d l", dts, self.dt_projs_weight)
-
-        xs = xs.view(B, -1, L) # (b, k * d, l)
-        dts = dts.contiguous().view(B, -1, L) # (b, k * d, l)
-        As = -torch.exp(self.A_logs.to(torch.float))  # (k * d, d_state)
-        Ds = self.Ds.to(torch.float) # (k * d)
-        dt_projs_bias = self.dt_projs_bias.to(torch.float).view(-1) # (k * d)
-
-        if float32:
-            ys: torch.Tensor = selective_scan(
-                xs.to(torch.float), 
-                dts.to(torch.float), 
-                As, 
-                Bs.to(torch.float), 
-                Cs.to(torch.float), 
-                Ds,
-                delta_bias=dt_projs_bias,
-                delta_softplus=True,
-            ).view(B, 4, -1, L)
-            ys = ys[:, 0:2] + ys[:, 2:4].flip(dims=[-1]).view(B, 2, -1, L)
-            y = ys[:, 0] + ys[:, 1].view(B, -1, W, H).transpose(dim0=2, dim1=3).contiguous().view(B, -1, L)
-        else:
-            out_y: torch.Tensor = selective_scan(
-                xs, dts, 
-                As, Bs, Cs, Ds,
-                delta_bias=dt_projs_bias,
-                delta_softplus=True,
-            ).view(B, 4, -1, L)
-            # assert out_y.dtype == torch.float16
-
-            inv_y = torch.flip(out_y[:, 2:4], dims=[-1]).view(B, 2, -1, L)
-            wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
-            invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
-            y = out_y[:, 0].float() + inv_y[:, 0].float() + wh_y.float() + invwh_y.float()
-            
         if self.softmax_version:
-            y = torch.softmax(y, dim=-1).to(x.dtype)
-            y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
+            y = y.softmax(dim=-1).to(x.dtype)
+            y = y.transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1)
         else:
-            y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
+            y = y.transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1)
             y = self.out_norm(y).to(x.dtype)
 
-            # if torch.isinf(y).any() or torch.isnan(y).any():
-            #     for item in [y, xs, dts, As, Bs, Cs, Ds]:
-            #         print(torch.isinf(item).any(), torch.isnan(item).any(), item.max(), item.min())
-            #     import time; time.sleep(10000)
-        
         return y
 
-    def forward_corev1_share_ssm(self, x: torch.Tensor):
-        selective_scan = selective_scan_fn_v1
+    def forward_corev0_share_ssm(self, x: torch.Tensor):
+        """
+        we may conduct this ablation later, but not with v0.
+        """
+        ...
 
-        B, C, H, W = x.shape
-        L = H * W
-
-        def cross_scan_2d(x):
-            # (B, C, H, W) => (B, K, C, H * W) with K = len([HW, WH, FHW, FWH])
-            x_hwwh = torch.stack([x.flatten(2, 3), x.transpose(dim0=2, dim1=3).contiguous().flatten(2, 3)], dim=1)
-            xs = torch.cat([x_hwwh, torch.flip(x_hwwh, dims=[-1])], dim=1) # (b, k, d, l)
-            return xs
-        
-        x_dbl = torch.einsum("b d l, c d -> b c l", x.view(B, -1, L), self.x_proj_weight[0])
-        # x_dbl = x_dbl + self.x_proj_bias.view(1, -1, 1)
-        dt, BC = torch.split(x_dbl, [self.dt_rank, 2 * self.d_state], dim=1)
-        dt = torch.einsum("b r l, d r -> b d l", dt, self.dt_projs_weight[0])
-        x_dt_BC = torch.cat([x, dt.view(B, -1, H, W), BC.view(B, -1, H, W)], dim=1) # (b, -1, h, w)
-
-        x_dt_BCs = cross_scan_2d(x_dt_BC) # (b, k, d, l)
-        xs, dts, Bs, Cs = torch.split(x_dt_BCs, [self.d_inner, self.d_inner, self.d_state, self.d_state], dim=2)
-
-        xs = xs.contiguous().view(B, -1, L) # (b, k * d, l)
-        dts = dts.contiguous().view(B, -1, L) # (b, k * d, l)
-        As = -torch.exp(self.A_logs.float()).repeat(4, 1) # (k * d, d_state)
-        Ds = self.Ds.repeat(4) # (k * d)
-        dt_projs_bias = self.dt_projs_bias.view(-1).repeat(4) # (k * d)
-
-        # assert len(xs.shape) == 3 and len(dts.shape) == 3 and len(Bs.shape) == 4 and len(Cs.shape) == 4
-        # assert len(As.shape) == 2 and len(Ds.shape) == 1 and len(dt_projs_bias.shape) == 1
-
-        out_y = selective_scan(
-            xs, dts, 
-            As, Bs, Cs, Ds,
-            delta_bias=dt_projs_bias,
-            delta_softplus=True,
-        ).view(B, 4, -1, L)
-        # assert out_y.dtype == torch.float16
-
-        inv_y = torch.flip(out_y[:, 2:4], dims=[-1]).view(B, 2, -1, L)
-        wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
-        invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
-        y = out_y[:, 0].float() + inv_y[:, 0].float() + wh_y.float() + invwh_y.float()
-        
-        if self.softmax_version:
-            y = torch.softmax(y, dim=-1).to(x.dtype)
-            y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
-        else:
-            y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
-            y = self.out_norm(y).to(x.dtype)
-        
-        return y
-
-    def forward_corev1_share_a(self, x: torch.Tensor):
-        selective_scan = selective_scan_fn_v1
-
-        B, C, H, W = x.shape
-        L = H * W
-
-        def cross_scan_2d(x, dim=1):
-            # (B, C, H, W) => (B, K, C, H * W) with K = len([HW, WH, FHW, FWH])
-            x_hwwh = torch.stack([x.flatten(2, 3), x.transpose(dim0=2, dim1=3).contiguous().flatten(2, 3)], dim=dim)
-            xs = torch.cat([x_hwwh, torch.flip(x_hwwh, dims=[-1])], dim=dim) # (b, k, d, l)
-            return xs
-        
-        K = 4
-        xs = cross_scan_2d(x, dim=1) # (b, d, k, l)
-
-        x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, self.x_proj_weight)
-        # x_dbl = x_dbl + self.x_proj_bias.view(1, K, -1, 1)
-        dts, Bs, Cs = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=2)
-        dts = torch.einsum("b k r l, k d r -> b k d l", dts, self.dt_projs_weight)
-        dts = dts + self.dt_projs_bias.to(xs.dtype).view(1, K, -1, 1)
-
-        xs = xs.transpose(dim0=1, dim1=2).contiguous().view(B, -1, K * L)
-        dts = dts.transpose(dim0=1, dim1=2).contiguous().view(B, -1, K * L)
-        As = -torch.exp(self.A_logs.float()) # (D, N)
-        Ds = self.Ds.view(-1) # (D)
-        Bs = Bs.transpose(dim0=1, dim1=2).contiguous().view(B, 1, -1, K * L)
-        Cs = Cs.transpose(dim0=1, dim1=2).contiguous().view(B, 1, -1, K * L)
-
-        # assert len(xs.shape) == 3 and len(dts.shape) == 3 and len(Bs.shape) == 4 and len(Cs.shape) == 4
-        # assert len(As.shape) == 2 and len(Ds.shape) == 1 and len(dt_projs_bias.shape) == 1
-        # print(self.Ds.dtype, self.A_logs.dtype, self.dt_projs_bias.dtype, flush=True) # fp16, fp16, fp16
-
-        out_y = selective_scan(
-            xs, dts, 
-            As, Bs, Cs, Ds,
-            delta_bias=None,
-            delta_softplus=True,
-        ).view(B, -1, 4, L)
-        # assert out_y.dtype == torch.float16
-
-        inv_y = torch.flip(out_y[:, :, 2:4], dims=[-1]).view(B, -1, 2, L)
-        wh_y = torch.transpose(out_y[:, :, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
-        invwh_y = torch.transpose(inv_y[:, :, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
-        y = out_y[:, :, 0].float() + inv_y[:, :, 0].float() + wh_y.float() + invwh_y.float()
-        
-        if self.softmax_version:
-            y = torch.softmax(y, dim=-1).to(x.dtype)
-            y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
-        else:
-            y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
-            y = self.out_norm(y).to(x.dtype)
-        
-        return y
+    def forward_corev0_share_a(self, x: torch.Tensor):
+        """
+        we may conduct this ablation later, but not with v0.
+        """
+        ...
 
     def forward_corev2(self, x: torch.Tensor, nrows=-1):
+        nrows = 1
         return cross_selective_scan(
             x, self.x_proj_weight, None, self.dt_projs_weight, self.dt_projs_bias,
             self.A_logs, self.Ds, getattr(self, "out_norm", None), self.softmax_version, 
             nrows=nrows,
         )
     
-    # forward_core = forward_core_share_ssm
-    # forward_core = forward_core_share_a
-    # forward_core = forward_corev1
-    forward_core = forward_corev2
-    # forward_core = forward_corev0
-
     def forward(self, x: torch.Tensor, **kwargs):
         xz = self.in_proj(x)
         if self.d_conv > 1:
@@ -865,16 +674,22 @@ class VSSBlock(nn.Module):
         hidden_dim: int = 0,
         drop_path: float = 0,
         norm_layer: Callable[..., torch.nn.Module] = partial(nn.LayerNorm, eps=1e-6),
-        attn_drop_rate: float = 0,
-        d_state: int = 16,
-        dt_rank: Any = "auto",
+        # =============================
+        ssm_d_state: int = 16,
         ssm_ratio=2.0,
-        shared_ssm=False,
+        ssm_rank_ratio=2.0,
+        ssm_dt_rank: Any = "auto",
+        ssm_conv: int = 3,
+        ssm_conv_bias=True,
+        ssm_drop_rate: float = 0,
         softmax_version=False,
-        use_checkpoint: bool = False,
+        forward_type="v2",
+        # =============================
         mlp_ratio=4.0,
-        act_layer=nn.GELU,
-        drop: float = 0.0,
+        mlp_act_layer=nn.GELU,
+        mlp_drop_rate: float = 0.0,
+        # =============================
+        use_checkpoint: bool = False,
         **kwargs,
     ):
         super().__init__()
@@ -882,13 +697,21 @@ class VSSBlock(nn.Module):
         self.norm = norm_layer(hidden_dim)
         self.op = SS2D(
             d_model=hidden_dim, 
-            dropout=attn_drop_rate, 
-            d_state=d_state, 
-            ssm_ratio=ssm_ratio, 
-            dt_rank=dt_rank,
-            shared_ssm=shared_ssm,
+            d_state=ssm_d_state, 
+            ssm_ratio=ssm_ratio,
+            ssm_rank_ratio=ssm_rank_ratio,
+            dt_rank=ssm_dt_rank,
+            d_conv=ssm_conv,
+            conv_bias=ssm_conv_bias,
+            dropout=ssm_drop_rate,
+            # bias=False,
+            # dt_min=0.001,
+            # dt_max=0.1,
+            # dt_init="random",
+            # dt_scale="random",
+            # dt_init_floor=1e-4,
             softmax_version=softmax_version,
-            **kwargs
+            forward_type=forward_type,
         )
         self.drop_path = DropPath(drop_path)
         
@@ -896,7 +719,7 @@ class VSSBlock(nn.Module):
         if self.mlp_branch:
             self.norm2 = norm_layer(hidden_dim)
             mlp_hidden_dim = int(hidden_dim * mlp_ratio)
-            self.mlp = Mlp(in_features=hidden_dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop, channels_first=False)
+            self.mlp = Mlp(in_features=hidden_dim, hidden_features=mlp_hidden_dim, act_layer=mlp_act_layer, drop=mlp_drop_rate, channels_first=False)
 
     def _forward(self, input: torch.Tensor):
         x = input + self.drop_path(self.op(self.norm(input)))
@@ -913,77 +736,91 @@ class VSSBlock(nn.Module):
 
 class VSSM(nn.Module):
     def __init__(
-            self, 
-            patch_size=4, 
-            in_chans=3, 
-            num_classes=1000, 
-            depths=[2, 2, 9, 2], 
-            dims=[96, 192, 384, 768], 
-            # =========================
-            d_state=16, 
-            dt_rank="auto", 
-            ssm_ratio=2.0, 
-            attn_drop_rate=0., 
-            shared_ssm=False,
-            softmax_version=False,
-            # =========================
-            drop_rate=0., 
-            drop_path_rate=0.1, 
-            mlp_ratio=4.0,
-            patch_norm=True, 
-            norm_layer=nn.LayerNorm,
-            downsample_version: str = "v2",
-            use_checkpoint=False,  
-            **kwargs,
-        ):
+        self, 
+        patch_size=4, 
+        in_chans=3, 
+        num_classes=1000, 
+        depths=[2, 2, 9, 2], 
+        dims=[96, 192, 384, 768], 
+        # =========================
+        ssm_d_state=16,
+        ssm_ratio=2.0,
+        ssm_rank_ratio=2.0,
+        ssm_dt_rank="auto",        
+        ssm_conv=3,
+        ssm_conv_bias=True,
+        ssm_drop_rate=0.0, 
+        softmax_version=False,
+        forward_type="v2",
+        # =========================
+        mlp_ratio=4.0,
+        mlp_act_layer=nn.GELU,
+        mlp_drop_rate=0.0,
+        # =========================
+        drop_path_rate=0.1, 
+        patch_norm=True, 
+        norm_layer=nn.LayerNorm,
+        downsample_version: str = "v2", # "v1", "v2", "v3"
+        patchembed_version: str = "v1", # "v1", "v2", "v3"
+        use_checkpoint=False,  
+        **kwargs,
+    ):
         super().__init__()
         self.num_classes = num_classes
         self.num_layers = len(depths)
         if isinstance(dims, int):
             dims = [int(dims * 2 ** i_layer) for i_layer in range(self.num_layers)]
-        self.embed_dim = dims[0]
         self.num_features = dims[-1]
         self.dims = dims
-
-        self.patch_embed = nn.Sequential(
-            nn.Conv2d(in_chans, self.embed_dim, kernel_size=patch_size, stride=patch_size, bias=True),
-            Permute(0, 2, 3, 1),
-            (norm_layer(self.embed_dim) if patch_norm else nn.Identity()), 
-        )
-
         dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]  # stochastic depth decay rule
+
+        _make_patch_embed = None
+        if patchembed_version == "v1":
+            _make_patch_embed = self._make_patch_embed
+        elif patchembed_version == "v2":
+            _make_patch_embed = self._make_patch_embed_v2
+        else:
+            raise NotImplementedError
+        self.patch_embed = _make_patch_embed(in_chans, dims[0], patch_size, patch_norm, norm_layer)
+
+        _make_downsample = None
+        if downsample_version == "v1":
+            _make_downsample = PatchMerging2D
+        elif downsample_version == "v2":
+            _make_downsample = self._make_downsample
+        elif downsample_version == "v3":
+            _make_downsample = self._make_downsample_v3
+        else:
+            raise NotImplementedError
 
         self.layers = nn.ModuleList()
         for i_layer in range(self.num_layers):
-
-            if downsample_version == "v2":
-                downsample = self._make_downsample(
-                    self.dims[i_layer], 
-                    self.dims[i_layer + 1], 
-                    norm_layer=norm_layer,
-                ) if (i_layer < self.num_layers - 1) else nn.Identity()
-            else:
-                downsample = PatchMerging2D(
-                    self.dims[i_layer], 
-                    self.dims[i_layer + 1], 
-                    norm_layer=norm_layer,
-                ) if (i_layer < self.num_layers - 1) else nn.Identity()
+            downsample = _make_downsample(
+                self.dims[i_layer], 
+                self.dims[i_layer + 1], 
+                norm_layer=norm_layer,
+            ) if (i_layer < self.num_layers - 1) else nn.Identity()
 
             self.layers.append(self._make_layer(
                 dim = self.dims[i_layer],
-                depth = depths[i_layer],
                 drop_path = dpr[sum(depths[:i_layer]):sum(depths[:i_layer + 1])],
                 use_checkpoint=use_checkpoint,
                 norm_layer=norm_layer,
                 downsample=downsample,
-                d_state=d_state,
-                dt_rank=dt_rank,
+                # =================
+                ssm_d_state=ssm_d_state,
                 ssm_ratio=ssm_ratio,
-                attn_drop_rate=attn_drop_rate,
-                shared_ssm=shared_ssm,
+                ssm_rank_ratio=ssm_rank_ratio,
+                ssm_dt_rank=ssm_dt_rank,
+                ssm_conv=ssm_conv,
+                ssm_conv_bias=ssm_conv_bias,
+                ssm_drop_rate=ssm_drop_rate,
                 softmax_version=softmax_version,
+                forward_type=forward_type,
+                # =================
                 mlp_ratio=mlp_ratio,
-                drop_rate=drop_rate,
+                mlp_act_layer=mlp_act_layer,
+                mlp_drop_rate=mlp_drop_rate,
             ))
 
         self.classifier = nn.Sequential(OrderedDict(
@@ -1006,6 +843,28 @@ class VSSM(nn.Module):
             nn.init.constant_(m.weight, 1.0)
 
     @staticmethod
+    def _make_patch_embed(in_chans=3, embed_dim=96, patch_size=4, patch_norm=True, norm_layer=nn.LayerNorm):
+        return nn.Sequential(
+            nn.Conv2d(in_chans, embed_dim, kernel_size=patch_size, stride=patch_size, bias=True),
+            Permute(0, 2, 3, 1),
+            (norm_layer(embed_dim) if patch_norm else nn.Identity()), 
+        )
+
+    @staticmethod
+    def _make_patch_embed_v2(in_chans=3, embed_dim=96, patch_size=4, patch_norm=True, norm_layer=nn.LayerNorm):
+        assert patch_size == 4
+        return nn.Sequential(
+            nn.Conv2d(in_chans, embed_dim // 2, kernel_size=3, stride=2, padding=1),
+            (Permute(0, 2, 3, 1) if patch_norm else nn.Identity()),
+            (norm_layer(embed_dim) if patch_norm else nn.Identity()),
+            (Permute(0, 3, 1, 2) if patch_norm else nn.Identity()),
+            nn.GELU(),
+            nn.Conv2d(embed_dim // 2, embed_dim, kernel_size=3, stride=2, padding=1),
+            Permute(0, 2, 3, 1),
+            (norm_layer(embed_dim) if patch_norm else nn.Identity()),
+        )
+    
+    @staticmethod
     def _make_downsample(dim=96, out_dim=192, norm_layer=nn.LayerNorm):
         return nn.Sequential(
             Permute(0, 3, 1, 2),
@@ -1015,43 +874,57 @@ class VSSM(nn.Module):
         )
 
     @staticmethod
+    def _make_downsample_v3(dim=96, out_dim=192, norm_layer=nn.LayerNorm):
+        return nn.Sequential(
+            Permute(0, 3, 1, 2),
+            nn.Conv2d(dim, out_dim, kernel_size=3, stride=2, padding=1),
+            Permute(0, 2, 3, 1),
+            norm_layer(out_dim),
+        )
+
+    @staticmethod
     def _make_layer(
         dim=96, 
-        depth=2,
         drop_path=[0.1, 0.1], 
         use_checkpoint=False, 
         norm_layer=nn.LayerNorm,
         downsample=nn.Identity(),
         # ===========================
-        d_state=16,
-        dt_rank="auto",
+        ssm_d_state=16,
         ssm_ratio=2.0,
-        attn_drop_rate=0.0, 
-        shared_ssm=False,
+        ssm_rank_ratio=2.0,
+        ssm_dt_rank="auto",        
+        ssm_conv=3,
+        ssm_conv_bias=True,
+        ssm_drop_rate=0.0, 
         softmax_version=False,
+        forward_type="v2",
         # ===========================
         mlp_ratio=4.0,
-        drop_rate=0.0,
+        mlp_act_layer=nn.GELU,
+        mlp_drop_rate=0.0,
         **kwargs,
     ):
-        assert depth == len(drop_path)
+        depth = len(drop_path)
         blocks = []
         for d in range(depth):
             blocks.append(VSSBlock(
                 hidden_dim=dim, 
                 drop_path=drop_path[d],
                 norm_layer=norm_layer,
-                attn_drop_rate=attn_drop_rate,
-                d_state=d_state,
-                dt_rank=dt_rank,
+                ssm_d_state=ssm_d_state,
                 ssm_ratio=ssm_ratio,
-                shared_ssm=shared_ssm,
+                ssm_rank_ratio=ssm_rank_ratio,
+                ssm_dt_rank=ssm_dt_rank,
+                ssm_conv=ssm_conv,
+                ssm_conv_bias=ssm_conv_bias,
+                ssm_drop_rate=ssm_drop_rate,
                 softmax_version=softmax_version,
-                use_checkpoint=use_checkpoint,
+                forward_type=forward_type,
                 mlp_ratio=mlp_ratio,
-                act_layer=nn.GELU,
-                drop=drop_rate,
-                **kwargs,
+                mlp_act_layer=mlp_act_layer,
+                mlp_drop_rate=mlp_drop_rate,
+                use_checkpoint=use_checkpoint,
             ))
         
         return nn.Sequential(OrderedDict(
@@ -1131,24 +1004,9 @@ class VSSM(nn.Module):
 
 # compatible with openmmlab
 class Backbone_VSSM(VSSM):
-    def __init__(self, patch_size=4, in_chans=3, num_classes=1000, 
-                 depths=[2, 2, 9, 2], dims=[96, 192, 384, 768], 
-                 d_state=16, ssm_ratio=2.0, attn_drop_rate=0., 
-                 drop_rate=0., drop_path_rate=0.1, mlp_ratio=4.0,
-                 patch_norm=True, norm_layer=nn.LayerNorm,
-                 downsample_version: str = "v2",
-                 use_checkpoint=False,
-                 out_indices=(0, 1, 2, 3), pretrained=None, 
-                 **kwargs,
-        ):
-        super().__init__(patch_size=patch_size, in_chans=in_chans, num_classes=num_classes, 
-                         depths=depths, dims=dims, 
-                         d_state=d_state, ssm_ratio=ssm_ratio, attn_drop_rate=attn_drop_rate, 
-                         drop_rate=drop_rate, drop_path_rate=drop_path_rate, mlp_ratio=mlp_ratio,
-                         patch_norm=patch_norm, norm_layer=norm_layer,
-                         downsample_version=downsample_version,
-                         use_checkpoint=use_checkpoint,
-                         **kwargs)
+    def __init__(self, out_indices=(0, 1, 2, 3), pretrained=None, norm_layer=nn.LayerNorm, **kwargs):
+        kwargs.update(norm_layer=norm_layer)
+        super().__init__(**kwargs)
         
         self.out_indices = out_indices
         for i in out_indices:
@@ -1611,7 +1469,6 @@ def load22kto1k():
                 del state_dict['head.weight']
                 del state_dict['head.bias']
                 logger.warning(f"Error in loading classifier head, re-init classifier head to 0")
-
 
 
 if __name__ == "__main__":
