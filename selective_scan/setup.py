@@ -76,6 +76,9 @@ def get_ext():
                 "csrc/selective_scan/selective_scan_core_fwd2.cu",
                 "csrc/selective_scan/selective_scan_core_fwd3.cu",
                 "csrc/selective_scan/selective_scan_core_fwd4.cu",
+                # "csrc/selective_scan/selective_scan_core_bwd2.cu",
+                # "csrc/selective_scan/selective_scan_core_bwd3.cu",
+                # "csrc/selective_scan/selective_scan_core_bwd4.cu",
             ],
             extra_compile_args={
                 "cxx": ["-O3", "-std=c++17"],
