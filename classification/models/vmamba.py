@@ -498,6 +498,7 @@ class SS2D(nn.Module):
         D._no_weight_decay = True
         return D
 
+    # only used to run previous version
     def forward_corev0(self, x: torch.Tensor, to_dtype=False):
         selective_scan = selective_scan_fn
 
@@ -550,7 +551,7 @@ class SS2D(nn.Module):
                 y = y.to(x.dtype)
         return y
     
-    # only with speed difference with v0
+    # only has speed difference with v0
     def forward_corev0_seq(self, x: torch.Tensor, to_dtype=False):
         selective_scan = selective_scan_fn
 
@@ -626,7 +627,6 @@ class SS2D(nn.Module):
             x, self.x_proj_weight, None, self.dt_projs_weight, self.dt_projs_bias,
             self.A_logs, self.Ds, getattr(self, "out_norm", None), self.softmax_version, 
             nrows=nrows, delta_softplus=True,
-            # to_dtype=False, # used to immulate v0
         )
         if self.ssm_low_rank:
             x = self.out_rank(x)
