@@ -532,8 +532,6 @@ class SS2D(nn.Module):
             delta_softplus=True,
             return_last_state=False,
         ).view(B, K, -1, L)
-        
-
         # assert out_y.dtype == torch.float
 
         inv_y = torch.flip(out_y[:, 2:4], dims=[-1]).view(B, 2, -1, L)
