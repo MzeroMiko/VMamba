@@ -8,9 +8,9 @@
 # --------------------------------------------------------
 
 import os
+from math import inf
 import torch
 import torch.distributed as dist
-from math import inf
 from timm.utils import ModelEma as ModelEma
 
 
