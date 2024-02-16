@@ -110,18 +110,8 @@ def get_ext():
 ext_modules = get_ext()
 setup(
     name="selective_scan",
-    version="0.0.1",
-    packages=find_packages(
-        exclude=(
-            "build",
-            "csrc",
-            "include",
-            "tests",
-            "dist",
-            "docs",
-            "benchmarks",
-        )
-    ),
+    version="0.0.2",
+    packages=[],
     author="Tri Dao, Albert Gu, Mzreo",
     author_email="tri@tridao.me, agu@cs.cmu.edu, liuyue171@mails.ucas.ac.cn",
     description="selective scan",
