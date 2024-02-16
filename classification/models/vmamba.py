@@ -20,7 +20,8 @@ try:
     "sscore acts the same as mamba_ssm"
     SSMODE = "sscore"
     import selective_scan_cuda_core
-except:
+except Exception as e:
+    print(e, flush=True)
     "you should install mamba_ssm to use this"
     SSMODE = "mamba_ssm"
     import selective_scan_cuda
