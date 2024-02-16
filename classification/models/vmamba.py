@@ -1203,7 +1203,11 @@ def check_vssm1_equals_vssm(forward_type="v0"):
             x = self.classifier.head(x)
             return x
 
-    VSSM1 = partial(VSSM_, downsample_version="v1", patchembed_version="v1", mlp_ratio=0.0, ssm_ratio=2.0, ssm_rank_ratio=2.0, forward_type=forward_type)
+    # only has initial difference 
+    VSSM1 = partial(VSSM, downsample_version="v1", patchembed_version="v1", mlp_ratio=0.0, ssm_ratio=2.0, ssm_rank_ratio=2.0, forward_type=forward_type)
+    VSSM.forward_backbone = VSSM_.forward_backbone 
+    VSSM.forward1 = VSSM_.forward1
+    # expected to be all the same 
     VSSM1 = partial(VSSM_, downsample_version="None", patchembed_version="v1", mlp_ratio=0.0, ssm_ratio=2.0, ssm_rank_ratio=2.0, forward_type=forward_type)
 
     # test 1 True =================================
