@@ -146,6 +146,13 @@ pip install mmengine==0.10.1 mmcv==2.1.0 opencv-python-headless ftfy
 pip install mmdet==3.3.0 mmsegmentation==1.2.2 mmpretrain==1.2.0
 ```
 
+<!-- conda create -n cu12 python=3.10 -y && conda activate cu12
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+# install cuda121 for windows
+# install https://visualstudio.microsoft.com/visual-cpp-build-tools/
+pip install timm==0.4.12 fvcore packaging -->
+
+
 ### Model Training and Inference
 
 **Classification:**
