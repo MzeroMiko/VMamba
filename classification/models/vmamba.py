@@ -221,6 +221,7 @@ if True:
         softmax_version=False,
         nrows = -1,
         delta_softplus = True,
+        to_dtype=True,
     ):
         B, D, H, W = x.shape
         D, N = A_logs.shape
@@ -263,12 +264,15 @@ if True:
         y: torch.Tensor = CrossMerge.apply(ys)
 
         if softmax_version:
-            y = y.softmax(dim=-1).to(x.dtype)
+            y = y.softmax(dim=-1)
+            if to_dtype:
+                y = y.to(x.dtype)
             y = y.transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1)
         else:
             y = y.transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1)
-            y = out_norm(y).to(x.dtype)
-        
+            y = out_norm(y)
+            if to_dtype:
+                y = y.to(x.dtype)
         return y
 
     def selective_scan_flop_jit(inputs, outputs):
@@ -362,13 +366,12 @@ class SS2D(nn.Module):
         """
         factory_kwargs = {"device": None, "dtype": None}
         super().__init__()
+        d_expand = int(ssm_ratio * d_model)
+        d_inner = int(ssm_rank_ratio * d_model) if ssm_rank_ratio > 0 else d_expand
         self.softmax_version = softmax_version
-        self.d_model = d_model
-        self.d_state = math.ceil(self.d_model / 6) if d_state == "auto" else d_state # 20240109
+        self.dt_rank = math.ceil(d_model / 16) if dt_rank == "auto" else dt_rank
+        self.d_state = math.ceil(d_model / 6) if d_state == "auto" else d_state # 20240109
         self.d_conv = d_conv
-        self.expand = ssm_ratio
-        self.d_inner = int(self.expand * self.d_model)
-        self.dt_rank = math.ceil(self.d_model / 16) if dt_rank == "auto" else dt_rank
 
         # forward_type =======================================
         self.forward_core = self.forward_corev2
@@ -391,14 +394,14 @@ class SS2D(nn.Module):
         self.K2 = self.K if forward_type not in ["share_a"] else 1
 
         # in proj =======================================
-        self.in_proj = nn.Linear(self.d_model, self.d_inner * 2, bias=bias, **factory_kwargs)
+        self.in_proj = nn.Linear(d_model, d_expand * 2, bias=bias, **factory_kwargs)
         
         # conv =======================================
         if self.d_conv > 1:
             self.conv2d = nn.Conv2d(
-                in_channels=self.d_inner,
-                out_channels=self.d_inner,
-                groups=self.d_inner,
+                in_channels=d_expand,
+                out_channels=d_expand,
+                groups=d_expand,
                 bias=conv_bias,
                 kernel_size=d_conv,
                 padding=(d_conv - 1) // 2,
@@ -406,16 +409,23 @@ class SS2D(nn.Module):
             )
             self.act = nn.SiLU()
 
+        # rank ratio =====================================
+        self.ssm_low_rank = False
+        if d_inner < d_expand:
+            self.ssm_low_rank = True
+            self.in_rank = nn.Conv2d(d_expand, d_inner, kernel_size=1, bias=False, **factory_kwargs)
+            self.out_rank = nn.Conv2d(d_inner, d_expand, kernel_size=1, bias=False, **factory_kwargs)
+
         # x proj; dt proj ============================
         self.x_proj = [
-            nn.Linear(self.d_inner, (self.dt_rank + self.d_state * 2), bias=False, **factory_kwargs)
+            nn.Linear(d_inner, (self.dt_rank + self.d_state * 2), bias=False, **factory_kwargs)
             for _ in range(self.K)
         ]
         self.x_proj_weight = nn.Parameter(torch.stack([t.weight for t in self.x_proj], dim=0)) # (K, N, inner)
         del self.x_proj
 
         self.dt_projs = [
-            self.dt_init(self.dt_rank, self.d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs)
+            self.dt_init(self.dt_rank, d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs)
             for _ in range(self.K)
         ]
         self.dt_projs_weight = nn.Parameter(torch.stack([t.weight for t in self.dt_projs], dim=0)) # (K, inner, rank)
@@ -423,15 +433,14 @@ class SS2D(nn.Module):
         del self.dt_projs
         
         # A, D =======================================
-        self.A_logs = self.A_log_init(self.d_state, self.d_inner, copies=self.K2, merge=True) # (K * D, N)
-        self.Ds = self.D_init(self.d_inner, copies=self.K2, merge=True) # (K * D)
+        self.A_logs = self.A_log_init(self.d_state, d_inner, copies=self.K2, merge=True) # (K * D, N)
+        self.Ds = self.D_init(d_inner, copies=self.K2, merge=True) # (K * D)
 
         # out proj =======================================
         if not self.softmax_version:
-            self.out_norm = nn.LayerNorm(self.d_inner)
-        self.out_proj = nn.Linear(self.d_inner, self.d_model, bias=bias, **factory_kwargs)
+            self.out_norm = nn.LayerNorm(d_expand)
+        self.out_proj = nn.Linear(d_expand, d_model, bias=bias, **factory_kwargs)
         self.dropout = nn.Dropout(dropout) if dropout > 0. else nn.Identity()
-
 
     @staticmethod
     def dt_init(dt_rank, d_inner, dt_scale=1.0, dt_init="random", dt_min=0.001, dt_max=0.1, dt_init_floor=1e-4, **factory_kwargs):
@@ -489,7 +498,7 @@ class SS2D(nn.Module):
         D._no_weight_decay = True
         return D
 
-    def forward_corev0(self, x: torch.Tensor):
+    def forward_corev0(self, x: torch.Tensor, to_dtype=False):
         selective_scan = selective_scan_fn
 
         B, C, H, W = x.shape
@@ -532,16 +541,19 @@ class SS2D(nn.Module):
         invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
         y = out_y[:, 0] + inv_y[:, 0] + wh_y + invwh_y
         if self.softmax_version:
-            y = y.softmax(dim=-1).to(x.dtype)
+            y = y.softmax(dim=-1)
+            if to_dtype:
+                y = y.to(x.dtype)
             y = y.transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1)
         else:
             y = y.transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1)
-            y = self.out_norm(y).to(x.dtype)
-
+            y = self.out_norm(y)
+            if to_dtype:
+                y = y.to(x.dtype)
         return y
     
     # only with speed difference with v0
-    def forward_corev0_seq(self, x: torch.Tensor):
+    def forward_corev0_seq(self, x: torch.Tensor, to_dtype=False):
         selective_scan = selective_scan_fn
 
         B, C, H, W = x.shape
@@ -585,12 +597,15 @@ class SS2D(nn.Module):
         invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
         y = out_y[:, 0] + inv_y[:, 0] + wh_y + invwh_y
         if self.softmax_version:
-            y = y.softmax(dim=-1).to(x.dtype)
+            y = y.softmax(dim=-1)
+            if to_dtype:
+                y = y.to(x.dtype)
             y = y.transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1)
         else:
             y = y.transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1)
-            y = self.out_norm(y).to(x.dtype)
-
+            y = self.out_norm(y)
+            if to_dtype:
+                y = y.to(x.dtype)
         return y
 
     def forward_corev0_share_ssm(self, x: torch.Tensor):
@@ -607,11 +622,17 @@ class SS2D(nn.Module):
 
     def forward_corev2(self, x: torch.Tensor, nrows=-1):
         nrows = 1
-        return cross_selective_scan(
+        if self.ssm_low_rank:
+            x = self.in_rank(x)
+        x = cross_selective_scan(
             x, self.x_proj_weight, None, self.dt_projs_weight, self.dt_projs_bias,
             self.A_logs, self.Ds, getattr(self, "out_norm", None), self.softmax_version, 
-            nrows=nrows,
+            nrows=nrows, delta_softplus=True,
+            # to_dtype=False, # used to immulate v0
         )
+        if self.ssm_low_rank:
+            x = self.out_rank(x)
+        return x
     
     def forward(self, x: torch.Tensor, **kwargs):
         xz = self.in_proj(x)
@@ -790,6 +811,8 @@ class VSSM(nn.Module):
             _make_downsample = self._make_downsample
         elif downsample_version == "v3":
             _make_downsample = self._make_downsample_v3
+        elif downsample_version == "None": # used to instantiate down_sample in make_layer
+            _make_downsample = lambda *_, **_k: None
         else:
             raise NotImplementedError
 
@@ -1097,133 +1120,59 @@ def check_vssm_equals_vmambadp():
     print("init miss align", miss_align) # init miss align 0
 
 
-def check_vssm1_equals_vssm(ss2dfwd=SS2D.forward_corev0):
+def check_vssm1_equals_vssm(forward_type="v0"):
     try:
         from _ignore.vmamba.vmamba_pub import VSSM as VSSM0
     except:
         print("original VSSM and VMamba2Dp not found.", flush=True)
         return
-    orifwdcore = SS2D.forward_core
-    SS2D.forward_core = ss2dfwd
 
     class VSSM_(VSSM):
-        def __init__(
-                self, 
-                patch_size=4, 
-                in_chans=3, 
-                num_classes=1000, 
-                depths=[2, 2, 9, 2], 
-                dims=[96, 192, 384, 768], 
-                # =========================
-                d_state=16, 
-                dt_rank="auto", 
-                ssm_ratio=2.0, 
-                attn_drop_rate=0., 
-                # =========================
-                drop_rate=0., 
-                drop_path_rate=0.1, 
-                mlp_ratio=4.0,
-                patch_norm=True, 
-                norm_layer=nn.LayerNorm,
-                downsample_version: str = "v2",
-                use_checkpoint=False,  
-                **kwargs,
-            ):
-            nn.Module.__init__(self)
-            self.num_classes = num_classes
-            self.num_layers = len(depths)
-            if isinstance(dims, int):
-                dims = [int(dims * 2 ** i_layer) for i_layer in range(self.num_layers)]
-            self.embed_dim = dims[0]
-            self.num_features = dims[-1]
-            self.dims = dims
-
-            self.patch_embed = nn.Sequential(
-                nn.Conv2d(in_chans, self.embed_dim, kernel_size=patch_size, stride=patch_size, bias=True),
-                Permute(0, 2, 3, 1),
-                (norm_layer(self.embed_dim) if patch_norm else nn.Identity()), 
-            )
-
-            dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]  # stochastic depth decay rule
-
-            self.layers = nn.ModuleList()
-            for i_layer in range(self.num_layers):
-
-                # if downsample_version == "v2":
-                #     downsample = self._make_downsample(
-                #         self.dims[i_layer], 
-                #         self.dims[i_layer + 1], 
-                #         norm_layer=norm_layer,
-                #     ) if (i_layer < self.num_layers - 1) else nn.Identity()
-                # else:
-                #     downsample = PatchMerging2D(
-                #         self.dims[i_layer], 
-                #         self.dims[i_layer + 1], 
-                #         norm_layer=norm_layer,
-                #     ) if (i_layer < self.num_layers - 1) else nn.Identity()
-
-                self.layers.append(self._make_layer(
-                    dim = self.dims[i_layer],
-                    depth = depths[i_layer],
-                    drop_path = dpr[sum(depths[:i_layer]):sum(depths[:i_layer + 1])],
-                    use_checkpoint=use_checkpoint,
-                    norm_layer=norm_layer,
-                    downsample=(i_layer < self.num_layers - 1),
-                    d_state=d_state,
-                    dt_rank=dt_rank,
-                    ssm_ratio=ssm_ratio,
-                    attn_drop_rate=attn_drop_rate,
-                    mlp_ratio=mlp_ratio,
-                    drop_rate=drop_rate,
-                ))
-
-            self.classifier = nn.Sequential(OrderedDict(
-                norm=norm_layer(self.num_features), # B,H,W,C
-                permute=Permute(0, 3, 1, 2),
-                avgpool=nn.AdaptiveAvgPool2d(1),
-                flatten=nn.Flatten(1),
-                head=nn.Linear(self.num_features, num_classes),
-            ))
-            self.apply(self._init_weights)
-
         def _make_layer(
             self,
             dim=96, 
-            depth=2,
             drop_path=[0.1, 0.1], 
             use_checkpoint=False, 
             norm_layer=nn.LayerNorm,
             downsample=nn.Identity(),
             # ===========================
-            d_state=16,
-            dt_rank="auto",
+            ssm_d_state=16,
             ssm_ratio=2.0,
-            attn_drop_rate=0.0, 
+            ssm_rank_ratio=2.0,
+            ssm_dt_rank="auto",        
+            ssm_conv=3,
+            ssm_conv_bias=True,
+            ssm_drop_rate=0.0, 
+            softmax_version=False,
+            forward_type="v2",
             # ===========================
             mlp_ratio=4.0,
-            drop_rate=0.0,
+            mlp_act_layer=nn.GELU,
+            mlp_drop_rate=0.0,
             **kwargs,
         ):
-            assert depth == len(drop_path)
+            depth = len(drop_path)
             blocks = []
             for d in range(depth):
                 blocks.append(VSSBlock(
                     hidden_dim=dim, 
                     drop_path=drop_path[d],
                     norm_layer=norm_layer,
-                    attn_drop_rate=attn_drop_rate,
-                    d_state=d_state,
-                    dt_rank=dt_rank,
+                    ssm_d_state=ssm_d_state,
                     ssm_ratio=ssm_ratio,
-                    use_checkpoint=use_checkpoint,
+                    ssm_rank_ratio=ssm_rank_ratio,
+                    ssm_dt_rank=ssm_dt_rank,
+                    ssm_conv=ssm_conv,
+                    ssm_conv_bias=ssm_conv_bias,
+                    ssm_drop_rate=ssm_drop_rate,
+                    softmax_version=softmax_version,
+                    forward_type=forward_type,
                     mlp_ratio=mlp_ratio,
-                    act_layer=nn.GELU,
-                    drop=drop_rate,
-                    **kwargs,
+                    mlp_act_layer=mlp_act_layer,
+                    mlp_drop_rate=mlp_drop_rate,
+                    use_checkpoint=use_checkpoint,
                 ))
-                # blocks[d].op = SS2D0(blocks[d].op.d_model)
             
-
             if True: # is this really applied? Yes, but been overriden later in VSSM!
                 def _init_weights(module: nn.Module):
                     for name, p in module.named_parameters():
@@ -1233,7 +1182,7 @@ def check_vssm1_equals_vssm(ss2dfwd=SS2D.forward_corev0):
                 layer = nn.Sequential(*copy.deepcopy(blocks))
                 layer.apply(_init_weights)
 
-            downsample = PatchMerging2D(dim, 2*dim, norm_layer=norm_layer) if downsample else nn.Identity()
+                downsample = PatchMerging2D(dim, 2*dim, norm_layer=norm_layer) if downsample is None else nn.Identity()
             
             return nn.Sequential(OrderedDict(
                 blocks=nn.Sequential(*blocks,),
@@ -1256,7 +1205,8 @@ def check_vssm1_equals_vssm(ss2dfwd=SS2D.forward_corev0):
             x = self.classifier.head(x)
             return x
 
-    VSSM1 = partial(VSSM_, downsample_version="v1", mlp_ratio=0.0, ssm_ratio=2.0, dt_rank="auto", d_state=16)
+    VSSM1 = partial(VSSM_, downsample_version="v1", patchembed_version="v1", mlp_ratio=0.0, ssm_ratio=2.0, ssm_rank_ratio=2.0, forward_type=forward_type)
+    VSSM1 = partial(VSSM_, downsample_version="None", patchembed_version="v1", mlp_ratio=0.0, ssm_ratio=2.0, ssm_rank_ratio=2.0, forward_type=forward_type)
 
     # test 1 True =================================
     torch.manual_seed(time.time()); torch.cuda.manual_seed(time.time())
@@ -1278,11 +1228,11 @@ def check_vssm1_equals_vssm(ss2dfwd=SS2D.forward_corev0):
     torch.manual_seed(0); torch.cuda.manual_seed(0)
     with torch.cuda.amp.autocast():
         y2 = newvss.forward1(input)
-    print((y1 -y2).abs().sum()) # tensor(0., device='cuda:0', grad_fn=<SumBackward0>)
+    print((y1 -y2).abs().sum()) # tensor(2.5988e-05, device='cuda:0', grad_fn=<SumBackward0>)
     torch.manual_seed(0); torch.cuda.manual_seed(0)
     with torch.cuda.amp.autocast():
         y3 = newvss.forward(input)
-    print((y1 -y3).abs().sum()) # tensor(0.0008, device='cuda:0', grad_fn=<SumBackward0>)
+    print((y1 -y3).abs().sum()) # tensor(0., device='cuda:0', grad_fn=<SumBackward0>)
     
     # test 2 True ==========================================
     torch.manual_seed(0); torch.cuda.manual_seed(0)
@@ -1299,7 +1249,6 @@ def check_vssm1_equals_vssm(ss2dfwd=SS2D.forward_corev0):
             print(k, same)
             miss_align += 1
     print("init miss align", miss_align) # init miss align 0
-    SS2D.forward_core = orifwdcore
 
 
 def check_profile():
@@ -1472,11 +1421,10 @@ def load22kto1k():
 
 
 if __name__ == "__main__":
-    check_vssm_equals_vmambadp()
-    check_vssm1_equals_vssm(ss2dfwd=SS2D.forward_corev0)
-    check_vssm1_equals_vssm(ss2dfwd=SS2D.forward_corev0_seq)
-    check_vssm1_equals_vssm(ss2dfwd=SS2D.forward_core)
-    check_vssm1_equals_vssm(ss2dfwd=lambda *args, **kwargs: SS2D.forward_corev1(*args, **kwargs).float())
+    # check_vssm_equals_vmambadp()
+    check_vssm1_equals_vssm(forward_type="v0")
+    check_vssm1_equals_vssm(forward_type="v0_seq")
+    check_vssm1_equals_vssm(forward_type="v2")
 
     
 
