@@ -409,7 +409,7 @@ class SS2D(nn.Module):
         if not self.softmax_version:
             self.out_norm = nn.LayerNorm(d_inner)
 
-        # x proj; dt proj ============================
+        # x proj ============================
         self.x_proj = [
             nn.Linear(d_inner, (self.dt_rank + self.d_state * 2), bias=False, **factory_kwargs)
             for _ in range(self.K)
@@ -417,6 +417,7 @@ class SS2D(nn.Module):
         self.x_proj_weight = nn.Parameter(torch.stack([t.weight for t in self.x_proj], dim=0)) # (K, N, inner)
         del self.x_proj
 
+        # dt proj ============================
         self.dt_projs = [
             self.dt_init(self.dt_rank, d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs)
             for _ in range(self.K)
@@ -432,6 +433,13 @@ class SS2D(nn.Module):
         # out proj =======================================
         self.out_proj = nn.Linear(d_expand, d_model, bias=bias, **factory_kwargs)
         self.dropout = nn.Dropout(dropout) if dropout > 0. else nn.Identity()
+
+        if simple_init:
+            # simple init dt_projs, A_logs, Ds
+            self.Ds = nn.Parameter(torch.ones((self.K2 * d_inner)))
+            self.A_logs = nn.Parameter(torch.randn((self.K2 * d_inner, self.d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
+            self.dt_projs_weight = nn.Parameter(torch.randn((self.K, d_inner, self.dt_rank)))
+            self.dt_projs_bias = nn.Parameter(torch.randn((self.K, d_inner))) 
 
     @staticmethod
     def dt_init(dt_rank, d_inner, dt_scale=1.0, dt_init="random", dt_min=0.001, dt_max=0.1, dt_init_floor=1e-4, **factory_kwargs):
@@ -698,6 +706,7 @@ class VSSBlock(nn.Module):
         ssm_conv: int = 3,
         ssm_conv_bias=True,
         ssm_drop_rate: float = 0,
+        ssm_simple_init=False,
         softmax_version=False,
         forward_type="v2",
         # =============================
@@ -730,6 +739,7 @@ class VSSBlock(nn.Module):
             # dt_init="random",
             # dt_scale="random",
             # dt_init_floor=1e-4,
+            simple_init=ssm_simple_init,
             # ==========================
             softmax_version=softmax_version,
             forward_type=forward_type,
@@ -772,6 +782,7 @@ class VSSM(nn.Module):
         ssm_conv=3,
         ssm_conv_bias=True,
         ssm_drop_rate=0.0, 
+        ssm_simple_init=False,
         softmax_version=False,
         forward_type="v2",
         # =========================
@@ -840,6 +851,7 @@ class VSSM(nn.Module):
                 ssm_conv=ssm_conv,
                 ssm_conv_bias=ssm_conv_bias,
                 ssm_drop_rate=ssm_drop_rate,
+                ssm_simple_init=ssm_simple_init,
                 softmax_version=softmax_version,
                 forward_type=forward_type,
                 # =================
@@ -933,6 +945,7 @@ class VSSM(nn.Module):
         ssm_conv=3,
         ssm_conv_bias=True,
         ssm_drop_rate=0.0, 
+        ssm_simple_init=False,
         softmax_version=False,
         forward_type="v2",
         # ===========================
@@ -956,6 +969,7 @@ class VSSM(nn.Module):
                 ssm_conv=ssm_conv,
                 ssm_conv_bias=ssm_conv_bias,
                 ssm_drop_rate=ssm_drop_rate,
+                ssm_simple_init=ssm_simple_init,
                 softmax_version=softmax_version,
                 forward_type=forward_type,
                 mlp_ratio=mlp_ratio,
