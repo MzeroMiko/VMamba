@@ -136,7 +136,7 @@ def main(config):
         print("Using EMA with decay = %.8f" % args.model_ema_decay)
 
 
-    optimizer = build_optimizer(config, model)
+    optimizer = build_optimizer(config, model, logger)
     model = torch.nn.parallel.DistributedDataParallel(model, broadcast_buffers=False)
     loss_scaler = NativeScalerWithGradNormCount()
 

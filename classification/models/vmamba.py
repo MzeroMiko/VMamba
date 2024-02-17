@@ -867,6 +867,16 @@ class VSSM(nn.Module):
             nn.init.constant_(m.bias, 0)
             nn.init.constant_(m.weight, 1.0)
 
+    # used in building optimizer
+    # @torch.jit.ignore
+    # def no_weight_decay(self):
+    #     return {}
+
+    # used in building optimizer
+    # @torch.jit.ignore
+    # def no_weight_decay_keywords(self):
+    #     return {}
+
     @staticmethod
     def _make_patch_embed(in_chans=3, embed_dim=96, patch_size=4, patch_norm=True, norm_layer=nn.LayerNorm):
         return nn.Sequential(
