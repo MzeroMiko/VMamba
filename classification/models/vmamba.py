@@ -332,11 +332,10 @@ class SS2D(nn.Module):
         ssm_ratio=2.0,
         ssm_rank_ratio=2.0,
         dt_rank="auto",
-        act_skip=nn.SiLU,
+        act_layer=nn.SiLU,
         # dwconv ===============
         d_conv=3, # < 2 means no conv 
         conv_bias=True,
-        act_conv=nn.SiLU,
         # ======================
         dropout=0.0,
         bias=False,
@@ -386,7 +385,7 @@ class SS2D(nn.Module):
 
         # in proj =======================================
         self.in_proj = nn.Linear(d_model, d_expand * 2, bias=bias, **factory_kwargs)
-        self.act_skip: nn.Module = act_skip()
+        self.act: nn.Module = act_layer()
         
         # conv =======================================
         if self.d_conv > 1:
@@ -399,7 +398,6 @@ class SS2D(nn.Module):
                 padding=(d_conv - 1) // 2,
                 **factory_kwargs,
             )
-            self.act_conv: nn.Module = act_conv()
 
         # rank ratio =====================================
         self.ssm_low_rank = False
@@ -491,10 +489,12 @@ class SS2D(nn.Module):
         return D
 
     # only used to run previous version
-    def forward_corev0(self, x: torch.Tensor, to_dtype=False):
+    def forward_corev0(self, x: torch.Tensor, to_dtype=False, channel_first=False):
         def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True, nrows=1):
             return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows)
 
+        if not channel_first:
+            x = x.permute(0, 3, 1, 2).contiguous()
         B, C, H, W = x.shape
         L = H * W
         K = 4
@@ -544,10 +544,12 @@ class SS2D(nn.Module):
         return y
     
     # only has speed difference with v0
-    def forward_corev0_seq(self, x: torch.Tensor, to_dtype=False):
+    def forward_corev0_seq(self, x: torch.Tensor, to_dtype=False, channel_first=False):
         def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True, nrows=1):
             return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows)
 
+        if not channel_first:
+            x = x.permute(0, 3, 1, 2).contiguous()
         B, C, H, W = x.shape
         L = H * W
         K = 4
@@ -600,20 +602,22 @@ class SS2D(nn.Module):
                 y = y.to(x.dtype)
         return y
 
-    def forward_corev0_share_ssm(self, x: torch.Tensor):
+    def forward_corev0_share_ssm(self, x: torch.Tensor, channel_first=False):
         """
         we may conduct this ablation later, but not with v0.
         """
         ...
 
-    def forward_corev0_share_a(self, x: torch.Tensor):
+    def forward_corev0_share_a(self, x: torch.Tensor, channel_first=False):
         """
         we may conduct this ablation later, but not with v0.
         """
         ...
 
-    def forward_corev2(self, x: torch.Tensor, nrows=-1):
+    def forward_corev2(self, x: torch.Tensor, nrows=-1, channel_first=False):
         nrows = 1
+        if not channel_first:
+            x = x.permute(0, 3, 1, 2).contiguous()
         if self.ssm_low_rank:
             x = self.in_rank(x)
         x = cross_selective_scan(
@@ -630,21 +634,20 @@ class SS2D(nn.Module):
         if self.d_conv > 1:
             x, z = xz.chunk(2, dim=-1) # (b, h, w, d)
             x = x.permute(0, 3, 1, 2).contiguous()
-            x = self.act_conv(self.conv2d(x)) # (b, d, h, w)
-            y = self.forward_core(x)
+            x = self.act(self.conv2d(x)) # (b, d, h, w)
+            y = self.forward_core(x, channel_first=True)
             if self.softmax_version:
                 y = y * z
             else:
-                y = y * self.act_skip(z)
+                y = y * self.act(z)
         else:
             if self.softmax_version:
                 x, z = xz.chunk(2, dim=-1) # (b, h, w, d)
-                x = self.act_skip(x)
+                x = self.act(x)
             else:
-                xz = self.act_skip(xz)
+                xz = self.act(xz)
                 x, z = xz.chunk(2, dim=-1) # (b, h, w, d)
-            x = x.permute(0, 3, 1, 2).contiguous()
-            y = self.forward_core(x)
+            y = self.forward_core(x, channel_first=False)
             y = y * z
         out = self.dropout(self.out_proj(y))
         return out
@@ -691,10 +694,9 @@ class VSSBlock(nn.Module):
         ssm_ratio=2.0,
         ssm_rank_ratio=2.0,
         ssm_dt_rank: Any = "auto",
-        ssm_skip_act=nn.SiLU,
+        ssm_act_layer=nn.SiLU,
         ssm_conv: int = 3,
         ssm_conv_bias=True,
-        ssm_conv_act=nn.SiLU,
         ssm_drop_rate: float = 0,
         softmax_version=False,
         forward_type="v2",
@@ -715,11 +717,10 @@ class VSSBlock(nn.Module):
             ssm_ratio=ssm_ratio,
             ssm_rank_ratio=ssm_rank_ratio,
             dt_rank=ssm_dt_rank,
-            act_skip=ssm_skip_act,
+            act_layer=ssm_act_layer,
             # ==========================
             d_conv=ssm_conv,
             conv_bias=ssm_conv_bias,
-            act_conv=ssm_conv_act,
             # ==========================
             dropout=ssm_drop_rate,
             # bias=False,
@@ -767,10 +768,9 @@ class VSSM(nn.Module):
         ssm_ratio=2.0,
         ssm_rank_ratio=2.0,
         ssm_dt_rank="auto",
-        ssm_skip_act=nn.SiLU,        
+        ssm_act_layer=nn.SiLU,        
         ssm_conv=3,
         ssm_conv_bias=True,
-        ssm_conv_act=nn.SiLU,
         ssm_drop_rate=0.0, 
         softmax_version=False,
         forward_type="v2",
@@ -836,10 +836,9 @@ class VSSM(nn.Module):
                 ssm_ratio=ssm_ratio,
                 ssm_rank_ratio=ssm_rank_ratio,
                 ssm_dt_rank=ssm_dt_rank,
-                ssm_skip_act=ssm_skip_act,
+                ssm_act_layer=ssm_act_layer,
                 ssm_conv=ssm_conv,
                 ssm_conv_bias=ssm_conv_bias,
-                ssm_conv_act=ssm_conv_act,
                 ssm_drop_rate=ssm_drop_rate,
                 softmax_version=softmax_version,
                 forward_type=forward_type,
@@ -920,10 +919,9 @@ class VSSM(nn.Module):
         ssm_ratio=2.0,
         ssm_rank_ratio=2.0,
         ssm_dt_rank="auto",       
-        ssm_skip_act=nn.SiLU,
+        ssm_act_layer=nn.SiLU,
         ssm_conv=3,
         ssm_conv_bias=True,
-        ssm_conv_act=nn.SiLU, 
         ssm_drop_rate=0.0, 
         softmax_version=False,
         forward_type="v2",
@@ -944,10 +942,9 @@ class VSSM(nn.Module):
                 ssm_ratio=ssm_ratio,
                 ssm_rank_ratio=ssm_rank_ratio,
                 ssm_dt_rank=ssm_dt_rank,
-                ssm_skip_act=ssm_skip_act,
+                ssm_act_layer=ssm_act_layer,
                 ssm_conv=ssm_conv,
                 ssm_conv_bias=ssm_conv_bias,
-                ssm_conv_act=ssm_conv_act,
                 ssm_drop_rate=ssm_drop_rate,
                 softmax_version=softmax_version,
                 forward_type=forward_type,
