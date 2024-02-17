@@ -1,4 +1,6 @@
 # --------------------------------------------------------
+# Modified by Mzero
+# --------------------------------------------------------
 # Swin Transformer
 # Copyright (c) 2021 Microsoft
 # Licensed under The MIT License [see LICENSE for details]
@@ -274,9 +276,6 @@ def update_config(config, args):
     ## Overwrite optimizer if not None, currently we use it for [fused_adam, fused_lamb]
     if _check_args('optim'):
         config.TRAIN.OPTIMIZER.NAME = args.optim
-
-    # set local rank for distributed training
-    # config.LOCAL_RANK = args.local_rank
 
     # output folder
     config.OUTPUT = os.path.join(config.OUTPUT, config.MODEL.NAME, config.TAG)
