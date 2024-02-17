@@ -332,9 +332,11 @@ class SS2D(nn.Module):
         ssm_ratio=2.0,
         ssm_rank_ratio=2.0,
         dt_rank="auto",
+        act_skip=nn.SiLU,
         # dwconv ===============
         d_conv=3, # < 2 means no conv 
         conv_bias=True,
+        act_conv=nn.SiLU,
         # ======================
         dropout=0.0,
         bias=False,
@@ -384,6 +386,7 @@ class SS2D(nn.Module):
 
         # in proj =======================================
         self.in_proj = nn.Linear(d_model, d_expand * 2, bias=bias, **factory_kwargs)
+        self.act_skip: nn.Module = act_skip()
         
         # conv =======================================
         if self.d_conv > 1:
@@ -396,7 +399,7 @@ class SS2D(nn.Module):
                 padding=(d_conv - 1) // 2,
                 **factory_kwargs,
             )
-            self.act = nn.SiLU()
+            self.act_conv: nn.Module = act_conv()
 
         # rank ratio =====================================
         self.ssm_low_rank = False
@@ -627,18 +630,18 @@ class SS2D(nn.Module):
         if self.d_conv > 1:
             x, z = xz.chunk(2, dim=-1) # (b, h, w, d)
             x = x.permute(0, 3, 1, 2).contiguous()
-            x = self.act(self.conv2d(x)) # (b, d, h, w)
+            x = self.act_conv(self.conv2d(x)) # (b, d, h, w)
             y = self.forward_core(x)
             if self.softmax_version:
                 y = y * z
             else:
-                y = y * F.silu(z)
+                y = y * self.act_skip(z)
         else:
             if self.softmax_version:
                 x, z = xz.chunk(2, dim=-1) # (b, h, w, d)
-                x = F.silu(x)
+                x = self.act_skip(x)
             else:
-                xz = F.silu(xz)
+                xz = self.act_skip(xz)
                 x, z = xz.chunk(2, dim=-1) # (b, h, w, d)
             x = x.permute(0, 3, 1, 2).contiguous()
             y = self.forward_core(x)
@@ -688,8 +691,10 @@ class VSSBlock(nn.Module):
         ssm_ratio=2.0,
         ssm_rank_ratio=2.0,
         ssm_dt_rank: Any = "auto",
+        ssm_skip_act=nn.SiLU,
         ssm_conv: int = 3,
         ssm_conv_bias=True,
+        ssm_conv_act=nn.SiLU,
         ssm_drop_rate: float = 0,
         softmax_version=False,
         forward_type="v2",
@@ -710,15 +715,21 @@ class VSSBlock(nn.Module):
             ssm_ratio=ssm_ratio,
             ssm_rank_ratio=ssm_rank_ratio,
             dt_rank=ssm_dt_rank,
+            act_skip=ssm_skip_act,
+            # ==========================
             d_conv=ssm_conv,
             conv_bias=ssm_conv_bias,
+            act_conv=ssm_conv_act,
+            # ==========================
             dropout=ssm_drop_rate,
             # bias=False,
+            # ==========================
             # dt_min=0.001,
             # dt_max=0.1,
             # dt_init="random",
             # dt_scale="random",
             # dt_init_floor=1e-4,
+            # ==========================
             softmax_version=softmax_version,
             forward_type=forward_type,
         )
@@ -755,9 +766,11 @@ class VSSM(nn.Module):
         ssm_d_state=16,
         ssm_ratio=2.0,
         ssm_rank_ratio=2.0,
-        ssm_dt_rank="auto",        
+        ssm_dt_rank="auto",
+        ssm_skip_act=nn.SiLU,        
         ssm_conv=3,
         ssm_conv_bias=True,
+        ssm_conv_act=nn.SiLU,
         ssm_drop_rate=0.0, 
         softmax_version=False,
         forward_type="v2",
@@ -823,8 +836,10 @@ class VSSM(nn.Module):
                 ssm_ratio=ssm_ratio,
                 ssm_rank_ratio=ssm_rank_ratio,
                 ssm_dt_rank=ssm_dt_rank,
+                ssm_skip_act=ssm_skip_act,
                 ssm_conv=ssm_conv,
                 ssm_conv_bias=ssm_conv_bias,
+                ssm_conv_act=ssm_conv_act,
                 ssm_drop_rate=ssm_drop_rate,
                 softmax_version=softmax_version,
                 forward_type=forward_type,
@@ -904,9 +919,11 @@ class VSSM(nn.Module):
         ssm_d_state=16,
         ssm_ratio=2.0,
         ssm_rank_ratio=2.0,
-        ssm_dt_rank="auto",        
+        ssm_dt_rank="auto",       
+        ssm_skip_act=nn.SiLU,
         ssm_conv=3,
         ssm_conv_bias=True,
+        ssm_conv_act=nn.SiLU, 
         ssm_drop_rate=0.0, 
         softmax_version=False,
         forward_type="v2",
@@ -927,8 +944,10 @@ class VSSM(nn.Module):
                 ssm_ratio=ssm_ratio,
                 ssm_rank_ratio=ssm_rank_ratio,
                 ssm_dt_rank=ssm_dt_rank,
+                ssm_skip_act=ssm_skip_act,
                 ssm_conv=ssm_conv,
                 ssm_conv_bias=ssm_conv_bias,
+                ssm_conv_act=ssm_conv_act,
                 ssm_drop_rate=ssm_drop_rate,
                 softmax_version=softmax_version,
                 forward_type=forward_type,
@@ -1115,61 +1134,24 @@ def check_vssm1_equals_vssm(forward_type="v0"):
         return
 
     class VSSM_(VSSM):
-        def _make_layer(
-            self,
-            dim=96, 
-            drop_path=[0.1, 0.1], 
-            use_checkpoint=False, 
-            norm_layer=nn.LayerNorm,
-            downsample=nn.Identity(),
-            # ===========================
-            ssm_d_state=16,
-            ssm_ratio=2.0,
-            ssm_rank_ratio=2.0,
-            ssm_dt_rank="auto",        
-            ssm_conv=3,
-            ssm_conv_bias=True,
-            ssm_drop_rate=0.0, 
-            softmax_version=False,
-            forward_type="v2",
-            # ===========================
-            mlp_ratio=4.0,
-            mlp_act_layer=nn.GELU,
-            mlp_drop_rate=0.0,
-            **kwargs,
-        ):
-            depth = len(drop_path)
-            blocks = []
-            for d in range(depth):
-                blocks.append(VSSBlock(
-                    hidden_dim=dim, 
-                    drop_path=drop_path[d],
-                    norm_layer=norm_layer,
-                    ssm_d_state=ssm_d_state,
-                    ssm_ratio=ssm_ratio,
-                    ssm_rank_ratio=ssm_rank_ratio,
-                    ssm_dt_rank=ssm_dt_rank,
-                    ssm_conv=ssm_conv,
-                    ssm_conv_bias=ssm_conv_bias,
-                    ssm_drop_rate=ssm_drop_rate,
-                    softmax_version=softmax_version,
-                    forward_type=forward_type,
-                    mlp_ratio=mlp_ratio,
-                    mlp_act_layer=mlp_act_layer,
-                    mlp_drop_rate=mlp_drop_rate,
-                    use_checkpoint=use_checkpoint,
-                ))
-            
+        @staticmethod
+        def _make_layer(*args, **kwargs):
+            layer = VSSM._make_layer(*args, **kwargs)
+            dim = kwargs.get("dim", None)
+            norm_layer = kwargs.get("norm_layer", None)
+            downsample = kwargs.get("downsample", None)
+            blocks = layer.blocks
+        
             if True: # is this really applied? Yes, but been overriden later in VSSM!
                 def _init_weights(module: nn.Module):
                     for name, p in module.named_parameters():
                         if name in ["out_proj.weight"]:
                             p = p.clone().detach_() # fake init, just to keep the seed ....
                             nn.init.kaiming_uniform_(p, a=math.sqrt(5))
-                layer = nn.Sequential(*copy.deepcopy(blocks))
-                layer.apply(_init_weights)
+                blks = nn.Sequential(*copy.deepcopy(blocks))
+                blks.apply(_init_weights)
 
-                downsample = PatchMerging2D(dim, 2*dim, norm_layer=norm_layer) if downsample is None else nn.Identity()
+            downsample = PatchMerging2D(dim, 2*dim, norm_layer=norm_layer) if downsample is None else nn.Identity()
             
             return nn.Sequential(OrderedDict(
                 blocks=nn.Sequential(*blocks,),
