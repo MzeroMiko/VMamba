@@ -78,20 +78,12 @@ def parse_option():
     parser.add_argument('--disable_amp', action='store_true', help='Disable pytorch amp')
     parser.add_argument('--output', default='output', type=str, metavar='PATH',
                         help='root of output folder, the full path is <output>/<model_name>/<tag> (default: output)')
-    parser.add_argument('--tag', help='tag of experiment')
+    parser.add_argument('--tag', default=time.strftime("%Y%m%d%H%M%S", time.localtime()), help='tag of experiment')
     parser.add_argument('--eval', action='store_true', help='Perform evaluation only')
     parser.add_argument('--throughput', action='store_true', help='Test throughput only')
 
-    # distributed training
-    # parser.add_argument("--local_rank", type=int, help='local rank for DistributedDataParallel')
-
-    # for acceleration
-    # parser.add_argument('--fused_window_process', action='store_true',
-                        # help='Fused window shift & window partition, similar for reversed part.')
     parser.add_argument('--fused_layernorm', action='store_true', help='Use fused layernorm.')
-    ## overwrite optimizer in config (*.yaml) if specified, e.g., fused_adam/fused_lamb
-    parser.add_argument('--optim', type=str,
-                        help='overwrite optimizer if provided, can be adamw/sgd/fused_adam/fused_lamb.')
+    parser.add_argument('--optim', type=str, help='overwrite optimizer if provided, can be adamw/sgd.')
 
     # EMA related parameters
     parser.add_argument('--model_ema', type=str2bool, default=True)
@@ -366,8 +358,8 @@ if __name__ == '__main__':
         rank = -1
         world_size = -1
     torch.cuda.set_device(rank)
-    torch.distributed.init_process_group(backend='nccl', init_method='env://', world_size=world_size, rank=rank)
-    torch.distributed.barrier()
+    dist.init_process_group(backend='nccl', init_method='env://', world_size=world_size, rank=rank)
+    dist.barrier()
 
     seed = config.SEED + dist.get_rank()
     torch.manual_seed(seed)
@@ -391,6 +383,18 @@ if __name__ == '__main__':
     config.TRAIN.MIN_LR = linear_scaled_min_lr
     config.freeze()
 
+    # to make sure all the config.OUTPUT are the same
+    config.defrost()
+    if dist.get_rank() == 0:
+        obj = [config.OUTPUT]
+        # obj = [str(random.randint(0, 100))] # for test
+    else:
+        obj = [None]
+    dist.broadcast_object_list(obj)
+    dist.barrier()
+    config.OUTPUT = obj[0]
+    print(config.OUTPUT, flush=True)
+    config.freeze()
     os.makedirs(config.OUTPUT, exist_ok=True)
     logger = create_logger(output_dir=config.OUTPUT, dist_rank=dist.get_rank(), name=f"{config.MODEL.NAME}")
 
