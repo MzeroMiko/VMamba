@@ -404,6 +404,8 @@ class SS2D(nn.Module):
             self.ssm_low_rank = True
             self.in_rank = nn.Conv2d(d_expand, d_inner, kernel_size=1, bias=False, **factory_kwargs)
             self.out_rank = nn.Conv2d(d_inner, d_expand, kernel_size=1, bias=False, **factory_kwargs)
+        if not self.softmax_version:
+            self.out_norm = nn.LayerNorm(d_inner)
 
         # x proj; dt proj ============================
         self.x_proj = [
@@ -426,8 +428,6 @@ class SS2D(nn.Module):
         self.Ds = self.D_init(d_inner, copies=self.K2, merge=True) # (K * D)
 
         # out proj =======================================
-        if not self.softmax_version:
-            self.out_norm = nn.LayerNorm(d_expand)
         self.out_proj = nn.Linear(d_expand, d_model, bias=bias, **factory_kwargs)
         self.dropout = nn.Dropout(dropout) if dropout > 0. else nn.Identity()
 
