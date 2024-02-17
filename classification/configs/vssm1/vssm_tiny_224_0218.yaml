@@ -7,8 +7,9 @@ MODEL:
     DEPTHS: [ 2, 2, 4, 2 ]
     SSM_D_STATE: 1
     SSM_DT_RANK: "auto"
-    SSM_RATIO: 2.0
-    SSM_RANK_RATIO: 1.2
+    SSM_RATIO: 1.2
+    # SSM_RATIO: 2.0
+    # SSM_RANK_RATIO: 1.2 # add SSM_RANK_RATIO will introduce extra nn.linear, which costs 1.5+ GFlops
     SSM_CONV: -1
     MLP_RATIO: 4.0
     DOWNSAMPLE: "v3"
