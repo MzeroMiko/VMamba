@@ -345,6 +345,7 @@ class SS2D(nn.Module):
         dt_init="random",
         dt_scale=1.0,
         dt_init_floor=1e-4,
+        simple_init=False,
         # ======================
         softmax_version=False,
         forward_type="v2",
