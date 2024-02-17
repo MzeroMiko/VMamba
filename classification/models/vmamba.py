@@ -633,13 +633,12 @@ class SS2D(nn.Module):
         xz = self.in_proj(x)
         if self.d_conv > 1:
             x, z = xz.chunk(2, dim=-1) # (b, h, w, d)
+            if not self.softmax_version:
+                z = self.act(z)
             x = x.permute(0, 3, 1, 2).contiguous()
             x = self.act(self.conv2d(x)) # (b, d, h, w)
             y = self.forward_core(x, channel_first=True)
-            if self.softmax_version:
-                y = y * z
-            else:
-                y = y * self.act(z)
+            y = y * z
         else:
             if self.softmax_version:
                 x, z = xz.chunk(2, dim=-1) # (b, h, w, d)
