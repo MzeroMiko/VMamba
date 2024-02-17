@@ -356,7 +356,7 @@ class SS2D(nn.Module):
         factory_kwargs = {"device": None, "dtype": None}
         super().__init__()
         d_expand = int(ssm_ratio * d_model)
-        d_inner = int(ssm_rank_ratio * d_model) if ssm_rank_ratio > 0 else d_expand
+        d_inner = int(min(ssm_rank_ratio, ssm_ratio) * d_model) if ssm_rank_ratio > 0 else d_expand
         self.softmax_version = softmax_version
         self.dt_rank = math.ceil(d_model / 16) if dt_rank == "auto" else dt_rank
         self.d_state = math.ceil(d_model / 6) if d_state == "auto" else d_state # 20240109
