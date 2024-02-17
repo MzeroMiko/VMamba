@@ -403,7 +403,7 @@ class SS2D(nn.Module):
         if d_inner < d_expand:
             self.ssm_low_rank = True
             self.in_rank = nn.Conv2d(d_expand, d_inner, kernel_size=1, bias=False, **factory_kwargs)
-            self.out_rank = nn.Conv2d(d_inner, d_expand, kernel_size=1, bias=False, **factory_kwargs)
+            self.out_rank = nn.Linear(d_inner, d_expand, bias=False, **factory_kwargs)
         if not self.softmax_version:
             self.out_norm = nn.LayerNorm(d_inner)
 
