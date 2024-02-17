@@ -106,15 +106,14 @@ def main(config):
     model = build_model(config)
     
     if dist.get_rank() == 0:
-        if False:
-            logger.info(flop_count_str(FlopCountAnalysis(model, (dataset_val[0][0][None],))))
-        if True:
+        if hasattr(model, 'flops'):
             logger.info(str(model))
             n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
             logger.info(f"number of params: {n_parameters}")
-            if hasattr(model, 'flops'):
-                flops = model.flops()
-                logger.info(f"number of GFLOPs: {flops / 1e9}")
+            flops = model.flops()
+            logger.info(f"number of GFLOPs: {flops / 1e9}")
+        else:
+            logger.info(flop_count_str(FlopCountAnalysis(model, (dataset_val[0][0][None],))))
 
     model.cuda()
     model_without_ddp = model
