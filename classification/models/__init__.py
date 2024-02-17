@@ -30,9 +30,11 @@ def build_vssm_model(config, is_pretrain=False):
             ssm_ratio=config.MODEL.VSSM.SSM_RATIO,
             ssm_rank_ratio=config.MODEL.VSSM.SSM_RANK_RATIO,
             ssm_dt_rank=("auto" if config.MODEL.VSSM.SSM_DT_RANK == "auto" else int(config.MODEL.VSSM.SSM_DT_RANK)),
+            # ssm_act_layer=nn.SiLU,
             ssm_conv=config.MODEL.VSSM.SSM_CONV,
             ssm_conv_bias=config.MODEL.VSSM.SSM_CONV_BIAS,
             ssm_drop_rate=config.MODEL.VSSM.SSM_DROP_RATE,
+            ssm_simple_init=False,
             softmax_version=config.MODEL.VSSM.SSM_SOFTMAX,
             forward_type=config.MODEL.VSSM.SSM_FORWARDTYPE,
             # ===================

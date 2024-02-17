@@ -365,22 +365,14 @@ class SS2D(nn.Module):
         self.d_conv = d_conv
 
         # forward_type =======================================
-        self.forward_core = self.forward_corev2
-        if forward_type in ["v0"]:
-            self.forward_core = self.forward_corev0
-        elif forward_type in ["v0_seq"]:
-            self.forward_core = self.forward_corev0_seq
-        elif forward_type in ["v1", "v2"]:
-            if forward_type in ["v1"]:
-                print("v1 is deprecated as float16 training would cause loss nan. use v2 instead")
-            self.forward_core = self.forward_corev2
-        elif forward_type in ["share_ssm"]:
-            self.forward_core = self.forward_corev0_share_ssm
-        elif forward_type in ["share_a"]:
-            self.forward_core = self.forward_corev0_share_a
-        else:
-            raise NotImplementedError
-
+        self.forward_core = dict(
+            v0=self.forward_corev0,
+            v0_seq=self.forward_corev0_seq,
+            v1=self.forward_corev2,
+            v2=self.forward_corev2,
+            share_ssm=self.forward_corev0_share_ssm,
+            share_a=self.forward_corev0_share_a,
+        ).get(forward_type, self.forward_corev2)
         self.K = 4 if forward_type not in ["share_ssm"] else 1
         self.K2 = self.K if forward_type not in ["share_a"] else 1
 
@@ -778,7 +770,7 @@ class VSSM(nn.Module):
         ssm_ratio=2.0,
         ssm_rank_ratio=2.0,
         ssm_dt_rank="auto",
-        ssm_act_layer=nn.SiLU,        
+        ssm_act_layer="silu",        
         ssm_conv=3,
         ssm_conv_bias=True,
         ssm_drop_rate=0.0, 
@@ -787,14 +779,14 @@ class VSSM(nn.Module):
         forward_type="v2",
         # =========================
         mlp_ratio=4.0,
-        mlp_act_layer=nn.GELU,
+        mlp_act_layer="gelu",
         mlp_drop_rate=0.0,
         # =========================
         drop_path_rate=0.1, 
         patch_norm=True, 
-        norm_layer=nn.LayerNorm,
+        norm_layer="LN",
         downsample_version: str = "v2", # "v1", "v2", "v3"
-        patchembed_version: str = "v1", # "v1", "v2", "v3"
+        patchembed_version: str = "v1", # "v1", "v2"
         use_checkpoint=False,  
         **kwargs,
     ):
@@ -806,27 +798,40 @@ class VSSM(nn.Module):
         self.num_features = dims[-1]
         self.dims = dims
         dpr = [x.item() for x in torch.linspace(0, drop_path_rate, sum(depths))]  # stochastic depth decay rule
+        
+        _NORMLAYERS = dict(
+            ln=nn.LayerNorm,
+            bn=nn.BatchNorm2d,
+        )
 
-        _make_patch_embed = None
-        if patchembed_version == "v1":
-            _make_patch_embed = self._make_patch_embed
-        elif patchembed_version == "v2":
-            _make_patch_embed = self._make_patch_embed_v2
-        else:
-            raise NotImplementedError
+        _ACTLAYERS = dict(
+            silu=nn.SiLU, 
+            gelu=nn.GELU, 
+            relu=nn.ReLU, 
+            sigmoid=nn.Sigmoid,
+        )
+
+        if norm_layer.lower() in ["ln"]:
+            norm_layer: nn.Module = _NORMLAYERS[norm_layer.lower()]
+
+        if ssm_act_layer.lower() in ["silu", "gelu", "relu"]:
+            ssm_act_layer: nn.Module = _ACTLAYERS[ssm_act_layer.lower()]
+
+        if mlp_act_layer.lower() in ["silu", "gelu", "relu"]:
+            mlp_act_layer: nn.Module = _ACTLAYERS[mlp_act_layer.lower()]
+
+        _make_patch_embed = dict(
+            v1=self._make_patch_embed, 
+            v2=self._make_patch_embed_v2,
+        ).get(patchembed_version, None)
         self.patch_embed = _make_patch_embed(in_chans, dims[0], patch_size, patch_norm, norm_layer)
 
-        _make_downsample = None
-        if downsample_version == "v1":
-            _make_downsample = PatchMerging2D
-        elif downsample_version == "v2":
-            _make_downsample = self._make_downsample
-        elif downsample_version == "v3":
-            _make_downsample = self._make_downsample_v3
-        elif downsample_version == "None": # used to instantiate down_sample in make_layer
-            _make_downsample = lambda *_, **_k: None
-        else:
-            raise NotImplementedError
+        _make_downsample = dict(
+            v1=PatchMerging2D, 
+            v2=self._make_downsample, 
+            v3=self._make_downsample_v3, 
+            none=(lambda *_, **_k: None),
+        ).get(downsample_version, None)
 
         self.layers = nn.ModuleList()
         for i_layer in range(self.num_layers):
@@ -1200,7 +1205,7 @@ def check_vssm1_equals_vssm(forward_type="v0"):
     VSSM.forward_backbone = VSSM_.forward_backbone 
     VSSM.forward1 = VSSM_.forward1
     # expected to be all the same 
-    VSSM1 = partial(VSSM_, downsample_version="None", patchembed_version="v1", mlp_ratio=0.0, ssm_ratio=2.0, ssm_rank_ratio=2.0, forward_type=forward_type)
+    VSSM1 = partial(VSSM_, downsample_version="none", patchembed_version="v1", mlp_ratio=0.0, ssm_ratio=2.0, ssm_rank_ratio=2.0, forward_type=forward_type)
 
     # test 1 True =================================
     torch.manual_seed(time.time()); torch.cuda.manual_seed(time.time())
