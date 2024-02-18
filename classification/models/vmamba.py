@@ -355,14 +355,22 @@ class SS2D(nn.Module):
         self.d_state = math.ceil(d_model / 6) if d_state == "auto" else d_state # 20240109
         self.d_conv = d_conv
 
-        # forward_type =======================================
-        self.softmax_version = forward_type[-len("softmax"):] == "softmax"
-        if self.softmax_version:
+        # disable z act ======================================
+        self.disable_z_act = forward_type[-len("nozact"):] == "nozact"
+        if self.disable_z_act:
+            forward_type = forward_type[:-len("nozact")]
+
+        # softmax | sigmoid | norm ===========================
+        if forward_type[-len("softmax"):] == "softmax":
             forward_type = forward_type[:-len("softmax")]
             self.out_norm = nn.Softmax(dim=1)
+        elif forward_type[-len("sigmoid"):] == "sigmoid":
+            forward_type = forward_type[:-len("sigmoid")]
+            self.out_norm = nn.Sigmoid()
         else:
             self.out_norm = nn.LayerNorm(d_inner)
 
+        # forward_type =======================================
         self.forward_core = dict(
             v0=self.forward_corev0,
             v0_seq=self.forward_corev0_seq,
@@ -617,21 +625,19 @@ class SS2D(nn.Module):
         xz = self.in_proj(x)
         if self.d_conv > 1:
             x, z = xz.chunk(2, dim=-1) # (b, h, w, d)
-            if not self.softmax_version:
+            if not self.disable_z_act:
                 z = self.act(z)
             x = x.permute(0, 3, 1, 2).contiguous()
             x = self.act(self.conv2d(x)) # (b, d, h, w)
-            y = self.forward_core(x, channel_first=True)
-            y = y * z
         else:
-            if self.softmax_version:
+            if self.disable_z_act:
                 x, z = xz.chunk(2, dim=-1) # (b, h, w, d)
                 x = self.act(x)
             else:
                 xz = self.act(xz)
                 x, z = xz.chunk(2, dim=-1) # (b, h, w, d)
-            y = self.forward_core(x, channel_first=False)
-            y = y * z
+        y = self.forward_core(x, channel_first=(self.d_conv > 1))
+        y = y * z
         out = self.dropout(self.out_proj(y))
         return out
 
