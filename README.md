@@ -83,7 +83,7 @@ We will release all the pre-trained models/logs in few days!
 
 *Most backbone models trained without ema, `which do not enhance performance \cite(Swin-Transformer)`. We use ema because our model is still under development, without hyperparameter tuning.*
 
-*The checkpoints used in object detection and segmentation is `VMamba-B with droppath 0.5` + `no ema`. `VMamba-B*` represents for `VMamba-B with droppath 0.6 + ema`, the performance of which is `non-ema: 83.3 in epoch 262;  ema: 83.7 in epoch 241`*
+*The checkpoints used in object detection and segmentation is `VMamba-B with droppath 0.5` + `no ema`. `VMamba-B*` represents for `VMamba-B with droppath 0.6 + ema`, the performance of which is `non-ema: 83.3 in epoch 262;  ema: 83.7 in epoch 241`. If you are about to use VMamba-B in downstream tasks, try `VMamba-B*` rather than `VMamba-B`, as it is supposed to preform better.*
 
 * **Object Detection on COCO**
   
