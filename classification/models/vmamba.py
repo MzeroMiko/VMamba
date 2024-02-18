@@ -1409,6 +1409,7 @@ if __name__ == "__main__":
     check_vssm1_equals_vssm(forward_type="v2")
     print(VSSM(forward_type="v0").flops())
     print(VSSM(forward_type="v2").flops())
+    print(VSSM(forward_type="v2nozact").flops())
 
     
 
