@@ -234,6 +234,8 @@ def cross_selective_scan(
     delta_softplus = True,
     to_dtype=True,
 ):
+    # out_norm: whatever fits (B, L, C)
+
     B, D, H, W = x.shape
     D, N = A_logs.shape
     K, D, R = dt_projs_weight.shape
@@ -272,15 +274,14 @@ def cross_selective_scan(
     ).view(B, K, -1, H, W)
     
     y: torch.Tensor = CrossMerge.apply(ys)
+    y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
 
     if softmax_version:
-        y = y.softmax(dim=-1)
+        y = y.softmax(dim=1).view(B, H, W, -1)
         if to_dtype:
             y = y.to(x.dtype)
-        y = y.transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1)
     else:
-        y = y.transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1)
-        y = out_norm(y)
+        y = out_norm(y).view(B, H, W, -1)
         if to_dtype:
             y = y.to(x.dtype)
     return y
@@ -359,12 +360,14 @@ class SS2D(nn.Module):
         super().__init__()
         d_expand = int(ssm_ratio * d_model)
         d_inner = int(min(ssm_rank_ratio, ssm_ratio) * d_model) if ssm_rank_ratio > 0 else d_expand
-        self.softmax_version = softmax_version
         self.dt_rank = math.ceil(d_model / 16) if dt_rank == "auto" else dt_rank
         self.d_state = math.ceil(d_model / 6) if d_state == "auto" else d_state # 20240109
         self.d_conv = d_conv
 
         # forward_type =======================================
+        self.softmax_version = forward_type[-len("softmax"):] == "softmax"
+        if self.softmax_version:
+            forward_type = forward_type[:-len("softmax")]
         self.forward_core = dict(
             v0=self.forward_corev0,
             v0_seq=self.forward_corev0_seq,
@@ -699,7 +702,6 @@ class VSSBlock(nn.Module):
         ssm_conv_bias=True,
         ssm_drop_rate: float = 0,
         ssm_simple_init=False,
-        softmax_version=False,
         forward_type="v2",
         # =============================
         mlp_ratio=4.0,
@@ -733,7 +735,6 @@ class VSSBlock(nn.Module):
             # dt_init_floor=1e-4,
             simple_init=ssm_simple_init,
             # ==========================
-            softmax_version=softmax_version,
             forward_type=forward_type,
         )
         self.drop_path = DropPath(drop_path)
@@ -775,7 +776,6 @@ class VSSM(nn.Module):
         ssm_conv_bias=True,
         ssm_drop_rate=0.0, 
         ssm_simple_init=False,
-        softmax_version=False,
         forward_type="v2",
         # =========================
         mlp_ratio=4.0,
@@ -857,7 +857,6 @@ class VSSM(nn.Module):
                 ssm_conv_bias=ssm_conv_bias,
                 ssm_drop_rate=ssm_drop_rate,
                 ssm_simple_init=ssm_simple_init,
-                softmax_version=softmax_version,
                 forward_type=forward_type,
                 # =================
                 mlp_ratio=mlp_ratio,
@@ -951,7 +950,6 @@ class VSSM(nn.Module):
         ssm_conv_bias=True,
         ssm_drop_rate=0.0, 
         ssm_simple_init=False,
-        softmax_version=False,
         forward_type="v2",
         # ===========================
         mlp_ratio=4.0,
@@ -975,7 +973,6 @@ class VSSM(nn.Module):
                 ssm_conv_bias=ssm_conv_bias,
                 ssm_drop_rate=ssm_drop_rate,
                 ssm_simple_init=ssm_simple_init,
-                softmax_version=softmax_version,
                 forward_type=forward_type,
                 mlp_ratio=mlp_ratio,
                 mlp_act_layer=mlp_act_layer,
