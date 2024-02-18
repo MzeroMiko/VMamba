@@ -229,12 +229,11 @@ def cross_selective_scan(
     A_logs: torch.Tensor=None,
     Ds: torch.Tensor=None,
     out_norm: torch.nn.Module=None,
-    softmax_version=False,
     nrows = -1,
     delta_softplus = True,
     to_dtype=True,
 ):
-    # out_norm: whatever fits (B, L, C)
+    # out_norm: whatever fits (B, L, C); LayerNorm; Sigmoid; Softmax(dim=1);...
 
     B, D, H, W = x.shape
     D, N = A_logs.shape
@@ -275,16 +274,9 @@ def cross_selective_scan(
     
     y: torch.Tensor = CrossMerge.apply(ys)
     y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
+    y = out_norm(y).view(B, H, W, -1)
 
-    if softmax_version:
-        y = y.softmax(dim=1).view(B, H, W, -1)
-        if to_dtype:
-            y = y.to(x.dtype)
-    else:
-        y = out_norm(y).view(B, H, W, -1)
-        if to_dtype:
-            y = y.to(x.dtype)
-    return y
+    return (y.to(x.dtype) if to_dtype else y)
 
 
 def selective_scan_flop_jit(inputs, outputs):
@@ -348,7 +340,6 @@ class SS2D(nn.Module):
         dt_init_floor=1e-4,
         simple_init=False,
         # ======================
-        softmax_version=False,
         forward_type="v2",
         # ======================
         **kwargs,
@@ -368,6 +359,10 @@ class SS2D(nn.Module):
         self.softmax_version = forward_type[-len("softmax"):] == "softmax"
         if self.softmax_version:
             forward_type = forward_type[:-len("softmax")]
+            self.out_norm = nn.Softmax(dim=1)
+        else:
+            self.out_norm = nn.LayerNorm(d_inner)
+
         self.forward_core = dict(
             v0=self.forward_corev0,
             v0_seq=self.forward_corev0_seq,
@@ -401,8 +396,6 @@ class SS2D(nn.Module):
             self.ssm_low_rank = True
             self.in_rank = nn.Conv2d(d_expand, d_inner, kernel_size=1, bias=False, **factory_kwargs)
             self.out_rank = nn.Linear(d_inner, d_expand, bias=False, **factory_kwargs)
-        if not self.softmax_version:
-            self.out_norm = nn.LayerNorm(d_inner)
 
         # x proj ============================
         self.x_proj = [
@@ -535,17 +528,10 @@ class SS2D(nn.Module):
         wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
         invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
         y = out_y[:, 0] + inv_y[:, 0] + wh_y + invwh_y
-        if self.softmax_version:
-            y = y.softmax(dim=-1)
-            if to_dtype:
-                y = y.to(x.dtype)
-            y = y.transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1)
-        else:
-            y = y.transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1)
-            y = self.out_norm(y)
-            if to_dtype:
-                y = y.to(x.dtype)
-        return y
+        y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
+        y = self.out_norm(y).view(B, H, W, -1)
+
+        return (y.to(x.dtype) if to_dtype else y)
     
     # only has speed difference with v0
     def forward_corev0_seq(self, x: torch.Tensor, to_dtype=False, channel_first=False):
@@ -594,17 +580,11 @@ class SS2D(nn.Module):
         wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
         invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
         y = out_y[:, 0] + inv_y[:, 0] + wh_y + invwh_y
-        if self.softmax_version:
-            y = y.softmax(dim=-1)
-            if to_dtype:
-                y = y.to(x.dtype)
-            y = y.transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1)
-        else:
-            y = y.transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1)
-            y = self.out_norm(y)
-            if to_dtype:
-                y = y.to(x.dtype)
-        return y
+        y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
+        y = self.out_norm(y).view(B, H, W, -1)
+
+        return (y.to(x.dtype) if to_dtype else y)
+
 
     def forward_corev0_share_ssm(self, x: torch.Tensor, channel_first=False):
         """
@@ -626,7 +606,7 @@ class SS2D(nn.Module):
             x = self.in_rank(x)
         x = cross_selective_scan(
             x, self.x_proj_weight, None, self.dt_projs_weight, self.dt_projs_bias,
-            self.A_logs, self.Ds, getattr(self, "out_norm", None), self.softmax_version, 
+            self.A_logs, self.Ds, getattr(self, "out_norm", None),
             nrows=nrows, delta_softplus=True,
         )
         if self.ssm_low_rank:
