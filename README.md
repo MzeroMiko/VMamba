@@ -66,17 +66,22 @@ We will release all the pre-trained models/logs in few days!
 * **Classification on ImageNet-1K**
 
 
-| name | pretrain | resolution |acc@1 | #params | FLOPs | checkpoints/logs |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| DeiT-S | ImageNet-1K | 224x224 | 79.8 | 22M | 4.6G | -- |
-| DeiT-B | ImageNet-1K | 224x224 | 81.8 | 86M | 17.5G | -- |
-| DeiT-B | ImageNet-1K | 384x384 | 83.1 | 86M | 55.4G | -- |
-| Swin-T | ImageNet-1K | 224x224 | 81.2 | 28M | 4.5G | -- |
-| Swin-S | ImageNet-1K | 224x224 | 83.2 | 50M | 8.7G | -- |
-| Swin-B | ImageNet-1K | 224x224 | 83.5 | 88M | 15.4G | -- |
-| VMamba-T | ImageNet-1K | 224x224 | 82.2 | 22M | ~~4.5G~~ 5.6G | [ckpt](https://drive.google.com/file/d/1ml7nZM-YPYbQurHiodf4dpXHw88dXFfP/view?usp=sharing)/[log](https://drive.google.com/file/d/1mVooWXl1Zj8ZALr1iYuoMLdG_yDbZpRx/view?usp=sharing) |
-| VMamba-S | ImageNet-1K | 224x224 | 83.5 | 44M | ~~9.1G~~ 11.2G | [ckpt](https://drive.google.com/file/d/1gUlRxeHxkn4JG2QR_DoAPbzSFYAoSxDy/view?usp=sharing)/[log](https://drive.google.com/file/d/12l81-VsPcCRjyIByWQzyO_EsovVj_00v/view?usp=sharing) |
-| VMamba-B | ImageNet-1K | 224x224 | 83.7 | 75M | ~~15.2G~~ 18.0G | waiting |
+| name | pretrain | resolution |acc@1 | #params | FLOPs | checkpoints/logs | best epoch | use ema |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| DeiT-S | ImageNet-1K | 224x224 | 79.8 | 22M | 4.6G | -- | -- | -- |
+| DeiT-B | ImageNet-1K | 224x224 | 81.8 | 86M | 17.5G | -- | -- | -- |
+| DeiT-B | ImageNet-1K | 384x384 | 83.1 | 86M | 55.4G | -- | -- | -- |
+| Swin-T | ImageNet-1K | 224x224 | 81.2 | 28M | 4.5G | -- | -- | -- |
+| Swin-S | ImageNet-1K | 224x224 | 83.2 | 50M | 8.7G | -- | -- | -- |
+| Swin-B | ImageNet-1K | 224x224 | 83.5 | 88M | 15.4G | -- | -- | -- |
+| VMamba-T | ImageNet-1K | 224x224 | 82.2 | 22M | ~~4.5G~~ 5.6G | [ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmtiny_dp01_ckpt_epoch_292.pth)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmtiny_dp01_e292_woema.log) | 292 | did'nt add |
+| VMamba-S | ImageNet-1K | 224x224 | 83.5 | 44M | ~~9.1G~~ 11.2G | [ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmsmall_dp03_ckpt_epoch_238.pth)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmsmall_dp03_e238_ema.log) | 238 | true |
+| VMamba-B | ImageNet-1K | 224x224 | 83.2 | 75M | ~~15.2G~~ 18.0G | [ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp05_ckpt_epoch_260.pth)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp05_e260_woema.log) | 260 | did'nt add |
+| VMamba-B* | ImageNet-1K | 224x224 | 83.7 | 75M | ~~15.2G~~ 18.0G | [ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp06_ckpt_epoch_241.pth)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp06_e241_ema.log) | 241 | true |
+
+*Most backbone models trained without ema, `which do not enhance performance \cite(Swin-Transformer)`. We use ema because our model is still under development, without hyperparameter tuning.*
+
+*The checkpoints used in object detection and segmentation is `VMamba-B with droppath 0.5` + `no ema`. `VMamba-B*` represents for `VMamba-B with droppath 0.6 + ema`, the performance of which is `non-ema: 83.3 in epoch 262;  ema: 83.7 in epoch 241`*
 
 * **Object Detection on COCO**
   
