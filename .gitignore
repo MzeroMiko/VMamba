@@ -35,3 +35,4 @@ segmentation/work_dirs
 
 selective_scan/build
 
+classification/configs/vssm1/vssm_tiny_224_0221.yaml
