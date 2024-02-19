@@ -593,7 +593,6 @@ class SS2D(nn.Module):
 
         return (y.to(x.dtype) if to_dtype else y)
 
-
     def forward_corev0_share_ssm(self, x: torch.Tensor, channel_first=False):
         """
         we may conduct this ablation later, but not with v0.
