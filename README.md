@@ -142,12 +142,20 @@ conda activate vmamba
 ```bash
 pip install -r requirements.txt
 # Install selective_scan and its dependencies
-cd selective_scan && pip install . && pytest
+cd selective_scan && pip install .
 ```
 
+#### Check Selctive Scan (optional).
 
+* If you want to check if the implementation of `selective scan` of ours is the same with `mamba_ssm`, `selective_scan/test_selective_scan.py` is here for you. Change to `MODE = "mamba_ssm_sscore"` in `selective_scan/test_selective_scan.py`, and run `pytest selective_scan/test_selective_scan.py`.
 
-Optional Dependencies for Model Detection and Segmentation:
+* If you want to check if the implementation of `selective scan` of ours is the same with reference code (`selective_scan_ref`), change to `MODE = "sscore"` in `selective_scan/test_selective_scan.py`, and run `pytest selective_scan/test_selective_scan.py`.
+
+* `MODE = "mamba_ssm"` stands for checking whether the results of `mamba_ssm` is close to `selective_scan_ref`, and `"sstest"` is preserved for development. 
+
+* If you find `mamba_ssm` (`selective_scan_cuda`) or `selective_scan` ( `selctive_scan_cuda_core`) is not close enough to `selective_scan_ref`, and the test failed, do not worry. Check if `mamba_ssm` and `selective_scan` are close enough [instead](https://github.com/state-spaces/mamba/pull/161).
+
+#### Dependencies for `Detection` and `Segementation` (optional).
 ```bash
 pip install mmengine==0.10.1 mmcv==2.1.0 opencv-python-headless ftfy
 pip install mmdet==3.3.0 mmsegmentation==1.2.2 mmpretrain==1.2.0
