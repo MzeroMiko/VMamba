@@ -131,7 +131,7 @@ class SelectiveScan(torch.autograd.Function):
             u = u.contiguous()
         if delta.stride(-1) != 1:
             delta = delta.contiguous()
-        if D is not None:
+        if D is not None and D.stride(-1) != 1:
             D = D.contiguous()
         if B.stride(-1) != 1:
             B = B.contiguous()
@@ -232,6 +232,7 @@ def cross_selective_scan(
     nrows = -1,
     delta_softplus = True,
     to_dtype=True,
+    force_fp32=True,
 ):
     # out_norm: whatever fits (B, L, C); LayerNorm; Sigmoid; Softmax(dim=1);...
 
@@ -257,14 +258,20 @@ def cross_selective_scan(
         x_dbl = x_dbl + x_proj_bias.view(1, K, -1, 1)
     dts, Bs, Cs = torch.split(x_dbl, [R, N, N], dim=2)
     dts = torch.einsum("b k r l, k d r -> b k d l", dts, dt_projs_weight)
-    xs = xs.view(B, -1, L).to(torch.float)
-    dts = dts.contiguous().view(B, -1, L).to(torch.float)
+    xs = xs.view(B, -1, L)
+    dts = dts.contiguous().view(B, -1, L)
     As = -torch.exp(A_logs.to(torch.float)) # (k * c, d_state)
-    Bs = Bs.contiguous().to(torch.float)
-    Cs = Cs.contiguous().to(torch.float)
+    Bs = Bs.contiguous()
+    Cs = Cs.contiguous()
     Ds = Ds.to(torch.float) # (K * c)
     delta_bias = dt_projs_bias.view(-1).to(torch.float)
-     
+
+    if force_fp32:
+        xs = xs.to(torch.float)
+        dts = dts.to(torch.float)
+        Bs = Bs.to(torch.float)
+        Cs = Cs.to(torch.float)
+
     def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True, nrows=1):
         return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows)
     
@@ -614,7 +621,7 @@ class SS2D(nn.Module):
         x = cross_selective_scan(
             x, self.x_proj_weight, None, self.dt_projs_weight, self.dt_projs_bias,
             self.A_logs, self.Ds, getattr(self, "out_norm", None),
-            nrows=nrows, delta_softplus=True,
+            nrows=nrows, delta_softplus=True, force_fp32=self.training,
         )
         if self.ssm_low_rank:
             x = self.out_rank(x)
