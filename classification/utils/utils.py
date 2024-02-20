@@ -72,9 +72,9 @@ def load_pretrained_ema(config, model, logger, model_ema: ModelEma=None, load_em
         if key in checkpoint:
             msg = model_ema.ema.load_state_dict(checkpoint[key], strict=False)
             logger.warning(msg)
-            logger.info(f"=> loaded {key} successfully from '{config.MODEL.PRETRAINED}' for model_ema")
+            logger.info(f"=> loaded '{key}' successfully from '{config.MODEL.PRETRAINED}' for model_ema")
         else:
-            logger.warning(f"No {key} found in {config.MODEL.PRETRAINED}! ")
+            logger.warning(f"No '{key}' found in {config.MODEL.PRETRAINED}! ")
 
     del checkpoint
     torch.cuda.empty_cache()
