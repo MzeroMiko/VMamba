@@ -145,7 +145,7 @@ pip install -r requirements.txt
 cd selective_scan && pip install .
 ```
 
-#### Check Selctive Scan (optional).
+#### Check Selective Scan (optional).
 
 * If you want to check if the implementation of `selective scan` of ours is the same with `mamba_ssm`, `selective_scan/test_selective_scan.py` is here for you. Change to `MODE = "mamba_ssm_sscore"` in `selective_scan/test_selective_scan.py`, and run `pytest selective_scan/test_selective_scan.py`.
 
