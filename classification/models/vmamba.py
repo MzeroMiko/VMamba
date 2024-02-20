@@ -697,41 +697,46 @@ class VSSBlock(nn.Module):
         **kwargs,
     ):
         super().__init__()
+        self.ssm_branch = ssm_ratio > 0
+        self.mlp_branch = mlp_ratio > 0
         self.use_checkpoint = use_checkpoint
-        self.norm = norm_layer(hidden_dim)
-        self.op = SS2D(
-            d_model=hidden_dim, 
-            d_state=ssm_d_state, 
-            ssm_ratio=ssm_ratio,
-            ssm_rank_ratio=ssm_rank_ratio,
-            dt_rank=ssm_dt_rank,
-            act_layer=ssm_act_layer,
-            # ==========================
-            d_conv=ssm_conv,
-            conv_bias=ssm_conv_bias,
-            # ==========================
-            dropout=ssm_drop_rate,
-            # bias=False,
-            # ==========================
-            # dt_min=0.001,
-            # dt_max=0.1,
-            # dt_init="random",
-            # dt_scale="random",
-            # dt_init_floor=1e-4,
-            simple_init=ssm_simple_init,
-            # ==========================
-            forward_type=forward_type,
-        )
+
+        if self.ssm_branch:
+            self.norm = norm_layer(hidden_dim)
+            self.op = SS2D(
+                d_model=hidden_dim, 
+                d_state=ssm_d_state, 
+                ssm_ratio=ssm_ratio,
+                ssm_rank_ratio=ssm_rank_ratio,
+                dt_rank=ssm_dt_rank,
+                act_layer=ssm_act_layer,
+                # ==========================
+                d_conv=ssm_conv,
+                conv_bias=ssm_conv_bias,
+                # ==========================
+                dropout=ssm_drop_rate,
+                # bias=False,
+                # ==========================
+                # dt_min=0.001,
+                # dt_max=0.1,
+                # dt_init="random",
+                # dt_scale="random",
+                # dt_init_floor=1e-4,
+                simple_init=ssm_simple_init,
+                # ==========================
+                forward_type=forward_type,
+            )
+        
         self.drop_path = DropPath(drop_path)
         
-        self.mlp_branch = mlp_ratio > 0
         if self.mlp_branch:
             self.norm2 = norm_layer(hidden_dim)
             mlp_hidden_dim = int(hidden_dim * mlp_ratio)
             self.mlp = Mlp(in_features=hidden_dim, hidden_features=mlp_hidden_dim, act_layer=mlp_act_layer, drop=mlp_drop_rate, channels_first=False)
 
     def _forward(self, input: torch.Tensor):
-        x = input + self.drop_path(self.op(self.norm(input)))
+        if self.ssm_branch:
+            x = input + self.drop_path(self.op(self.norm(input)))
         if self.mlp_branch:
             x = x + self.drop_path(self.mlp(self.norm2(x))) # FFN
         return x
