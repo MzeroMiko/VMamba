@@ -6,6 +6,8 @@
 **/*.egg-info
 **/*.TAG
 **/dist
+**/*.so
+*.so
 tmp
 output
 work_dirs

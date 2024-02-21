@@ -227,7 +227,7 @@ def selective_scan_ref(u, delta, A, B, C, D=None, z=None, delta_bias=None, delta
 # MODE = "sscore"
 # MODE = "sstest"
 MODE = "mamba_ssm_sscore" # 1344 items pass
-# MODE = "mamba_ssm_sscorendstate" # 1344 items pass
+MODE = "mamba_ssm_sscorendstate" # 1344 items pass
 
 if MODE in ["mamba_ssm"]:
     import selective_scan_cuda
@@ -280,8 +280,8 @@ print("use MODE:", MODE)
 @pytest.mark.parametrize("nrows", [1, 2, 3, 4])
 @pytest.mark.parametrize("batch_size", [2])
 @pytest.mark.parametrize("dim", [24])
-# @pytest.mark.parametrize("dstate", [8])
 @pytest.mark.parametrize("dstate", [1])
+# @pytest.mark.parametrize("dstate", [8])
 def test_selective_scan(is_variable_B, is_variable_C, varBC_groups, has_D, has_z, has_delta_bias,
                         delta_softplus, return_last_state, seqlen, itype, wtype, nrows, batch_size, dim, dstate):
     print(f'method: {selective_scan_cuda}')
@@ -394,5 +394,5 @@ def test_selective_scan(is_variable_B, is_variable_C, varBC_groups, has_D, has_z
     if has_delta_bias:
         assert torch.allclose(delta_bias.grad, delta_bias_ref.grad, rtol=rtolw, atol=atolw)
 
-test_selective_scan(True, True, 2, True, False, True, True, True, 64, torch.float32, torch.float32, 1, 2, 24, 1)
+# test_selective_scan(True, True, 2, True, False, True, True, True, 64, torch.float32, torch.float32, 1, 2, 24, 1)
 
