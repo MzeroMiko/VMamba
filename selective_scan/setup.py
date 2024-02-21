@@ -37,6 +37,9 @@ def get_cuda_bare_metal_version(cuda_dir):
 
     return raw_output, bare_metal_version
 
+MODE = "nstate"
+MODE = "nrow"
+# MODE = "nonrow"
 
 def get_ext():
     ext_modules = []
@@ -67,20 +70,34 @@ def get_ext():
     if FORCE_CXX11_ABI:
         torch._C._GLIBCXX_USE_CXX11_ABI = True
 
+    sources = dict(
+        nonrow=[
+            "csrc/selective_scan/selective_scan.cpp",
+            "csrc/selective_scan/cus/selective_scan_core_fwd.cu",
+            "csrc/selective_scan/cus/selective_scan_core_bwd.cu",
+        ],
+        nrow=[
+            "csrc/selective_scan/selective_scan_nrow.cpp",
+            "csrc/selective_scan/cusnrow/selective_scan_core_fwd.cu",
+            "csrc/selective_scan/cusnrow/selective_scan_core_fwd2.cu",
+            "csrc/selective_scan/cusnrow/selective_scan_core_fwd3.cu",
+            "csrc/selective_scan/cusnrow/selective_scan_core_fwd4.cu",
+            "csrc/selective_scan/cusnrow/selective_scan_core_bwd.cu",
+            "csrc/selective_scan/cusnrow/selective_scan_core_bwd2.cu",
+            "csrc/selective_scan/cusnrow/selective_scan_core_bwd3.cu",
+            "csrc/selective_scan/cusnrow/selective_scan_core_bwd4.cu",
+        ],
+        nstate=[
+            "csrc/selective_scan/selective_scan.cpp",
+            "csrc/selective_scan/cus/selective_scan_core_fwd.cu",
+            "csrc/selective_scan/cus/selective_scan_core_bwd.cu",
+        ],
+    ).get(MODE, None)
+
     ext_modules.append(
         CUDAExtension(
             name="selective_scan_cuda_core",
-            sources=[
-                "csrc/selective_scan/selective_scan.cpp",
-                "csrc/selective_scan/cus/selective_scan_core_fwd.cu",
-                "csrc/selective_scan/cus/selective_scan_core_fwd2.cu",
-                "csrc/selective_scan/cus/selective_scan_core_fwd3.cu",
-                "csrc/selective_scan/cus/selective_scan_core_fwd4.cu",
-                "csrc/selective_scan/cus/selective_scan_core_bwd.cu",
-                "csrc/selective_scan/cus/selective_scan_core_bwd2.cu",
-                "csrc/selective_scan/cus/selective_scan_core_bwd3.cu",
-                "csrc/selective_scan/cus/selective_scan_core_bwd4.cu",
-            ],
+            sources=sources,
             extra_compile_args={
                 "cxx": ["-O3", "-std=c++17"],
                 "nvcc": [

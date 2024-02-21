@@ -88,33 +88,35 @@ void selective_scan_bwd_kernel(SSMParamsBwd params) {
     auto& smem_scan = *reinterpret_cast<typename Ktraits::BlockScanT::TempStorage*>(reinterpret_cast<char *>(&smem_reduce) + Ktraits::kSmemReduceSize);
     auto& smem_reverse_scan = *reinterpret_cast<typename Ktraits::BlockReverseScanT::TempStorage*>(reinterpret_cast<char *>(&smem_scan) + sizeof(typename Ktraits::BlockScanT::TempStorage));
     weight_t *smem_delta_a = reinterpret_cast<weight_t *>(smem_ + Ktraits::kSmemSize);
-    scan_t *smem_running_postfix = reinterpret_cast<scan_t *>(smem_delta_a + kNRows * (2 * Ktraits::MaxDState + kNThreads));
+    // scan_t *smem_running_postfix = reinterpret_cast<scan_t *>(smem_delta_a + kNRows * (2 * Ktraits::MaxDState + kNThreads));
+    scan_t *smem_running_postfix = reinterpret_cast<scan_t *>(smem_delta_a + kNRows * 2 * Ktraits::MaxDState + kNThreads);
     weight_t *smem_da = reinterpret_cast<weight_t *>(smem_running_postfix + kNRows * Ktraits::MaxDState);
 
     const int batch_id = blockIdx.x;
     const int dim_id = blockIdx.y;
-    const int group_id = dim_id * kNRows / (params.dim_ngroups_ratio);
+    const int dim_id_nrow = dim_id * kNRows;
+    const int group_id = dim_id_nrow / (params.dim_ngroups_ratio);
     input_t *u = reinterpret_cast<input_t *>(params.u_ptr) + batch_id * params.u_batch_stride
-        + dim_id * kNRows * params.u_d_stride;
+        + dim_id_nrow * params.u_d_stride;
     input_t *delta = reinterpret_cast<input_t *>(params.delta_ptr) + batch_id * params.delta_batch_stride
-        + dim_id * kNRows * params.delta_d_stride;
+        + dim_id_nrow * params.delta_d_stride;
     input_t *dout = reinterpret_cast<input_t *>(params.dout_ptr) + batch_id * params.dout_batch_stride
-        + dim_id * kNRows * params.dout_d_stride;
-    weight_t *A = reinterpret_cast<weight_t *>(params.A_ptr) + dim_id * kNRows * params.A_d_stride;
+        + dim_id_nrow * params.dout_d_stride;
+    weight_t *A = reinterpret_cast<weight_t *>(params.A_ptr) + dim_id_nrow * params.A_d_stride;
     input_t *Bvar = reinterpret_cast<input_t *>(params.B_ptr) + batch_id * params.B_batch_stride + group_id * params.B_group_stride;
     input_t *Cvar = reinterpret_cast<input_t *>(params.C_ptr) + batch_id * params.C_batch_stride + group_id * params.C_group_stride;
-    weight_t *dA = reinterpret_cast<weight_t *>(params.dA_ptr) + dim_id * kNRows * params.dA_d_stride;
+    weight_t *dA = reinterpret_cast<weight_t *>(params.dA_ptr) + dim_id_nrow * params.dA_d_stride;
     weight_t *dB = reinterpret_cast<weight_t *>(params.dB_ptr)
         + (batch_id * params.dB_batch_stride + group_id * params.dB_group_stride);
     weight_t *dC = reinterpret_cast<weight_t *>(params.dC_ptr)
         + (batch_id * params.dC_batch_stride + group_id * params.dC_group_stride);
-    float *dD = params.dD_ptr == nullptr ? nullptr : reinterpret_cast<float *>(params.dD_ptr) + dim_id * kNRows;
-    float *D_val = params.D_ptr == nullptr ? nullptr : reinterpret_cast<float *>(params.D_ptr) + dim_id * kNRows;
-    float *ddelta_bias = params.ddelta_bias_ptr == nullptr ? nullptr : reinterpret_cast<float *>(params.ddelta_bias_ptr) + dim_id * kNRows;
-    float *delta_bias = params.delta_bias_ptr == nullptr ? nullptr : reinterpret_cast<float *>(params.delta_bias_ptr) + dim_id * kNRows;
+    float *dD = params.dD_ptr == nullptr ? nullptr : reinterpret_cast<float *>(params.dD_ptr) + dim_id_nrow;
+    float *D_val = params.D_ptr == nullptr ? nullptr : reinterpret_cast<float *>(params.D_ptr) + dim_id_nrow;
+    float *ddelta_bias = params.ddelta_bias_ptr == nullptr ? nullptr : reinterpret_cast<float *>(params.ddelta_bias_ptr) + dim_id_nrow;
+    float *delta_bias = params.delta_bias_ptr == nullptr ? nullptr : reinterpret_cast<float *>(params.delta_bias_ptr) + dim_id_nrow;
     scan_t *x = params.x_ptr == nullptr
         ? nullptr
-        : reinterpret_cast<scan_t *>(params.x_ptr) + (batch_id * params.dim + dim_id * kNRows) * (params.n_chunks) * params.dstate;
+        : reinterpret_cast<scan_t *>(params.x_ptr) + (batch_id * params.dim + dim_id_nrow) * (params.n_chunks) * params.dstate;
     float dD_val[kNRows] = {0};
     float ddelta_bias_val[kNRows] = {0};
 
@@ -185,7 +187,9 @@ void selective_scan_bwd_kernel(SSMParamsBwd params) {
                     const float delta_a_exp = exp2f(delta_vals[r][i] * A_scaled[r]);
                     thread_data[i] = make_float2(delta_a_exp, delta_vals[r][i] * float(u_vals[r][i]) * B_vals[i]);
                     if (i == 0) {
-                        smem_delta_a[threadIdx.x == 0 ? state_idx + (chunk % 2) * Ktraits::MaxDState + r * (2 * Ktraits::MaxDState + kNThreads) : threadIdx.x + 2 * Ktraits::MaxDState + r * (2 * Ktraits::MaxDState + kNThreads)] = delta_a_exp;
+                        // smem_delta_a[threadIdx.x == 0 ? state_idx + (chunk % 2) * Ktraits::MaxDState + r * (2 * Ktraits::MaxDState + kNThreads) : threadIdx.x + 2 * Ktraits::MaxDState + r * (2 * Ktraits::MaxDState + kNThreads)] = delta_a_exp;
+                        smem_delta_a[threadIdx.x == 0 ? state_idx + (chunk % 2) * Ktraits::MaxDState + r * 2 * Ktraits::MaxDState : threadIdx.x + kNRows * 2 * Ktraits::MaxDState] = delta_a_exp;
+                        
                     } else {
                         thread_reverse_data[i - 1].x = delta_a_exp;
                     }
@@ -193,8 +197,10 @@ void selective_scan_bwd_kernel(SSMParamsBwd params) {
                 }
                 __syncthreads();
                 thread_reverse_data[kNItems - 1].x = threadIdx.x == kNThreads - 1
-                    ? (chunk == params.n_chunks - 1 ? 1.f : smem_delta_a[state_idx + ((chunk + 1) % 2) * Ktraits::MaxDState + r * (2 * Ktraits::MaxDState + kNThreads)])
-                    : smem_delta_a[threadIdx.x + 1 +  2 * Ktraits::MaxDState + r * (2 * Ktraits::MaxDState + kNThreads)];
+                    // ? (chunk == params.n_chunks - 1 ? 1.f : smem_delta_a[state_idx + ((chunk + 1) % 2) * Ktraits::MaxDState + r * (2 * Ktraits::MaxDState + kNThreads)])
+                    // : smem_delta_a[threadIdx.x + 1 + 2 * Ktraits::MaxDState + r * (2 * Ktraits::MaxDState + kNThreads)];
+                    ? (chunk == params.n_chunks - 1 ? 1.f : smem_delta_a[state_idx + ((chunk + 1) % 2) * Ktraits::MaxDState + r * 2 * Ktraits::MaxDState])
+                    : smem_delta_a[threadIdx.x + 1 + kNRows * 2 * Ktraits::MaxDState];
                 // Initialize running total
                 scan_t running_prefix = chunk > 0 && threadIdx.x % 32 == 0 ? x[(r * params.n_chunks + chunk - 1) * params.dstate + state_idx] : make_float2(1.f, 0.f);
                 SSMScanPrefixCallbackOp<weight_t> prefix_op(running_prefix);
@@ -265,13 +271,14 @@ void selective_scan_bwd_kernel(SSMParamsBwd params) {
         __syncthreads();
         #pragma unroll
         for (int r = 0; r < kNRows; ++r) {
+            #pragma unroll
             for (int i = 0; i < kNItems; ++i) { ddelta_bias_val[r] += ddelta_vals[r][i]; }
         }
 
         input_t *du = reinterpret_cast<input_t *>(params.du_ptr) + batch_id * params.du_batch_stride
-            + dim_id * kNRows * params.du_d_stride + chunk * kChunkSize;
+            + dim_id_nrow * params.du_d_stride + chunk * kChunkSize;
         input_t *ddelta = reinterpret_cast<input_t *>(params.ddelta_ptr) + batch_id * params.ddelta_batch_stride
-            + dim_id * kNRows * params.ddelta_d_stride + chunk * kChunkSize;
+            + dim_id_nrow * params.ddelta_d_stride + chunk * kChunkSize;
         #pragma unroll
         for (int r = 0; r < kNRows; ++r) {
             __syncthreads();
@@ -308,7 +315,6 @@ void selective_scan_bwd_launch(SSMParamsBwd &params, cudaStream_t stream) {
     BOOL_SWITCH(params.seqlen % (kNThreads * kNItems) == 0, kIsEvenLen, [&] {
         BOOL_SWITCH(params.delta_softplus, kDeltaSoftplus, [&] {
             using Ktraits = Selective_Scan_bwd_kernel_traits<kNThreads, kNItems, kNRows, kIsEvenLen, kDeltaSoftplus, input_t, weight_t>;
-            // TODO: check this
             constexpr int kSmemSize = Ktraits::kSmemSize + kNRows * Ktraits::MaxDState * sizeof(typename Ktraits::scan_t) + (kNThreads + 4 * kNRows * Ktraits::MaxDState) * sizeof(typename Ktraits::weight_t);
             // printf("smem_size = %d\n", kSmemSize);
             dim3 grid(params.batch, params.dim / kNRows);
