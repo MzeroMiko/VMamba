@@ -107,9 +107,9 @@ void selective_scan_bwd_kernel(SSMParamsBwd params) {
         + (batch_id * params.dB_batch_stride + group_id * params.dB_group_stride);
     weight_t *dC = reinterpret_cast<weight_t *>(params.dC_ptr)
         + (batch_id * params.dC_batch_stride + group_id * params.dC_group_stride);
-    float dD = params.dD_ptr == nullptr ? 0 : reinterpret_cast<float *>(params.dD_ptr)[dim_id];
+    float *dD = params.dD_ptr == nullptr ? nullptr : reinterpret_cast<float *>(params.dD_ptr)[dim_id];
     float D_val = params.D_ptr == nullptr ? 0 : reinterpret_cast<float *>(params.D_ptr)[dim_id];
-    float ddelta_bias = params.ddelta_bias_ptr == nullptr ? 0 : reinterpret_cast<float *>(params.ddelta_bias_ptr)[dim_id];
+    float *ddelta_bias = params.ddelta_bias_ptr == nullptr ? nullptr : reinterpret_cast<float *>(params.ddelta_bias_ptr)[dim_id];
     float delta_bias = params.delta_bias_ptr == nullptr ? 0 : reinterpret_cast<float *>(params.delta_bias_ptr)[dim_id];
     scan_t *x = params.x_ptr == nullptr
         ? nullptr
@@ -254,19 +254,16 @@ void selective_scan_bwd_kernel(SSMParamsBwd params) {
         Cvar -= kChunkSize;
     }
 
-    printf("11111");
     if (params.dD_ptr != nullptr) {
         __syncthreads();
         dD_val = Ktraits::BlockReduceFloatT(smem_reduce_float).Sum(dD_val);
-        if (threadIdx.x == 0) { gpuAtomicAdd(&(dD), dD_val); }
+        if (threadIdx.x == 0) { gpuAtomicAdd(dD, dD_val); }
     }
-    printf("22222");
     if (params.ddelta_bias_ptr != nullptr) {
         __syncthreads();
         ddelta_bias_val = Ktraits::BlockReduceFloatT(smem_reduce_float).Sum(ddelta_bias_val);
-        if (threadIdx.x == 0) { gpuAtomicAdd(&(ddelta_bias), ddelta_bias_val); }
+        if (threadIdx.x == 0) { gpuAtomicAdd(ddelta_bias, ddelta_bias_val); }
     }
-    printf("33333");
     __syncthreads();
     if (threadIdx.x == 0) { gpuAtomicAdd(&(dA), smem_da[0]); }
 }
@@ -284,7 +281,6 @@ void selective_scan_bwd_launch(SSMParamsBwd &params, cudaStream_t stream) {
                 C10_CUDA_CHECK(cudaFuncSetAttribute(kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, kSmemSize));
             }
             kernel<<<grid, Ktraits::kNThreads, kSmemSize, stream>>>(params);
-            printf("4444444444");
             C10_CUDA_KERNEL_LAUNCH_CHECK();
         });
     });

@@ -329,7 +329,6 @@ selective_scan_bwd(const at::Tensor &u, const at::Tensor &delta,
     at::cuda::CUDAGuard device_guard{(char)u.get_device()};
     auto stream = at::cuda::getCurrentCUDAStream().stream();
     DISPATCH_ITYPE_FLOAT_AND_HALF_AND_BF16(u.scalar_type(), "selective_scan_bwd", [&] {
-        printf("ssssssssss");
         selective_scan_bwd_cuda<1, input_t, weight_t>(params, stream);
     });
     std::vector<at::Tensor> result = {du, ddelta, dA, dB.to(B.dtype()), dC.to(C.dtype()), dD, ddelta_bias};

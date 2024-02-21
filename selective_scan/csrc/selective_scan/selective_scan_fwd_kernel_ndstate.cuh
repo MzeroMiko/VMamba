@@ -74,8 +74,7 @@ void selective_scan_fwd_kernel(SSMParamsBase params) {
     auto& smem_load_weight1 = *reinterpret_cast<typename Ktraits::BlockLoadWeightT::TempStorage*>(smem_ + sizeof(typename Ktraits::BlockLoadWeightT::TempStorage));
     auto& smem_store = reinterpret_cast<typename Ktraits::BlockStoreT::TempStorage&>(smem_);
     auto& smem_scan = *reinterpret_cast<typename Ktraits::BlockScanT::TempStorage*>(smem_ + Ktraits::kSmemIOSize);
-    // scan_t *smem_running_prefix = reinterpret_cast<scan_t *>(smem_ + Ktraits::kSmemSize);
-    scan_t smem_running_prefix = reinterpret_cast<scan_t *>(smem_ + Ktraits::kSmemSize)[0];
+    scan_t *smem_running_prefix = reinterpret_cast<scan_t *>(smem_ + Ktraits::kSmemSize);
 
     const int batch_id = blockIdx.x;
     const int dim_id = blockIdx.y;
@@ -143,7 +142,7 @@ void selective_scan_fwd_kernel(SSMParamsBase params) {
             // Initialize running total
             scan_t running_prefix;
             // If we use WARP_SCAN then all lane 0 of all warps (not just thread 0) needs to read
-            running_prefix = chunk > 0 && threadIdx.x % 32 == 0 ? smem_running_prefix : make_float2(1.f, 0.f);
+            running_prefix = chunk > 0 && threadIdx.x % 32 == 0 ? smem_running_prefix[0] : make_float2(1.f, 0.f);
             SSMScanPrefixCallbackOp<weight_t> prefix_op(running_prefix);
             Ktraits::BlockScanT(smem_scan).InclusiveScan(
                 thread_data, thread_data, SSMScanOp<weight_t>(), prefix_op
@@ -151,7 +150,7 @@ void selective_scan_fwd_kernel(SSMParamsBase params) {
             // There's a syncthreads in the scan op, so we don't need to sync here.
             // Unless there's only 1 warp, but then it's the same thread (0) reading and writing.
             if (threadIdx.x == 0) {
-                smem_running_prefix = prefix_op.running_prefix;
+                smem_running_prefix[0] = prefix_op.running_prefix;
                 x[chunk] = prefix_op.running_prefix;
             }
             #pragma unroll
