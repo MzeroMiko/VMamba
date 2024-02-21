@@ -155,7 +155,7 @@ cd selective_scan && pip install .
 
 * If you find `mamba_ssm` (`selective_scan_cuda`) or `selective_scan` ( `selctive_scan_cuda_core`) is not close enough to `selective_scan_ref`, and the test failed, do not worry. Check if `mamba_ssm` and `selective_scan` are close enough [instead](https://github.com/state-spaces/mamba/pull/161).
 
-#### Dependencies for `Detection` and `Segementation` (optional).
+#### Dependencies for `Detection` and `Segmentation` (optional).
 ```bash
 pip install mmengine==0.10.1 mmcv==2.1.0 opencv-python-headless ftfy
 pip install mmdet==3.3.0 mmsegmentation==1.2.2 mmpretrain==1.2.0

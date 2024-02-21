@@ -9,9 +9,11 @@ import torch
 import torch.nn.functional as F
 from torch.cuda.amp import custom_bwd, custom_fwd
 from einops import rearrange, repeat
+import time
+from functools import partial
 
 
-def build_selective_scan_fn(selective_scan_cuda: object = None, mode="mamba_ssm"):
+def build_selective_scan_fn(selective_scan_cuda: object = None, mode="mamba_ssm", tag=None):
     MODE = mode
 
     class SelectiveScanFn(torch.autograd.Function):
@@ -151,6 +153,8 @@ def build_selective_scan_fn(selective_scan_cuda: object = None, mode="mamba_ssm"
         """
         return SelectiveScanFn.apply(u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state, nrows, backnrows)
 
+    selective_scan_fn.__repr__ = lambda *_ :f"selective_scan_fn | {mode} | {tag}"
+
     return selective_scan_fn
 
 
@@ -260,11 +264,15 @@ else:
     raise NotImplementedError
 
 print("use MODE:", MODE)
+DSTATE = [1]
+DIM = [768]
+BATCHSIZE = [2]
+# DSTATE = [1] if MODE in ["mamba_ssm_sscorendstate", "sscorendstate"] else [8]
+NROWS = [1,2,3,4]
 
 # @pytest.mark.parametrize('wtype', [torch.float32, torch.complex64])
 @pytest.mark.parametrize('wtype', [torch.float32])
 @pytest.mark.parametrize('itype', [torch.float32, torch.float16, torch.bfloat16])
-# @pytest.mark.parametrize('itype', [torch.float32])
 @pytest.mark.parametrize('seqlen', [64, 128, 256, 512, 1024, 2048, 4096])
 @pytest.mark.parametrize("return_last_state", [True])
 @pytest.mark.parametrize('has_delta_bias', [False, True])
@@ -277,11 +285,10 @@ print("use MODE:", MODE)
 @pytest.mark.parametrize("is_variable_C", [True])
 # @pytest.mark.parametrize("is_variable_B", [False, True])
 @pytest.mark.parametrize("is_variable_B", [True])
-@pytest.mark.parametrize("nrows", [1, 2, 3, 4])
-@pytest.mark.parametrize("batch_size", [2])
-@pytest.mark.parametrize("dim", [24])
-@pytest.mark.parametrize("dstate", [1])
-# @pytest.mark.parametrize("dstate", [8])
+@pytest.mark.parametrize("nrows", NROWS)
+@pytest.mark.parametrize("batch_size", BATCHSIZE)
+@pytest.mark.parametrize("dim", DIM)
+@pytest.mark.parametrize("dstate", DSTATE)
 def test_selective_scan(is_variable_B, is_variable_C, varBC_groups, has_D, has_z, has_delta_bias,
                         delta_softplus, return_last_state, seqlen, itype, wtype, nrows, batch_size, dim, dstate):
     print(f'method: {selective_scan_cuda}')

@@ -102,7 +102,7 @@ void selective_scan_bwd_kernel(SSMParamsBwd params) {
     weight_t A_scaled = A_val * kLog2e;
     input_t *Bvar = reinterpret_cast<input_t *>(params.B_ptr) + batch_id * params.B_batch_stride + group_id * params.B_group_stride;
     input_t *Cvar = reinterpret_cast<input_t *>(params.C_ptr) + batch_id * params.C_batch_stride + group_id * params.C_group_stride;
-    weight_t dA = reinterpret_cast<weight_t *>(params.dA_ptr)[dim_id];
+    weight_t *dA = reinterpret_cast<weight_t *>(params.dA_ptr) + dim_id;
     weight_t *dB = reinterpret_cast<weight_t *>(params.dB_ptr)
         + (batch_id * params.dB_batch_stride + group_id * params.dB_group_stride);
     weight_t *dC = reinterpret_cast<weight_t *>(params.dC_ptr)
@@ -265,7 +265,7 @@ void selective_scan_bwd_kernel(SSMParamsBwd params) {
         if (threadIdx.x == 0) { gpuAtomicAdd(ddelta_bias, ddelta_bias_val); }
     }
     __syncthreads();
-    if (threadIdx.x == 0) { gpuAtomicAdd(&(dA), smem_da[0]); }
+    if (threadIdx.x == 0) { gpuAtomicAdd(dA, smem_da[0]); }
 }
 
 template<int kNThreads, int kNItems, typename input_t, typename weight_t>

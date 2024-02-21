@@ -38,8 +38,8 @@ def get_cuda_bare_metal_version(cuda_dir):
     return raw_output, bare_metal_version
 
 # MODE = "nrow"
-# MODE = "nonrow"
-MODE = "ndstate"
+MODE = "nonrow"
+# MODE = "ndstate"
 
 def get_ext():
     ext_modules = []
