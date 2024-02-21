@@ -261,8 +261,11 @@ import time; time.sleep(10)
 # @pytest.mark.parametrize("is_variable_B", [False, True])
 @pytest.mark.parametrize("is_variable_B", [True])
 @pytest.mark.parametrize("nrows", [1, 2, 3, 4])
+@pytest.mark.parametrize("batch_size", [2])
+@pytest.mark.parametrize("dim", [24])
+@pytest.mark.parametrize("dstate", [8])
 def test_selective_scan(is_variable_B, is_variable_C, varBC_groups, has_D, has_z, has_delta_bias,
-                        delta_softplus, return_last_state, seqlen, itype, wtype, nrows):
+                        delta_softplus, return_last_state, seqlen, itype, wtype, nrows, batch_size, dim, dstate):
     print(f'method: {selective_scan_cuda}')
     if varBC_groups > 1 and (not is_variable_B or not is_variable_C):
         pytest.skip()  # This config is not applicable
@@ -276,9 +279,9 @@ def test_selective_scan(is_variable_B, is_variable_C, varBC_groups, has_D, has_z
         atolw = max(atolw, atol)
     # set seed
     torch.random.manual_seed(0)
-    batch_size = 2
-    dim = 24
-    dstate = 8
+    # batch_size = 2
+    # dim = 24
+    # dstate = 8
     is_complex = wtype == torch.complex64
     A = (-0.5 * torch.rand(dim, dstate, device=device, dtype=wtype)).requires_grad_()
     if not is_variable_B:
