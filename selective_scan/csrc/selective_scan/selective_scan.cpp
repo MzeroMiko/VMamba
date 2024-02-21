@@ -27,14 +27,6 @@ using weight_t = float;
         AT_ERROR(#NAME, " not implemented for input type '", toString(ITYPE), "'"); \
     }
 
-#define INT_SWITCH(INT, NAME, ...) [&] {                         \
-    if (INT == 2) {constexpr int NAME = 2; __VA_ARGS__(); }      \
-    else if (INT == 3) {constexpr int NAME = 3; __VA_ARGS__(); } \
-    else if (INT == 4) {constexpr int NAME = 4; __VA_ARGS__(); } \
-    else {constexpr int NAME = 1; __VA_ARGS__(); }               \
-}()                                                              \
-
-
 template<int knrows, typename input_t, typename weight_t>
 void selective_scan_fwd_cuda(SSMParamsBase &params, cudaStream_t stream);
 
@@ -195,8 +187,8 @@ selective_scan_fwd(const at::Tensor &u, const at::Tensor &delta,
     const int dstate = A.size(1);
     const int n_groups = B.size(1);
 
-    TORCH_CHECK(dim % (n_groups * nrows) == 0, "dims should be dividable by n_groups * nrows");
-    TORCH_CHECK(dstate <= MAX_DSTATE / nrows, "selective_scan only supports state dimension <= 256 / nrows");
+    TORCH_CHECK(dim % n_groups == 0, "dims should be dividable by n_groups");
+    TORCH_CHECK(dstate <= MAX_DSTATE, "selective_scan only supports state dimension <= 256");
 
     CHECK_SHAPE(u, batch_size, dim, seqlen);
     CHECK_SHAPE(delta, batch_size, dim, seqlen);
@@ -240,9 +232,7 @@ selective_scan_fwd(const at::Tensor &u, const at::Tensor &delta,
     at::cuda::CUDAGuard device_guard{(char)u.get_device()};
     auto stream = at::cuda::getCurrentCUDAStream().stream();
     DISPATCH_ITYPE_FLOAT_AND_HALF_AND_BF16(u.scalar_type(), "selective_scan_fwd", [&] {
-        INT_SWITCH(nrows, kNRows, [&] {
-            selective_scan_fwd_cuda<kNRows, input_t, weight_t>(params, stream);
-        });
+        selective_scan_fwd_cuda<1, input_t, weight_t>(params, stream);
     });
     std::vector<at::Tensor> result = {out, x};
     return result;
@@ -286,8 +276,8 @@ selective_scan_bwd(const at::Tensor &u, const at::Tensor &delta,
     const int dstate = A.size(1);
     const int n_groups = B.size(1);
 
-    TORCH_CHECK(dim % (n_groups * nrows) == 0, "dims should be dividable by n_groups * nrows");
-    TORCH_CHECK(dstate <= MAX_DSTATE / nrows, "selective_scan only supports state dimension <= 256 / nrows");
+    TORCH_CHECK(dim % n_groups == 0, "dims should be dividable by n_groups");
+    TORCH_CHECK(dstate <= MAX_DSTATE, "selective_scan only supports state dimension <= 256");
     
     CHECK_SHAPE(u, batch_size, dim, seqlen);
     CHECK_SHAPE(delta, batch_size, dim, seqlen);
@@ -352,10 +342,7 @@ selective_scan_bwd(const at::Tensor &u, const at::Tensor &delta,
     at::cuda::CUDAGuard device_guard{(char)u.get_device()};
     auto stream = at::cuda::getCurrentCUDAStream().stream();
     DISPATCH_ITYPE_FLOAT_AND_HALF_AND_BF16(u.scalar_type(), "selective_scan_bwd", [&] {
-        // constexpr int kNRows = 1;
-        INT_SWITCH(nrows, kNRows, [&] {
-            selective_scan_bwd_cuda<kNRows, input_t, weight_t>(params, stream);
-        });
+        selective_scan_bwd_cuda<1, input_t, weight_t>(params, stream);
     });
     std::vector<at::Tensor> result = {du, ddelta, dA, dB.to(B.dtype()), dC.to(C.dtype()), dD, ddelta_bias};
     return result;
