@@ -7,7 +7,7 @@
 #include <torch/extension.h>
 #include <vector>
 
-#include "selective_scan.h"
+#include "selective_scan_ndstate.h"
 #define MAX_DSTATE 256
 
 #define CHECK_SHAPE(x, ...) TORCH_CHECK(x.sizes() == torch::IntArrayRef({__VA_ARGS__}), #x " must have shape (" #__VA_ARGS__ ")")
@@ -38,7 +38,6 @@ void set_ssm_params_fwd(SSMParamsBase &params,
                         const size_t batch,
                         const size_t dim,
                         const size_t seqlen,
-                        const size_t dstate,
                         const size_t n_groups,
                         const size_t n_chunks,
                         // device pointers
@@ -59,7 +58,6 @@ void set_ssm_params_fwd(SSMParamsBase &params,
     params.batch = batch;
     params.dim = dim;
     params.seqlen = seqlen;
-    params.dstate = dstate;
     params.n_groups = n_groups;
     params.n_chunks = n_chunks;
     params.dim_ngroups_ratio = dim / n_groups;
@@ -79,13 +77,10 @@ void set_ssm_params_fwd(SSMParamsBase &params,
 
     // All stride are in elements, not bytes.
     params.A_d_stride = A.stride(0);
-    params.A_dstate_stride = A.stride(1);
     params.B_batch_stride = B.stride(0);
     params.B_group_stride = B.stride(1);
-    params.B_dstate_stride = B.stride(2);
     params.C_batch_stride = C.stride(0);
     params.C_group_stride = C.stride(1);
-    params.C_dstate_stride = C.stride(2);
     params.u_batch_stride = u.stride(0);
     params.u_d_stride = u.stride(1);
     params.delta_batch_stride = delta.stride(0);
@@ -100,7 +95,6 @@ void set_ssm_params_bwd(SSMParamsBwd &params,
                         const size_t batch,
                         const size_t dim,
                         const size_t seqlen,
-                        const size_t dstate,
                         const size_t n_groups,
                         const size_t n_chunks,
                         // device pointers
@@ -123,7 +117,7 @@ void set_ssm_params_bwd(SSMParamsBwd &params,
                         void* ddelta_bias_ptr,
                         bool delta_softplus) {
     // Pass in "dout" instead of "out", we're not gonna use "out" unless we have z
-    set_ssm_params_fwd(params, batch, dim, seqlen, dstate, n_groups, n_chunks,
+    set_ssm_params_fwd(params, batch, dim, seqlen, n_groups, n_chunks,
                        u, delta, A, B, C, dout,
                        D_ptr, delta_bias_ptr, x_ptr, delta_softplus);
 
@@ -140,13 +134,10 @@ void set_ssm_params_bwd(SSMParamsBwd &params,
     params.dout_batch_stride = dout.stride(0);
     params.dout_d_stride = dout.stride(1);
     params.dA_d_stride = dA.stride(0);
-    params.dA_dstate_stride = dA.stride(1);
     params.dB_batch_stride = dB.stride(0);
     params.dB_group_stride = dB.stride(1);
-    params.dB_dstate_stride = dB.stride(2);
     params.dC_batch_stride = dC.stride(0);
     params.dC_group_stride = dC.stride(1);
-    params.dC_dstate_stride = dC.stride(2);
     params.du_batch_stride = du.stride(0);
     params.du_d_stride = du.stride(1);
     params.ddelta_batch_stride = ddelta.stride(0);
@@ -184,18 +175,16 @@ selective_scan_fwd(const at::Tensor &u, const at::Tensor &delta,
     const int batch_size = sizes[0];
     const int dim = sizes[1];
     const int seqlen = sizes[2];
-    const int dstate = A.size(1);
     const int n_groups = B.size(1);
 
     TORCH_CHECK(dim % n_groups == 0, "dims should be dividable by n_groups");
-    TORCH_CHECK(dstate <= MAX_DSTATE, "selective_scan only supports state dimension <= 256");
 
     CHECK_SHAPE(u, batch_size, dim, seqlen);
     CHECK_SHAPE(delta, batch_size, dim, seqlen);
-    CHECK_SHAPE(A, dim, dstate);
-    CHECK_SHAPE(B, batch_size, n_groups, dstate, seqlen);
+    CHECK_SHAPE(A, dim);
+    CHECK_SHAPE(B, batch_size, n_groups, seqlen);
     TORCH_CHECK(B.stride(-1) == 1 || B.size(-1) == 1);
-    CHECK_SHAPE(C, batch_size, n_groups, dstate, seqlen);
+    CHECK_SHAPE(C, batch_size, n_groups, seqlen);
     TORCH_CHECK(C.stride(-1) == 1 || C.size(-1) == 1);
 
     if (D_.has_value()) {
@@ -217,10 +206,10 @@ selective_scan_fwd(const at::Tensor &u, const at::Tensor &delta,
     const int n_chunks = (seqlen + 2048 - 1) / 2048; // max is 128 * 16 = 2048 in fwd_kernel
     at::Tensor out = torch::empty_like(delta);
     at::Tensor x;
-    x = torch::empty({batch_size, dim, n_chunks, dstate * 2}, u.options().dtype(weight_type));
+    x = torch::empty({batch_size, dim, n_chunks, 1 * 2}, u.options().dtype(weight_type));
 
     SSMParamsBase params;
-    set_ssm_params_fwd(params, batch_size, dim, seqlen, dstate, n_groups, n_chunks,
+    set_ssm_params_fwd(params, batch_size, dim, seqlen, n_groups, n_chunks,
                        u, delta, A, B, C, out,
                        D_.has_value() ? D_.value().data_ptr() : nullptr,
                        delta_bias_.has_value() ? delta_bias_.value().data_ptr() : nullptr,
@@ -232,7 +221,6 @@ selective_scan_fwd(const at::Tensor &u, const at::Tensor &delta,
     at::cuda::CUDAGuard device_guard{(char)u.get_device()};
     auto stream = at::cuda::getCurrentCUDAStream().stream();
     DISPATCH_ITYPE_FLOAT_AND_HALF_AND_BF16(u.scalar_type(), "selective_scan_fwd", [&] {
-        printf("ssssssssss");
         selective_scan_fwd_cuda<1, input_t, weight_t>(params, stream);
     });
     std::vector<at::Tensor> result = {out, x};
@@ -274,18 +262,16 @@ selective_scan_bwd(const at::Tensor &u, const at::Tensor &delta,
     const int batch_size = sizes[0];
     const int dim = sizes[1];
     const int seqlen = sizes[2];
-    const int dstate = A.size(1);
     const int n_groups = B.size(1);
 
     TORCH_CHECK(dim % n_groups == 0, "dims should be dividable by n_groups");
-    TORCH_CHECK(dstate <= MAX_DSTATE, "selective_scan only supports state dimension <= 256");
     
     CHECK_SHAPE(u, batch_size, dim, seqlen);
     CHECK_SHAPE(delta, batch_size, dim, seqlen);
-    CHECK_SHAPE(A, dim, dstate);
-    CHECK_SHAPE(B, batch_size, n_groups, dstate, seqlen);
+    CHECK_SHAPE(A, dim);
+    CHECK_SHAPE(B, batch_size, n_groups, seqlen);
     TORCH_CHECK(B.stride(-1) == 1 || B.size(-1) == 1);
-    CHECK_SHAPE(C, batch_size, n_groups, dstate, seqlen);
+    CHECK_SHAPE(C, batch_size, n_groups, seqlen);
     TORCH_CHECK(C.stride(-1) == 1 || C.size(-1) == 1);
     CHECK_SHAPE(dout, batch_size, dim, seqlen);
 
@@ -314,7 +300,7 @@ selective_scan_bwd(const at::Tensor &u, const at::Tensor &delta,
         TORCH_CHECK(x.scalar_type() == weight_type);
         TORCH_CHECK(x.is_cuda());
         TORCH_CHECK(x.is_contiguous());
-        CHECK_SHAPE(x, batch_size, dim, n_chunks, 2 * dstate);
+        CHECK_SHAPE(x, batch_size, dim, n_chunks, 2 * 1);
     }
 
     at::Tensor du = torch::empty_like(u);
@@ -328,7 +314,7 @@ selective_scan_bwd(const at::Tensor &u, const at::Tensor &delta,
     if (delta_bias_.has_value()) { ddelta_bias = torch::zeros_like(delta_bias_.value()); }
 
     SSMParamsBwd params;
-    set_ssm_params_bwd(params, batch_size, dim, seqlen, dstate, n_groups, n_chunks,
+    set_ssm_params_bwd(params, batch_size, dim, seqlen, n_groups, n_chunks,
                        u, delta, A, B, C, out,
                        D_.has_value() ? D_.value().data_ptr() : nullptr,
                        delta_bias_.has_value() ? delta_bias_.value().data_ptr() : nullptr,
@@ -343,6 +329,7 @@ selective_scan_bwd(const at::Tensor &u, const at::Tensor &delta,
     at::cuda::CUDAGuard device_guard{(char)u.get_device()};
     auto stream = at::cuda::getCurrentCUDAStream().stream();
     DISPATCH_ITYPE_FLOAT_AND_HALF_AND_BF16(u.scalar_type(), "selective_scan_bwd", [&] {
+        printf("ssssssssss");
         selective_scan_bwd_cuda<1, input_t, weight_t>(params, stream);
     });
     std::vector<at::Tensor> result = {du, ddelta, dA, dB.to(B.dtype()), dC.to(C.dtype()), dD, ddelta_bias};

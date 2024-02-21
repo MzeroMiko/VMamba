@@ -37,9 +37,9 @@ def get_cuda_bare_metal_version(cuda_dir):
 
     return raw_output, bare_metal_version
 
-MODE = "nstate"
-MODE = "nrow"
-# MODE = "nonrow"
+MODE = "ndstate"
+# MODE = "nrow"
+MODE = "nonrow"
 
 def get_ext():
     ext_modules = []
@@ -87,10 +87,10 @@ def get_ext():
             "csrc/selective_scan/cusnrow/selective_scan_core_bwd3.cu",
             "csrc/selective_scan/cusnrow/selective_scan_core_bwd4.cu",
         ],
-        nstate=[
-            "csrc/selective_scan/selective_scan.cpp",
-            "csrc/selective_scan/cus/selective_scan_core_fwd.cu",
-            "csrc/selective_scan/cus/selective_scan_core_bwd.cu",
+        ndstate=[
+            "csrc/selective_scan/selective_scan_ndstate.cpp",
+            "csrc/selective_scan/cusndstate/selective_scan_core_fwd.cu",
+            "csrc/selective_scan/cusndstate/selective_scan_core_bwd.cu",
         ],
     ).get(MODE, None)
 

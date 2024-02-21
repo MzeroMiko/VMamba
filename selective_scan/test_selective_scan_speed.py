@@ -225,14 +225,15 @@ def test_speed():
     has_delta_bias = True
     varBC_groups = 2
     seqlen = 4096
-    seqlen = 128
-    seqlen = 64
+    # seqlen = 128
+    # seqlen = 64
     batch_size = 128
     dim = 24
     dim = 96
-    dim = 384
-    dim = 768
+    # dim = 384
+    # dim = 768
     dstate = 8
+    dstate = 1
     # dstate = 24
     delta_softplus = True
     is_complex = wtype == torch.complex64

@@ -59,6 +59,12 @@ def build_selective_scan_fn(selective_scan_cuda: object = None, mode="mamba_ssm"
                 out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows)
             elif MODE in ["sstest"]:
                 out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, z, delta_bias, delta_softplus, nrows)
+            elif MODE in ["sscorendstate"]:
+                assert A.shape[-1] == 1 and B.shape[2] == 1 and C.shape[2] == 1
+                A = A.view(-1)
+                B = B.squeeze(2)
+                C = C.squeeze(2)
+                out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus, 1)
             else:
                 raise NotImplementedError
 
@@ -104,6 +110,13 @@ def build_selective_scan_fn(selective_scan_cuda: object = None, mode="mamba_ssm"
                 du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda.bwd(
                     u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus, ctx.backnrows
                 )
+            elif MODE in ["sscorendstate"]:
+                du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda.bwd(
+                    u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus, 1
+                )
+                dA = dA.unsqueeze(1)
+                dB = dB.unsqueeze(2)
+                dC = dC.unsqueeze(2)
             else:
                 raise NotImplementedError
             
@@ -214,9 +227,10 @@ def selective_scan_ref(u, delta, A, B, C, D=None, z=None, delta_bias=None, delta
 # MODE = "sscore"
 # MODE = "sstest"
 MODE = "mamba_ssm_sscore" # 1344 items pass
+MODE = "mamba_ssm_sscorendstate" # 1344 items pass
 
 if MODE in ["mamba_ssm"]:
-    import selective_scan_cuda as selective_scan_cuda
+    import selective_scan_cuda
     selective_scan_fn = build_selective_scan_fn(selective_scan_cuda, mode=MODE)
     selective_scan_ref = selective_scan_ref
 elif MODE in ["sscore"]:
@@ -237,12 +251,15 @@ elif MODE in ["mamba_ssm_sstest"]:
     import selective_scan_cuda
     selective_scan_fn = build_selective_scan_fn(selective_scan_cuda_test, mode="sstest")
     selective_scan_ref = build_selective_scan_fn(selective_scan_cuda, mode="mamba_ssm")
+elif MODE in ["mamba_ssm_sscorendstate"]:
+    import selective_scan_cuda_core
+    import selective_scan_cuda
+    selective_scan_fn = build_selective_scan_fn(selective_scan_cuda_core, mode="sscorendstate")
+    selective_scan_ref = build_selective_scan_fn(selective_scan_cuda, mode="mamba_ssm")
 else:
     raise NotImplementedError
 
 print("use MODE:", MODE)
-import time; time.sleep(10)
-
 
 # @pytest.mark.parametrize('wtype', [torch.float32, torch.complex64])
 @pytest.mark.parametrize('wtype', [torch.float32])
@@ -263,7 +280,8 @@ import time; time.sleep(10)
 @pytest.mark.parametrize("nrows", [1, 2, 3, 4])
 @pytest.mark.parametrize("batch_size", [2])
 @pytest.mark.parametrize("dim", [24])
-@pytest.mark.parametrize("dstate", [8])
+# @pytest.mark.parametrize("dstate", [8])
+@pytest.mark.parametrize("dstate", [1])
 def test_selective_scan(is_variable_B, is_variable_C, varBC_groups, has_D, has_z, has_delta_bias,
                         delta_softplus, return_last_state, seqlen, itype, wtype, nrows, batch_size, dim, dstate):
     print(f'method: {selective_scan_cuda}')
@@ -376,5 +394,5 @@ def test_selective_scan(is_variable_B, is_variable_C, varBC_groups, has_D, has_z
     if has_delta_bias:
         assert torch.allclose(delta_bias.grad, delta_bias_ref.grad, rtol=rtolw, atol=atolw)
 
-
+test_selective_scan(True, True, 2, True, False, True, True, True, 64, torch.float32, torch.float32, 1, 2, 24, 1)
 
