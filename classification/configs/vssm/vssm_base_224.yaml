@@ -12,4 +12,5 @@ MODEL:
     MLP_RATIO: 0.0
     DOWNSAMPLE: "v1"
     PATCHEMBED: "v1"
+    # SSM_FORWARDTYPE: "v0" # if you want exactly the same
 
