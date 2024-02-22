@@ -808,13 +808,13 @@ class VSSM(nn.Module):
             sigmoid=nn.Sigmoid,
         )
 
-        if norm_layer.lower() in ["ln"]:
+        if isinstance(norm_layer, str) and norm_layer.lower() in ["ln"]:
             norm_layer: nn.Module = _NORMLAYERS[norm_layer.lower()]
 
-        if ssm_act_layer.lower() in ["silu", "gelu", "relu"]:
+        if isinstance(ssm_act_layer, str) and ssm_act_layer.lower() in ["silu", "gelu", "relu"]:
             ssm_act_layer: nn.Module = _ACTLAYERS[ssm_act_layer.lower()]
 
-        if mlp_act_layer.lower() in ["silu", "gelu", "relu"]:
+        if isinstance(mlp_act_layer, str) and mlp_act_layer.lower() in ["silu", "gelu", "relu"]:
             mlp_act_layer: nn.Module = _ACTLAYERS[mlp_act_layer.lower()]
 
         _make_patch_embed = dict(
