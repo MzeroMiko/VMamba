@@ -69,7 +69,7 @@ inspiration from the recently introduced state space model and propose the Visua
 
 | name | pretrain | resolution |acc@1 | #params | FLOPs | configs/logs/ckpts | best epoch | use ema |
 | :---: | :---: | :---: | :---: | :---: | :---: |:---: | :---: | :---: |
-| VMamba-T | ImageNet-1K | 224x224 | 82.5 | 32M | 5G | [config](https://github.com/MzeroMiko/VMamba/blob/main/classification/configs/vssm1/vssm_tiny_224_0220.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240220/vssmtiny_dp02_e258_ema.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240220/vssmtiny_dp02_ckpt_epoch_258.pth) | 258 | true |
+| VMamba-T | ImageNet-1K | 224x224 | 82.5 | 32M | 5G | [config](classification/configs/vssm1/vssm_tiny_224_0220.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240220/vssmtiny_dp02_e258_ema.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240220/vssmtiny_dp02_ckpt_epoch_258.pth) | 258 | true |
 
 
 * **Classification on ImageNet-1K**
@@ -82,10 +82,10 @@ inspiration from the recently introduced state space model and propose the Visua
 | Swin-T | ImageNet-1K | 224x224 | 81.2 | 28M | 4.5G | -- | -- | -- |
 | Swin-S | ImageNet-1K | 224x224 | 83.2 | 50M | 8.7G | -- | -- | -- |
 | Swin-B | ImageNet-1K | 224x224 | 83.5 | 88M | 15.4G | -- | -- | -- |
-| VMamba-T | ImageNet-1K | 224x224 | 82.2 | 22M | ~~4.5G~~ 5.6G | [config](https://github.com/MzeroMiko/VMamba/blob/main/classification/configs/vssm/vssm_tiny_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmtiny_dp01_e292_woema.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmtiny_dp01_ckpt_epoch_292.pth) | 292 | did'nt add |
-| VMamba-S | ImageNet-1K | 224x224 | 83.5 | 44M | ~~9.1G~~ 11.2G | [config](https://github.com/MzeroMiko/VMamba/blob/main/classification/configs/vssm/vssm_small_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmsmall_dp03_e238_ema.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmsmall_dp03_ckpt_epoch_238.pth) | 238 | true |
-| VMamba-B | ImageNet-1K | 224x224 | 83.2 | 75M | ~~15.2G~~ 18.0G | [config](https://github.com/MzeroMiko/VMamba/blob/main/classification/configs/vssm/vssm_base_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp05_e260_woema.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp05_ckpt_epoch_260.pth) | 260 | did'nt add |
-| VMamba-B* | ImageNet-1K | 224x224 | 83.7 | 75M | ~~15.2G~~ 18.0G | [config](https://github.com/MzeroMiko/VMamba/blob/main/classification/configs/vssm/vssm_base_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp06_e241_ema.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp06_ckpt_epoch_241.pth) | 241 | true |
+| VMamba-T | ImageNet-1K | 224x224 | 82.2 | 22M | ~~4.5G~~ 5.6G | [config](hclassification/configs/vssm/vssm_tiny_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmtiny_dp01_e292_woema.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmtiny_dp01_ckpt_epoch_292.pth) | 292 | did'nt add |
+| VMamba-S | ImageNet-1K | 224x224 | 83.5 | 44M | ~~9.1G~~ 11.2G | [config](classification/configs/vssm/vssm_small_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmsmall_dp03_e238_ema.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmsmall_dp03_ckpt_epoch_238.pth) | 238 | true |
+| VMamba-B | ImageNet-1K | 224x224 | 83.2 | 75M | ~~15.2G~~ 18.0G | [config](classification/configs/vssm/vssm_base_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp05_e260_woema.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp05_ckpt_epoch_260.pth) | 260 | did'nt add |
+| VMamba-B* | ImageNet-1K | 224x224 | 83.7 | 75M | ~~15.2G~~ 18.0G | [config](classification/configs/vssm/vssm_base_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp06_e241_ema.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp06_ckpt_epoch_241.pth) | 241 | true |
 
 *Most backbone models trained without ema, `which do not enhance performance \cite(Swin-Transformer)`. We use ema because our model is still under development.*
 
@@ -96,18 +96,18 @@ inspiration from the recently introduced state space model and propose the Visua
 
 * **Object Detection on COCO**
   
-| Backbone | #params | FLOPs | Detector | box mAP | mask mAP | checkpoints/logs |
-| :---: | :---: | :---: | :---: | :---: | :---: |:---: |
-| Swin-T | 48M | 267G | MaskRCNN@1x | 42.7| 39.3 |-- |
-| VMamba-T | 42M | 262G | MaskRCNN@1x | 46.5| 42.1 |[ckpt](https://drive.google.com/file/d/1SIQFPpXkVBPB4mx1VO9P9nH4ebvTH0W5/view?usp=sharing)/[log](https://drive.google.com/file/d/15nd3AZuOkHpqlZhVUEXilnsVzd1qn8Kc/view?usp=sharing) |
-| Swin-S | 69M | 354G | MaskRCNN@1x | 44.8| 40.9 |-- |
-| VMamba-S | 64M | 357G | MaskRCNN@1x | 48.2| 43.0 |[ckpt](https://drive.google.com/file/d/1LzytVo2wTKgOxyBadstzacslwol8Dvhq/view?usp=sharing)/[log](https://drive.google.com/file/d/1TbYZhban4VqC-9kQ8-kuZOPSBX484sSj/view?usp=sharing) |
-| Swin-B | 107M | 496G | MaskRCNN@1x | 46.9| 42.3 |-- |
-| VMamba-B | 96M | 482G | MaskRCNN@1x | 48.5| 43.1 |[ckpt](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main)/[log](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main) |
-| Swin-T | 48M | 267G | MaskRCNN@3x | 46.0| 41.6 |-- |
-| VMamba-T | 42M | 262G | MaskRCNN@3x | 48.5| 43.2 |[ckpt](https://drive.google.com/file/d/1SmsgM2SR_GbKjq1EkcLcQXCEIlPhA-_r/view?usp=sharing)/[log](https://drive.google.com/file/d/1EVUKFsPQI3bqelX7-WlTKFdToXjwmcXU/view?usp=sharing) |
-| Swin-S | 69M | 354G | MaskRCNN@3x | 48.2| 43.2 |-- |
-| VMamba-S | 64M | 357G | MaskRCNN@3x | 49.7| 44.0 |[ckpt](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main)/[log](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main) |
+| Backbone | #params | FLOPs | Detector | box mAP | mask mAP | configs/logs/ckpts | best epoch |
+| :---: | :---: | :---: | :---: | :---: | :---: |:---: |:---: |
+| Swin-T | 48M | 267G | MaskRCNN@1x | 42.7| 39.3 |-- |-- |
+| VMamba-T | 42M | 262G | MaskRCNN@1x | 46.5| 42.1 | [config](detection/configs/vssm/mask_rcnn_vssm_fpn_coco_tiny.py)/[log](https://drive.google.com/file/d/15nd3AZuOkHpqlZhVUEXilnsVzd1qn8Kc/view?usp=sharing)/[ckpt](https://drive.google.com/file/d/1SIQFPpXkVBPB4mx1VO9P9nH4ebvTH0W5/view?usp=sharing) | 12 |
+| Swin-S | 69M | 354G | MaskRCNN@1x | 44.8| 40.9 |-- |-- |
+| VMamba-S | 64M | 357G | MaskRCNN@1x | 48.2| 43.0 | [config](detection/configs/vssm/mask_rcnn_vssm_fpn_coco_small.py)/[log](https://drive.google.com/file/d/1TbYZhban4VqC-9kQ8-kuZOPSBX484sSj/view?usp=sharing)/[ckpt](https://drive.google.com/file/d/1LzytVo2wTKgOxyBadstzacslwol8Dvhq/view?usp=sharing) | 12 |
+| Swin-B | 107M | 496G | MaskRCNN@1x | 46.9| 42.3 |-- |-- |
+| VMamba-B | 96M | 482G | MaskRCNN@1x | 48.5| 43.1 | [config](detection/configs/vssm/mask_rcnn_vssm_fpn_coco_base.py)/[log](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main)/[ckpt](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main) | 12 |
+| Swin-T | 48M | 267G | MaskRCNN@3x | 46.0| 41.6 |-- |-- |
+| VMamba-T | 42M | 262G | MaskRCNN@3x | 48.5| 43.2 | [config](detection/configs/vssm/mask_rcnn_vssm_fpn_coco_tiny_ms_3x.py)/[log](https://drive.google.com/file/d/1EVUKFsPQI3bqelX7-WlTKFdToXjwmcXU/view?usp=sharing)/[ckpt](https://drive.google.com/file/d/1SmsgM2SR_GbKjq1EkcLcQXCEIlPhA-_r/view?usp=sharing) | 34 |
+| Swin-S | 69M | 354G | MaskRCNN@3x | 48.2| 43.2 |-- |-- |
+| VMamba-S | 64M | 357G | MaskRCNN@3x | 49.7| 44.0 | [config](detection/configs/vssm/mask_rcnn_vssm_fpn_coco_small_ms_3x.py)/[log](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main)/[ckpt](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main) | 34 |
 
 * **Semantic Segmentation on ADE20K**
 
@@ -197,7 +197,18 @@ python -m torch.distributed.launch --nnodes=1 --node_rank=0 --nproc_per_node=1 -
 
 **Detection and Segmentation:**
 
-For detection and segmentation tasks, follow similar steps provided by [`mmdetection`](https://mmdetection.readthedocs.io/en/latest/user_guides/train.html) and [`mmsegmentation`](https://mmsegmentation.readthedocs.io/en/latest/user_guides/4_train_test.html) with the appropriate config files from the `configs/vssm` directory.
+To evaluate with `mmdetection` or `mmsegmentation`:
+```bash
+bash ./tools/dist_test.sh </path/to/config> </path/to/checkpoint> 1
+```
+
+To train with `mmdetection` or `mmsegmentation`:
+```bash
+bash ./tools/dist_train.sh </path/to/config> 8
+```
+
+
+For more information about detection and segmentation tasks, follow similar steps provided by [`mmdetection`](https://mmdetection.readthedocs.io/en/latest/user_guides/train.html) and [`mmsegmentation`](https://mmsegmentation.readthedocs.io/en/latest/user_guides/4_train_test.html) with the appropriate config files from the `configs/vssm` directory.
 
 ### Analysis Tools
 
