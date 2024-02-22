@@ -1292,8 +1292,6 @@ def check_vssblock():
     ms = triton.testing.do_bench(fn, warmup=100)
     print(ms)
     import time; time.sleep(10000)
-    # 7.249664306640625
-    # 79.23916625976562
 
 
 def check_profile():
