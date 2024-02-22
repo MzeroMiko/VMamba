@@ -63,12 +63,16 @@ inspiration from the recently introduced state space model and propose the Visua
 
 ## Main Results
 
-We will release all the pre-trained models/logs in few days!
+* **Classification on ImageNet-1K with nightly builds!**
+
+| name | pretrain | resolution |acc@1 | #params | FLOPs | configs/logs/ckpts | best epoch | use ema |
+| :---: | :---: | :---: | :---: | :---: | :---: |:---: | :---: | :---: |
+| VMamba-T | ImageNet-1K | 224x224 | 82.5 | 32M | 5G | [config](https://github.com/MzeroMiko/VMamba/blob/main/classification/configs/vssm1/vssm_tiny_224_0220.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240220/vssmtiny_dp02_e258_ema.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240220/vssmtiny_dp02_ckpt_epoch_258.pth) | 258 | true |
+
 
 * **Classification on ImageNet-1K**
 
-
-| name | pretrain | resolution |acc@1 | #params | FLOPs | checkpoints/logs | best epoch | use ema |
+| name | pretrain | resolution |acc@1 | #params | FLOPs | configs/logs/ckpts | best epoch | use ema |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | DeiT-S | ImageNet-1K | 224x224 | 79.8 | 22M | 4.6G | -- | -- | -- |
 | DeiT-B | ImageNet-1K | 224x224 | 81.8 | 86M | 17.5G | -- | -- | -- |
@@ -76,14 +80,17 @@ We will release all the pre-trained models/logs in few days!
 | Swin-T | ImageNet-1K | 224x224 | 81.2 | 28M | 4.5G | -- | -- | -- |
 | Swin-S | ImageNet-1K | 224x224 | 83.2 | 50M | 8.7G | -- | -- | -- |
 | Swin-B | ImageNet-1K | 224x224 | 83.5 | 88M | 15.4G | -- | -- | -- |
-| VMamba-T | ImageNet-1K | 224x224 | 82.2 | 22M | ~~4.5G~~ 5.6G | [ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmtiny_dp01_ckpt_epoch_292.pth)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmtiny_dp01_e292_woema.log) | 292 | did'nt add |
-| VMamba-S | ImageNet-1K | 224x224 | 83.5 | 44M | ~~9.1G~~ 11.2G | [ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmsmall_dp03_ckpt_epoch_238.pth)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmsmall_dp03_e238_ema.log) | 238 | true |
-| VMamba-B | ImageNet-1K | 224x224 | 83.2 | 75M | ~~15.2G~~ 18.0G | [ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp05_ckpt_epoch_260.pth)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp05_e260_woema.log) | 260 | did'nt add |
-| VMamba-B* | ImageNet-1K | 224x224 | 83.7 | 75M | ~~15.2G~~ 18.0G | [ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp06_ckpt_epoch_241.pth)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp06_e241_ema.log) | 241 | true |
+| VMamba-T | ImageNet-1K | 224x224 | 82.2 | 22M | ~~4.5G~~ 5.6G | [config](https://github.com/MzeroMiko/VMamba/blob/main/classification/configs/vssm/vssm_tiny_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmtiny_dp01_e292_woema.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmtiny_dp01_ckpt_epoch_292.pth) | 292 | did'nt add |
+| VMamba-S | ImageNet-1K | 224x224 | 83.5 | 44M | ~~9.1G~~ 11.2G | [config](https://github.com/MzeroMiko/VMamba/blob/main/classification/configs/vssm/vssm_small_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmsmall_dp03_e238_ema.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmsmall_dp03_ckpt_epoch_238.pth) | 238 | true |
+| VMamba-B | ImageNet-1K | 224x224 | 83.2 | 75M | ~~15.2G~~ 18.0G | [config](https://github.com/MzeroMiko/VMamba/blob/main/classification/configs/vssm/vssm_base_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp05_e260_woema.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp05_ckpt_epoch_260.pth) | 260 | did'nt add |
+| VMamba-B* | ImageNet-1K | 224x224 | 83.7 | 75M | ~~15.2G~~ 18.0G | [config](https://github.com/MzeroMiko/VMamba/blob/main/classification/configs/vssm/vssm_base_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp06_e241_ema.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240218/vssmbase_dp06_ckpt_epoch_241.pth) | 241 | true |
 
 *Most backbone models trained without ema, `which do not enhance performance \cite(Swin-Transformer)`. We use ema because our model is still under development.*
 
 *The checkpoints used in object detection and segmentation is `VMamba-B with droppath 0.5` + `no ema`. `VMamba-B*` represents for `VMamba-B with droppath 0.6 + ema`, the performance of which is `non-ema: 83.3 in epoch 262;  ema: 83.7 in epoch 241`. If you are about to use VMamba-B in downstream tasks, try `VMamba-B*` rather than `VMamba-B`, as it is supposed to perform better.*
+
+
+
 
 * **Object Detection on COCO**
   
@@ -177,20 +184,18 @@ pip install timm==0.4.12 fvcore packaging -->
 To train VMamba models for classification on ImageNet, use the following commands for different configurations:
 
 ```bash
-# For VMamba Tiny
-python -m torch.distributed.launch --nnodes=1 --node_rank=0 --nproc_per_node=8 --master_addr="127.0.0.1" --master_port=29501 main.py --cfg configs/vssm/vssm_tiny_224.yaml --batch-size 128 --data-path /dataset/ImageNet2012 --output /tmp
+python -m torch.distributed.launch --nnodes=1 --node_rank=0 --nproc_per_node=8 --master_addr="127.0.0.1" --master_port=29501 main.py --cfg </path/to/config> --batch-size 128 --data-path </path/of/dataset> --output /tmp
+```
 
-# For VMamba Small
-python -m torch.distributed.launch --nnodes=1 --node_rank=0 --nproc_per_node=8 --master_addr="127.0.0.1" --master_port=29501 main.py --cfg configs/vssm/vssm_small_224.yaml --batch-size 128 --data-path /dataset/ImageNet2012 --output /tmp
+If you only want to test the performance (together with params and flops):
 
-# For VMamba Base
-python -m torch.distributed.launch --nnodes=1 --node_rank=0 --nproc_per_node=8 --master_addr="127.0.0.1" --master_port=29501 main.py --cfg configs/vssm/vssm_base_224.yaml --batch-size 128 --data-path /dataset/ImageNet2012 --output /tmp
-
+```bash
+python -m torch.distributed.launch --nnodes=1 --node_rank=0 --nproc_per_node=1 --master_addr="127.0.0.1" --master_port=29501 main.py --cfg </path/to/config> --batch-size 128 --data-path </path/of/dataset> --output /tmp --pretrained </path/of/checkpoint>
 ```
 
 **Detection and Segmentation:**
 
-For detection and segmentation tasks, follow similar steps using the appropriate config files from the `configs/vssm` directory. Adjust the `--cfg`, `--data-path`, and `--output` parameters according to your dataset and desired output location.
+For detection and segmentation tasks, follow similar steps provided by [`mmdetection`](https://mmdetection.readthedocs.io/en/latest/user_guides/train.html) and [`mmsegmentation`](https://mmsegmentation.readthedocs.io/en/latest/user_guides/4_train_test.html) with the appropriate config files from the `configs/vssm` directory.
 
 ### Analysis Tools
 
@@ -199,9 +204,6 @@ VMamba includes tools for analyzing the effective receptive field, FLOPs, loss, 
 ```bash
 # Analyze the effective receptive field
 CUDA_VISIBLE_DEVICES=0 python analyze/get_erf.py > analyze/show/erf/get_erf.log 2>&1
-
-# Analyze FLOPs
-CUDA_VISIBLE_DEVICES=0 python analyze/get_flops.py > analyze/show/flops/flops.log 2>&1
 
 # Analyze loss
 CUDA_VISIBLE_DEVICES=0 python analyze/get_loss.py
