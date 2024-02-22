@@ -1285,9 +1285,16 @@ def check_vssblock():
     fn = lambda :trans(inp2)
     ms = triton.testing.do_bench(fn, warmup=100)
     print(ms)
+    fn = lambda :vb(inp).sum().backward()
+    ms = triton.testing.do_bench(fn, warmup=100)
+    print(ms)
+    fn = lambda :trans(inp2).sum().backward()
+    ms = triton.testing.do_bench(fn, warmup=100)
+    print(ms)
     import time; time.sleep(10000)
     # 7.249664306640625
     # 79.23916625976562
+
 
 def check_profile():
     vss = VSSM(depths=[1], dims=1024).half().cuda()
