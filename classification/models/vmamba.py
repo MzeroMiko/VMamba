@@ -1244,6 +1244,51 @@ def check_vssm1_equals_vssm(forward_type="v0"):
     print("init miss align", miss_align) # init miss align 0
 
 
+def check_vssblock():
+    import triton
+    from torchvision.models.vision_transformer import EncoderBlock
+
+    vb = VSSBlock(
+        hidden_dim=16, 
+        drop_path=0.0, 
+        norm_layer=nn.LayerNorm, 
+        ssm_d_state=1, 
+        ssm_ratio=2, 
+        ssm_rank_ratio=-1, 
+        ssm_dt_rank="auto", 
+        ssm_act_layer=nn.SiLU,
+        ssm_conv=3, 
+        ssm_conv_bias=False, 
+        ssm_drop_rate=0.0, 
+        ssm_simple_init=True, 
+        forward_type="v2", 
+        mlp_ratio=4, 
+        mlp_act_layer=nn.GELU, 
+        mlp_drop_rate=0.0, 
+        use_checkpoint=False,
+    ).cuda()
+    
+    trans = EncoderBlock(
+        num_heads=1, 
+        hidden_dim=16, 
+        mlp_dim=int(4.0 * 16), 
+        dropout=0.0, 
+        attention_dropout=0.0, 
+        norm_layer=nn.LayerNorm,
+    ).cuda()
+
+    inp = torch.randn((16, 128, 128, 16)).cuda().requires_grad_()
+    inp2 = inp.detach().cuda().view(16, -1, 16).requires_grad_()
+    fn = lambda :vb(inp)
+    ms = triton.testing.do_bench(fn, warmup=100)
+    print(ms)
+    fn = lambda :trans(inp2)
+    ms = triton.testing.do_bench(fn, warmup=100)
+    print(ms)
+    import time; time.sleep(10000)
+    # 7.249664306640625
+    # 79.23916625976562
+
 def check_profile():
     vss = VSSM(depths=[1], dims=1024).half().cuda()
     input = torch.randn((128, 3, 56, 56)).half().cuda()
@@ -1414,6 +1459,7 @@ def load22kto1k():
 
 
 if __name__ == "__main__":
+    check_vssblock()
     check_vssm_equals_vmambadp()
     check_vssm1_equals_vssm(forward_type="v0")
     check_vssm1_equals_vssm(forward_type="v0_seq")
