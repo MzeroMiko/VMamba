@@ -111,16 +111,16 @@ inspiration from the recently introduced state space model and propose the Visua
 
 * **Semantic Segmentation on ADE20K**
 
-| Backbone | Input|  #params | FLOPs | Segmentor | mIoU(SS) | mIoU(MS) | configs/logs/ckpts | best iter |
+| Backbone | Input|  #params | FLOPs | Segmentor | mIoU(SS) | mIoU(MS) | configs/logs/logs(ms)/ckpts | best iter |
 | :---: | :---: | :---: | :---: | :---: | :---: |:---: |:---: |:---: |
 | Swin-T | 512x512 | 60M | 945G | UperNet@160k | 44.4| 45.8| -- | -- |
-| VMamba-T| 512x512 | 55M | 939G | UperNet@160k | 47.3| 48.3| [config]()/[log](https://drive.google.com/file/d/17nh9_hdF9QQxyqj81U86HoGUnMxZQ4nN/view?usp=sharing)/[ckpt](https://drive.google.com/file/d/1hLAGFBRJfaFSzyPlqsGbKXXN_gQJMLzn/view?usp=sharing) | 160000 |
+| VMamba-T| 512x512 | 55M | 939G | UperNet@160k | 47.3| 48.3| [config](segmentation/configs/vssm/upernet_vssm_4xb4-160k_ade20k-512x512_tiny.py)/[log](https://drive.google.com/file/d/17nh9_hdF9QQxyqj81U86HoGUnMxZQ4nN/view?usp=sharing)/[ckpt](https://drive.google.com/file/d/1hLAGFBRJfaFSzyPlqsGbKXXN_gQJMLzn/view?usp=sharing) | 160000 |
 | Swin-S | 512x512 | 81M | 1039G | UperNet@160k | 47.6| 49.5| -- | -- |
-| VMamba-S| 512x512 | 76M | 1037G | UperNet@160k | 49.5| 50.5|[config]()/[log](https://drive.google.com/file/d/1m-Pd4_kPgF6Dt2E33sfIf_g9jVWxfPnG/view?usp=sharing)/[ckpt](https://drive.google.com/file/d/18GReI1A6LckwnPrnEFPXp9at7VB8GiJW/view?usp=sharing) | 160000 |
+| VMamba-S| 512x512 | 76M | 1037G | UperNet@160k | 49.5| 50.5|[config](segmentation/configs/vssm/upernet_vssm_4xb4-160k_ade20k-512x512_small.py)/[log](https://drive.google.com/file/d/1m-Pd4_kPgF6Dt2E33sfIf_g9jVWxfPnG/view?usp=sharing)/[ckpt](https://drive.google.com/file/d/18GReI1A6LckwnPrnEFPXp9at7VB8GiJW/view?usp=sharing) | 160000 |
 | Swin-B | 512x512 | 121M | 1188G | UperNet@160k | 48.1| 49.7|-- |
-| VMamba-B| 512x512 | 110M | 1167G | UperNet@160k | 50.0| 51.3|[config]()/[log](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main)/[ckpt](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main) | 128000 |
+| VMamba-B| 512x512 | 110M | 1167G | UperNet@160k | 50.0| 51.3|[config](segmentation/configs/vssm/upernet_vssm_4xb4-160k_ade20k-512x512_base.py)/[log](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main)/[ckpt](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main) | 128000 |
 | Swin-S | 640x640 | 81M | 1614G | UperNet@160k | 47.9| 48.8| -- | -- |
-| VMamba-S| 640x640 | 76M | 1620G | UperNet@160k | 50.8| 50.8| [config]()/[log](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main)/[ckpt](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main) | -- |
+| VMamba-S| 640x640 | 76M | 1620G | UperNet@160k | 50.8| 50.8| [config](segmentation/configs/vssm/upernet_vssm_4xb4-160k_ade20k-640x640_small.py)/[log](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main)/[ckpt](https://huggingface.co/sunsmarterjieleaf/VMamba/tree/main) | 112000 |
 
 
 
@@ -201,6 +201,7 @@ To evaluate with `mmdetection` or `mmsegmentation`:
 ```bash
 bash ./tools/dist_test.sh </path/to/config> </path/to/checkpoint> 1
 ```
+*use `--tta` to get the `mIoU(ms)` in segmentation*
 
 To train with `mmdetection` or `mmsegmentation`:
 ```bash
