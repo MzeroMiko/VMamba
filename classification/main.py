@@ -92,6 +92,8 @@ def parse_option():
     parser.add_argument('--model_ema_decay', type=float, default=0.9999, help='')
     parser.add_argument('--model_ema_force_cpu', type=str2bool, default=False, help='')
 
+    parser.add_argument('--memory_limit_rate', type=float, default=-1, help='limitation of gpu memory use')
+
     args, unparsed = parser.parse_known_args()
 
     config = get_config(args)
@@ -408,5 +410,10 @@ if __name__ == '__main__':
     # print config
     logger.info(config.dump())
     logger.info(json.dumps(vars(args)))
+
+    if args.memory_limit_rate > 0 and args.memory_limit_rate < 1:
+        torch.cuda.set_per_process_memory_fraction(args.memory_limit_rate)
+        usable_memory = torch.cuda.get_device_properties(0).total_memory * args.memory_limit_rate / 1e6
+        print(f"===========> GPU memory is limited to {usable_memory}MB", flush=True)
 
     main(config)
