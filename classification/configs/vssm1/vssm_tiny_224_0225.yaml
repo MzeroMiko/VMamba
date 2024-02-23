@@ -9,8 +9,7 @@ MODEL:
     SSM_DT_RANK: "auto"
     SSM_RATIO: 2.0
     SSM_CONV: 3
-    # SSM_CONV_BIAS: false
-    # SSM_SIMPLE_INIT: true
+    SSM_CONV_BIAS: false
     MLP_RATIO: -1.0
     DOWNSAMPLE: "v3"
     PATCHEMBED: "v2"
