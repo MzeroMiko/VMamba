@@ -283,8 +283,7 @@ def cross_selective_scan(
     y: torch.Tensor = CrossMerge.apply(ys)
 
     if out_norm_shape in ["v1"]: # (B, C, H, W)
-        y = out_norm(y.view(B, -1, H, W)).view(B, -1, L)
-        y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
+        y = out_norm(y.view(B, -1, H, W)).permute(0, 2, 3, 1) # (B, H, W, C)
     else: # (B, L, C)
         y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
         y = out_norm(y).view(B, H, W, -1)
@@ -632,7 +631,7 @@ class SS2D(nn.Module):
             x, self.x_proj_weight, None, self.dt_projs_weight, self.dt_projs_bias,
             self.A_logs, self.Ds, 
             out_norm=getattr(self, "out_norm", None),
-            out_norm_shape=getattr("out_norm_shape", "v0"),
+            out_norm_shape=getattr(self, "out_norm_shape", "v0"),
             nrows=nrows, delta_softplus=True, force_fp32=self.training,
         )
         if self.ssm_low_rank:
