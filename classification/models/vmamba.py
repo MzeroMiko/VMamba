@@ -373,7 +373,10 @@ class SS2D(nn.Module):
             forward_type = forward_type[:-len("nozact")]
 
         # softmax | sigmoid | dwconv | norm ===========================
-        if forward_type[-len("dwconv3"):] == "dwconv3":
+        if forward_type[-len("none"):] == "none":
+            forward_type = forward_type[:-len("none")]
+            self.out_norm = nn.Identity()
+        elif forward_type[-len("dwconv3"):] == "dwconv3":
             forward_type = forward_type[:-len("dwconv3")]
             self.out_norm = nn.Conv2d(d_inner, d_inner, kernel_size=3, padding=1, groups=d_inner, bias=False)
             self.out_norm_shape = "v1"
