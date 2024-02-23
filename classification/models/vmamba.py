@@ -229,6 +229,7 @@ def cross_selective_scan(
     A_logs: torch.Tensor=None,
     Ds: torch.Tensor=None,
     out_norm: torch.nn.Module=None,
+    out_norm_shape="v0",
     nrows = -1,
     delta_softplus = True,
     to_dtype=True,
@@ -280,8 +281,13 @@ def cross_selective_scan(
     ).view(B, K, -1, H, W)
     
     y: torch.Tensor = CrossMerge.apply(ys)
-    y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
-    y = out_norm(y).view(B, H, W, -1)
+
+    if out_norm_shape in ["v1"]: # (B, C, H, W)
+        y = out_norm(y.view(B, -1, H, W)).view(B, -1, L)
+        y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
+    else: # (B, L, C)
+        y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
+        y = out_norm(y).view(B, H, W, -1)
 
     return (y.to(x.dtype) if to_dtype else y)
 
@@ -367,8 +373,12 @@ class SS2D(nn.Module):
         if self.disable_z_act:
             forward_type = forward_type[:-len("nozact")]
 
-        # softmax | sigmoid | norm ===========================
-        if forward_type[-len("softmax"):] == "softmax":
+        # softmax | sigmoid | dwconv | norm ===========================
+        if forward_type[-len("dwconv3"):] == "dwconv3":
+            forward_type = forward_type[:-len("dwconv3")]
+            self.out_norm = nn.Conv2d(d_inner, d_inner, kernel_size=3, padding=1, groups=d_inner)
+            self.out_norm_shape = "v1"
+        elif forward_type[-len("softmax"):] == "softmax":
             forward_type = forward_type[:-len("softmax")]
             self.out_norm = nn.Softmax(dim=1)
         elif forward_type[-len("sigmoid"):] == "sigmoid":
@@ -620,7 +630,9 @@ class SS2D(nn.Module):
             x = self.in_rank(x)
         x = cross_selective_scan(
             x, self.x_proj_weight, None, self.dt_projs_weight, self.dt_projs_bias,
-            self.A_logs, self.Ds, getattr(self, "out_norm", None),
+            self.A_logs, self.Ds, 
+            out_norm=getattr(self, "out_norm", None),
+            out_norm_shape=getattr("out_norm_shape", "v0"),
             nrows=nrows, delta_softplus=True, force_fp32=self.training,
         )
         if self.ssm_low_rank:
