@@ -120,7 +120,8 @@ def print_jit_input_names(inputs):
 class SelectiveScan(torch.autograd.Function):
     
     @staticmethod
-    @torch.cuda.amp.custom_fwd(cast_inputs=torch.float32)
+    # @torch.cuda.amp.custom_fwd(cast_inputs=torch.float32)
+    @torch.cuda.amp.custom_fwd
     def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, nrows=1):
         assert nrows in [1, 2, 3, 4], f"{nrows}" # 8+ is too slow to compile
         assert u.shape[1] % (B.shape[1] * nrows) == 0, f"{nrows}, {u.shape}, {B.shape}"
