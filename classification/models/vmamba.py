@@ -368,6 +368,11 @@ class SS2D(nn.Module):
         self.d_state = math.ceil(d_model / 6) if d_state == "auto" else d_state # 20240109
         self.d_conv = d_conv
 
+        # disable z ======================================
+        self.disable_z = forward_type[-len("noz"):] == "noz"
+        if self.disable_z:
+            forward_type = forward_type[:-len("noz")]
+
         # disable z act ======================================
         self.disable_z_act = forward_type[-len("nozact"):] == "nozact"
         if self.disable_z_act:
@@ -403,7 +408,8 @@ class SS2D(nn.Module):
         self.K2 = self.K if forward_type not in ["share_a"] else 1
 
         # in proj =======================================
-        self.in_proj = nn.Linear(d_model, d_expand * 2, bias=bias, **factory_kwargs)
+        d_proj = d_expand if self.disable_z else (d_expand * 2)
+        self.in_proj = nn.Linear(d_model, d_proj, bias=bias, **factory_kwargs)
         self.act: nn.Module = act_layer()
         
         # conv =======================================
@@ -650,22 +656,18 @@ class SS2D(nn.Module):
         return x
     
     def forward(self, x: torch.Tensor, **kwargs):
-        xz = self.in_proj(x)
-        if self.d_conv > 1:
-            x, z = xz.chunk(2, dim=-1) # (b, h, w, d)
+        x = self.in_proj(x)
+        if not self.disable_z:
+            x, z = x.chunk(2, dim=-1) # (b, h, w, d)
             if not self.disable_z_act:
                 z = self.act(z)
+        if self.d_conv > 0:
             x = x.permute(0, 3, 1, 2).contiguous()
-            x = self.act(self.conv2d(x)) # (b, d, h, w)
-        else:
-            if self.disable_z_act:
-                x, z = xz.chunk(2, dim=-1) # (b, h, w, d)
-                x = self.act(x)
-            else:
-                xz = self.act(xz)
-                x, z = xz.chunk(2, dim=-1) # (b, h, w, d)
+            x = self.conv2d(x) # (b, d, h, w)
+        x = self.act(x)
         y = self.forward_core(x, channel_first=(self.d_conv > 1))
-        y = y * z
+        if not self.disable_z:
+            y = y * z
         out = self.dropout(self.out_proj(y))
         return out
 

@@ -10,7 +10,6 @@ MODEL:
     SSM_RATIO: 2.0
     SSM_CONV: 3
     SSM_CONV_BIAS: false
-    SSM_INIT: "v2"
-    MLP_RATIO: 4.0
+    MLP_RATIO: 3.0
     DOWNSAMPLE: "v3"
     PATCHEMBED: "v2"
