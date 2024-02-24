@@ -351,7 +351,7 @@ class SS2D(nn.Module):
         dt_init="random",
         dt_scale=1.0,
         dt_init_floor=1e-4,
-        simple_init=False,
+        initialize="v0",
         # ======================
         forward_type="v2",
         # ======================
@@ -432,30 +432,37 @@ class SS2D(nn.Module):
         ]
         self.x_proj_weight = nn.Parameter(torch.stack([t.weight for t in self.x_proj], dim=0)) # (K, N, inner)
         del self.x_proj
-
-        # dt proj ============================
-        self.dt_projs = [
-            self.dt_init(self.dt_rank, d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs)
-            for _ in range(self.K)
-        ]
-        self.dt_projs_weight = nn.Parameter(torch.stack([t.weight for t in self.dt_projs], dim=0)) # (K, inner, rank)
-        self.dt_projs_bias = nn.Parameter(torch.stack([t.bias for t in self.dt_projs], dim=0)) # (K, inner)
-        del self.dt_projs
         
-        # A, D =======================================
-        self.A_logs = self.A_log_init(self.d_state, d_inner, copies=self.K2, merge=True) # (K * D, N)
-        self.Ds = self.D_init(d_inner, copies=self.K2, merge=True) # (K * D)
-
         # out proj =======================================
         self.out_proj = nn.Linear(d_expand, d_model, bias=bias, **factory_kwargs)
         self.dropout = nn.Dropout(dropout) if dropout > 0. else nn.Identity()
 
-        if simple_init:
+        if initialize in ["v0"]:
+            # dt proj ============================
+            self.dt_projs = [
+                self.dt_init(self.dt_rank, d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs)
+                for _ in range(self.K)
+            ]
+            self.dt_projs_weight = nn.Parameter(torch.stack([t.weight for t in self.dt_projs], dim=0)) # (K, inner, rank)
+            self.dt_projs_bias = nn.Parameter(torch.stack([t.bias for t in self.dt_projs], dim=0)) # (K, inner)
+            del self.dt_projs
+            
+            # A, D =======================================
+            self.A_logs = self.A_log_init(self.d_state, d_inner, copies=self.K2, merge=True) # (K * D, N)
+            self.Ds = self.D_init(d_inner, copies=self.K2, merge=True) # (K * D)
+        elif initialize in ["v1"]:
             # simple init dt_projs, A_logs, Ds
             self.Ds = nn.Parameter(torch.ones((self.K2 * d_inner)))
             self.A_logs = nn.Parameter(torch.randn((self.K2 * d_inner, self.d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
             self.dt_projs_weight = nn.Parameter(torch.randn((self.K, d_inner, self.dt_rank)))
             self.dt_projs_bias = nn.Parameter(torch.randn((self.K, d_inner))) 
+        elif initialize in ["v2"]:
+            # simple init dt_projs, A_logs, Ds
+            self.Ds = nn.Parameter(torch.ones((self.K2 * d_inner)))
+            self.A_logs = nn.Parameter(torch.zeros((self.K2 * d_inner, self.d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
+            self.dt_projs_weight = nn.Parameter(torch.randn((self.K, d_inner, self.dt_rank)))
+            self.dt_projs_bias = nn.Parameter(torch.randn((self.K, d_inner)))
+        
 
     @staticmethod
     def dt_init(dt_rank, d_inner, dt_scale=1.0, dt_init="random", dt_min=0.001, dt_max=0.1, dt_init_floor=1e-4, **factory_kwargs):
@@ -708,7 +715,7 @@ class VSSBlock(nn.Module):
         ssm_conv: int = 3,
         ssm_conv_bias=True,
         ssm_drop_rate: float = 0,
-        ssm_simple_init=False,
+        ssm_init="v0",
         forward_type="v2",
         # =============================
         mlp_ratio=4.0,
@@ -744,7 +751,7 @@ class VSSBlock(nn.Module):
                 # dt_init="random",
                 # dt_scale="random",
                 # dt_init_floor=1e-4,
-                simple_init=ssm_simple_init,
+                initialize=ssm_init,
                 # ==========================
                 forward_type=forward_type,
             )
@@ -787,7 +794,7 @@ class VSSM(nn.Module):
         ssm_conv=3,
         ssm_conv_bias=True,
         ssm_drop_rate=0.0, 
-        ssm_simple_init=False,
+        ssm_init="v0",
         forward_type="v2",
         # =========================
         mlp_ratio=4.0,
@@ -868,7 +875,7 @@ class VSSM(nn.Module):
                 ssm_conv=ssm_conv,
                 ssm_conv_bias=ssm_conv_bias,
                 ssm_drop_rate=ssm_drop_rate,
-                ssm_simple_init=ssm_simple_init,
+                ssm_init=ssm_init,
                 forward_type=forward_type,
                 # =================
                 mlp_ratio=mlp_ratio,
@@ -961,7 +968,7 @@ class VSSM(nn.Module):
         ssm_conv=3,
         ssm_conv_bias=True,
         ssm_drop_rate=0.0, 
-        ssm_simple_init=False,
+        ssm_init="v0",
         forward_type="v2",
         # ===========================
         mlp_ratio=4.0,
@@ -984,7 +991,7 @@ class VSSM(nn.Module):
                 ssm_conv=ssm_conv,
                 ssm_conv_bias=ssm_conv_bias,
                 ssm_drop_rate=ssm_drop_rate,
-                ssm_simple_init=ssm_simple_init,
+                ssm_init=ssm_init,
                 forward_type=forward_type,
                 mlp_ratio=mlp_ratio,
                 mlp_act_layer=mlp_act_layer,
@@ -1275,7 +1282,7 @@ def check_vssblock():
         ssm_conv=3, 
         ssm_conv_bias=False, 
         ssm_drop_rate=0.0, 
-        ssm_simple_init=True, 
+        ssm_init="v0", 
         forward_type="v2", 
         mlp_ratio=4, 
         mlp_act_layer=nn.GELU, 

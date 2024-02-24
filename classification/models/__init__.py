@@ -34,7 +34,7 @@ def build_vssm_model(config, is_pretrain=False):
             ssm_conv=config.MODEL.VSSM.SSM_CONV,
             ssm_conv_bias=config.MODEL.VSSM.SSM_CONV_BIAS,
             ssm_drop_rate=config.MODEL.VSSM.SSM_DROP_RATE,
-            ssm_simple_init=config.MODEL.VSSM.SSM_SIMPLE_INIT,
+            ssm_init=config.MODEL.VSSM.SSM_INIT,
             forward_type=config.MODEL.VSSM.SSM_FORWARDTYPE,
             # ===================
             mlp_ratio=config.MODEL.VSSM.MLP_RATIO,
