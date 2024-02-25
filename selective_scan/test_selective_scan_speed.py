@@ -229,9 +229,10 @@ def selective_scan_ref(u, delta, A, B, C, D=None, z=None, delta_bias=None, delta
 
 def test_speed():
     MODE = "sscore"
-    MODE = "sscorendstate"
+    # MODE = "sscorendstate"
     wtype = torch.float32
     itype = torch.float32
+    itype = torch.float16
     is_variable_B = True
     is_variable_C = True
     has_D = True
