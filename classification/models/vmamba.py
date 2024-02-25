@@ -468,8 +468,7 @@ class SS2D(nn.Module):
             self.A_logs = nn.Parameter(torch.zeros((self.K2 * d_inner, self.d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
             self.dt_projs_weight = nn.Parameter(torch.randn((self.K, d_inner, self.dt_rank)))
             self.dt_projs_bias = nn.Parameter(torch.randn((self.K, d_inner)))
-        
-
+    
     @staticmethod
     def dt_init(dt_rank, d_inner, dt_scale=1.0, dt_init="random", dt_min=0.001, dt_max=0.1, dt_init_floor=1e-4, **factory_kwargs):
         dt_proj = nn.Linear(dt_rank, d_inner, bias=True, **factory_kwargs)
