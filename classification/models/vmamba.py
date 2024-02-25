@@ -118,32 +118,31 @@ def print_jit_input_names(inputs):
 # cross selective scan ===============================
 
 class SelectiveScan(torch.autograd.Function):
-    
+    # comment all checks if inside cross_selective_scan
     @staticmethod
-    # @torch.cuda.amp.custom_fwd(cast_inputs=torch.float32)
     @torch.cuda.amp.custom_fwd
     def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, nrows=1):
-        assert nrows in [1, 2, 3, 4], f"{nrows}" # 8+ is too slow to compile
-        assert u.shape[1] % (B.shape[1] * nrows) == 0, f"{nrows}, {u.shape}, {B.shape}"
+        # assert nrows in [1, 2, 3, 4], f"{nrows}" # 8+ is too slow to compile
+        # assert u.shape[1] % (B.shape[1] * nrows) == 0, f"{nrows}, {u.shape}, {B.shape}"
         ctx.delta_softplus = delta_softplus
         ctx.nrows = nrows
         # all in float
-        if u.stride(-1) != 1:
-            u = u.contiguous()
-        if delta.stride(-1) != 1:
-            delta = delta.contiguous()
-        if D is not None and D.stride(-1) != 1:
-            D = D.contiguous()
-        if B.stride(-1) != 1:
-            B = B.contiguous()
-        if C.stride(-1) != 1:
-            C = C.contiguous()
-        if B.dim() == 3:
-            B = B.unsqueeze(dim=1)
-            ctx.squeeze_B = True
-        if C.dim() == 3:
-            C = C.unsqueeze(dim=1)
-            ctx.squeeze_C = True
+        # if u.stride(-1) != 1:
+        #     u = u.contiguous()
+        # if delta.stride(-1) != 1:
+        #     delta = delta.contiguous()
+        # if D is not None and D.stride(-1) != 1:
+        #     D = D.contiguous()
+        # if B.stride(-1) != 1:
+        #     B = B.contiguous()
+        # if C.stride(-1) != 1:
+        #     C = C.contiguous()
+        # if B.dim() == 3:
+        #     B = B.unsqueeze(dim=1)
+        #     ctx.squeeze_B = True
+        # if C.dim() == 3:
+        #     C = C.unsqueeze(dim=1)
+        #     ctx.squeeze_C = True
         
         if SSMODE == "mamba_ssm":
             out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, None, delta_bias, delta_softplus)
@@ -171,8 +170,8 @@ class SelectiveScan(torch.autograd.Function):
                 # u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus, ctx.nrows,
             )
         
-        dB = dB.squeeze(1) if getattr(ctx, "squeeze_B", False) else dB
-        dC = dC.squeeze(1) if getattr(ctx, "squeeze_C", False) else dC
+        # dB = dB.squeeze(1) if getattr(ctx, "squeeze_B", False) else dB
+        # dC = dC.squeeze(1) if getattr(ctx, "squeeze_C", False) else dC
         return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None)
 
 
@@ -368,7 +367,12 @@ class SS2D(nn.Module):
         self.d_state = math.ceil(d_model / 6) if d_state == "auto" else d_state # 20240109
         self.d_conv = d_conv
 
-        # disable z ======================================
+        # disable force float32 ==============================
+        self.disable_force32 = forward_type[-len("no32"):] == "no32"
+        if self.disable_force32:
+            forward_type = forward_type[:-len("no32")]
+
+        # disable z ==========================================
         self.disable_z = forward_type[-len("noz"):] == "noz"
         if self.disable_z:
             forward_type = forward_type[:-len("noz")]
@@ -639,6 +643,7 @@ class SS2D(nn.Module):
 
     def forward_corev2(self, x: torch.Tensor, nrows=-1, channel_first=False):
         nrows = 1
+        force_fp32 = (self.training and (not self.disable_force32))
         if not channel_first:
             x = x.permute(0, 3, 1, 2).contiguous()
         if self.ssm_low_rank:
@@ -648,7 +653,7 @@ class SS2D(nn.Module):
             self.A_logs, self.Ds, 
             out_norm=getattr(self, "out_norm", None),
             out_norm_shape=getattr(self, "out_norm_shape", "v0"),
-            nrows=nrows, delta_softplus=True, force_fp32=self.training,
+            nrows=nrows, delta_softplus=True, force_fp32=force_fp32,
         )
         if self.ssm_low_rank:
             x = self.out_rank(x)
