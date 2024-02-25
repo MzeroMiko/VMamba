@@ -176,7 +176,9 @@ def draw_fig(data: list, xlim=(0, 301), ylim=(68, 84), xstep=None,ystep=None, sa
     plot.savefig(save_path)
 
 
-def main_vssm():
+# =====================================
+
+def main_vssm_():
     logpath = os.path.join(os.path.dirname(__file__), "../../logs")
     showpath = os.path.join(os.path.dirname(__file__), "./show/log")
     
@@ -327,7 +329,7 @@ def main_vssm():
         ], xlim=(10, 300), ylim=(2,5), save_path=f"{showpath}/loss_vssmd.jpg")
 
 
-def main_heat():
+def main_heat_():
     logpath = os.path.join(os.path.dirname(__file__), "../../logs")
     showpath = os.path.join(os.path.dirname(__file__), "./show/log")
     
@@ -461,85 +463,135 @@ def main_heatwzz():
         ], xlim=(10, 300), ylim=(2,5), save_path=f"{showpath}/loss_heatwzz.jpg")
 
 
-def main_heat2():
-    logpath = os.path.join(os.path.dirname(__file__), "../../logs")
-    showpath = os.path.join(os.path.dirname(__file__), "./show/log")
+# =====================================
+def main_vssm():
+    results = {}
+    logpath = os.path.join(os.path.dirname(__file__), "../../ckpts/private/classification/vssm/")
+    showpath = os.path.join(os.path.dirname(__file__), "../../ckpts/private/classification/vssm/fig")
+
+    files = dict(
+        ti = f"{logpath}/vssmtiny/vmamba_tiny_dp01_e292_woema.log",
+        sm = f"{logpath}/vssmsmall/vmamba_small_dp03_e238_ema.log",
+        ba = f"{logpath}/vssmbase/vmamba_base_dp06_e241_ema.log",
+        ba05 = f"{logpath}/vssmbasedp05/vmamba_base_dp05_e260_woema.log",
+    )
     
-    # baseline ===
-    swin_tiny = f"{logpath}/swin_tiny_224_b16x64_300e_imagenet_20210616_090925.json"
-    swin_small = f"{logpath}/swin_small_224_b16x64_300e_imagenet_20210615_110219.json"
-    swin_base = f"{logpath}/swin_base_224_b16x64_300e_imagenet_20210616_190742.json"
-    convnext_baseline = f"{logpath}/convnext_modelarts-job-68076d57-44e0-4fa8-afac-cea5b1ef12f2-worker-0.log"
+    for name, file in files.items():
+        x, accs, emaaccs = get_acc_swin(file, split_ema=True)
+        lx, losses, avglosses = get_loss_swin(file, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
+        file = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+        results.update({name: file})
 
-    heat_mini = f"{logpath}/h2/heat_mini_dp005.log"
-    heat_tiny = f"{logpath}/h2/heat_tiny.log"
-    heat_small = f"{logpath}/h2/heat_small.log"
-    heat_base = f"{logpath}/h2/heat_base.log"
+    draw_fig(data=[
+        *[dict(x=file['xaxis'], y=file['accs']['acc1'], label=name) for name, file in results.items()], 
+        *[dict(x=file['xaxis'], y=file['emaaccs']['acc1'], label=f"{name}_ema") for name, file in results.items()],
+    ], xlim=(30, 300), ylim=(60, 85), xstep=5, ystep=0.5, save_path=f"{showpath}/acc.jpg")
+
+    draw_fig(data=[
+        *[dict(x=file['loss_xaxis'], y=file['avglosses'], label=name)  for name, file in results.items()],
+    ], xlim=(10, 300), ylim=(2,5), save_path=f"{showpath}/loss.jpg")
     
-    # =====================================================================
-    x, accs, emaaccs = get_acc_mmpretrain(swin_tiny)
-    lx, losses, avglosses = get_loss_mmpretrain(swin_tiny)
-    swin_tiny = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
 
-    x, accs, emaaccs = get_acc_mmpretrain(swin_small)
-    lx, losses, avglosses = get_loss_mmpretrain(swin_small)
-    swin_small = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+def main_vssmd():
+    results = {}
+    logpath = os.path.join(os.path.dirname(__file__), "../../ckpts/private/classification/vssmd/")
+    showpath = os.path.join(os.path.dirname(__file__), "../../ckpts/private/classification/vssmd/fig")
 
-    x, accs, emaaccs = get_acc_mmpretrain(swin_base)
-    lx, losses, avglosses = get_loss_mmpretrain(swin_base)
-    swin_base = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+    files = dict(
+        ti = f"{logpath}/vssmdtiny/default/log_rank0.txt",
+        sm = f"{logpath}/vssmdsmall/default/log_rank0.txt",
+        ba = f"{logpath}/vssmdbase/default/log_rank0.txt",
+    )
+    
+    for name, file in files.items():
+        x, accs, emaaccs = get_acc_swin(file, split_ema=True)
+        lx, losses, avglosses = get_loss_swin(file, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
+        file = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+        results.update({name: file})
 
-    x, accs, emaaccs = get_acc_convnext(convnext_baseline)
-    lx, losses, avglosses = get_loss_convnext(convnext_baseline)
-    convnext_baseline = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+    draw_fig(data=[
+        *[dict(x=file['xaxis'], y=file['accs']['acc1'], label=name) for name, file in results.items()], 
+        *[dict(x=file['xaxis'], y=file['emaaccs']['acc1'], label=f"{name}_ema") for name, file in results.items()],
+    ], xlim=(30, 300), ylim=(60, 85), xstep=5, ystep=0.5, save_path=f"{showpath}/acc.jpg")
 
-    x, accs, emaaccs = get_acc_swin(heat_mini, split_ema=True)
-    lx, losses, avglosses = get_loss_swin(heat_mini, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
-    heat_mini = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+    draw_fig(data=[
+        *[dict(x=file['loss_xaxis'], y=file['avglosses'], label=name)  for name, file in results.items()],
+    ], xlim=(10, 300), ylim=(2,5), save_path=f"{showpath}/loss.jpg")
+    
 
-    x, accs, emaaccs = get_acc_swin(heat_tiny, split_ema=True)
-    lx, losses, avglosses = get_loss_swin(heat_tiny, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
-    heat_tiny = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+def main_heat():
+    results = {}
+    logpath = os.path.join(os.path.dirname(__file__), "../../ckpts/private/classification/heat/")
+    showpath = os.path.join(os.path.dirname(__file__), "../../ckpts/private/classification/heat/fig")
 
-    x, accs, emaaccs = get_acc_swin(heat_small, split_ema=True)
-    lx, losses, avglosses = get_loss_swin(heat_small, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
-    heat_small = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+    files = dict(
+        mi = f"{logpath}/heat_mini/log_rank0.txt",
+        ti = f"{logpath}/heat_tiny/log_rank0.txt",
+        sm = f"{logpath}/heat_small/log_rank0.txt",
+        ba = f"{logpath}/heat_base/log_rank0.txt",
+        tiso = f"{logpath}/heat_tiny_softmax/log_rank0.txt",
+    )
+    
+    for name, file in files.items():
+        x, accs, emaaccs = get_acc_swin(file, split_ema=True)
+        lx, losses, avglosses = get_loss_swin(file, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
+        file = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+        results.update({name: file})
 
-    x, accs, emaaccs = get_acc_swin(heat_base, split_ema=True)
-    lx, losses, avglosses = get_loss_swin(heat_base, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
-    heat_base = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+    draw_fig(data=[
+        *[dict(x=file['xaxis'], y=file['accs']['acc1'], label=name) for name, file in results.items()], 
+        *[dict(x=file['xaxis'], y=file['emaaccs']['acc1'], label=f"{name}_ema") for name, file in results.items()],
+    ], xlim=(30, 300), ylim=(60, 85), xstep=5, ystep=0.5, save_path=f"{showpath}/acc.jpg")
 
-    if True:
-        draw_fig(data=[
-            dict(x=swin_tiny['xaxis'], y=swin_tiny['accs']['acc1'], label="swin_tiny"),
-            dict(x=swin_small['xaxis'], y=swin_small['accs']['acc1'], label="swin_small"),
-            dict(x=swin_base['xaxis'], y=swin_base['accs']['acc1'], label="swin_base"),
-            dict(x=heat_mini['xaxis'], y=heat_mini['accs']['acc1'], label="heat_mini"),
-            dict(x=heat_tiny['xaxis'], y=heat_tiny['accs']['acc1'], label="heat_tiny"),
-            dict(x=heat_small['xaxis'], y=heat_small['accs']['acc1'], label="heat_small"),
-            dict(x=heat_base['xaxis'], y=heat_base['accs']['acc1'], label="heat_base"),
-            # ======================================================================
-            dict(x=heat_mini['xaxis'], y=heat_mini['emaaccs']['acc1'], label="heat_mini_ema"),
-            dict(x=heat_tiny['xaxis'], y=heat_tiny['emaaccs']['acc1'], label="heat_tiny_ema"),
-            dict(x=heat_small['xaxis'], y=heat_small['emaaccs']['acc1'], label="heat_small_ema"),
-            dict(x=heat_base['xaxis'], y=heat_base['emaaccs']['acc1'], label="heat_base_ema"),
-            # ======================================================================
-        ], xlim=(30, 300), ylim=(60, 85), xstep=5, ystep=0.5, save_path=f"{showpath}/acc_heat2.jpg")
+    draw_fig(data=[
+        *[dict(x=file['loss_xaxis'], y=file['avglosses'], label=name)  for name, file in results.items()],
+    ], xlim=(10, 300), ylim=(2,5), save_path=f"{showpath}/loss.jpg")
+    
 
-    if True:
-        draw_fig(data=[
-            dict(x=swin_tiny['loss_xaxis'], y=swin_tiny['avglosses'], label="swin_tiny"),
-            dict(x=swin_small['loss_xaxis'], y=swin_small['avglosses'], label="swin_small"),
-            dict(x=swin_base['loss_xaxis'], y=swin_base['avglosses'], label="swin_base"),
-            # ======================================================================
-            dict(x=heat_mini['loss_xaxis'], y=heat_mini['avglosses'], label="heat_mini"),
-            dict(x=heat_tiny['loss_xaxis'], y=heat_tiny['avglosses'], label="heat_tiny"),
-            dict(x=heat_small['loss_xaxis'], y=heat_small['avglosses'], label="heat_small"),
-            dict(x=heat_base['loss_xaxis'], y=heat_base['avglosses'], label="heat_base"),
-            # ======================================================================
-        ], xlim=(10, 300), ylim=(2,5), save_path=f"{showpath}/loss_heat2.jpg")
+def main_vssm1():
+    results = {}
+    logpath = os.path.join(os.path.dirname(__file__), "../../ckpts/private/classification/vssm1/")
+    showpath = os.path.join(os.path.dirname(__file__), "../../ckpts/private/classification/vssm1/vssm1tifig")
+
+    files = dict(
+        # ti1 = f"{logpath}/vssm_tiny_224_1.log",
+        # ti1v1 = f"{logpath}/vssm_tiny_224_1v1.log",
+        # ti0211 = f"{logpath}/vssm_tiny_224_0211.log",
+        # ti0211v1 = f"{logpath}/vssm_tiny_224_0211v1.log",
+        # ti0212 = f"{logpath}/vssm_tiny_224_0212.log",
+        # ti0213 = f"{logpath}/vssm_tiny_224_0213.log",
+        # ti0215 = f"{logpath}/vssm_tiny_224_0215.log",
+        # ti0216 = f"{logpath}/vssm_tiny_224_0216.log",
+        # ti0217 = f"{logpath}/vssm_tiny_224_0217.log",
+        # ti0218 = f"{logpath}/vssm_tiny_224_0218.log",
+        # ti0219 = f"{logpath}/vssm_tiny_224_0219.log",
+        ti0220 = f"{logpath}/vssm_tiny_224_0220.log",
+        ti0221 = f"{logpath}/vssm_tiny_224_0221.log",
+        ti0222 = f"{logpath}/vssm_tiny_224_0222.log",
+        ti0223 = f"{logpath}/vssm_tiny_224_0223.log",
+        ti0225 = f"{logpath}/vssm_tiny_224_0225.log",
+    )
+    
+    for name, file in files.items():
+        x, accs, emaaccs = get_acc_swin(file, split_ema=True)
+        lx, losses, avglosses = get_loss_swin(file, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
+        file = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
+        results.update({name: file})
+
+    draw_fig(data=[
+        *[dict(x=file['xaxis'], y=file['accs']['acc1'], label=name) for name, file in results.items()], 
+        *[dict(x=file['xaxis'], y=file['emaaccs']['acc1'], label=f"{name}_ema") for name, file in results.items()],
+    ], xlim=(30, 300), ylim=(60, 85), xstep=5, ystep=0.5, save_path=f"{showpath}/acc.jpg")
+
+    draw_fig(data=[
+        *[dict(x=file['loss_xaxis'], y=file['avglosses'], label=name)  for name, file in results.items()],
+    ], xlim=(10, 300), ylim=(2,5), save_path=f"{showpath}/loss.jpg")
 
 
 if __name__ == "__main__":
-    main_heat2()
+    ...
+    # main_vssm()
+    # main_vssmd()
+    # main_heat()
+    # main_vssm1()
 
