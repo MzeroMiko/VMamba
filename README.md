@@ -13,7 +13,7 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 </div>
 
 ## Updates
-* **` Feb. 26th, 2024`:** Improvement: we now support flexible output of `selective scan`. Try `SelectiveScanOflex` with float16 input and float32 output to enjoy that feature!
+* **` Feb. 26th, 2024`:** Improvement: we now support flexible output of `selective scan`. That means whatever type the input is, the output can always be float32. The feature is useful as when training with float16, the loss often get nan due to the overflow over float16. In the meantime, training with float32 costs more time. Input with float16 and output with float32 can be fast, but in the meantime, the loss is less likely to be NaN.   Try `SelectiveScanOflex` with float16 input and float32 output to enjoy that feature!
 
 * **` Feb. 22th, 2024`:** Pre-Release: we set a pre-release to share nightly-build checkpoints in classificaion. Feel free to enjoy those new features with faster code and higher performance! 
 
