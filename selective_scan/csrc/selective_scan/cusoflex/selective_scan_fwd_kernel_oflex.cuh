@@ -33,9 +33,9 @@ struct Selective_Scan_fwd_kernel_traits {
     static_assert(kNItems % kNElts == 0);
     static constexpr int kNLoads = kNItems / kNElts;
     static constexpr bool kIsEvenLen = kIsEvenLen_;
-
     static constexpr bool kDirectIO = kIsEvenLen && kNLoads == 1;
-
+    static constexpr int kNLoadsOutput = sizeof(output_t) * kNLoads / kNBytes;
+    static constexpr bool kDirectIOOutput = kDirectIO && (kNLoadsOutput == 1);
     using vec_t = typename BytesToType<kNBytes * kNElts>::Type;
     using scan_t = float2;
     using BlockLoadT = cub::BlockLoad<input_t, kNThreads, kNItems, cub::BLOCK_LOAD_WARP_TRANSPOSE>;
@@ -47,6 +47,9 @@ struct Selective_Scan_fwd_kernel_traits {
     using BlockStoreT = cub::BlockStore<input_t, kNThreads, kNItems, cub::BLOCK_STORE_WARP_TRANSPOSE>;
     using BlockStoreVecT = cub::BlockStore<vec_t, kNThreads, kNLoads,
         !kDirectIO ? cub::BLOCK_STORE_WARP_TRANSPOSE : cub::BLOCK_STORE_DIRECT>;
+    using BlockStoreOutputT = cub::BlockStore<output_t, kNThreads, kNItems, cub::BLOCK_STORE_WARP_TRANSPOSE>;
+    using BlockStoreOutputVecT = cub::BlockStore<vec_t, kNThreads, kNLoadsOutput,
+        !kDirectIOOutput ? cub::BLOCK_STORE_WARP_TRANSPOSE  : cub::BLOCK_STORE_DIRECT>;
     // using BlockScanT = cub::BlockScan<scan_t, kNThreads, cub::BLOCK_SCAN_RAKING_MEMOIZE>;
     // using BlockScanT = cub::BlockScan<scan_t, kNThreads, cub::BLOCK_SCAN_RAKING>;
     using BlockScanT = cub::BlockScan<scan_t, kNThreads, cub::BLOCK_SCAN_WARP_SCANS>;
@@ -55,7 +58,9 @@ struct Selective_Scan_fwd_kernel_traits {
                                                  2 * sizeof(typename BlockLoadWeightT::TempStorage),
                                                  2 * sizeof(typename BlockLoadWeightVecT::TempStorage),
                                                  sizeof(typename BlockStoreT::TempStorage),
-                                                 sizeof(typename BlockStoreVecT::TempStorage)});
+                                                 sizeof(typename BlockStoreVecT::TempStorage),
+                                                 sizeof(typename BlockStoreOutputT::TempStorage),
+                                                 sizeof(typename BlockStoreOutputVecT::TempStorage)});
     static constexpr int kSmemSize = kSmemIOSize + sizeof(typename BlockScanT::TempStorage);
 };
 
@@ -76,6 +81,7 @@ void selective_scan_fwd_kernel(SSMParamsBase params) {
     auto& smem_load_weight = reinterpret_cast<typename Ktraits::BlockLoadWeightT::TempStorage&>(smem_);
     auto& smem_load_weight1 = *reinterpret_cast<typename Ktraits::BlockLoadWeightT::TempStorage*>(smem_ + sizeof(typename Ktraits::BlockLoadWeightT::TempStorage));
     auto& smem_store = reinterpret_cast<typename Ktraits::BlockStoreT::TempStorage&>(smem_);
+    auto& smem_store1 = reinterpret_cast<typename Ktraits::BlockStoreOutputT::TempStorage&>(smem_);
     auto& smem_scan = *reinterpret_cast<typename Ktraits::BlockScanT::TempStorage*>(smem_ + Ktraits::kSmemIOSize);
     scan_t *smem_running_prefix = reinterpret_cast<scan_t *>(smem_ + Ktraits::kSmemSize);
 
@@ -130,9 +136,8 @@ void selective_scan_fwd_kernel(SSMParamsBase params) {
             weight_t B_vals[kNItems], C_vals[kNItems];
             load_weight<Ktraits>(Bvar + state_idx * params.B_dstate_stride, B_vals,
                     smem_load_weight, (params.seqlen - chunk * kChunkSize));
-            auto &smem_load_weight_C = smem_load_weight1;
             load_weight<Ktraits>(Cvar + state_idx * params.C_dstate_stride, C_vals,
-                    smem_load_weight_C, (params.seqlen - chunk * kChunkSize));
+                    smem_load_weight1, (params.seqlen - chunk * kChunkSize));
             __syncthreads();
             scan_t thread_data[kNItems];
             #pragma unroll
@@ -168,7 +173,7 @@ void selective_scan_fwd_kernel(SSMParamsBase params) {
         output_t *out = reinterpret_cast<output_t *>(params.out_ptr) + batch_id * params.out_batch_stride
             + dim_id * params.out_d_stride + chunk * kChunkSize;
         __syncthreads();
-        store_output_ot<Ktraits, output_t>(out, out_vals, smem_store, params.seqlen - chunk * kChunkSize);
+        store_output1<Ktraits>(out, out_vals, smem_store1, params.seqlen - chunk * kChunkSize);
         Bvar += kChunkSize;
         Cvar += kChunkSize;
     }

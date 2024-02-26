@@ -128,9 +128,8 @@ void selective_scan_fwd_kernel(SSMParamsBase params) {
             weight_t B_vals[kNItems], C_vals[kNItems];
             load_weight<Ktraits>(Bvar + state_idx * params.B_dstate_stride, B_vals,
                     smem_load_weight, (params.seqlen - chunk * kChunkSize));
-            auto &smem_load_weight_C = smem_load_weight1;
             load_weight<Ktraits>(Cvar + state_idx * params.C_dstate_stride, C_vals,
-                    smem_load_weight_C, (params.seqlen - chunk * kChunkSize));
+                    smem_load_weight1, (params.seqlen - chunk * kChunkSize));
             __syncthreads();
             scan_t thread_data[kNItems];
             #pragma unroll

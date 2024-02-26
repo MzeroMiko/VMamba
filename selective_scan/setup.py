@@ -37,12 +37,10 @@ def get_cuda_bare_metal_version(cuda_dir):
 
     return raw_output, bare_metal_version
 
-# MODE = "nrow"
-MODE = "nonrow"
-# MODE = "ndstate"
+# MODES = ["core", "ndstate", "oflex"]
+MODES = ["core", "ndstate", "oflex", "nrow"]
 
 def get_ext():
-    ext_modules = []
     cc_flag = []
 
     print("\n\ntorch.__version__  = {}\n\n".format(torch.__version__))
@@ -71,13 +69,13 @@ def get_ext():
         torch._C._GLIBCXX_USE_CXX11_ABI = True
 
     sources = dict(
-        nonrow=[
-            "csrc/selective_scan/selective_scan.cpp",
+        core=[
+            "csrc/selective_scan/cus/selective_scan.cpp",
             "csrc/selective_scan/cus/selective_scan_core_fwd.cu",
             "csrc/selective_scan/cus/selective_scan_core_bwd.cu",
         ],
         nrow=[
-            "csrc/selective_scan/selective_scan_nrow.cpp",
+            "csrc/selective_scan/cusnrow/selective_scan_nrow.cpp",
             "csrc/selective_scan/cusnrow/selective_scan_core_fwd.cu",
             "csrc/selective_scan/cusnrow/selective_scan_core_fwd2.cu",
             "csrc/selective_scan/cusnrow/selective_scan_core_fwd3.cu",
@@ -88,16 +86,28 @@ def get_ext():
             "csrc/selective_scan/cusnrow/selective_scan_core_bwd4.cu",
         ],
         ndstate=[
-            "csrc/selective_scan/selective_scan_ndstate.cpp",
+            "csrc/selective_scan/cusndstate/selective_scan_ndstate.cpp",
             "csrc/selective_scan/cusndstate/selective_scan_core_fwd.cu",
             "csrc/selective_scan/cusndstate/selective_scan_core_bwd.cu",
         ],
-    ).get(MODE, None)
+        oflex=[
+            "csrc/selective_scan/cusoflex/selective_scan_oflex.cpp",
+            "csrc/selective_scan/cusoflex/selective_scan_core_fwd.cu",
+            "csrc/selective_scan/cusoflex/selective_scan_core_bwd.cu",
+        ],
+    )
 
-    ext_modules.append(
+    names = dict(
+        core="selective_scan_cuda_core",
+        nrow="selective_scan_cuda_nrow",
+        ndstate="selective_scan_cuda_ndstate",
+        oflex="selective_scan_cuda_oflex",
+    )
+
+    ext_modules = [
         CUDAExtension(
-            name="selective_scan_cuda_core",
-            sources=sources,
+            name=names.get(MODE, None),
+            sources=sources.get(MODE, None),
             extra_compile_args={
                 "cxx": ["-O3", "-std=c++17"],
                 "nvcc": [
@@ -120,7 +130,8 @@ def get_ext():
             },
             include_dirs=[Path(this_dir) / "csrc" / "selective_scan"],
         )
-    )
+        for MODE in MODES
+    ]
 
     return ext_modules
 

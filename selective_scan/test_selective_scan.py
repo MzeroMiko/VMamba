@@ -12,6 +12,8 @@ from einops import rearrange, repeat
 import time
 from functools import partial
 
+SSOFLEX_FLOAT = True
+
 
 def build_selective_scan_fn(selective_scan_cuda: object = None, mode="mamba_ssm", tag=None):
     MODE = mode
@@ -56,7 +58,8 @@ def build_selective_scan_fn(selective_scan_cuda: object = None, mode="mamba_ssm"
             
             if MODE in ["mamba_ssm"]:
                 out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, z, delta_bias, delta_softplus)
-
+            elif MODE in ["ssoflex"]:
+                out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, SSOFLEX_FLOAT)
             elif MODE in ["sscore"]:
                 out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows)
             elif MODE in ["sstest"]:
@@ -82,7 +85,7 @@ def build_selective_scan_fn(selective_scan_cuda: object = None, mode="mamba_ssm"
                 if MODE in ["mamba_ssm", "sstest"]:
                     out_z = rest[0]
                     return out_z if not return_last_state else (out_z, last_state)
-                elif MODE in ["sscore"]:
+                elif MODE in ["sscore", "ssoflex"]:
                     return out if not return_last_state else (out, last_state)
 
         @staticmethod
@@ -108,7 +111,7 @@ def build_selective_scan_fn(selective_scan_cuda: object = None, mode="mamba_ssm"
                     u, delta, A, B, C, D, z, delta_bias, dout, x, out, None, ctx.delta_softplus,
                     False, ctx.backnrows  # option to recompute out_z, not used here
                 )
-            elif MODE in ["sscore"]:
+            elif MODE in ["sscore", "ssoflex"]:
                 du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda.bwd(
                     u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus, ctx.backnrows
                 )
@@ -151,7 +154,11 @@ def build_selective_scan_fn(selective_scan_cuda: object = None, mode="mamba_ssm"
         last_state has shape (batch, dim, dstate). Note that the gradient of the last state is
         not considered in the backward pass.
         """
-        return SelectiveScanFn.apply(u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state, nrows, backnrows)
+        outs = SelectiveScanFn.apply(u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state, nrows, backnrows)
+        if mode in ["ssoflex"]:
+            return outs.to(u.dtype) if not return_last_state else (outs[0].to(u.dtype), outs[1])
+        else:
+            return outs
 
     selective_scan_fn.__repr__ = lambda *_ :f"selective_scan_fn | {mode} | {tag}"
 
@@ -303,11 +310,12 @@ def selective_scan_fn(u, delta, A, B, C, D=None, z=None, delta_bias=None, delta_
     return selective_scan_ref_v2(u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state)
 
 # MODE = None
-MODE = "mamba_ssm"
+# MODE = "mamba_ssm"
 # MODE = "sscore"
 # MODE = "sstest"
 # MODE = "mamba_ssm_sscore" # 1344 items pass
 # MODE = "mamba_ssm_sscorendstate" # 1344 items pass
+MODE = "mamba_ssm_ssoflex" # 1344 items pass
 
 if MODE in ["mamba_ssm"]:
     import selective_scan_cuda
@@ -336,6 +344,11 @@ elif MODE in ["mamba_ssm_sscorendstate"]:
     import selective_scan_cuda
     selective_scan_fn = build_selective_scan_fn(selective_scan_cuda_core, mode="sscorendstate")
     selective_scan_ref = build_selective_scan_fn(selective_scan_cuda, mode="mamba_ssm")
+elif MODE in ["mamba_ssm_ssoflex"]:
+    import selective_scan_cuda_core
+    import selective_scan_cuda
+    selective_scan_fn = build_selective_scan_fn(selective_scan_cuda_core, mode="ssoflex")
+    selective_scan_ref = build_selective_scan_fn(selective_scan_cuda, mode="mamba_ssm")
 else:
     selective_scan_cuda = None
 
@@ -346,8 +359,7 @@ DIM = [768]
 BATCHSIZE = [2]
 # DSTATE = [1] if MODE in ["mamba_ssm_sscorendstate", "sscorendstate"] else [8]
 NROWS = [1,2,3,4]
-IDTYPE = False
-IDTYPE = True
+IDTYPE = MODE in [None]
 
 # @pytest.mark.parametrize('wtype', [torch.float32, torch.complex64])
 @pytest.mark.parametrize('wtype', [torch.float32])

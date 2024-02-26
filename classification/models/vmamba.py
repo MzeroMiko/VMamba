@@ -15,10 +15,17 @@ from timm.models.layers import DropPath, trunc_normal_
 from fvcore.nn import FlopCountAnalysis, flop_count_str, flop_count, parameter_count
 DropPath.__repr__ = lambda self: f"timm.DropPath({self.drop_prob})"
 
+try:
+    import selective_scan_cuda_core
+    import selective_scan_cuda_oflex
+    import selective_scan_cuda_ndstate
+    import selective_scan_cuda_nrow
+    import selective_scan_cuda
+except:
+    pass
 
 try:
     "sscore acts the same as mamba_ssm"
-    SSMODE = "sscore"
     import selective_scan_cuda_core
 except Exception as e:
     print(e, flush=True)
@@ -116,16 +123,15 @@ def print_jit_input_names(inputs):
 
 
 # cross selective scan ===============================
-
-class SelectiveScan(torch.autograd.Function):
+class SelectiveScanMamba(torch.autograd.Function):
     # comment all checks if inside cross_selective_scan
     @staticmethod
     @torch.cuda.amp.custom_fwd
-    def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, nrows=1):
+    def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, nrows=1, backnrows=1, oflex=True):
         # assert nrows in [1, 2, 3, 4], f"{nrows}" # 8+ is too slow to compile
         # assert u.shape[1] % (B.shape[1] * nrows) == 0, f"{nrows}, {u.shape}, {B.shape}"
         ctx.delta_softplus = delta_softplus
-        ctx.nrows = nrows
+        ctx.backnrows = backnrows
         # all in float
         # if u.stride(-1) != 1:
         #     u = u.contiguous()
@@ -144,11 +150,7 @@ class SelectiveScan(torch.autograd.Function):
         #     C = C.unsqueeze(dim=1)
         #     ctx.squeeze_C = True
         
-        if SSMODE == "mamba_ssm":
-            out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, None, delta_bias, delta_softplus)
-        else:
-            out, x, *rest = selective_scan_cuda_core.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows)
-        
+        out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, None, delta_bias, delta_softplus)
         ctx.save_for_backward(u, delta, A, B, C, D, delta_bias, x)
         return out
     
@@ -159,20 +161,64 @@ class SelectiveScan(torch.autograd.Function):
         if dout.stride(-1) != 1:
             dout = dout.contiguous()
         
-        if SSMODE == "mamba_ssm":
-            du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda.bwd(
-                u, delta, A, B, C, D, None, delta_bias, dout, x, None, None, ctx.delta_softplus,
-                False  # option to recompute out_z, not used here
-            )
-        else:
-            du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda_core.bwd(
-                u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus, 1
-                # u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus, ctx.nrows,
-            )
-        
+        du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda.bwd(
+            u, delta, A, B, C, D, None, delta_bias, dout, x, None, None, ctx.delta_softplus,
+            False
+        )
         # dB = dB.squeeze(1) if getattr(ctx, "squeeze_B", False) else dB
         # dC = dC.squeeze(1) if getattr(ctx, "squeeze_C", False) else dC
-        return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None)
+        return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None, None, None)
+
+
+class SelectiveScanCore(torch.autograd.Function):
+    # comment all checks if inside cross_selective_scan
+    @staticmethod
+    @torch.cuda.amp.custom_fwd
+    def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, nrows=1, backnrows=1, oflex=True):
+        ctx.delta_softplus = delta_softplus
+        ctx.backnrows = backnrows
+        out, x, *rest = selective_scan_cuda_core.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows)
+        ctx.save_for_backward(u, delta, A, B, C, D, delta_bias, x)
+        return out
+    
+    @staticmethod
+    @torch.cuda.amp.custom_bwd
+    def backward(ctx, dout, *args):
+        u, delta, A, B, C, D, delta_bias, x = ctx.saved_tensors
+        if dout.stride(-1) != 1:
+            dout = dout.contiguous()
+        du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda_core.bwd(
+            u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus, ctx.backnrows
+        )
+        return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None, None, None)
+
+
+class SelectiveScanOflex(torch.autograd.Function):
+    # comment all checks if inside cross_selective_scan
+    @staticmethod
+    @torch.cuda.amp.custom_fwd
+    def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, nrows=1, backnrows=1, oflex=True):
+        ctx.delta_softplus = delta_softplus
+        ctx.backnrows = backnrows
+        out, x, *rest = selective_scan_cuda_oflex.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, oflex)
+        ctx.save_for_backward(u, delta, A, B, C, D, delta_bias, x)
+        return out
+    
+    @staticmethod
+    @torch.cuda.amp.custom_bwd
+    def backward(ctx, dout, *args):
+        u, delta, A, B, C, D, delta_bias, x = ctx.saved_tensors
+        if dout.stride(-1) != 1:
+            dout = dout.contiguous()
+        du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda_oflex.bwd(
+            u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus, ctx.backnrows
+        )
+        return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None, None, None)
+
+
+SelectiveScan = SelectiveScanMamba
+SelectiveScan = SelectiveScanCore
+SelectiveScan = SelectiveScanOflex
 
 
 class CrossScan(torch.autograd.Function):
@@ -231,9 +277,13 @@ def cross_selective_scan(
     out_norm: torch.nn.Module=None,
     out_norm_shape="v0",
     nrows = -1,
+    backnrows = -1,
     delta_softplus = True,
     to_dtype=True,
-    force_fp32=True,
+    # force_fp32=True,
+    force_fp32=False, # False if ssoflex
+    ssoflex=True,
+    SelectiveScan=SelectiveScan,
 ):
     # out_norm: whatever fits (B, L, C); LayerNorm; Sigmoid; Softmax(dim=1);...
 
@@ -273,11 +323,11 @@ def cross_selective_scan(
         Bs = Bs.to(torch.float)
         Cs = Cs.to(torch.float)
 
-    def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True, nrows=1):
-        return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows)
+    def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True):
+        return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, backnrows, ssoflex)
     
     ys: torch.Tensor = selective_scan(
-        xs, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus, nrows,
+        xs, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus
     ).view(B, K, -1, H, W)
     
     y: torch.Tensor = CrossMerge.apply(ys)
@@ -402,9 +452,9 @@ class SS2D(nn.Module):
         # forward_type =======================================
         self.forward_core = dict(
             v0=self.forward_corev0,
-            v0_seq=self.forward_corev0_seq,
-            v1=self.forward_corev2,
             v2=self.forward_corev2,
+            v1=self.forward_corev1,
+            v01=self.forward_corev01,
             share_ssm=self.forward_corev0_share_ssm,
             share_a=self.forward_corev0_share_a,
         ).get(forward_type, self.forward_corev2)
@@ -532,7 +582,7 @@ class SS2D(nn.Module):
     # only used to run previous version
     def forward_corev0(self, x: torch.Tensor, to_dtype=False, channel_first=False):
         def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True, nrows=1):
-            return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows)
+            return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, False)
 
         if not channel_first:
             x = x.permute(0, 3, 1, 2).contiguous()
@@ -577,58 +627,6 @@ class SS2D(nn.Module):
 
         return (y.to(x.dtype) if to_dtype else y)
     
-    # only has speed difference with v0
-    def forward_corev0_seq(self, x: torch.Tensor, to_dtype=False, channel_first=False):
-        def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True, nrows=1):
-            return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows)
-
-        if not channel_first:
-            x = x.permute(0, 3, 1, 2).contiguous()
-        B, C, H, W = x.shape
-        L = H * W
-        K = 4
-
-        x_hwwh = torch.stack([x.view(B, -1, L), torch.transpose(x, dim0=2, dim1=3).contiguous().view(B, -1, L)], dim=1).view(B, 2, -1, L)
-        xs = torch.cat([x_hwwh, torch.flip(x_hwwh, dims=[-1])], dim=1) # (b, k, d, l)
-
-        x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, self.x_proj_weight)
-        # x_dbl = x_dbl + self.x_proj_bias.view(1, K, -1, 1)
-        dts, Bs, Cs = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=2)
-        dts = torch.einsum("b k r l, k d r -> b k d l", dts, self.dt_projs_weight)
-
-        xs = xs.float() # (b, k, d, l)
-        dts = dts.contiguous().float() # (b, k, d, l)
-        Bs = Bs.float() # (b, k, d_state, l)
-        Cs = Cs.float() # (b, k, d_state, l)
-        
-        As = -torch.exp(self.A_logs.float()).view(K, -1, self.d_state)  # (k, d, d_state)
-        Ds = self.Ds.float().view(K, -1) # (k, d)
-        dt_projs_bias = self.dt_projs_bias.float().view(K, -1) # (k, d)
-
-        # assert len(xs.shape) == 4 and len(dts.shape) == 4 and len(Bs.shape) == 4 and len(Cs.shape) == 4
-        # assert len(As.shape) == 3 and len(Ds.shape) == 2 and len(dt_projs_bias.shape) == 2
-
-        out_y = []
-        for i in range(4):
-            yi = selective_scan(
-                xs[:, i], dts[:, i], 
-                As[i], Bs[:, i], Cs[:, i], Ds[i],
-                delta_bias=dt_projs_bias[i],
-                delta_softplus=True,
-            ).view(B, -1, L)
-            out_y.append(yi)
-        out_y = torch.stack(out_y, dim=1)
-        assert out_y.dtype == torch.float
-
-        inv_y = torch.flip(out_y[:, 2:4], dims=[-1]).view(B, 2, -1, L)
-        wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
-        invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
-        y = out_y[:, 0] + inv_y[:, 0] + wh_y + invwh_y
-        y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
-        y = self.out_norm(y).view(B, H, W, -1)
-
-        return (y.to(x.dtype) if to_dtype else y)
-
     def forward_corev0_share_ssm(self, x: torch.Tensor, channel_first=False):
         """
         we may conduct this ablation later, but not with v0.
@@ -641,7 +639,7 @@ class SS2D(nn.Module):
         """
         ...
 
-    def forward_corev2(self, x: torch.Tensor, nrows=-1, channel_first=False):
+    def forward_corev2(self, x: torch.Tensor, nrows=-1, channel_first=False, SelectiveScan=SelectiveScanOflex):
         nrows = 1
         force_fp32 = (self.training and (not self.disable_force32))
         if not channel_first:
@@ -653,11 +651,18 @@ class SS2D(nn.Module):
             self.A_logs, self.Ds, 
             out_norm=getattr(self, "out_norm", None),
             out_norm_shape=getattr(self, "out_norm_shape", "v0"),
-            nrows=nrows, delta_softplus=True, force_fp32=force_fp32,
+            nrows=nrows, backnrows=1, delta_softplus=True, force_fp32=force_fp32,
+            SelectiveScan=SelectiveScan,
         )
         if self.ssm_low_rank:
             x = self.out_rank(x)
         return x
+    
+    def forward_corev1(self, x: torch.Tensor, nrows=-1, channel_first=False):
+        return self.forward_corev2(x, nrows, channel_first, SelectiveScan=SelectiveScanCore)
+
+    def forward_corev01(self, x: torch.Tensor, nrows=-1, channel_first=False):
+        return self.forward_corev2(x, nrows, channel_first, SelectiveScan=SelectiveScanMamba)
     
     def forward(self, x: torch.Tensor, **kwargs):
         x = self.in_proj(x)
@@ -1026,7 +1031,9 @@ class VSSM(nn.Module):
             "aten::flip": None, # as permute is in _IGNORED_OPS
             # "prim::PythonOp.CrossScan": None,
             # "prim::PythonOp.CrossMerge": None,
-            "prim::PythonOp.SelectiveScan": selective_scan_flop_jit,
+            "prim::PythonOp.SelectiveScanMamba": selective_scan_flop_jit,
+            "prim::PythonOp.SelectiveScanOflex": selective_scan_flop_jit,
+            "prim::PythonOp.SelectiveScanCore": selective_scan_flop_jit,
         }
 
         model = copy.deepcopy(self)
@@ -1272,6 +1279,46 @@ def check_vssm1_equals_vssm(forward_type="v0"):
     print("init miss align", miss_align) # init miss align 0
 
 
+def check_vssm1_ssoflex_equals_mambassm():
+    # only has initial difference
+    VSSM0 = partial(VSSM, downsample_version="v3", patchembed_version="v2", mlp_ratio=4.0, ssm_ratio=2.0, ssm_rank_ratio=2.0, forward_type="v2")
+    VSSM1 = partial(VSSM, downsample_version="v3", patchembed_version="v2", mlp_ratio=4.0, ssm_ratio=2.0, ssm_rank_ratio=2.0, forward_type="v01")
+
+    # test 1 True =================================
+    torch.manual_seed(time.time()); torch.cuda.manual_seed(time.time())
+    oldvss = VSSM0(depths=[2,2,6,2]).half().cuda()
+    newvss = VSSM1(depths=[2,2,6,2]).half().cuda()
+    newvss.load_state_dict(oldvss.state_dict())
+    input0 = torch.randn((12, 3, 224, 224)).half().cuda().requires_grad_()
+    input1 = input0.detach().clone().requires_grad_()
+    torch.manual_seed(0); torch.cuda.manual_seed(0)
+    with torch.cuda.amp.autocast():
+        y1 = oldvss.forward(input0)
+        y1.sum().backward()
+    torch.manual_seed(0); torch.cuda.manual_seed(0)
+    with torch.cuda.amp.autocast():
+        y2 = newvss.forward(input1)
+        y2.sum().backward()
+    print((y1 - y2).abs().sum()) # tensor(0., device='cuda:0', dtype=torch.float16, grad_fn=<SumBackward0>)
+    print((input0.grad - input1.grad).abs().sum()) # tensor(6.6016, device='cuda:0', dtype=torch.float16)
+    
+    # test 2 True ==========================================
+    torch.manual_seed(0); torch.cuda.manual_seed(0)
+    oldvss = VSSM0(depths=[2,2,6,2]).cuda()
+    torch.manual_seed(0); torch.cuda.manual_seed(0)
+    newvss = VSSM1(depths=[2,2,6,2]).cuda()
+
+    miss_align = 0
+    oldvss2new = copy.deepcopy(newvss)
+    oldvss2new.load_state_dict(oldvss.state_dict())
+    for k, v in oldvss2new.state_dict().items(): 
+        same = (oldvss2new.state_dict()[k] == newvss.state_dict()[k]).all()
+        if not same:
+            print(k, same)
+            miss_align += 1
+    print("init miss align", miss_align) # init miss align 0
+
+
 def check_vssblock():
     import triton
     from torchvision.models.vision_transformer import EncoderBlock
@@ -1492,14 +1539,17 @@ def load22kto1k():
 
 
 if __name__ == "__main__":
-    check_vssblock()
-    check_vssm_equals_vmambadp()
-    check_vssm1_equals_vssm(forward_type="v0")
-    check_vssm1_equals_vssm(forward_type="v0_seq")
-    check_vssm1_equals_vssm(forward_type="v2")
-    print(VSSM(forward_type="v0").flops())
-    print(VSSM(forward_type="v2").flops())
-    print(VSSM(forward_type="v2nozact").flops())
+
+    # check_vssblock()
+    # check_vssm_equals_vmambadp()
+    # check_vssm1_equals_vssm(forward_type="v0")
+    # check_vssm1_equals_vssm(forward_type="v0_seq")
+    # check_vssm1_equals_vssm(forward_type="v2")
+    # print(VSSM(forward_type="v0").flops())
+    # print(VSSM(forward_type="v2").flops())
+    # print(VSSM(forward_type="v2nozact").flops())
+
+    check_vssm1_ssoflex_equals_mambassm()
 
     
 
