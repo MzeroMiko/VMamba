@@ -172,12 +172,13 @@ inline __device__ void store_output(typename Ktraits::input_t *out,
     }
 }
 
-template<typename Ktraits, typename output_t>
-inline __device__ void store_output_ot(typename output_t *out,
+template<typename Ktraits, typename data_t>
+inline __device__ void store_output_ot(typename data_t *out,
                                     const float (&out_vals)[Ktraits::kNItems],
                                     typename Ktraits::BlockStoreT::TempStorage &smem_store,
                                     int seqlen) {
-    typename output_t write_vals[Ktraits::kNItems];
+    using BlockStoreT = cub::BlockStore<input_t, kNThreads, kNItems, cub::BLOCK_STORE_WARP_TRANSPOSE>;
+    typename data_t write_vals[Ktraits::kNItems];
     #pragma unroll
     for (int i = 0; i < Ktraits::kNItems; ++i) { write_vals[i] = out_vals[i]; }
     if constexpr (Ktraits::kIsEvenLen) {
@@ -189,5 +190,22 @@ inline __device__ void store_output_ot(typename output_t *out,
        );
     } else {
         Ktraits::BlockStoreT(smem_store).Store(out, write_vals, seqlen);
+    }
+}
+
+template<typename Ktraits, typename data_t>
+inline __device__ void load_input_ot(typename data_t *u,
+                                  typename data_t (&u_vals)[Ktraits::kNItems],
+                                  typename Ktraits::BlockLoadT::TempStorage &smem_load,
+                                  int seqlen) {
+    if constexpr (Ktraits::kIsEvenLen) {
+        auto& smem_load_vec = reinterpret_cast<typename Ktraits::BlockLoadVecT::TempStorage&>(smem_load);
+        using vec_t = typename Ktraits::vec_t;
+        Ktraits::BlockLoadVecT(smem_load_vec).Load(
+            reinterpret_cast<vec_t*>(u),
+            reinterpret_cast<vec_t(&)[Ktraits::kNLoads]>(u_vals)
+       );
+    } else {
+        Ktraits::BlockLoadT(smem_load).Load(u, u_vals, seqlen, 0.f);
     }
 }

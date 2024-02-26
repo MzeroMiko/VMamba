@@ -96,7 +96,7 @@ void selective_scan_bwd_kernel(SSMParamsBwd params) {
         + dim_id * params.u_d_stride;
     input_t *delta = reinterpret_cast<input_t *>(params.delta_ptr) + batch_id * params.delta_batch_stride
         + dim_id * params.delta_d_stride;
-    input_t *dout = reinterpret_cast<input_t *>(params.dout_ptr) + batch_id * params.dout_batch_stride
+    output_t *dout = reinterpret_cast<output_t *>(params.dout_ptr) + batch_id * params.dout_batch_stride
         + dim_id * params.dout_d_stride;
     weight_t *A = reinterpret_cast<weight_t *>(params.A_ptr) + dim_id * params.A_d_stride;
     input_t *Bvar = reinterpret_cast<input_t *>(params.B_ptr) + batch_id * params.B_batch_stride + group_id * params.B_group_stride;
@@ -125,23 +125,23 @@ void selective_scan_bwd_kernel(SSMParamsBwd params) {
     for (int chunk = params.n_chunks - 1; chunk >= 0; --chunk) {
         input_t u_vals[kNItems];
         input_t delta_vals_load[kNItems];
-        input_t dout_vals_load[kNItems];
+        weight_t dout_vals_load[kNItems];
         __syncthreads();
         load_input<Ktraits>(u, u_vals, smem_load, params.seqlen - chunk * kChunkSize);
         __syncthreads();
         load_input<Ktraits>(delta, delta_vals_load, smem_load, params.seqlen - chunk * kChunkSize);
         __syncthreads();
-        load_input<Ktraits>(dout, dout_vals_load, smem_load, params.seqlen - chunk * kChunkSize);
+        load_weight<Ktraits>(dout, dout_vals_load, smem_load, params.seqlen - chunk * kChunkSize);
         u -= kChunkSize;
         // Will reload delta at the same location if kDeltaSoftplus
         if constexpr (!kDeltaSoftplus) { delta -= kChunkSize; }
         dout -= kChunkSize;
 
-        float dout_vals[kNItems], delta_vals[kNItems];
+        float dout_vals[kNItems] delta_vals[kNItems];
         float du_vals[kNItems];
         #pragma unroll
         for (int i = 0; i < kNItems; ++i) {
-            dout_vals[i] = float(dout_vals_load[i]);
+            dout_vals[i] = dout_vals_load[i];
             delta_vals[i] = float(delta_vals_load[i]) + delta_bias;
             if constexpr (kDeltaSoftplus) {
                 delta_vals[i] = delta_vals[i] <= 20.f ? log1pf(expf(delta_vals[i])) : delta_vals[i];
