@@ -249,9 +249,9 @@ void selective_scan_bwd_kernel(SSMParamsBwd params) {
         input_t *ddelta = reinterpret_cast<input_t *>(params.ddelta_ptr) + batch_id * params.ddelta_batch_stride
             + dim_id * params.ddelta_d_stride + chunk * kChunkSize;
         __syncthreads();
-        store_output<Ktraits, input_t>(du, du_vals, smem_store, params.seqlen - chunk * kChunkSize);
+        store_output_ot<Ktraits, input_t>(du, du_vals, smem_store, params.seqlen - chunk * kChunkSize);
         __syncthreads();
-        store_output<Ktraits, input_t>(ddelta, ddelta_vals, smem_store, params.seqlen - chunk * kChunkSize);
+        store_output_ot<Ktraits, input_t>(ddelta, ddelta_vals, smem_store, params.seqlen - chunk * kChunkSize);
         Bvar -= kChunkSize;
         Cvar -= kChunkSize;
     }

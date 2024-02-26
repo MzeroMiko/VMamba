@@ -168,7 +168,7 @@ void selective_scan_fwd_kernel(SSMParamsBase params) {
         output_t *out = reinterpret_cast<output_t *>(params.out_ptr) + batch_id * params.out_batch_stride
             + dim_id * params.out_d_stride + chunk * kChunkSize;
         __syncthreads();
-        store_output<Ktraits, output_t>(out, out_vals, smem_store, params.seqlen - chunk * kChunkSize);
+        store_output_ot<Ktraits, output_t>(out, out_vals, smem_store, params.seqlen - chunk * kChunkSize);
         Bvar += kChunkSize;
         Cvar += kChunkSize;
     }
