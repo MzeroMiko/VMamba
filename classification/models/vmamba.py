@@ -177,7 +177,7 @@ class SelectiveScanCore(torch.autograd.Function):
     def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, nrows=1, backnrows=1, oflex=True):
         ctx.delta_softplus = delta_softplus
         ctx.backnrows = backnrows
-        out, x, *rest = selective_scan_cuda_core.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows)
+        out, x, *rest = selective_scan_cuda_core.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus, 1)
         ctx.save_for_backward(u, delta, A, B, C, D, delta_bias, x)
         return out
     
@@ -188,6 +188,29 @@ class SelectiveScanCore(torch.autograd.Function):
         if dout.stride(-1) != 1:
             dout = dout.contiguous()
         du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda_core.bwd(
+            u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus, 1
+        )
+        return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None, None, None)
+
+
+class SelectiveScanNRow(torch.autograd.Function):
+    # comment all checks if inside cross_selective_scan
+    @staticmethod
+    @torch.cuda.amp.custom_fwd
+    def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, nrows=1, backnrows=1, oflex=True):
+        ctx.delta_softplus = delta_softplus
+        ctx.backnrows = backnrows
+        out, x, *rest = selective_scan_cuda_nrow.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows)
+        ctx.save_for_backward(u, delta, A, B, C, D, delta_bias, x)
+        return out
+    
+    @staticmethod
+    @torch.cuda.amp.custom_bwd
+    def backward(ctx, dout, *args):
+        u, delta, A, B, C, D, delta_bias, x = ctx.saved_tensors
+        if dout.stride(-1) != 1:
+            dout = dout.contiguous()
+        du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda_nrow.bwd(
             u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus, ctx.backnrows
         )
         return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None, None, None)
@@ -217,6 +240,7 @@ class SelectiveScanOflex(torch.autograd.Function):
 
 
 SelectiveScan = SelectiveScanMamba
+SelectiveScan = SelectiveScanNRow
 SelectiveScan = SelectiveScanCore
 SelectiveScan = SelectiveScanOflex
 
@@ -292,16 +316,27 @@ def cross_selective_scan(
     K, D, R = dt_projs_weight.shape
     L = H * W
 
-    if nrows < 1:
-        if D % 4 == 0:
-            nrows = 4
-        elif D % 3 == 0:
-            nrows = 3
-        elif D % 2 == 0:
-            nrows = 2
-        else:
-            nrows = 1
-    
+    if SelectiveScan == SelectiveScanNRow:
+        if nrows < 1:
+            if D % 4 == 0:
+                nrows = 4
+            elif D % 3 == 0:
+                nrows = 3
+            elif D % 2 == 0:
+                nrows = 2
+            else:
+                nrows = 1
+        
+        if backnrows < 1:
+            if D % 4 == 0:
+                backnrows = 4
+            elif D % 3 == 0:
+                backnrows = 3
+            elif D % 2 == 0:
+                backnrows = 2
+            else:
+                backnrows = 1
+
     xs = CrossScan.apply(x)
     
     x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, x_proj_weight)
@@ -378,6 +413,7 @@ class PatchMerging2D(nn.Module):
         return x
 
 
+# v2no32
 class SS2D(nn.Module):
     def __init__(
         self,
@@ -449,15 +485,35 @@ class SS2D(nn.Module):
         else:
             self.out_norm = nn.LayerNorm(d_inner)
 
-        # forward_type =======================================
-        self.forward_core = dict(
-            v0=self.forward_corev0,
-            v2=self.forward_corev2,
-            v1=self.forward_corev1,
-            v01=self.forward_corev01,
-            share_ssm=self.forward_corev0_share_ssm,
-            share_a=self.forward_corev0_share_a,
-        ).get(forward_type, self.forward_corev2)
+        # forward_type debug =======================================
+        if forward_type.startswith("debug"):
+            from .ss2d_ablations import SS2D_ForwardCoreSpeedAblations, SS2D_ForwardCoreModeAblations
+            self.forward_core = dict(
+                v0=self.forward_corev0,
+                v1=self.forward_corev1,
+                v2=self.forward_corev2,
+                v01=self.forward_corev01,
+                debugforward_core_mambassm_seq=partial(SS2D_ForwardCoreSpeedAblations.forward_core_mambassm_seq, self),
+                debugforward_core_mambassm=partial(SS2D_ForwardCoreSpeedAblations.forward_core_mambassm, self),
+                debugforward_core_mambassm_fp16=partial(SS2D_ForwardCoreSpeedAblations.forward_core_mambassm_fp16, self),
+                debugforward_core_mambassm_fusecs=partial(SS2D_ForwardCoreSpeedAblations.forward_core_mambassm_fusecs, self),
+                debugforward_core_mambassm_fusecscm=partial(SS2D_ForwardCoreSpeedAblations.forward_core_mambassm_fusecscm, self),
+                debugforward_core_sscore_fusecscm=partial(SS2D_ForwardCoreSpeedAblations.forward_core_sscore_fusecscm, self),
+                debugforward_core_sscore_fusecscm_fwdnrow=partial(SS2D_ForwardCoreSpeedAblations.forward_core_sscore_fusecscm_fwdnrow, self),
+                debugforward_core_sscore_fusecscm_bwdnrow=partial(SS2D_ForwardCoreSpeedAblations.forward_core_sscore_fusecscm_bwdnrow, self),
+                debugforward_core_sscore_fusecscm_fbnrow=partial(SS2D_ForwardCoreSpeedAblations.forward_core_sscore_fusecscm_fbnrow, self),
+                debugforward_core_ssoflex_fusecscm=partial(SS2D_ForwardCoreSpeedAblations.forward_core_ssoflex_fusecscm, self),
+                debugforward_core_ssoflex_fusecscm_i16o32=partial(SS2D_ForwardCoreSpeedAblations.forward_core_ssoflex_fusecscm_i16o32, self),
+            ).get(forward_type, self.forward_corev2)
+        else:
+            self.forward_core = dict(
+                v0=self.forward_corev0,
+                v2=self.forward_corev2,
+                v1=self.forward_corev1,
+                v01=self.forward_corev01,
+                share_ssm=self.forward_corev0_share_ssm,
+                share_a=self.forward_corev0_share_a,
+            ).get(forward_type, self.forward_corev2)
         self.K = 4 if forward_type not in ["share_ssm"] else 1
         self.K2 = self.K if forward_type not in ["share_a"] else 1
 
@@ -1034,6 +1090,7 @@ class VSSM(nn.Module):
             "prim::PythonOp.SelectiveScanMamba": selective_scan_flop_jit,
             "prim::PythonOp.SelectiveScanOflex": selective_scan_flop_jit,
             "prim::PythonOp.SelectiveScanCore": selective_scan_flop_jit,
+            "prim::PythonOp.SelectiveScanNRow": selective_scan_flop_jit,
         }
 
         model = copy.deepcopy(self)

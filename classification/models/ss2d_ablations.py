@@ -2,67 +2,8 @@ import math
 import torch
 import torch.nn as nn
 
-from .vmamba import SSMODE, cross_selective_scan, CrossMerge, CrossScan, SelectiveScanCore, SelectiveScanOflex
+from .vmamba import cross_selective_scan, CrossMerge, CrossScan, SelectiveScanCore, SelectiveScanOflex, SelectiveScanNRow
 from mamba_ssm.ops.selective_scan_interface import selective_scan_fn as selective_scan_fn_mambassm
-
-class SelectiveScanMambaSSM(torch.autograd.Function):
-    # comment all checks if inside cross_selective_scan
-    @staticmethod
-    @torch.cuda.amp.custom_fwd
-    def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, nrows=1, backnrows=1, oflex=True):
-        # assert nrows in [1, 2, 3, 4], f"{nrows}" # 8+ is too slow to compile
-        # assert u.shape[1] % (B.shape[1] * nrows) == 0, f"{nrows}, {u.shape}, {B.shape}"
-        ctx.delta_softplus = delta_softplus
-        ctx.backnrows = backnrows
-        # all in float
-        # if u.stride(-1) != 1:
-        #     u = u.contiguous()
-        # if delta.stride(-1) != 1:
-        #     delta = delta.contiguous()
-        # if D is not None and D.stride(-1) != 1:
-        #     D = D.contiguous()
-        # if B.stride(-1) != 1:
-        #     B = B.contiguous()
-        # if C.stride(-1) != 1:
-        #     C = C.contiguous()
-        # if B.dim() == 3:
-        #     B = B.unsqueeze(dim=1)
-        #     ctx.squeeze_B = True
-        # if C.dim() == 3:
-        #     C = C.unsqueeze(dim=1)
-        #     ctx.squeeze_C = True
-        
-        if SSMODE == "mamba_ssm":
-            out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, None, delta_bias, delta_softplus)
-        elif SSMODE == "ssoflex":
-            out, x, *rest = selective_scan_cuda_core.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, True)
-        else:
-            out, x, *rest = selective_scan_cuda_core.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows)
-        
-        ctx.save_for_backward(u, delta, A, B, C, D, delta_bias, x)
-        return out
-    
-    @staticmethod
-    @torch.cuda.amp.custom_bwd
-    def backward(ctx, dout, *args):
-        u, delta, A, B, C, D, delta_bias, x = ctx.saved_tensors
-        if dout.stride(-1) != 1:
-            dout = dout.contiguous()
-        
-        if SSMODE == "mamba_ssm":
-            du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda.bwd(
-                u, delta, A, B, C, D, None, delta_bias, dout, x, None, None, ctx.delta_softplus,
-                False
-            )
-        else:
-            du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda_core.bwd(
-                u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus, ctx.backnrows
-            )
-        
-        # dB = dB.squeeze(1) if getattr(ctx, "squeeze_B", False) else dB
-        # dC = dC.squeeze(1) if getattr(ctx, "squeeze_C", False) else dC
-        return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None)
-
 
 
 class SS2D_ForwardCoreAblations:
@@ -103,7 +44,7 @@ class SS2D_ForwardCoreAblations:
         self.dt_projs_bias = nn.Parameter(torch.randn((self.K, d_inner)))
 
 
-class SS2D_SpeedAblations(SS2D_ForwardCoreAblations):
+class SS2D_ForwardCoreSpeedAblations(SS2D_ForwardCoreAblations):
     # mamba_ssm + sequence
     def forward_core_mambassm_seq(self, x: torch.Tensor, to_dtype=False, channel_first=False):
         def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True, **kwargs):
@@ -205,7 +146,7 @@ class SS2D_SpeedAblations(SS2D_ForwardCoreAblations):
         return (y.to(x.dtype) if to_dtype else y)
 
     # mamba_ssm + parallel + fp16 # cause nan in training
-    def forward_core_mambassm(self, x: torch.Tensor, to_dtype=False, channel_first=False):
+    def forward_core_mambassm_fp16(self, x: torch.Tensor, to_dtype=False, channel_first=False):
         def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True, **kwargs):
             return selective_scan_fn_mambassm(u, delta, A, B, C, D, None, delta_bias, delta_softplus, False)
 
@@ -345,78 +286,78 @@ class SS2D_SpeedAblations(SS2D_ForwardCoreAblations):
 
     # sscore + fuse cross scan + fuse cross merge
     def forward_core_sscore_fusecscm(self, x: torch.Tensor, to_dtype=False, channel_first=False):
-        assert SSMODE == "sscore"
         x = cross_selective_scan(
             x, self.x_proj_weight, None, self.dt_projs_weight, self.dt_projs_bias,
             self.A_logs, self.Ds, 
             out_norm=getattr(self, "out_norm", None),
             out_norm_shape=getattr(self, "out_norm_shape", "v0"),
             nrows=1, backnrows=1, delta_softplus=True, force_fp32=True, ssoflex=False,
+            SelectiveScan=SelectiveScanCore,
         )
         return x
 
     # sscore + fuse cross scan + fuse cross merge + fwdnrow
     def forward_core_sscore_fusecscm_fwdnrow(self, x: torch.Tensor, to_dtype=False, channel_first=False):
-        assert SSMODE == "sscore"
         x = cross_selective_scan(
             x, self.x_proj_weight, None, self.dt_projs_weight, self.dt_projs_bias,
             self.A_logs, self.Ds, 
             out_norm=getattr(self, "out_norm", None),
             out_norm_shape=getattr(self, "out_norm_shape", "v0"),
             nrows=-1, backnrows=1, delta_softplus=True, force_fp32=True, ssoflex=False,
+            SelectiveScan=SelectiveScanNRow,
         )
         return x
 
     # sscore + fuse cross scan + fuse cross merge + bwdnrow
     def forward_core_sscore_fusecscm_bwdnrow(self, x: torch.Tensor, to_dtype=False, channel_first=False):
-        assert SSMODE == "sscore"
         x = cross_selective_scan(
             x, self.x_proj_weight, None, self.dt_projs_weight, self.dt_projs_bias,
             self.A_logs, self.Ds, 
             out_norm=getattr(self, "out_norm", None),
             out_norm_shape=getattr(self, "out_norm_shape", "v0"),
             nrows=1, backnrows=-1, delta_softplus=True, force_fp32=True, ssoflex=False,
+            SelectiveScan=SelectiveScanNRow,
         )
         return x
 
     # sscore + fuse cross scan + fuse cross merge + fwdbwdnrow
     def forward_core_sscore_fusecscm_fbnrow(self, x: torch.Tensor, to_dtype=False, channel_first=False):
-        assert SSMODE == "sscore"
         x = cross_selective_scan(
             x, self.x_proj_weight, None, self.dt_projs_weight, self.dt_projs_bias,
             self.A_logs, self.Ds, 
             out_norm=getattr(self, "out_norm", None),
             out_norm_shape=getattr(self, "out_norm_shape", "v0"),
             nrows=-1, backnrows=-1, delta_softplus=True, force_fp32=True, ssoflex=False,
+            SelectiveScan=SelectiveScanNRow,
         )
         return x
 
     # ssoflex + fuse cross scan + fuse cross merge + fp32
     def forward_core_ssoflex_fusecscm(self, x: torch.Tensor, to_dtype=False, channel_first=False):
-        assert SSMODE == "ssoflex"
         x = cross_selective_scan(
             x, self.x_proj_weight, None, self.dt_projs_weight, self.dt_projs_bias,
             self.A_logs, self.Ds, 
             out_norm=getattr(self, "out_norm", None),
             out_norm_shape=getattr(self, "out_norm_shape", "v0"),
             nrows=1, backnrows=1, delta_softplus=True, force_fp32=True, ssoflex=True,
+            SelectiveScan=SelectiveScanOflex,
         )
         return x
 
     # ssoflex + fuse cross scan + fuse cross merge + fp16
     def forward_core_ssoflex_fusecscm_i16o32(self, x: torch.Tensor, to_dtype=False, channel_first=False):
-        assert SSMODE == "ssoflex"
         x = cross_selective_scan(
             x, self.x_proj_weight, None, self.dt_projs_weight, self.dt_projs_bias,
             self.A_logs, self.Ds, 
             out_norm=getattr(self, "out_norm", None),
             out_norm_shape=getattr(self, "out_norm_shape", "v0"),
             nrows=1, backnrows=1, delta_softplus=True, force_fp32=False, ssoflex=True,
+            SelectiveScan=SelectiveScanOflex,
         )
         return x
 
 
-class SS2D_ModeAblations(SS2D_ForwardCoreAblations):
+class SS2D_ForwardCoreModeAblations(SS2D_ForwardCoreAblations):
     # ssoflex + fuse cross scan + fuse cross merge + fp16
     def forward_core_sscore_fusecscm_fbnrow(self, x: torch.Tensor, to_dtype=False, channel_first=False):
         x = cross_selective_scan(
