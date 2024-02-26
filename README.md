@@ -53,7 +53,7 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 | sscore + fused cross scan + fused cross merge + backward nrow | 24984M | 0.4490s |
 | sscore + fused cross scan + fused cross merge + forward nrow + backward nrow | 24984M | 0.4640s |
 | ssoflex + fused cross scan + fused cross merge | 24986M | 0.3940s |
-| `ssoflex + fused cross scan + fused cross merge + input16 + float32` | `19842M` | `0.3650s` |
+| `ssoflex + fused cross scan + fused cross merge + input fp16 + output fp32` | `19842M` | `0.3650s` |
 
 * *mamba-ssm: mamba_ssm-1.1.3.post1+cu122torch2.2cxx11abiFALSE-cp310-cp310-linux_x86_64.whl*
 * *sscore: selective_scan_cuda_core*
