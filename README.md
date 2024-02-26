@@ -13,6 +13,8 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 </div>
 
 ## Updates
+* **` Feb. 26th, 2024`:** Improvement: we now support flexible output of `selective scan`. Try `SelectiveScanOflex` with float16 input and float32 output to enjoy that feature!
+
 * **` Feb. 22th, 2024`:** Pre-Release: we set a pre-release to share nightly-build checkpoints in classificaion. Feel free to enjoy those new features with faster code and higher performance! 
 
 * **` Feb. 18th, 2024`:** Release: all the checkpoints and logs of `VMamba` (`VSSM version 0`) in classification have been released. These checkpoints correspond to the experiments done before date #20240119, if there is any mismatch to the latest code in main, please let me know, and I'll fix that. This is related to issue#1 and issue#37.
@@ -33,12 +35,31 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 
 * **` Jan. 19th, 2024`:** The source code for classification, object detection, and semantic segmentation are provided. 
 
-<!-- ## Speed up!
-* **s**
-* **s**
-* **s**
-* **s** -->
+## The History of Speed Up
 
+*Time is tested on 1xA100; config vssm1_tiny_0220*
+
+*GPU memory is adopted from the log*
+
+*The experiments (([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))) done before #20240119 used `mamba-ssm + group-parallel`, the experiments done between #20240201 to now use `sscore + fused cross scan + fused cross merge`. We plan to use `ssoflex + fused cross scan + fused cross merge + input16output32` in the future.*
+
+| name | GPU Memory | time (s/10iter) |
+| :--- | :---: | :---: |
+| mamba-ssm + sequence scan | 25927M | 0.6585s |
+| mamba-ssm + group parallel | 25672M | 0.4860s |
+| mamba-ssm + float16 | 20439M | 0.4195s |
+| mamba-ssm + fused cross scan | 25675M | 0.4820s |
+| mamba-ssm + fused cross scan + fused cross merge | 25596M | 0.4020s |
+| sscore + fused cross scan + fused cross merge | 24984M | 0.3930s |
+| sscore + fused cross scan + fused cross merge + forward nrow | 24984M | 0.4090s |
+| sscore + fused cross scan + fused cross merge + backward nrow | 24984M | 0.4490s |
+| sscore + fused cross scan + fused cross merge + forward nrow + backward nrow | 24984M | 0.4640s |
+| ssoflex + fused cross scan + fused cross merge | 24986M | 0.3940s |
+| ssoflex + fused cross scan + fused cross merge + input16 + float32 | 19842M | 0.3650s |
+
+* *mamba-ssm: mamba_ssm-1.1.3.post1+cu122torch2.2cxx11abiFALSE-cp310-cp310-linux_x86_64.whl*
+* *sscore: selective_scan_cuda_core*
+* *ssoflex: selective_scan_cuda_oflex, oflex means output flexible*
 
 ## Abstract
 
