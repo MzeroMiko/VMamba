@@ -171,3 +171,23 @@ inline __device__ void store_output(typename Ktraits::input_t *out,
         Ktraits::BlockStoreT(smem_store).Store(out, write_vals, seqlen);
     }
 }
+
+template<typename Ktraits, typename output_t>
+inline __device__ void store_output_ot(typename output_t *out,
+                                    const float (&out_vals)[Ktraits::kNItems],
+                                    typename Ktraits::BlockStoreT::TempStorage &smem_store,
+                                    int seqlen) {
+    typename output_t write_vals[Ktraits::kNItems];
+    #pragma unroll
+    for (int i = 0; i < Ktraits::kNItems; ++i) { write_vals[i] = out_vals[i]; }
+    if constexpr (Ktraits::kIsEvenLen) {
+        auto& smem_store_vec = reinterpret_cast<typename Ktraits::BlockStoreVecT::TempStorage&>(smem_store);
+        using vec_t = typename Ktraits::vec_t;
+        Ktraits::BlockStoreVecT(smem_store_vec).Store(
+            reinterpret_cast<vec_t*>(out),
+            reinterpret_cast<vec_t(&)[Ktraits::kNLoads]>(write_vals)
+       );
+    } else {
+        Ktraits::BlockStoreT(smem_store).Store(out, write_vals, seqlen);
+    }
+}
