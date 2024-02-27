@@ -99,10 +99,14 @@ inspiration from the recently introduced state space model and propose the Visua
 
 ### **Classification on ImageNet-1K with nightly builds!**
 
-| name | pretrain | resolution |acc@1 | #params | FLOPs | configs/logs/ckpts | best epoch | use ema |
-| :---: | :---: | :---: | :---: | :---: | :---: |:---: | :---: | :---: |
-| VMamba-T | ImageNet-1K | 224x224 | 82.5 | 32M | 5G | [config](classification/configs/vssm1/vssm_tiny_224_0220.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240220/vssmtiny_dp02_e258_ema.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240220/vssmtiny_dp02_ckpt_epoch_258.pth) | 258 | true |
+* *GPU Memory Usage is adopted from log files, the models in this section trained in 8xA100 with EMA updates.*
+* *Logs and checkpoints for model `0229` and `0229flex` have not been released yet*
 
+| name | pretrain | resolution |acc@1 | #params | FLOPs | configs/logs/ckpts | best epoch | use ema | GPU Mem | time/epoch |
+| :---: | :---: | :---: | :---: | :---: | :---: |:---: | :---: | :---: | :---: | :---: |
+| VMamba-T(0220) | ImageNet-1K | 224x224 | 82.5 | 32M | 5G | [config](classification/configs/vssm1/vssm_tiny_224_0220.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240220/vssmtiny_dp02_e258_ema.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240220/vssmtiny_dp02_ckpt_epoch_258.pth) | 258 | true | 25036M | 8.53min |
+| VMamba-T(0229) | ImageNet-1K | 224x224 | 82.4 | 29M | 4.5G | [config](classification/configs/vssm1/vssm_tiny_224_0229.yaml)/[log](#)/[ckpt](#) | 262 | true | 22454M | 8.28min |
+| VMamba-T(0229flex) | ImageNet-1K | 224x224 | ? | 29M | 4.5G | [config](classification/configs/vssm1/vssm_tiny_224_0229flex.yaml)/[log](#)/[ckpt](#) | ? | true | 17292M | 7.77min |
 
 ### **Classification on ImageNet-1K**
 

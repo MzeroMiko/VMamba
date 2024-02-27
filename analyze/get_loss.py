@@ -566,10 +566,11 @@ def main_vssm1():
         # ti0218 = f"{logpath}/vssm_tiny_224_0218.log",
         # ti0219 = f"{logpath}/vssm_tiny_224_0219.log",
         ti0220 = f"{logpath}/vssm_tiny_224_0220.log",
-        ti0221 = f"{logpath}/vssm_tiny_224_0221.log",
-        ti0222 = f"{logpath}/vssm_tiny_224_0222.log",
-        ti0223 = f"{logpath}/vssm_tiny_224_0223.log",
-        ti0225 = f"{logpath}/vssm_tiny_224_0225.log",
+        # ti0221 = f"{logpath}/vssm_tiny_224_0221.log",
+        # ti0222 = f"{logpath}/vssm_tiny_224_0222.log",
+        # ti0223 = f"{logpath}/vssm_tiny_224_0223.log",
+        # ti0225 = f"{logpath}/vssm_tiny_224_0225.log",
+        ti0229 = f"{logpath}/vssm_tiny_224_0229.log",
     )
     
     for name, file in files.items():
@@ -593,5 +594,5 @@ if __name__ == "__main__":
     # main_vssm()
     # main_vssmd()
     # main_heat()
-    # main_vssm1()
+    main_vssm1()
 
