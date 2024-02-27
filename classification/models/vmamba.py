@@ -300,11 +300,10 @@ def cross_selective_scan(
     Ds: torch.Tensor=None,
     out_norm: torch.nn.Module=None,
     out_norm_shape="v0",
-    nrows = -1,
-    backnrows = -1,
+    nrows = -1, # for SelectiveScanNRow
+    backnrows = -1, # for SelectiveScanNRow
     delta_softplus = True,
     to_dtype=True,
-    # force_fp32=True,
     force_fp32=False, # False if ssoflex
     ssoflex=True,
     SelectiveScan=SelectiveScan,
@@ -337,6 +336,9 @@ def cross_selective_scan(
             else:
                 backnrows = 1
 
+    def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True):
+        return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, backnrows, ssoflex)
+    
     xs = CrossScan.apply(x)
     
     x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, x_proj_weight)
@@ -358,9 +360,6 @@ def cross_selective_scan(
         Bs = Bs.to(torch.float)
         Cs = Cs.to(torch.float)
 
-    def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True):
-        return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, backnrows, ssoflex)
-    
     ys: torch.Tensor = selective_scan(
         xs, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus
     ).view(B, K, -1, H, W)
@@ -692,8 +691,7 @@ class SS2D(nn.Module):
         """
         ...
 
-    def forward_corev2(self, x: torch.Tensor, nrows=-1, channel_first=False, SelectiveScan=SelectiveScanOflex, force_fp32=None):
-        nrows = 1
+    def forward_corev2(self, x: torch.Tensor, channel_first=False, SelectiveScan=SelectiveScanOflex, force_fp32=None):
         force_fp32 = (self.training and (not self.disable_force32)) if force_fp32 is None else force_fp32
         if not channel_first:
             x = x.permute(0, 3, 1, 2).contiguous()
@@ -704,7 +702,7 @@ class SS2D(nn.Module):
             self.A_logs, self.Ds, 
             out_norm=getattr(self, "out_norm", None),
             out_norm_shape=getattr(self, "out_norm_shape", "v0"),
-            nrows=nrows, backnrows=1, delta_softplus=True, force_fp32=force_fp32,
+            delta_softplus=True, force_fp32=force_fp32,
             SelectiveScan=SelectiveScan, ssoflex=True, # output fp32
         )
         if self.ssm_low_rank:
