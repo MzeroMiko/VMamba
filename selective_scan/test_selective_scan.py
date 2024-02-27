@@ -312,6 +312,7 @@ def selective_scan_fn(u, delta, A, B, C, D=None, z=None, delta_bias=None, delta_
 # MODE = None
 # MODE = "mamba_ssm"
 # MODE = "sscore"
+# MODE = "ssoflex"
 # MODE = "sstest"
 # MODE = "mamba_ssm_sscore" # 1344 items pass
 # MODE = "mamba_ssm_sscorendstate" # 1344 items pass
@@ -321,12 +322,19 @@ if MODE in ["mamba_ssm"]:
     import selective_scan_cuda
     selective_scan_fn = build_selective_scan_fn(selective_scan_cuda, mode=MODE)
     selective_scan_ref = selective_scan_ref
+elif MODE in ["ssoflex"]:
+    import selective_scan_cuda_oflex
+    selective_scan_cuda = selective_scan_cuda_oflex
+    selective_scan_fn = build_selective_scan_fn(selective_scan_cuda_oflex, mode=MODE)
+    selective_scan_ref = selective_scan_ref
 elif MODE in ["sscore"]:
     import selective_scan_cuda_core
+    selective_scan_cuda = selective_scan_cuda_core
     selective_scan_fn = build_selective_scan_fn(selective_scan_cuda_core, mode=MODE)
     selective_scan_ref = selective_scan_ref
 elif MODE in ["sstest"]:
     import selective_scan_cuda_test
+    selective_scan_cuda = selective_scan_cuda_test
     selective_scan_fn = build_selective_scan_fn(selective_scan_cuda_test, mode=MODE)
     selective_scan_ref = selective_scan_ref
 elif MODE in ["mamba_ssm_sscore"]:
