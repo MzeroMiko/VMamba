@@ -486,13 +486,18 @@ class SS2D(nn.Module):
             self.out_norm = nn.LayerNorm(d_inner)
 
         # forward_type debug =======================================
+        FORWARD_TYPES = dict(
+            v0=self.forward_corev0,
+            v2=partial(self.forward_corev2, force_fp32=None, SelectiveScan=SelectiveScanCore),
+            v3=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex),
+            v1=partial(self.forward_corev2, force_fp32=None, SelectiveScan=SelectiveScanOflex),
+            v01=partial(self.forward_corev2, force_fp32=None, SelectiveScan=SelectiveScanMamba),
+            share_ssm=self.forward_corev0_share_ssm,
+            share_a=self.forward_corev0_share_a,
+        )
         if forward_type.startswith("debug"):
             from .ss2d_ablations import SS2D_ForwardCoreSpeedAblations, SS2D_ForwardCoreModeAblations
-            self.forward_core = dict(
-                v0=self.forward_corev0,
-                v1=self.forward_corev1,
-                v2=self.forward_corev2,
-                v01=self.forward_corev01,
+            FORWARD_TYPES.update(dict(
                 debugforward_core_mambassm_seq=partial(SS2D_ForwardCoreSpeedAblations.forward_core_mambassm_seq, self),
                 debugforward_core_mambassm=partial(SS2D_ForwardCoreSpeedAblations.forward_core_mambassm, self),
                 debugforward_core_mambassm_fp16=partial(SS2D_ForwardCoreSpeedAblations.forward_core_mambassm_fp16, self),
@@ -504,16 +509,8 @@ class SS2D(nn.Module):
                 debugforward_core_sscore_fusecscm_fbnrow=partial(SS2D_ForwardCoreSpeedAblations.forward_core_sscore_fusecscm_fbnrow, self),
                 debugforward_core_ssoflex_fusecscm=partial(SS2D_ForwardCoreSpeedAblations.forward_core_ssoflex_fusecscm, self),
                 debugforward_core_ssoflex_fusecscm_i16o32=partial(SS2D_ForwardCoreSpeedAblations.forward_core_ssoflex_fusecscm_i16o32, self),
-            ).get(forward_type, self.forward_corev2)
-        else:
-            self.forward_core = dict(
-                v0=self.forward_corev0,
-                v2=self.forward_corev2,
-                v1=self.forward_corev1,
-                v01=self.forward_corev01,
-                share_ssm=self.forward_corev0_share_ssm,
-                share_a=self.forward_corev0_share_a,
-            ).get(forward_type, self.forward_corev2)
+            ))
+        self.forward_core = FORWARD_TYPES.get(forward_type, FORWARD_TYPES.get("v2", None))
         self.K = 4 if forward_type not in ["share_ssm"] else 1
         self.K2 = self.K if forward_type not in ["share_a"] else 1
 
@@ -695,9 +692,9 @@ class SS2D(nn.Module):
         """
         ...
 
-    def forward_corev2(self, x: torch.Tensor, nrows=-1, channel_first=False, SelectiveScan=SelectiveScanOflex):
+    def forward_corev2(self, x: torch.Tensor, nrows=-1, channel_first=False, SelectiveScan=SelectiveScanOflex, force_fp32=None):
         nrows = 1
-        force_fp32 = (self.training and (not self.disable_force32))
+        force_fp32 = (self.training and (not self.disable_force32)) if force_fp32 is None else force_fp32
         if not channel_first:
             x = x.permute(0, 3, 1, 2).contiguous()
         if self.ssm_low_rank:
@@ -708,17 +705,11 @@ class SS2D(nn.Module):
             out_norm=getattr(self, "out_norm", None),
             out_norm_shape=getattr(self, "out_norm_shape", "v0"),
             nrows=nrows, backnrows=1, delta_softplus=True, force_fp32=force_fp32,
-            SelectiveScan=SelectiveScan,
+            SelectiveScan=SelectiveScan, ssoflex=True, # output fp32
         )
         if self.ssm_low_rank:
             x = self.out_rank(x)
         return x
-    
-    def forward_corev1(self, x: torch.Tensor, nrows=-1, channel_first=False):
-        return self.forward_corev2(x, nrows, channel_first, SelectiveScan=SelectiveScanCore)
-
-    def forward_corev01(self, x: torch.Tensor, nrows=-1, channel_first=False):
-        return self.forward_corev2(x, nrows, channel_first, SelectiveScan=SelectiveScanMamba)
     
     def forward(self, x: torch.Tensor, **kwargs):
         x = self.in_proj(x)
