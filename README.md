@@ -90,7 +90,7 @@ inspiration from the recently introduced state space model and propose the Visua
 * **To better understand How SSMScanOp can be derived from Continuous State Space Model**
 
 <p align="center">
-  <img src="assets/derivation.png" alt="derivation" width="50%">
+  <img src="assets/derivation.png" alt="derivation" width="80%">
 </p>
 
 
