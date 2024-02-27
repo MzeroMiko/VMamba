@@ -779,12 +779,14 @@ class VSSBlock(nn.Module):
         mlp_drop_rate: float = 0.0,
         # =============================
         use_checkpoint: bool = False,
+        post_norm: bool = False,
         **kwargs,
     ):
         super().__init__()
         self.ssm_branch = ssm_ratio > 0
         self.mlp_branch = mlp_ratio > 0
         self.use_checkpoint = use_checkpoint
+        self.post_norm = post_norm
 
         if self.ssm_branch:
             self.norm = norm_layer(hidden_dim)
@@ -821,9 +823,15 @@ class VSSBlock(nn.Module):
 
     def _forward(self, input: torch.Tensor):
         if self.ssm_branch:
-            x = input + self.drop_path(self.op(self.norm(input)))
+            if self.post_norm:
+                x = input + self.drop_path(self.norm(self.op(input)))
+            else:
+                x = input + self.drop_path(self.op(self.norm(input)))
         if self.mlp_branch:
-            x = x + self.drop_path(self.mlp(self.norm2(x))) # FFN
+            if self.post_norm:
+                x = x + self.drop_path(self.norm2(self.mlp(x))) # FFN
+            else:
+                x = x + self.drop_path(self.mlp(self.norm2(x))) # FFN
         return x
 
     def forward(self, input: torch.Tensor):
