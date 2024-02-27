@@ -37,13 +37,14 @@ def get_cuda_bare_metal_version(cuda_dir):
 
     return raw_output, bare_metal_version
 
-# MODES = ["core", "ndstate", "oflex"]
-MODES = ["core", "ndstate", "oflex", "nrow"]
+MODES = ["core", "ndstate", "oflex"]
+# MODES = ["core", "ndstate", "oflex", "nrow"]
 
 def get_ext():
     cc_flag = []
 
     print("\n\ntorch.__version__  = {}\n\n".format(torch.__version__))
+    print("\n\nCUDA_HOME = {}\n\n".format(CUDA_HOME))
 
     # Check, if CUDA11 is installed for compute capability 8.0
     if CUDA_HOME is not None:
@@ -58,7 +59,7 @@ def get_ext():
     cc_flag.append("arch=compute_70,code=sm_70")
     cc_flag.append("-gencode")
     cc_flag.append("arch=compute_80,code=sm_80")
-    if bare_metal_version >= Version("11.8"):
+    if (CUDA_HOME is not None) and (bare_metal_version >= Version("11.8")):
         cc_flag.append("-gencode")
         cc_flag.append("arch=compute_90,code=sm_90")
 
@@ -134,7 +135,6 @@ def get_ext():
     ]
 
     return ext_modules
-
 
 ext_modules = get_ext()
 setup(
