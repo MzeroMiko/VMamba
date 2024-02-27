@@ -345,9 +345,9 @@ elif MODE in ["mamba_ssm_sscorendstate"]:
     selective_scan_fn = build_selective_scan_fn(selective_scan_cuda_core, mode="sscorendstate")
     selective_scan_ref = build_selective_scan_fn(selective_scan_cuda, mode="mamba_ssm")
 elif MODE in ["mamba_ssm_ssoflex"]:
-    import selective_scan_cuda_core
+    import selective_scan_cuda_oflex
     import selective_scan_cuda
-    selective_scan_fn = build_selective_scan_fn(selective_scan_cuda_core, mode="ssoflex")
+    selective_scan_fn = build_selective_scan_fn(selective_scan_cuda_oflex, mode="ssoflex")
     selective_scan_ref = build_selective_scan_fn(selective_scan_cuda, mode="mamba_ssm")
 else:
     selective_scan_cuda = None
