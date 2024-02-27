@@ -87,6 +87,13 @@ inspiration from the recently introduced state space model and propose the Visua
   <img src="assets/erf_comp.png" alt="erf" width="50%">
 </p>
 
+* **To better understand How SSMScanOp can be derived from Continuous State Space Model**
+
+<p align="center">
+  <img src="assets/derivation.png" alt="derivation" width="50%">
+</p>
+
+
 
 ## Main Results
 
