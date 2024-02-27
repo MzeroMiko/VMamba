@@ -45,6 +45,9 @@ supported_extra_ops={
     "aten::flip": None, # as permute is in _IGNORED_OPS
     "prim::PythonOp.SelectiveScanFn": selective_scan_flop_jit, # latter
     "prim::PythonOp.SelectiveScan": selective_scan_flop_jit, # latter
+    "prim::PythonOp.SelectiveScanCore": selective_scan_flop_jit, # latter
+    "prim::PythonOp.SelectiveScanOflex": selective_scan_flop_jit, # latter
+    "prim::PythonOp.SelectiveScanMamba": selective_scan_flop_jit, # latter
 }
 
 

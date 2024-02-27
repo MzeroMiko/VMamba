@@ -412,7 +412,6 @@ class PatchMerging2D(nn.Module):
         return x
 
 
-# v2no32
 class SS2D(nn.Module):
     def __init__(
         self,
@@ -452,20 +451,16 @@ class SS2D(nn.Module):
         self.d_state = math.ceil(d_model / 6) if d_state == "auto" else d_state # 20240109
         self.d_conv = d_conv
 
-        # disable force float32 ==============================
-        self.disable_force32 = forward_type[-len("no32"):] == "no32"
-        if self.disable_force32:
-            forward_type = forward_type[:-len("no32")]
+        # tags for forward_type ==============================
+        def checkpostfix(tag, value):
+            ret = value[-len(tag):] == tag
+            if ret:
+                value = value[:-len(tag)]
+            return ret, value
 
-        # disable z ==========================================
-        self.disable_z = forward_type[-len("noz"):] == "noz"
-        if self.disable_z:
-            forward_type = forward_type[:-len("noz")]
-
-        # disable z act ======================================
-        self.disable_z_act = forward_type[-len("nozact"):] == "nozact"
-        if self.disable_z_act:
-            forward_type = forward_type[:-len("nozact")]
+        self.disable_force32, forward_type = checkpostfix("no32", forward_type)
+        self.disable_z, forward_type = checkpostfix("noz", forward_type)
+        self.disable_z_act, forward_type = checkpostfix("nozact", forward_type)
 
         # softmax | sigmoid | dwconv | norm ===========================
         if forward_type[-len("none"):] == "none":
