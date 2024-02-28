@@ -52,7 +52,7 @@ class CSv2(torch.autograd.Function):
     def forward(ctx, x: torch.Tensor):
         B, C, H, W = x.shape
         ctx.shape = (B, C, H, W)
-        return vssm_cross_scan_cuda.cross_scan(x).view(B, 4, C, H * W)
+        return vssm_cross_scan_cuda.cross_scan(x.permute(0, 2, 3, 1).contiguous()).permute(0, 1, 4, 2, 3).contiguous().view(B, 4, C, H * W)
     
     @staticmethod
     def backward(ctx, ys: torch.Tensor):
@@ -60,15 +60,15 @@ class CSv2(torch.autograd.Function):
         ys = ys.view(B, 4, C, H, W)
         if ys.stride(-1) != 1:
             ys = ys.contiguous()
-        return vssm_cross_scan_cuda.cross_merge(ys)
+        return vssm_cross_scan_cuda.cross_merge(ys.permute(0, 1, 3, 4, 2).contiguous()).permute(0, 3, 1, 2).contiguous().view(B, C, H, W)
 
 
 class CMv2(torch.autograd.Function):
     @staticmethod
     def forward(ctx, ys: torch.Tensor):
-        B, K, D, H, W = ys.shape
+        B, K, C, H, W = ys.shape
         ctx.shape = (H, W)
-        return vssm_cross_scan_cuda.cross_merge(ys).view(B, D, H * W)
+        return vssm_cross_scan_cuda.cross_merge(ys.permute(0, 1, 3, 4, 2).contiguous()).permute(0, 3, 1, 2).contiguous().view(B, C, H * W)
     
     @staticmethod
     def backward(ctx, x: torch.Tensor):
@@ -76,13 +76,14 @@ class CMv2(torch.autograd.Function):
         B, C, L = x.shape
         if x.stride(-1) != 1:
             x = x.contiguous()
-        return vssm_cross_scan_cuda.cross_scan(x.view(B, C, H, W))
+        x = x.view(B, C, H, W)
+        return vssm_cross_scan_cuda.cross_scan(x.permute(0, 2, 3, 1).contiguous()).permute(0, 1, 4, 2, 3).contiguous().view(B, 4, C, H, W)
 
 
 def test():
     B, C, H, W = 128, 96, 56, 56
-    x = torch.randn((B, C, H, W)).cuda().requires_grad_(True)
-    y = torch.randn((B, 4, C, H, W)).cuda().requires_grad_(True)
+    x = torch.randn((B, C, H, W)).cuda().half().requires_grad_(True)
+    y = torch.randn((B, 4, C, H, W)).cuda().half().requires_grad_(True)
     y1 = CrossScan.apply(x)
     y2 = CSv2.apply(x)
     x1 = CrossMerge.apply(y)
@@ -100,23 +101,45 @@ def test():
     import time
     t0 = time.time()
     torch.cuda.synchronize()
-    for _ in range(1000):
+    for _ in range(200):
         CrossScan.apply(x).sum().backward()
     torch.cuda.synchronize()
     t1 = time.time()
-    for _ in range(1000):
+    for _ in range(200):
         CSv2.apply(x).sum().backward()
     torch.cuda.synchronize()
     t2 = time.time()
-    for _ in range(1000):
-        CrossMerge.apply(y).sum().backward()
+    for _ in range(200):
+        CMv2.apply(y).sum().backward()
     torch.cuda.synchronize()
     t3 = time.time()
-    for _ in range(1000):
-        CMv2.apply(y).sum().backward()
+    for _ in range(200):
+        CrossMerge.apply(y).sum().backward()
     torch.cuda.synchronize()
     t4 = time.time()
     print(t4-t3,t3-t2,t2-t1,t1-t0)
+
+    import time
+    with torch.no_grad():
+        t0 = time.time()
+        torch.cuda.synchronize()
+        for _ in range(200):
+            CrossScan.apply(x)
+        torch.cuda.synchronize()
+        t1 = time.time()
+        for _ in range(200):
+            CSv2.apply(x)
+        torch.cuda.synchronize()
+        t2 = time.time()
+        for _ in range(200):
+            CrossMerge.apply(y)
+        torch.cuda.synchronize()
+        t3 = time.time()
+        for _ in range(200):
+            CMv2.apply(y)
+        torch.cuda.synchronize()
+        t4 = time.time()
+        print(t4-t3,t3-t2,t2-t1,t1-t0)
 
 
 test()

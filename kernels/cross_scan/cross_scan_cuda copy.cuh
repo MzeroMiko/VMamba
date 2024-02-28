@@ -35,19 +35,18 @@ int best_block_dim(int feat_dim){
 
 template <typename T>
 __global__ void cross_scan_cuda_kernel(T* x, T* out, const int B, const int C, const int H, const int W) {
-    // data: B, H, W, C
+    // data: B, C, H, W
     // B: gridDim.z; H: gridDim.y; W: gridDim.x; C: threadIdx.x | i;
     int i0, o0, o1, o2, o3;
-    int WC = W * C;
     int HW = H * W;
-    int HWC = H * WC;
-    int _4HWC = 4 * HWC;
+    int CHW = C * HW;
+    int _4CHW = 4 * CHW;
     for (int i = threadIdx.x; i < C; i += blockDim.x) {
-        i0 = blockIdx.z * HWC + (blockIdx.y * W + blockIdx.x) * C + i; // data position -> (h * W + w)
-        o0 = blockIdx.z * _4HWC + 0 + (blockIdx.y * W + blockIdx.x) * C + i; // data position -> (h * W + w)
-        o1 = blockIdx.z * _4HWC + HWC + (blockIdx.x * H + blockIdx.y) * C + i; // transpose H W -> (w * H + h)
-        o2 = blockIdx.z * _4HWC + 2 * HWC + (HW - 1 - blockIdx.y * W - blockIdx.x) * C + i; // flip H W
-        o3 = blockIdx.z * _4HWC + 3 * HWC + (HW - 1 - blockIdx.x * H - blockIdx.y) * C + i; // flip (trans H W)
+        i0 = blockIdx.z * CHW + i * HW + blockIdx.y * W + blockIdx.x; // data position -> (h * W + w)
+        o0 = blockIdx.z * _4CHW + 0 + i * HW + blockIdx.y * W + blockIdx.x; // data position -> (h * W + w)
+        o1 = blockIdx.z * _4CHW + CHW + i * HW + blockIdx.x * H + blockIdx.y; // transpose H W -> (w * H + h)
+        o2 = blockIdx.z * _4CHW + 2 * CHW + i * HW + HW - 1 - blockIdx.y * W - blockIdx.x; // flip H W
+        o3 = blockIdx.z * _4CHW + 3 * CHW + i * HW + HW - 1 - blockIdx.x * H - blockIdx.y; // flip (trans H W)
         T data = (T)(__ldg(x + i0));
         out[o0] = data;
         out[o1] = data;
@@ -58,19 +57,18 @@ __global__ void cross_scan_cuda_kernel(T* x, T* out, const int B, const int C, c
 
 template <typename T>
 __global__ void cross_merge_cuda_kernel(T* x, T* out, const int B, const int C, const int H, const int W) {
-    // data: B, H, W, 4, C
+    // data: B, C, H, W
     // B: gridDim.z; H: gridDim.y; W: gridDim.x; C: threadIdx.x | i;
     int i0, o0, o1, o2, o3;
-    int WC = W * C;
     int HW = H * W;
-    int HWC = H * WC;
-    int _4HWC = 4 * HWC;
+    int CHW = C * HW;
+    int _4CHW = 4 * CHW;
     for (int i = threadIdx.x; i < C; i += blockDim.x) {
-        i0 = blockIdx.z * HWC + (blockIdx.y * W + blockIdx.x) * C + i; // data position -> (h * W + w)
-        o0 = blockIdx.z * _4HWC + 0 + (blockIdx.y * W + blockIdx.x) * C + i; // data position -> (h * W + w)
-        o1 = blockIdx.z * _4HWC + HWC + (blockIdx.x * H + blockIdx.y) * C + i; // transpose H W -> (w * H + h)
-        o2 = blockIdx.z * _4HWC + 2 * HWC + (HW - 1 - blockIdx.y * W - blockIdx.x) * C + i; // flip H W
-        o3 = blockIdx.z * _4HWC + 3 * HWC + (HW - 1 - blockIdx.x * H - blockIdx.y) * C + i; // flip (trans H W)
+        i0 = blockIdx.z * CHW + i * HW + blockIdx.y * W + blockIdx.x; // data position -> (h * W + w)
+        o0 = blockIdx.z * _4CHW + 0 + i * HW + blockIdx.y * W + blockIdx.x; // data position -> (h * W + w)
+        o1 = blockIdx.z * _4CHW + CHW + i * HW + blockIdx.x * H + blockIdx.y; // transpose H W -> (w * H + h)
+        o2 = blockIdx.z * _4CHW + 2 * CHW + i * HW + HW - 1 - blockIdx.y * W - blockIdx.x; // flip H W
+        o3 = blockIdx.z * _4CHW + 3 * CHW + i * HW + HW - 1 - blockIdx.x * H - blockIdx.y; // flip (trans H W)
         out[i0] = (T)(__ldg(x + o0)) + (T)(__ldg(x + o1)) + (T)(__ldg(x + o2)) + (T)(__ldg(x + o3));
     }
 }

@@ -267,15 +267,20 @@ class CrossScan(torch.autograd.Function):
     def forward(ctx, x: torch.Tensor):
         B, C, H, W = x.shape
         ctx.shape = (B, C, H, W)
-        return vssm_cross_scan_cuda.cross_scan(x).view(B, 4, C, H * W)
+        xs = x.new_empty((B, 4, C, H * W))
+        xs[:, 0] = x.flatten(2, 3)
+        xs[:, 1] = x.transpose(dim0=2, dim1=3).flatten(2, 3)
+        xs[:, 2:4] = torch.flip(xs[:, 0:2], dims=[-1])
+        return xs
     
     @staticmethod
     def backward(ctx, ys: torch.Tensor):
+        # out: (b, k, d, l)
         B, C, H, W = ctx.shape
-        ys = ys.view(B, 4, C, H, W)
-        if ys.stride(-1) != 1:
-            ys = ys.contiguous()
-        return vssm_cross_scan_cuda.cross_merge(ys)
+        L = H * W
+        ys = ys[:, 0:2] + ys[:, 2:4].flip(dims=[-1]).view(B, 2, -1, L)
+        y = ys[:, 0] + ys[:, 1].view(B, -1, W, H).transpose(dim0=2, dim1=3).contiguous().view(B, -1, L)
+        return y.view(B, -1, H, W)
 
 
 class CrossMerge(torch.autograd.Function):
@@ -283,15 +288,23 @@ class CrossMerge(torch.autograd.Function):
     def forward(ctx, ys: torch.Tensor):
         B, K, D, H, W = ys.shape
         ctx.shape = (H, W)
-        return vssm_cross_scan_cuda.cross_merge(ys).view(B, D, H * W)
+        ys = ys.view(B, K, D, -1)
+        ys = ys[:, 0:2] + ys[:, 2:4].flip(dims=[-1]).view(B, 2, D, -1)
+        y = ys[:, 0] + ys[:, 1].view(B, -1, W, H).transpose(dim0=2, dim1=3).contiguous().view(B, D, -1)
+        return y
     
     @staticmethod
     def backward(ctx, x: torch.Tensor):
+        # B, D, L = x.shape
+        # out: (b, k, d, l)
         H, W = ctx.shape
         B, C, L = x.shape
-        if x.stride(-1) != 1:
-            x = x.contiguous()
-        return vssm_cross_scan_cuda.cross_scan(x.view(B, C, H, W))
+        xs = x.new_empty((B, 4, C, L))
+        xs[:, 0] = x
+        xs[:, 1] = x.view(B, C, H, W).transpose(dim0=2, dim1=3).flatten(2, 3)
+        xs[:, 2:4] = torch.flip(xs[:, 0:2], dims=[-1])
+        xs = xs.view(B, 4, C, H, W)
+        return xs, None, None
 
 
 def cross_selective_scan(

@@ -92,7 +92,7 @@ if __name__ == "__main__":
         # INFO:root:batch_size 64 throughput 175.17029874793926
         model = VSSM(dims=128, depths=[2,2,15,2], ssm_d_state=1, ssm_ratio=1, forward_type="v3noz", downsample_version="v3", patchembed_version="v2")
         # INFO:root:batch_size 64 throughput 383.81260980073216 # A100
-        model = VSSM(dims=128, depths=[2,2,12,2], ssm_d_state=1, ssm_ratio=1, forward_type="v4noz", downsample_version="v3", patchembed_version="v2")
+        # model = VSSM(dims=128, depths=[2,2,12,2], ssm_d_state=1, ssm_ratio=1, forward_type="v4noz", downsample_version="v3", patchembed_version="v2")
         # INFO:root:batch_size 64 throughput 370.81260980073216 # A100
         
     if MODEL in ["SWIN"]:

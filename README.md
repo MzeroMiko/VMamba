@@ -192,8 +192,8 @@ conda activate vmamba
 ```bash
 pip install -r requirements.txt
 cd kernels/selective_scan && pip install .
-cd kernels/cross_scan && pip install .
 ```
+<!-- cd kernels/cross_scan && pip install . -->
 
 ***Check Selective Scan (optional)***
 

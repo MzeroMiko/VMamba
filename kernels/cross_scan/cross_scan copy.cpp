@@ -33,11 +33,11 @@ void cross_merge_cuda(void *__restrict__  x, void *__restrict__ out, int B, int 
 at::Tensor cross_scan_fwd(at::Tensor & xs) {
     const auto sizes = xs.sizes();
     const int B = sizes[0];
-    const int H = sizes[1];
-    const int W = sizes[2];
-    const int C = sizes[3];
+    const int C = sizes[1];
+    const int H = sizes[2];
+    const int W = sizes[3];
     CHECK_INPUT(xs);
-    at::Tensor out = torch::empty({B, 4, H, W, C}, xs.options().device(torch::kCUDA));
+    at::Tensor out = torch::empty({B, 4, C, H, W}, xs.options().device(torch::kCUDA));
     at::cuda::CUDAGuard device_guard{(char)xs.get_device()};
     auto stream = at::cuda::getCurrentCUDAStream().stream();
     DISPATCH_ITYPE_FLOAT_AND_HALF_AND_BF16(xs.scalar_type(), "cross_scan", [&] {
@@ -49,11 +49,11 @@ at::Tensor cross_scan_fwd(at::Tensor & xs) {
 at::Tensor cross_merge_fwd(at::Tensor & xs) {
     const auto sizes = xs.sizes();
     const int B = sizes[0];
-    const int H = sizes[2];
-    const int W = sizes[3];
-    const int C = sizes[4];
+    const int C = sizes[2];
+    const int H = sizes[3];
+    const int W = sizes[4];
     CHECK_INPUT(xs);
-    at::Tensor out = torch::zeros({B, H, W, C}, xs.options().device(torch::kCUDA));
+    at::Tensor out = torch::zeros({B, C, H, W}, xs.options().device(torch::kCUDA));
     at::cuda::CUDAGuard device_guard{(char)xs.get_device()};
     auto stream = at::cuda::getCurrentCUDAStream().stream();
     DISPATCH_ITYPE_FLOAT_AND_HALF_AND_BF16(xs.scalar_type(), "cross_merge", [&] {
