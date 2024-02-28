@@ -34,6 +34,7 @@ except Exception as e:
     import selective_scan_cuda
     # from mamba_ssm.ops.selective_scan_interface import selective_scan_fn, selective_scan_ref
 
+import vssm_cross_scan_cuda
 
 # fvcore flops =======================================
 
@@ -261,49 +262,36 @@ class SelectiveScanFake(torch.autograd.Function):
         return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None, None, None)
 
 
-class CrossScan(torch.autograd.Function):
+class CSv2(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x: torch.Tensor):
         B, C, H, W = x.shape
         ctx.shape = (B, C, H, W)
-        xs = x.new_empty((B, 4, C, H * W))
-        xs[:, 0] = x.flatten(2, 3)
-        xs[:, 1] = x.transpose(dim0=2, dim1=3).flatten(2, 3)
-        xs[:, 2:4] = torch.flip(xs[:, 0:2], dims=[-1])
-        return xs
+        return vssm_cross_scan_cuda.cross_scan(x).view(B, 4, C, H * W)
     
     @staticmethod
     def backward(ctx, ys: torch.Tensor):
-        # out: (b, k, d, l)
         B, C, H, W = ctx.shape
-        L = H * W
-        ys = ys[:, 0:2] + ys[:, 2:4].flip(dims=[-1]).view(B, 2, -1, L)
-        y = ys[:, 0] + ys[:, 1].view(B, -1, W, H).transpose(dim0=2, dim1=3).contiguous().view(B, -1, L)
-        return y.view(B, -1, H, W)
+        ys = ys.view(B, 4, C, H, W)
+        if ys.stride(-1) != 1:
+            ys = ys.contiguous()
+        return vssm_cross_scan_cuda.cross_merge(ys)
 
 
-class CrossMerge(torch.autograd.Function):
+class CMv2(torch.autograd.Function):
     @staticmethod
     def forward(ctx, ys: torch.Tensor):
         B, K, D, H, W = ys.shape
         ctx.shape = (H, W)
-        ys = ys.view(B, K, D, -1)
-        ys = ys[:, 0:2] + ys[:, 2:4].flip(dims=[-1]).view(B, 2, D, -1)
-        y = ys[:, 0] + ys[:, 1].view(B, -1, W, H).transpose(dim0=2, dim1=3).contiguous().view(B, D, -1)
-        return y
+        return vssm_cross_scan_cuda.cross_merge(ys).view(B, D, H * W)
     
     @staticmethod
     def backward(ctx, x: torch.Tensor):
-        # B, D, L = x.shape
-        # out: (b, k, d, l)
         H, W = ctx.shape
         B, C, L = x.shape
-        xs = x.new_empty((B, 4, C, L))
-        xs[:, 0] = x
-        xs[:, 1] = x.view(B, C, H, W).transpose(dim0=2, dim1=3).flatten(2, 3)
-        xs[:, 2:4] = torch.flip(xs[:, 0:2], dims=[-1])
-        xs = xs.view(B, 4, C, H, W)
-        return xs, None, None
+        if x.stride(-1) != 1:
+            x = x.contiguous()
+        return vssm_cross_scan_cuda.cross_scan(x.view(B, C, H, W))
 
 
 def cross_selective_scan(
@@ -440,15 +428,23 @@ def cross_selective_scanv2(
     def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True):
         return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, backnrows, ssoflex)
     
-    xs = CrossScan.apply(x)
-    
-    x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, x_proj_weight)
+    # =========================
+    # tmp
+    x_proj_weight = x_proj_weight.sum(dim=0)
+    x_proj_bias = x_proj_bias.view(K, -1, 1).sum(dim=0) if x_proj_bias is not None else None
+    dt_projs_weight = dt_projs_weight.sum(dim=0)
+    # =========================
+    x = x.view(B, D, L)
+    x_dbl = torch.einsum("b d l, c d -> b c l", x, x_proj_weight)
     if x_proj_bias is not None:
-        x_dbl = x_dbl + x_proj_bias.view(1, K, -1, 1)
-    dts, Bs, Cs = torch.split(x_dbl, [R, N, N], dim=2)
-    dts = torch.einsum("b k r l, k d r -> b k d l", dts, dt_projs_weight)
-    
-    xs = xs.view(B, -1, L)
+        x_dbl = x_dbl + x_proj_bias.view(1, -1, 1)
+    dts = torch.einsum("b r l, d r -> b d l", x_dbl[:, :R, :], dt_projs_weight)
+    ps = torch.cat([x, dts, x_dbl[:, R:, :]], dim=1).view(B, -1, H, W) # (B, D+D+N+N, L)
+    ps = CrossScan.apply(ps) # (B, 4, D+D+N+N, L)
+
+    xs, dts, Bs, Cs = torch.split(ps, [D, D, N, N], dim=2)
+
+    xs = xs.contiguous().view(B, -1, L)
     dts = dts.contiguous().view(B, -1, L)
     As = -torch.exp(A_logs.to(torch.float)) # (k * c, d_state)
     Bs = Bs.contiguous()
@@ -587,6 +583,7 @@ class SS2D(nn.Module):
             fake=partial(self.forward_corev2, force_fp32=None, SelectiveScan=SelectiveScanFake),
             v2=partial(self.forward_corev2, force_fp32=None, SelectiveScan=SelectiveScanCore),
             v3=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex),
+            v4=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, cross_selective_scan=cross_selective_scanv2),
             v1=partial(self.forward_corev2, force_fp32=None, SelectiveScan=SelectiveScanOflex),
             v01=partial(self.forward_corev2, force_fp32=None, SelectiveScan=SelectiveScanMamba),
             share_ssm=self.forward_corev0_share_ssm,
@@ -732,7 +729,7 @@ class SS2D(nn.Module):
     # only used to run previous version
     def forward_corev0(self, x: torch.Tensor, to_dtype=False, channel_first=False):
         def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True, nrows=1):
-            return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, False)
+            return SelectiveScanCore.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, False)
 
         if not channel_first:
             x = x.permute(0, 3, 1, 2).contiguous()
@@ -789,7 +786,7 @@ class SS2D(nn.Module):
         """
         ...
 
-    def forward_corev2(self, x: torch.Tensor, channel_first=False, SelectiveScan=SelectiveScanOflex, force_fp32=None):
+    def forward_corev2(self, x: torch.Tensor, channel_first=False, SelectiveScan=SelectiveScanOflex, cross_selective_scan=cross_selective_scan, force_fp32=None):
         force_fp32 = (self.training and (not self.disable_force32)) if force_fp32 is None else force_fp32
         if not channel_first:
             x = x.permute(0, 3, 1, 2).contiguous()

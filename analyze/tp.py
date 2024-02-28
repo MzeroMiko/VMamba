@@ -64,7 +64,7 @@ def throughput(data_loader, model, logger):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--batch-size', type=int, default=128, help="batch size for single GPU")
+    parser.add_argument('--batch-size', type=int, default=64, help="batch size for single GPU")
     parser.add_argument('--data-path', type=str, required=True, help='path to dataset')
     parser.add_argument('--size', type=int, default=224, help='path to dataset')
     args = parser.parse_args()
@@ -91,9 +91,14 @@ if __name__ == "__main__":
         model = VSSM(dims=128, depths=[2,2,15,2], ssm_d_state=1, forward_type="v3noz", downsample_version="v3", patchembed_version="v2")
         # INFO:root:batch_size 64 throughput 175.17029874793926
         model = VSSM(dims=128, depths=[2,2,15,2], ssm_d_state=1, ssm_ratio=1, forward_type="v3noz", downsample_version="v3", patchembed_version="v2")
+        # INFO:root:batch_size 64 throughput 383.81260980073216 # A100
+        model = VSSM(dims=128, depths=[2,2,12,2], ssm_d_state=1, ssm_ratio=1, forward_type="v4noz", downsample_version="v3", patchembed_version="v2")
+        # INFO:root:batch_size 64 throughput 370.81260980073216 # A100
         
     if MODEL in ["SWIN"]:
-        sys.path.append("../../Swin-Transformer/")
+        sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../Swin-Transformer"),)
+        # print(sys.path)
+        # from kernels.window_process.window_process import WindowProcess, WindowProcessReverse
         SWIN = import_abspy(
             "swin_transformer", 
             os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../Swin-Transformer/models"),
@@ -104,6 +109,7 @@ if __name__ == "__main__":
         # INFO:root:batch_size 64 throughput 437.82169310230506
         model = SWIN(embed_dim=128, depths=[2,2,18,2], num_heads=[ 4, 8, 16, 32 ])
         # INFO:root:batch_size 64 throughput 284.90212452944024
+        # INFO:root:batch_size 64 throughput 410.8976187260478 # A100
 
     if MODEL in ["CONVNEXT"]:
         CONVNEXT = import_abspy(

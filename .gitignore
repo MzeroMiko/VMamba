@@ -35,6 +35,7 @@ detection/work_dirs
 segmentation/data
 segmentation/work_dirs
 
-selective_scan/build
+kernels/cross_scan/build
+kernels/selective_scan/build
 
 classification/configs/vssm1/_test_vssm_tiny_224_0221.yaml

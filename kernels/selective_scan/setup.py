@@ -141,7 +141,7 @@ setup(
     name="selective_scan",
     version="0.0.2",
     packages=[],
-    author="Tri Dao, Albert Gu, Mzreo",
+    author="Tri Dao, Albert Gu, Mzero",
     author_email="tri@tridao.me, agu@cs.cmu.edu, liuyue171@mails.ucas.ac.cn",
     description="selective scan",
     long_description="",
