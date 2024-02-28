@@ -34,7 +34,7 @@ except Exception as e:
     import selective_scan_cuda
     # from mamba_ssm.ops.selective_scan_interface import selective_scan_fn, selective_scan_ref
 
-import vssm_cross_scan_cuda
+# import vssm_cross_scan_cuda
 
 # fvcore flops =======================================
 
