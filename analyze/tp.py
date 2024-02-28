@@ -90,7 +90,7 @@ if __name__ == "__main__":
         # INFO:root:batch_size 64 throughput 245.8051057770092
         model = VSSM(dims=128, depths=[2,2,15,2], ssm_d_state=1, forward_type="v3noz", downsample_version="v3", patchembed_version="v2")
         # INFO:root:batch_size 64 throughput 175.17029874793926
-        model = VSSM(dims=128, depths=[2,2,15,2], ssm_d_state=1, forward_type="v3noz", downsample_version="v3", patchembed_version="v2", ssm_forwardtype="fake")
+        model = VSSM(dims=128, depths=[2,2,15,2], ssm_d_state=1, forward_type="fakenoz", downsample_version="v3", patchembed_version="v2")
         
     if MODEL in ["SWIN"]:
         sys.path.append("../../Swin-Transformer/")
