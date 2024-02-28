@@ -7,6 +7,7 @@ import sys
 import logging
 from torchvision import datasets, transforms
 from timm.data import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
+from torchvision.models.vision_transformer import EncoderBlock
 
 def import_abspy(name="models", path="classification/"):
     import sys
