@@ -392,6 +392,7 @@ def cross_selective_scan(
     return (y.to(x.dtype) if to_dtype else y)
 
 
+# slower ...
 def cross_selective_scanv2(
     x: torch.Tensor=None, 
     x_proj_weight: torch.Tensor=None,
