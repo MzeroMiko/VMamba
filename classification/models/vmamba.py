@@ -239,10 +239,26 @@ class SelectiveScanOflex(torch.autograd.Function):
         return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None, None, None)
 
 
-SelectiveScan = SelectiveScanMamba
-SelectiveScan = SelectiveScanNRow
-SelectiveScan = SelectiveScanCore
-SelectiveScan = SelectiveScanOflex
+class SelectiveScanFake(torch.autograd.Function):
+    # comment all checks if inside cross_selective_scan
+    @staticmethod
+    @torch.cuda.amp.custom_fwd
+    def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, nrows=1, backnrows=1, oflex=True):
+        ctx.delta_softplus = delta_softplus
+        ctx.backnrows = backnrows
+        x = delta
+        out = u
+        ctx.save_for_backward(u, delta, A, B, C, D, delta_bias, x)
+        return out
+    
+    @staticmethod
+    @torch.cuda.amp.custom_bwd
+    def backward(ctx, dout, *args):
+        u, delta, A, B, C, D, delta_bias, x = ctx.saved_tensors
+        if dout.stride(-1) != 1:
+            dout = dout.contiguous()
+        du, ddelta, dA, dB, dC, dD, ddelta_bias = u * 0, delta * 0, A * 0, B * 0, C * 0, C * 0, (D * 0 if D else None), (delta_bias * 0 if delta_bias else None)
+        return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None, None, None)
 
 
 class CrossScan(torch.autograd.Function):
@@ -482,6 +498,7 @@ class SS2D(nn.Module):
         # forward_type debug =======================================
         FORWARD_TYPES = dict(
             v0=self.forward_corev0,
+            fake=partial(self.forward_corev2, force_fp32=None, SelectiveScan=SelectiveScanFake),
             v2=partial(self.forward_corev2, force_fp32=None, SelectiveScan=SelectiveScanCore),
             v3=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex),
             v1=partial(self.forward_corev2, force_fp32=None, SelectiveScan=SelectiveScanOflex),
