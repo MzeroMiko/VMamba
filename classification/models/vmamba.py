@@ -835,6 +835,145 @@ class SS2D(nn.Module):
         return out
 
 
+class SS2DDev(nn.Module):
+    def __init__(
+        self,
+        # basic dims ===========
+        d_model=96,
+        d_state=1,
+        ssm_ratio=2.0,
+        ssm_rank_ratio=2.0,
+        dt_rank="auto",
+        act_layer=nn.SiLU,
+        # dwconv ===============
+        d_conv=3, # < 2 means no conv 
+        conv_bias=True,
+        # ======================
+        dropout=0.0,
+        bias=False,
+        # dt init ==============
+        dt_min=0.001,
+        dt_max=0.1,
+        dt_init="random",
+        dt_scale=1.0,
+        dt_init_floor=1e-4,
+        initialize="v0",
+        # ======================
+        forward_type="v2",
+        # ======================
+        **kwargs,
+    ):
+        """
+        ssm_rank_ratio would be used in the future...
+        """
+        factory_kwargs = {"device": None, "dtype": None}
+        super().__init__()
+        d_expand = int(ssm_ratio * d_model)
+        d_inner = d_expand
+        self.d_state = d_state
+
+        # tags for forward_type ==============================
+        def checkpostfix(tag, value):
+            ret = value[-len(tag):] == tag
+            if ret:
+                value = value[:-len(tag)]
+            return ret, value
+
+        # softmax | sigmoid | dwconv | norm ===========================
+        if forward_type[-len("none"):] == "none":
+            forward_type = forward_type[:-len("none")]
+            self.out_norm = nn.Identity()
+        elif forward_type[-len("dwconv3"):] == "dwconv3":
+            forward_type = forward_type[:-len("dwconv3")]
+            self.out_norm = nn.Conv2d(d_inner, d_inner, kernel_size=3, padding=1, groups=d_inner, bias=False)
+            self.out_norm_shape = "v1"
+        elif forward_type[-len("softmax"):] == "softmax":
+            forward_type = forward_type[:-len("softmax")]
+            self.out_norm = nn.Softmax(dim=1)
+        elif forward_type[-len("sigmoid"):] == "sigmoid":
+            forward_type = forward_type[:-len("sigmoid")]
+            self.out_norm = nn.Sigmoid()
+        else:
+            self.out_norm = nn.LayerNorm(d_inner)
+
+        self.K = 4
+
+        # x proj =======================================
+        # x; dts; Bs; Cs;
+        d_proj = d_expand + d_expand + self.d_state * 2
+        self.x_proj = [
+            nn.Linear(d_model, d_proj, bias=bias, **factory_kwargs)
+            for _ in range(self.K)
+        ]
+        self.x_proj_weight = nn.Parameter(torch.stack([t.weight for t in self.x_proj], dim=0)) # (K, N, inner)
+        self.x_proj_bias = nn.Parameter(torch.stack([t.bias for t in self.x_proj], dim=0)) if bias else None # (K, N, inner)
+        del self.x_proj
+
+        # out proj =======================================
+        self.out_proj = nn.Linear(d_expand, d_model, bias=bias, **factory_kwargs)
+        self.dropout = nn.Dropout(dropout) if dropout > 0. else nn.Identity()
+
+        if True:
+            self.Ds = nn.Parameter(torch.ones((self.K * d_inner)))
+            self.A_logs = nn.Parameter(torch.zeros((self.K * d_inner, self.d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
+            self.dt_projs_bias = nn.Parameter(torch.randn((self.K, d_inner)))
+    
+    def forward(self, x: torch.Tensor, SelectiveScan = SelectiveScanOflex, **kwargs):
+        force_fp32 = False
+        nrows, backnrows, ssoflex = 1, 1, self.training
+        out_norm_shape = getattr(self, "out_norm_shape", "v0")
+        out_norm = self.out_norm
+        to_dtype = True
+
+        def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True):
+            return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, backnrows, ssoflex)
+        
+        K = 4
+        N = self.A_logs.shape[-1]
+        B, H, W, D = x.shape
+        L = H * W
+    
+        x_proj_weight = self.x_proj_weight
+        x_proj_bias = self.x_proj_bias
+        delta_bias = self.dt_projs_bias.view(-1).to(torch.float)
+        Ds = self.Ds.to(torch.float) # (K * c)
+        As = -torch.exp(self.A_logs.to(torch.float)) # (k * c, d_state)
+
+        x = x.permute(0, 3, 1, 2).contiguous()
+        x = CrossScan.apply(x) # (B, 4, D, L)
+        xall = torch.einsum("b k d l, k c d -> b k c l", x, x_proj_weight)
+        if self.x_proj_bias is not None:
+            xall = xall + x_proj_bias.view(1, K, -1, 1)
+        xs, dts, Bs, Cs = torch.split(xall, [D, D, N, N], dim=2)
+        
+        xs = xs.contiguous().view(B, -1, L)
+        dts = dts.contiguous().view(B, -1, L)
+        Bs = Bs.contiguous()
+        Cs = Cs.contiguous()
+
+        if force_fp32:
+            xs = xs.to(torch.float)
+            dts = dts.to(torch.float)
+            Bs = Bs.to(torch.float)
+            Cs = Cs.to(torch.float)
+
+        ys: torch.Tensor = selective_scan(
+            xs, dts, As, Bs, Cs, Ds, delta_bias, True
+        ).view(B, K, -1, H, W)
+        
+        y: torch.Tensor = CrossMerge.apply(ys)
+
+        if out_norm_shape in ["v1"]: # (B, C, H, W)
+            y = out_norm(y.view(B, -1, H, W)).permute(0, 2, 3, 1) # (B, H, W, C)
+        else: # (B, L, C)
+            y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
+            y = out_norm(y).view(B, H, W, -1)
+
+        y = (y.to(x.dtype) if to_dtype else y)
+        out = self.dropout(self.out_proj(y))
+        return out
+
+
 class Permute(nn.Module):
     def __init__(self, *args):
         super().__init__()
@@ -896,6 +1035,9 @@ class VSSBlock(nn.Module):
         self.mlp_branch = mlp_ratio > 0
         self.use_checkpoint = use_checkpoint
         self.post_norm = post_norm
+
+        if forward_type.startswith("dev"):
+            SS2D = SS2DDev
 
         if self.ssm_branch:
             self.norm = norm_layer(hidden_dim)
