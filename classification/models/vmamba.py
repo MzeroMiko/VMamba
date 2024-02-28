@@ -322,7 +322,7 @@ def cross_selective_scan(
     to_dtype=True,
     force_fp32=False, # False if ssoflex
     ssoflex=True,
-    SelectiveScan=SelectiveScan,
+    SelectiveScan=None,
 ):
     # out_norm: whatever fits (B, L, C); LayerNorm; Sigmoid; Softmax(dim=1);...
 
