@@ -262,7 +262,7 @@ class SelectiveScanFake(torch.autograd.Function):
         return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None, None, None)
 
 
-class CSv2(torch.autograd.Function):
+class CrossScan(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x: torch.Tensor):
         B, C, H, W = x.shape
@@ -278,7 +278,7 @@ class CSv2(torch.autograd.Function):
         return vssm_cross_scan_cuda.cross_merge(ys)
 
 
-class CMv2(torch.autograd.Function):
+class CrossMerge(torch.autograd.Function):
     @staticmethod
     def forward(ctx, ys: torch.Tensor):
         B, K, D, H, W = ys.shape
