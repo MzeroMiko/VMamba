@@ -41,7 +41,7 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 
 *The experiments ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166)) done before #20240119 used `mamba-ssm + group-parallel`. The experiments done since #20240201 use `sscore + fused cross scan + fused cross merge`. We plan to use `ssoflex + fused cross scan + fused cross merge + input16output32` in the future.*
 
-| name | GPU Memory | time (s/10iter) |
+| name | GPU Memory | time (s/iter) |
 | :--- | :---: | :---: |
 | mamba-ssm + sequence scan | 25927M | 0.6585s |
 | `mamba-ssm + group parallel` | `25672M` | `0.4860s` |
