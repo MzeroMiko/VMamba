@@ -812,7 +812,7 @@ class SS2D(nn.Module):
             out_norm=getattr(self, "out_norm", None),
             out_norm_shape=getattr(self, "out_norm_shape", "v0"),
             delta_softplus=True, force_fp32=force_fp32,
-            SelectiveScan=SelectiveScan, ssoflex=self.training, # output fp32
+            SelectiveScan=SelectiveScan, ssoflex=True, # output fp32
         )
         if self.ssm_low_rank:
             x = self.out_rank(x)
