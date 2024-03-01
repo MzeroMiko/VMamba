@@ -15,24 +15,25 @@ from timm.models.layers import DropPath, trunc_normal_
 from fvcore.nn import FlopCountAnalysis, flop_count_str, flop_count, parameter_count
 DropPath.__repr__ = lambda self: f"timm.DropPath({self.drop_prob})"
 
+# import selective scan ==============================
 try:
-    import selective_scan_cuda_core
-    import selective_scan_cuda_oflex
-    import selective_scan_cuda_ndstate
-    import selective_scan_cuda_nrow
-    import selective_scan_cuda
-except:
-    pass
-
-try:
-    "sscore acts the same as mamba_ssm"
     import selective_scan_cuda_oflex
 except Exception as e:
-    print(e, flush=True)
-    "you should install mamba_ssm to use this"
-    SSMODE = "mamba_ssm"
+    print(f"WARNING: can not import selective_scan_cuda_oflex.", flush=True)
+    # print(e, flush=True)
+
+try:
+    import selective_scan_cuda_core
+except Exception as e:
+    print(f"WARNING: can not import selective_scan_cuda_core.", flush=True)
+    # print(e, flush=True)
+
+try:
     import selective_scan_cuda
-    # from mamba_ssm.ops.selective_scan_interface import selective_scan_fn, selective_scan_ref
+except Exception as e:
+    print(f"WARNING: can not import selective_scan_cuda.", flush=True)
+    # print(e, flush=True)
+
 
 # fvcore flops =======================================
 
