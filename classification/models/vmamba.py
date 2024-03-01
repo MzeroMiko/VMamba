@@ -132,7 +132,6 @@ class SelectiveScanMamba(torch.autograd.Function):
         # assert nrows in [1, 2, 3, 4], f"{nrows}" # 8+ is too slow to compile
         # assert u.shape[1] % (B.shape[1] * nrows) == 0, f"{nrows}, {u.shape}, {B.shape}"
         ctx.delta_softplus = delta_softplus
-        ctx.backnrows = backnrows
         # all in float
         # if u.stride(-1) != 1:
         #     u = u.contiguous()
@@ -177,7 +176,6 @@ class SelectiveScanCore(torch.autograd.Function):
     @torch.cuda.amp.custom_fwd
     def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, nrows=1, backnrows=1, oflex=True):
         ctx.delta_softplus = delta_softplus
-        ctx.backnrows = backnrows
         out, x, *rest = selective_scan_cuda_core.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus, 1)
         ctx.save_for_backward(u, delta, A, B, C, D, delta_bias, x)
         return out
@@ -194,37 +192,13 @@ class SelectiveScanCore(torch.autograd.Function):
         return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None, None, None)
 
 
-class SelectiveScanNRow(torch.autograd.Function):
-    # comment all checks if inside cross_selective_scan
-    @staticmethod
-    @torch.cuda.amp.custom_fwd
-    def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, nrows=1, backnrows=1, oflex=True):
-        ctx.delta_softplus = delta_softplus
-        ctx.backnrows = backnrows
-        out, x, *rest = selective_scan_cuda_nrow.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows)
-        ctx.save_for_backward(u, delta, A, B, C, D, delta_bias, x)
-        return out
-    
-    @staticmethod
-    @torch.cuda.amp.custom_bwd
-    def backward(ctx, dout, *args):
-        u, delta, A, B, C, D, delta_bias, x = ctx.saved_tensors
-        if dout.stride(-1) != 1:
-            dout = dout.contiguous()
-        du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda_nrow.bwd(
-            u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus, ctx.backnrows
-        )
-        return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None, None, None)
-
-
 class SelectiveScanOflex(torch.autograd.Function):
     # comment all checks if inside cross_selective_scan
     @staticmethod
     @torch.cuda.amp.custom_fwd
     def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, nrows=1, backnrows=1, oflex=True):
         ctx.delta_softplus = delta_softplus
-        ctx.backnrows = backnrows
-        out, x, *rest = selective_scan_cuda_oflex.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, oflex)
+        out, x, *rest = selective_scan_cuda_oflex.fwd(u, delta, A, B, C, D, delta_bias, delta_softplus, 1, oflex)
         ctx.save_for_backward(u, delta, A, B, C, D, delta_bias, x)
         return out
     
@@ -235,7 +209,7 @@ class SelectiveScanOflex(torch.autograd.Function):
         if dout.stride(-1) != 1:
             dout = dout.contiguous()
         du, ddelta, dA, dB, dC, dD, ddelta_bias, *rest = selective_scan_cuda_oflex.bwd(
-            u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus, ctx.backnrows
+            u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus, 1
         )
         return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None, None, None)
 
@@ -261,7 +235,7 @@ class SelectiveScanFake(torch.autograd.Function):
         du, ddelta, dA, dB, dC, dD, ddelta_bias = u * 0, delta * 0, A * 0, B * 0, C * 0, C * 0, (D * 0 if D else None), (delta_bias * 0 if delta_bias else None)
         return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None, None, None)
 
-
+# =============
 class CrossScan(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x: torch.Tensor):
@@ -304,8 +278,89 @@ class CrossMerge(torch.autograd.Function):
         xs[:, 1] = x.view(B, C, H, W).transpose(dim0=2, dim1=3).flatten(2, 3)
         xs[:, 2:4] = torch.flip(xs[:, 0:2], dims=[-1])
         xs = xs.view(B, 4, C, H, W)
-        return xs, None, None
+        return xs
 
+
+# these are for ablations =============
+class CrossScan_Ab_2direction(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, x: torch.Tensor):
+        B, C, H, W = x.shape
+        ctx.shape = (B, C, H, W)
+        xs = x.new_empty((B, 4, C, H * W))
+        xs[:, 0] = x.flatten(2, 3)
+        xs[:, 1] = x.flatten(2, 3)
+        xs[:, 2:4] = torch.flip(xs[:, 0:2], dims=[-1])
+        return xs
+    
+    @staticmethod
+    def backward(ctx, ys: torch.Tensor):
+        # out: (b, k, d, l)
+        B, C, H, W = ctx.shape
+        L = H * W
+        ys = ys[:, 0:2] + ys[:, 2:4].flip(dims=[-1]).view(B, 2, -1, L)
+        y = ys[:, 0] + ys[:, 1].view(B, -1, W, H).transpose(dim0=2, dim1=3).contiguous().view(B, -1, L)
+        return y.view(B, -1, H, W)
+
+
+class CrossMerge_Ab_2direction(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, ys: torch.Tensor):
+        B, K, D, H, W = ys.shape
+        ctx.shape = (H, W)
+        ys = ys.view(B, K, D, -1)
+        ys = ys[:, 0:2] + ys[:, 2:4].flip(dims=[-1]).view(B, 2, D, -1)
+        y = ys.sum(dim=1)
+        return y
+    
+    @staticmethod
+    def backward(ctx, x: torch.Tensor):
+        # B, D, L = x.shape
+        # out: (b, k, d, l)
+        H, W = ctx.shape
+        B, C, L = x.shape
+        xs = x.new_empty((B, 4, C, L))
+        xs[:, 0] = x
+        xs[:, 1] = x
+        xs[:, 2:4] = torch.flip(xs[:, 0:2], dims=[-1])
+        xs = xs.view(B, 4, C, H, W)
+        return xs
+
+
+class CrossScan_Ab_1direction(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, x: torch.Tensor):
+        B, C, H, W = x.shape
+        ctx.shape = (B, C, H, W)
+        xs = x.view(B, 1, C, H * W).repeat(1, 4, 1, 1).contiguous()
+        return xs
+    
+    @staticmethod
+    def backward(ctx, ys: torch.Tensor):
+        # out: (b, k, d, l)
+        B, C, H, W = ctx.shape
+        y = ys.sum(dim=1).view(B, C, H, W)
+        return y
+
+
+class CrossMerge_Ab_1direction(torch.autograd.Function):
+    @staticmethod
+    def forward(ctx, ys: torch.Tensor):
+        B, K, D, H, W = ys.shape
+        ctx.shape = (H, W)
+        y = ys.sum(dim=1).view(B, D, H * W)
+        return y
+    
+    @staticmethod
+    def backward(ctx, x: torch.Tensor):
+        # B, D, L = x.shape
+        # out: (b, k, d, l)
+        B, C, L = x.shape
+        xs = x.view(B, 1, C, L).repeat(1, 4, 1, 1).contiguous()
+        return xs
+
+
+# =============
 
 def cross_selective_scan(
     x: torch.Tensor=None, 
@@ -315,15 +370,20 @@ def cross_selective_scan(
     dt_projs_bias: torch.Tensor=None,
     A_logs: torch.Tensor=None,
     Ds: torch.Tensor=None,
+    delta_softplus = True,
     out_norm: torch.nn.Module=None,
     out_norm_shape="v0",
-    nrows = -1, # for SelectiveScanNRow
-    backnrows = -1, # for SelectiveScanNRow
-    delta_softplus = True,
-    to_dtype=True,
-    force_fp32=False, # False if ssoflex
-    ssoflex=True,
+    # ==============================
+    to_dtype=True, # True: final out to dtype
+    force_fp32=False, # True: input fp32
+    # ==============================
+    nrows = -1, # for SelectiveScanNRow; 0: auto; -1: disable;
+    backnrows = -1, # for SelectiveScanNRow; 0: auto; -1: disable;
+    ssoflex=True, # True: out fp32 in SSOflex; else, SSOflex is the same as SSCore
+    # ==============================
     SelectiveScan=None,
+    CrossScan=CrossScan,
+    CrossMerge=CrossMerge,
 ):
     # out_norm: whatever fits (B, L, C); LayerNorm; Sigmoid; Softmax(dim=1);...
 
@@ -332,26 +392,25 @@ def cross_selective_scan(
     K, D, R = dt_projs_weight.shape
     L = H * W
 
-    if SelectiveScan == SelectiveScanNRow:
-        if nrows < 1:
-            if D % 4 == 0:
-                nrows = 4
-            elif D % 3 == 0:
-                nrows = 3
-            elif D % 2 == 0:
-                nrows = 2
-            else:
-                nrows = 1
+    if nrows == 0:
+        if D % 4 == 0:
+            nrows = 4
+        elif D % 3 == 0:
+            nrows = 3
+        elif D % 2 == 0:
+            nrows = 2
+        else:
+            nrows = 1
         
-        if backnrows < 1:
-            if D % 4 == 0:
-                backnrows = 4
-            elif D % 3 == 0:
-                backnrows = 3
-            elif D % 2 == 0:
-                backnrows = 2
-            else:
-                backnrows = 1
+    if backnrows == 0:
+        if D % 4 == 0:
+            backnrows = 4
+        elif D % 3 == 0:
+            backnrows = 3
+        elif D % 2 == 0:
+            backnrows = 2
+        else:
+            backnrows = 1
 
     def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True):
         return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, backnrows, ssoflex)
@@ -443,10 +502,9 @@ def cross_selective_scanv2(
         return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, backnrows, ssoflex)
     
     # =========================
-    # tmp
-    x_proj_weight = x_proj_weight.sum(dim=0)
-    x_proj_bias = x_proj_bias.view(K, -1, 1).sum(dim=0) if x_proj_bias is not None else None
-    dt_projs_weight = dt_projs_weight.sum(dim=0)
+    x_proj_weight = x_proj_weight[0]
+    x_proj_bias = x_proj_bias.view(-1, 1) if x_proj_bias is not None else None
+    dt_projs_weight = dt_projs_weight[0]
     # =========================
     x = x.view(B, D, L)
     x_dbl = torch.einsum("b d l, c d -> b c l", x, x_proj_weight)
@@ -485,6 +543,7 @@ def cross_selective_scanv2(
         y = out_norm(y).view(B, H, W, -1)
 
     return (y.to(x.dtype) if to_dtype else y)
+
 
 
 def selective_scan_flop_jit(inputs, outputs):
@@ -557,10 +616,8 @@ class SS2D(nn.Module):
         """
         factory_kwargs = {"device": None, "dtype": None}
         super().__init__()
-        d_expand = int(ssm_ratio * d_model)
-        d_inner = int(min(ssm_rank_ratio, ssm_ratio) * d_model) if ssm_rank_ratio > 0 else d_expand
-        self.dt_rank = math.ceil(d_model / 16) if dt_rank == "auto" else dt_rank
-        self.d_state = math.ceil(d_model / 6) if d_state == "auto" else d_state # 20240109
+        d_inner = int(ssm_ratio * d_model)
+        dt_rank = math.ceil(d_model / 16) if dt_rank == "auto" else dt_rank
         self.d_conv = d_conv
 
         # tags for forward_type ==============================
@@ -594,17 +651,21 @@ class SS2D(nn.Module):
         # forward_type debug =======================================
         FORWARD_TYPES = dict(
             v0=self.forward_corev0,
-            fake=partial(self.forward_corev2, force_fp32=None, SelectiveScan=SelectiveScanFake),
-            v2=partial(self.forward_corev2, force_fp32=None, SelectiveScan=SelectiveScanCore),
+            v2=partial(self.forward_corev2, force_fp32=(not self.disable_force32), SelectiveScan=SelectiveScanCore),
             v3=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex),
-            v4=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, cross_selective_scan=cross_selective_scanv2),
-            v1=partial(self.forward_corev2, force_fp32=None, SelectiveScan=SelectiveScanOflex),
-            v01=partial(self.forward_corev2, force_fp32=None, SelectiveScan=SelectiveScanMamba),
-            share_ssm=self.forward_corev0_share_ssm,
-            share_a=self.forward_corev0_share_a,
+            v31d=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, cross_selective_scan=partial(
+                cross_selective_scan, CrossScan=CrossMerge_Ab_1direction, CrossMerge=CrossMerge_Ab_1direction,
+            )),
+            v32d=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, cross_selective_scan=partial(
+                cross_selective_scan, CrossScan=CrossMerge_Ab_2direction, CrossMerge=CrossMerge_Ab_2direction,
+            )),
+            # ===============================
+            fake=partial(self.forward_corev2, force_fp32=(not self.disable_force32), SelectiveScan=SelectiveScanFake),
+            v1=partial(self.forward_corev2, force_fp32=True, SelectiveScan=SelectiveScanOflex),
+            v01=partial(self.forward_corev2, force_fp32=(not self.disable_force32), SelectiveScan=SelectiveScanMamba),
         )
         if forward_type.startswith("debug"):
-            from .ss2d_ablations import SS2D_ForwardCoreSpeedAblations, SS2D_ForwardCoreModeAblations
+            from .ss2d_ablations import SS2D_ForwardCoreSpeedAblations, SS2D_ForwardCoreModeAblations, cross_selective_scanv2
             FORWARD_TYPES.update(dict(
                 debugforward_core_mambassm_seq=partial(SS2D_ForwardCoreSpeedAblations.forward_core_mambassm_seq, self),
                 debugforward_core_mambassm=partial(SS2D_ForwardCoreSpeedAblations.forward_core_mambassm, self),
@@ -612,77 +673,70 @@ class SS2D(nn.Module):
                 debugforward_core_mambassm_fusecs=partial(SS2D_ForwardCoreSpeedAblations.forward_core_mambassm_fusecs, self),
                 debugforward_core_mambassm_fusecscm=partial(SS2D_ForwardCoreSpeedAblations.forward_core_mambassm_fusecscm, self),
                 debugforward_core_sscore_fusecscm=partial(SS2D_ForwardCoreSpeedAblations.forward_core_sscore_fusecscm, self),
-                debugforward_core_sscore_fusecscm_fwdnrow=partial(SS2D_ForwardCoreSpeedAblations.forward_core_sscore_fusecscm_fwdnrow, self),
-                debugforward_core_sscore_fusecscm_bwdnrow=partial(SS2D_ForwardCoreSpeedAblations.forward_core_sscore_fusecscm_bwdnrow, self),
-                debugforward_core_sscore_fusecscm_fbnrow=partial(SS2D_ForwardCoreSpeedAblations.forward_core_sscore_fusecscm_fbnrow, self),
+                debugforward_core_sscore_fusecscm_fwdnrow=partial(SS2D_ForwardCoreSpeedAblations.forward_core_ssnrow_fusecscm_fwdnrow, self),
+                debugforward_core_sscore_fusecscm_bwdnrow=partial(SS2D_ForwardCoreSpeedAblations.forward_core_ssnrow_fusecscm_bwdnrow, self),
+                debugforward_core_sscore_fusecscm_fbnrow=partial(SS2D_ForwardCoreSpeedAblations.forward_core_ssnrow_fusecscm_fbnrow, self),
                 debugforward_core_ssoflex_fusecscm=partial(SS2D_ForwardCoreSpeedAblations.forward_core_ssoflex_fusecscm, self),
                 debugforward_core_ssoflex_fusecscm_i16o32=partial(SS2D_ForwardCoreSpeedAblations.forward_core_ssoflex_fusecscm_i16o32, self),
+                debugscan_sharessm=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, cross_selective_scan=cross_selective_scanv2),
             ))
-        self.forward_core = FORWARD_TYPES.get(forward_type, FORWARD_TYPES.get("v2", None))
-        self.K = 4 if forward_type not in ["share_ssm"] else 1
-        self.K2 = self.K if forward_type not in ["share_a"] else 1
+        self.forward_core = FORWARD_TYPES.get(forward_type, None)
+        k_group = 4 if forward_type not in ["debugscan_sharessm"] else 1
 
         # in proj =======================================
-        d_proj = d_expand if self.disable_z else (d_expand * 2)
+        d_proj = d_inner if self.disable_z else (d_inner * 2)
         self.in_proj = nn.Linear(d_model, d_proj, bias=bias, **factory_kwargs)
         self.act: nn.Module = act_layer()
         
         # conv =======================================
-        if self.d_conv > 1:
+        if d_conv > 1:
             self.conv2d = nn.Conv2d(
-                in_channels=d_expand,
-                out_channels=d_expand,
-                groups=d_expand,
+                in_channels=d_inner,
+                out_channels=d_inner,
+                groups=d_inner,
                 bias=conv_bias,
                 kernel_size=d_conv,
                 padding=(d_conv - 1) // 2,
                 **factory_kwargs,
             )
 
-        # rank ratio =====================================
-        self.ssm_low_rank = False
-        if d_inner < d_expand:
-            self.ssm_low_rank = True
-            self.in_rank = nn.Conv2d(d_expand, d_inner, kernel_size=1, bias=False, **factory_kwargs)
-            self.out_rank = nn.Linear(d_inner, d_expand, bias=False, **factory_kwargs)
-
         # x proj ============================
         self.x_proj = [
-            nn.Linear(d_inner, (self.dt_rank + self.d_state * 2), bias=False, **factory_kwargs)
-            for _ in range(self.K)
+            nn.Linear(d_inner, (dt_rank + d_state * 2), bias=False, **factory_kwargs)
+            for _ in range(k_group)
         ]
         self.x_proj_weight = nn.Parameter(torch.stack([t.weight for t in self.x_proj], dim=0)) # (K, N, inner)
         del self.x_proj
         
         # out proj =======================================
-        self.out_proj = nn.Linear(d_expand, d_model, bias=bias, **factory_kwargs)
+        self.out_proj = nn.Linear(d_inner, d_model, bias=bias, **factory_kwargs)
         self.dropout = nn.Dropout(dropout) if dropout > 0. else nn.Identity()
 
         if initialize in ["v0"]:
             # dt proj ============================
             self.dt_projs = [
-                self.dt_init(self.dt_rank, d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs)
-                for _ in range(self.K)
+                self.dt_init(dt_rank, d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs)
+                for _ in range(k_group)
             ]
             self.dt_projs_weight = nn.Parameter(torch.stack([t.weight for t in self.dt_projs], dim=0)) # (K, inner, rank)
             self.dt_projs_bias = nn.Parameter(torch.stack([t.bias for t in self.dt_projs], dim=0)) # (K, inner)
             del self.dt_projs
             
             # A, D =======================================
-            self.A_logs = self.A_log_init(self.d_state, d_inner, copies=self.K2, merge=True) # (K * D, N)
-            self.Ds = self.D_init(d_inner, copies=self.K2, merge=True) # (K * D)
+            self.A_logs = self.A_log_init(d_state, d_inner, copies=k_group, merge=True) # (K * D, N)
+            self.Ds = self.D_init(d_inner, copies=k_group, merge=True) # (K * D)
         elif initialize in ["v1"]:
             # simple init dt_projs, A_logs, Ds
-            self.Ds = nn.Parameter(torch.ones((self.K2 * d_inner)))
-            self.A_logs = nn.Parameter(torch.randn((self.K2 * d_inner, self.d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
-            self.dt_projs_weight = nn.Parameter(torch.randn((self.K, d_inner, self.dt_rank)))
-            self.dt_projs_bias = nn.Parameter(torch.randn((self.K, d_inner))) 
+            self.Ds = nn.Parameter(torch.ones((k_group * d_inner)))
+            self.A_logs = nn.Parameter(torch.randn((k_group * d_inner, d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
+            self.dt_projs_weight = nn.Parameter(torch.randn((k_group, d_inner, dt_rank)))
+            self.dt_projs_bias = nn.Parameter(torch.randn((k_group, d_inner))) 
         elif initialize in ["v2"]:
             # simple init dt_projs, A_logs, Ds
-            self.Ds = nn.Parameter(torch.ones((self.K2 * d_inner)))
-            self.A_logs = nn.Parameter(torch.zeros((self.K2 * d_inner, self.d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
-            self.dt_projs_weight = nn.Parameter(torch.randn((self.K, d_inner, self.dt_rank)))
-            self.dt_projs_bias = nn.Parameter(torch.randn((self.K, d_inner)))
+            self.Ds = nn.Parameter(torch.ones((k_group * d_inner)))
+            self.A_logs = nn.Parameter(torch.zeros((k_group * d_inner, d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
+            self.dt_projs_weight = nn.Parameter(torch.randn((k_group, d_inner, dt_rank)))
+            self.dt_projs_bias = nn.Parameter(torch.randn((k_group, d_inner)))
     
     @staticmethod
     def dt_init(dt_rank, d_inner, dt_scale=1.0, dt_init="random", dt_min=0.001, dt_max=0.1, dt_init_floor=1e-4, **factory_kwargs):
@@ -747,16 +801,17 @@ class SS2D(nn.Module):
 
         if not channel_first:
             x = x.permute(0, 3, 1, 2).contiguous()
-        B, C, H, W = x.shape
+        B, D, H, W = x.shape
+        D, N = self.A_logs.shape
+        K, D, R = self.dt_projs_weight.shape
         L = H * W
-        K = 4
 
         x_hwwh = torch.stack([x.view(B, -1, L), torch.transpose(x, dim0=2, dim1=3).contiguous().view(B, -1, L)], dim=1).view(B, 2, -1, L)
         xs = torch.cat([x_hwwh, torch.flip(x_hwwh, dims=[-1])], dim=1) # (b, k, d, l)
 
         x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, self.x_proj_weight)
         # x_dbl = x_dbl + self.x_proj_bias.view(1, K, -1, 1)
-        dts, Bs, Cs = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=2)
+        dts, Bs, Cs = torch.split(x_dbl, [R, N, N], dim=2)
         dts = torch.einsum("b k r l, k d r -> b k d l", dts, self.dt_projs_weight)
 
         xs = xs.float().view(B, -1, L) # (b, k * d, l)
@@ -788,47 +843,31 @@ class SS2D(nn.Module):
 
         return (y.to(x.dtype) if to_dtype else y)
     
-    def forward_corev0_share_ssm(self, x: torch.Tensor, channel_first=False):
-        """
-        we may conduct this ablation later, but not with v0.
-        """
-        ...
-
-    def forward_corev0_share_a(self, x: torch.Tensor, channel_first=False):
-        """
-        we may conduct this ablation later, but not with v0.
-        """
-        ...
-
     def forward_corev2(self, x: torch.Tensor, channel_first=False, SelectiveScan=SelectiveScanOflex, cross_selective_scan=cross_selective_scan, force_fp32=None):
-        force_fp32 = (self.training and (not self.disable_force32)) if force_fp32 is None else force_fp32
         if not channel_first:
             x = x.permute(0, 3, 1, 2).contiguous()
-        if self.ssm_low_rank:
-            x = self.in_rank(x)
         x = cross_selective_scan(
             x, self.x_proj_weight, None, self.dt_projs_weight, self.dt_projs_bias,
-            self.A_logs, self.Ds, 
+            self.A_logs, self.Ds, delta_softplus=True,
             out_norm=getattr(self, "out_norm", None),
             out_norm_shape=getattr(self, "out_norm_shape", "v0"),
-            delta_softplus=True, force_fp32=force_fp32,
-            SelectiveScan=SelectiveScan, ssoflex=True, # output fp32
+            force_fp32=force_fp32,
+            SelectiveScan=SelectiveScan,
         )
-        if self.ssm_low_rank:
-            x = self.out_rank(x)
         return x
     
     def forward(self, x: torch.Tensor, **kwargs):
+        with_dconv = (self.d_conv > 1)
         x = self.in_proj(x)
         if not self.disable_z:
             x, z = x.chunk(2, dim=-1) # (b, h, w, d)
             if not self.disable_z_act:
                 z = self.act(z)
-        if self.d_conv > 0:
+        if with_dconv:
             x = x.permute(0, 3, 1, 2).contiguous()
             x = self.conv2d(x) # (b, d, h, w)
         x = self.act(x)
-        y = self.forward_core(x, channel_first=(self.d_conv > 1))
+        y = self.forward_core(x, channel_first=with_dconv)
         if not self.disable_z:
             y = y * z
         out = self.dropout(self.out_proj(y))
