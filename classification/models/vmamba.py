@@ -496,7 +496,6 @@ class SS2D(nn.Module):
         d_model=96,
         d_state=16,
         ssm_ratio=2.0,
-        ssm_rank_ratio=2.0,
         dt_rank="auto",
         act_layer=nn.SiLU,
         # dwconv ===============
@@ -517,9 +516,6 @@ class SS2D(nn.Module):
         # ======================
         **kwargs,
     ):
-        """
-        ssm_rank_ratio would be used in the future...
-        """
         factory_kwargs = {"device": None, "dtype": None}
         super().__init__()
         d_inner = int(ssm_ratio * d_model)
@@ -819,7 +815,6 @@ class VSSBlock(nn.Module):
         # =============================
         ssm_d_state: int = 16,
         ssm_ratio=2.0,
-        ssm_rank_ratio=2.0,
         ssm_dt_rank: Any = "auto",
         ssm_act_layer=nn.SiLU,
         ssm_conv: int = 3,
@@ -854,7 +849,6 @@ class VSSBlock(nn.Module):
                 d_model=hidden_dim, 
                 d_state=ssm_d_state, 
                 ssm_ratio=ssm_ratio,
-                ssm_rank_ratio=ssm_rank_ratio,
                 dt_rank=ssm_dt_rank,
                 act_layer=ssm_act_layer,
                 # ==========================
@@ -912,7 +906,6 @@ class VSSM(nn.Module):
         # =========================
         ssm_d_state=16,
         ssm_ratio=2.0,
-        ssm_rank_ratio=2.0,
         ssm_dt_rank="auto",
         ssm_act_layer="silu",        
         ssm_conv=3,
@@ -993,7 +986,6 @@ class VSSM(nn.Module):
                 # =================
                 ssm_d_state=ssm_d_state,
                 ssm_ratio=ssm_ratio,
-                ssm_rank_ratio=ssm_rank_ratio,
                 ssm_dt_rank=ssm_dt_rank,
                 ssm_act_layer=ssm_act_layer,
                 ssm_conv=ssm_conv,
@@ -1086,7 +1078,6 @@ class VSSM(nn.Module):
         # ===========================
         ssm_d_state=16,
         ssm_ratio=2.0,
-        ssm_rank_ratio=2.0,
         ssm_dt_rank="auto",       
         ssm_act_layer=nn.SiLU,
         ssm_conv=3,
@@ -1109,7 +1100,6 @@ class VSSM(nn.Module):
                 norm_layer=norm_layer,
                 ssm_d_state=ssm_d_state,
                 ssm_ratio=ssm_ratio,
-                ssm_rank_ratio=ssm_rank_ratio,
                 ssm_dt_rank=ssm_dt_rank,
                 ssm_act_layer=ssm_act_layer,
                 ssm_conv=ssm_conv,
@@ -1344,11 +1334,11 @@ def check_vssm1_equals_vssm(forward_type="v0"):
             return x
 
     # only has initial difference 
-    VSSM1 = partial(VSSM, downsample_version="v1", patchembed_version="v1", mlp_ratio=0.0, ssm_ratio=2.0, ssm_rank_ratio=2.0, forward_type=forward_type)
+    VSSM1 = partial(VSSM, downsample_version="v1", patchembed_version="v1", mlp_ratio=0.0, ssm_ratio=2.0, forward_type=forward_type)
     VSSM.forward_backbone = VSSM_.forward_backbone 
     VSSM.forward1 = VSSM_.forward1
     # expected to be all the same 
-    VSSM1 = partial(VSSM_, downsample_version="none", patchembed_version="v1", mlp_ratio=0.0, ssm_ratio=2.0, ssm_rank_ratio=2.0, forward_type=forward_type)
+    VSSM1 = partial(VSSM_, downsample_version="none", patchembed_version="v1", mlp_ratio=0.0, ssm_ratio=2.0, forward_type=forward_type)
 
     # test 1 True =================================
     torch.manual_seed(time.time()); torch.cuda.manual_seed(time.time())
@@ -1395,8 +1385,8 @@ def check_vssm1_equals_vssm(forward_type="v0"):
 
 def check_vssm1_ssoflex_equals_mambassm():
     # only has initial difference
-    VSSM0 = partial(VSSM, downsample_version="v3", patchembed_version="v2", mlp_ratio=4.0, ssm_ratio=2.0, ssm_rank_ratio=2.0, forward_type="v2")
-    VSSM1 = partial(VSSM, downsample_version="v3", patchembed_version="v2", mlp_ratio=4.0, ssm_ratio=2.0, ssm_rank_ratio=2.0, forward_type="v01")
+    VSSM0 = partial(VSSM, downsample_version="v3", patchembed_version="v2", mlp_ratio=4.0, ssm_ratio=2.0, forward_type="v2")
+    VSSM1 = partial(VSSM, downsample_version="v3", patchembed_version="v2", mlp_ratio=4.0, ssm_ratio=2.0, forward_type="v01")
 
     # test 1 True =================================
     torch.manual_seed(time.time()); torch.cuda.manual_seed(time.time())
@@ -1443,7 +1433,6 @@ def check_vssblock():
         norm_layer=nn.LayerNorm, 
         ssm_d_state=1, 
         ssm_ratio=2, 
-        ssm_rank_ratio=-1, 
         ssm_dt_rank="auto", 
         ssm_act_layer=nn.SiLU,
         ssm_conv=3, 
@@ -1488,14 +1477,6 @@ def check_profile():
     input = torch.randn((128, 3, 56, 56)).half().cuda()
     torch.cuda.manual_seed(0)
 
-    self = vss
-    blk = self.layers[0].blocks[0]
-    ln_1 = blk.ln_1
-    self_attention = blk.self_attention
-    selfa = self_attention
-    drop_path = blk.drop_path
-    input = self.patch_embed(input).detach()
-
     def trace_handler(prof: torch.profiler.profile):
         print(prof.key_averages().table(sort_by="self_cuda_time_total", row_limit=-1))
         # print(prof.export_chrome_trace("./tracev1.json"))
@@ -1532,44 +1513,6 @@ def check_profile():
                     x = input
                     # with torch.autograd.profiler.record_function("patch_embed"):
                     #     x = self.patch_embed(x)
-                    
-                    B, H, W, C = x.shape
-                    ori = x
-
-                    with torch.autograd.profiler.record_function("VSSBlock.ln_1"):
-                        x = ln_1(x)
-
-                    with torch.autograd.profiler.record_function("SS2D.inproj"):
-                        xz = selfa.in_proj(x)
-                        x, z = xz.chunk(2, dim=-1) # (b, h, w, d)
-                        x = x.permute(0, 3, 1, 2).contiguous()
-
-                    with torch.autograd.profiler.record_function("SS2D.dwconv2d"):
-                        x = selfa.act(selfa.conv2d(x)) # (b, d, h, w)
-                        # x = self.act(x) # (b, d, h, w)
-                    
-                    with torch.autograd.profiler.record_function("SS2D.foreward_core"):
-                        # y = selfa.forward_corev2(x)
-                        # y = selfa.forward_corev3(x)
-                        y = selfa.forward_corev1(x)
-                        # y = selfa.forward_corev1(x)
-                    
-                    with torch.autograd.profiler.record_function("SS2D.transpose"):
-                        y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
-                        y = selfa.out_norm(y)
-                        y = y * F.silu(z)
-                    
-                    with torch.autograd.profiler.record_function("SS2D.out_proj"):
-                        out = selfa.out_proj(y)
-                        if selfa.dropout is not None:
-                            out = selfa.dropout(out)
-
-                    with torch.autograd.profiler.record_function("SS2D.out"):
-                        x = ori + drop_path(out)
-
-                    with torch.autograd.profiler.record_function("backward"):
-                        x.sum().backward()
-
                     prof.step()
 
 
