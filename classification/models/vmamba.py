@@ -19,19 +19,22 @@ DropPath.__repr__ = lambda self: f"timm.DropPath({self.drop_prob})"
 try:
     import selective_scan_cuda_oflex
 except Exception as e:
-    print(f"WARNING: can not import selective_scan_cuda_oflex.", flush=True)
+    ...
+    # print(f"WARNING: can not import selective_scan_cuda_oflex.", flush=True)
     # print(e, flush=True)
 
 try:
     import selective_scan_cuda_core
 except Exception as e:
-    print(f"WARNING: can not import selective_scan_cuda_core.", flush=True)
+    ...
+    # print(f"WARNING: can not import selective_scan_cuda_core.", flush=True)
     # print(e, flush=True)
 
 try:
     import selective_scan_cuda
 except Exception as e:
-    print(f"WARNING: can not import selective_scan_cuda.", flush=True)
+    ...
+    # print(f"WARNING: can not import selective_scan_cuda.", flush=True)
     # print(e, flush=True)
 
 
