@@ -352,8 +352,9 @@ class CrossMerge_Ab_1direction(torch.autograd.Function):
     def backward(ctx, x: torch.Tensor):
         # B, D, L = x.shape
         # out: (b, k, d, l)
+        H, W = ctx.shape
         B, C, L = x.shape
-        xs = x.view(B, 1, C, L).repeat(1, 4, 1, 1).contiguous()
+        xs = x.view(B, 1, C, L).repeat(1, 4, 1, 1).contiguous().view(B, 4, C, H, W)
         return xs
 
 
@@ -556,10 +557,10 @@ class SS2D(nn.Module):
             v2=partial(self.forward_corev2, force_fp32=(not self.disable_force32), SelectiveScan=SelectiveScanCore),
             v3=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex),
             v31d=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, cross_selective_scan=partial(
-                cross_selective_scan, CrossScan=CrossMerge_Ab_1direction, CrossMerge=CrossMerge_Ab_1direction,
+                cross_selective_scan, CrossScan=CrossScan_Ab_1direction, CrossMerge=CrossMerge_Ab_1direction,
             )),
             v32d=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, cross_selective_scan=partial(
-                cross_selective_scan, CrossScan=CrossMerge_Ab_2direction, CrossMerge=CrossMerge_Ab_2direction,
+                cross_selective_scan, CrossScan=CrossScan_Ab_2direction, CrossMerge=CrossMerge_Ab_2direction,
             )),
             # ===============================
             fake=partial(self.forward_corev2, force_fp32=(not self.disable_force32), SelectiveScan=SelectiveScanFake),
