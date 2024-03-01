@@ -36,8 +36,7 @@ except Exception as e:
 
 
 # fvcore flops =======================================
-
-def flops_selective_scan_fn(B=1, L=256, D=768, N=16, with_D=True, with_Z=False, with_Group=True, with_complex=False):
+def flops_selective_scan_fn(B=1, L=256, D=768, N=16, with_D=True, with_Z=False, with_complex=False):
     """
     u: r(B D L)
     delta: r(B D L)
@@ -59,7 +58,6 @@ def flops_selective_scan_fn(B=1, L=256, D=768, N=16, with_D=True, with_Z=False, 
     if with_Z:
         flops += B * D * L    
     return flops
-
 
 # this is only for selective_scan_ref...
 def flops_selective_scan_ref(B=1, L=256, D=768, N=16, with_D=True, with_Z=False, with_Group=True, with_complex=False):
@@ -454,7 +452,7 @@ def selective_scan_flop_jit(inputs, outputs):
     print_jit_input_names(inputs)
     B, D, L = inputs[0].type().sizes()
     N = inputs[2].type().sizes()[1]
-    flops = flops_selective_scan_fn(B=B, L=L, D=D, N=N, with_D=True, with_Z=False, with_Group=True)
+    flops = flops_selective_scan_fn(B=B, L=L, D=D, N=N, with_D=True, with_Z=False)
     return flops
 
 
