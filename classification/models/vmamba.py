@@ -26,15 +26,13 @@ except:
 
 try:
     "sscore acts the same as mamba_ssm"
-    import selective_scan_cuda_core
+    import selective_scan_cuda_oflex
 except Exception as e:
     print(e, flush=True)
     "you should install mamba_ssm to use this"
     SSMODE = "mamba_ssm"
     import selective_scan_cuda
     # from mamba_ssm.ops.selective_scan_interface import selective_scan_fn, selective_scan_ref
-
-# import vssm_cross_scan_cuda
 
 # fvcore flops =======================================
 
@@ -449,101 +447,6 @@ def cross_selective_scan(
         y = out_norm(y).view(B, H, W, -1)
 
     return (y.to(x.dtype) if to_dtype else y)
-
-
-# slower ...
-def cross_selective_scanv2(
-    x: torch.Tensor=None, 
-    x_proj_weight: torch.Tensor=None,
-    x_proj_bias: torch.Tensor=None,
-    dt_projs_weight: torch.Tensor=None,
-    dt_projs_bias: torch.Tensor=None,
-    A_logs: torch.Tensor=None,
-    Ds: torch.Tensor=None,
-    out_norm: torch.nn.Module=None,
-    out_norm_shape="v0",
-    nrows = -1, # for SelectiveScanNRow
-    backnrows = -1, # for SelectiveScanNRow
-    delta_softplus = True,
-    to_dtype=True,
-    force_fp32=False, # False if ssoflex
-    ssoflex=True,
-    SelectiveScan=None,
-):
-    # out_norm: whatever fits (B, L, C); LayerNorm; Sigmoid; Softmax(dim=1);...
-
-    B, D, H, W = x.shape
-    D, N = A_logs.shape
-    K, D, R = dt_projs_weight.shape
-    L = H * W
-
-    if SelectiveScan == SelectiveScanNRow:
-        if nrows < 1:
-            if D % 4 == 0:
-                nrows = 4
-            elif D % 3 == 0:
-                nrows = 3
-            elif D % 2 == 0:
-                nrows = 2
-            else:
-                nrows = 1
-        
-        if backnrows < 1:
-            if D % 4 == 0:
-                backnrows = 4
-            elif D % 3 == 0:
-                backnrows = 3
-            elif D % 2 == 0:
-                backnrows = 2
-            else:
-                backnrows = 1
-
-    def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True):
-        return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, backnrows, ssoflex)
-    
-    # =========================
-    x_proj_weight = x_proj_weight[0]
-    x_proj_bias = x_proj_bias.view(-1, 1) if x_proj_bias is not None else None
-    dt_projs_weight = dt_projs_weight[0]
-    # =========================
-    x = x.view(B, D, L)
-    x_dbl = torch.einsum("b d l, c d -> b c l", x, x_proj_weight)
-    if x_proj_bias is not None:
-        x_dbl = x_dbl + x_proj_bias.view(1, -1, 1)
-    dts = torch.einsum("b r l, d r -> b d l", x_dbl[:, :R, :], dt_projs_weight)
-    ps = torch.cat([x, dts, x_dbl[:, R:, :]], dim=1).view(B, -1, H, W) # (B, D+D+N+N, L)
-    ps = CrossScan.apply(ps) # (B, 4, D+D+N+N, L)
-
-    xs, dts, Bs, Cs = torch.split(ps, [D, D, N, N], dim=2)
-
-    xs = xs.contiguous().view(B, -1, L)
-    dts = dts.contiguous().view(B, -1, L)
-    As = -torch.exp(A_logs.to(torch.float)) # (k * c, d_state)
-    Bs = Bs.contiguous()
-    Cs = Cs.contiguous()
-    Ds = Ds.to(torch.float) # (K * c)
-    delta_bias = dt_projs_bias.view(-1).to(torch.float)
-
-    if force_fp32:
-        xs = xs.to(torch.float)
-        dts = dts.to(torch.float)
-        Bs = Bs.to(torch.float)
-        Cs = Cs.to(torch.float)
-
-    ys: torch.Tensor = selective_scan(
-        xs, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus
-    ).view(B, K, -1, H, W)
-    
-    y: torch.Tensor = CrossMerge.apply(ys)
-
-    if out_norm_shape in ["v1"]: # (B, C, H, W)
-        y = out_norm(y.view(B, -1, H, W)).permute(0, 2, 3, 1) # (B, H, W, C)
-    else: # (B, L, C)
-        y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
-        y = out_norm(y).view(B, H, W, -1)
-
-    return (y.to(x.dtype) if to_dtype else y)
-
 
 
 def selective_scan_flop_jit(inputs, outputs):
