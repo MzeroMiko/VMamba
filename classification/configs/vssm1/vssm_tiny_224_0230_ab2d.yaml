@@ -1,6 +1,6 @@
 MODEL:
   TYPE: vssm
-  NAME: vssm1_tiny_0230
+  NAME: vssm1_tiny_0230ab2d
   DROP_PATH_RATE: 0.2
   VSSM:
     EMBED_DIM: 96
@@ -10,7 +10,7 @@ MODEL:
     SSM_RATIO: 2.0
     SSM_CONV: 3
     SSM_CONV_BIAS: false
-    SSM_FORWARDTYPE: "v31dnoz"
+    SSM_FORWARDTYPE: "v32dnoz"
     MLP_RATIO: 4.0
     DOWNSAMPLE: "v3"
     PATCHEMBED: "v2"
