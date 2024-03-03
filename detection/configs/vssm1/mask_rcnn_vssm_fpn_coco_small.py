@@ -19,7 +19,7 @@ model = dict(
         mlp_ratio=4.0,
         downsample_version="v3",
         patchembed_version="v2",
-        drop_path_rate=0.2,
+        drop_path_rate=0.3,
     ),
 )
 
