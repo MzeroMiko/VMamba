@@ -41,3 +41,5 @@ kernels/selective_scan/build
 classification/configs/vssm1/_test_vssm_tiny_224_0221.yaml
 
 classification/models/ss2d_ablations.py
+kernels/selective_scan/1.log
+classification/dev.py
