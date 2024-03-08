@@ -813,12 +813,10 @@ class SS2D(nn.Module):
         return D
 
     # only used to run previous version
-    def forward_corev0(self, x: torch.Tensor, to_dtype=False, channel_first=False):
+    def forward_corev0(self, x: torch.Tensor, to_dtype=False):
         def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True, nrows=1):
             return SelectiveScanCore.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, False)
 
-        if not channel_first:
-            x = x.permute(0, 3, 1, 2).contiguous()
         B, D, H, W = x.shape
         D, N = self.A_logs.shape
         K, D, R = self.dt_projs_weight.shape
@@ -861,9 +859,7 @@ class SS2D(nn.Module):
 
         return (y.to(x.dtype) if to_dtype else y)
     
-    def forward_corev2(self, x: torch.Tensor, channel_first=False, SelectiveScan=SelectiveScanOflex, cross_selective_scan=cross_selective_scan, force_fp32=None, no_einsum=False, CrossScan=CrossScan, CrossMerge=CrossMerge):
-        if not channel_first:
-            x = x.permute(0, 3, 1, 2).contiguous()
+    def forward_corev2(self, x: torch.Tensor, SelectiveScan=SelectiveScanOflex, cross_selective_scan=cross_selective_scan, force_fp32=None, no_einsum=False, CrossScan=CrossScan, CrossMerge=CrossMerge):
         x = cross_selective_scan(
             x, self.x_proj_weight, None, self.dt_projs_weight, self.dt_projs_bias,
             self.A_logs, self.Ds, delta_softplus=True,
@@ -888,7 +884,9 @@ class SS2D(nn.Module):
         if with_dconv:
             x = self.conv2d(x) # (b, d, h, w)
         x = self.act(x)
-        y = self.forward_core(x, channel_first=True)
+        
+        y = self.forward_core(x)
+
         if not self.disable_z:
             y = y * z
         out = self.dropout(self.out_proj(y))
