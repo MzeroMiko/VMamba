@@ -49,19 +49,21 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 | `mamba-ssm + group parallel` | `25672M` | `0.4860s` |
 | mamba-ssm + float16 | 20439M | 0.4195s |
 | mamba-ssm + fused cross scan | 25675M | 0.4820s |
-| mamba-ssm + fused cross scan + fused cross merge | 25596M | 0.4020s |
+| mamba-ssm + fused csm | 25596M | 0.4020s |
 | `sscore + fused csm` | `24984M` | `0.3930s` |
 | sscore + fused csm + forward nrow | 24984M | 0.4090s |
 | sscore + fused csm + backward nrow | 24984M | 0.4490s |
 | sscore + fused csm + forward nrow + backward nrow | 24984M | 0.4640s |
 | ssoflex + fused csm | 24986M | 0.3940s |
-| `ssoflex + fused csm + input fp16 + output fp32` | `19842M` | `0.3650s` |
-| `ssoflex + csm in triton + input fp16 + output fp32` | `19842M` | `0.3610s` |
+| `ssoflex + fused csm + i16o32` | `19842M` | `0.3650s` |
+| ssoflex + csm in triton + i16o32 | 19888M | 0.3610s |
+| `ssoflex + csm in triton + i16o32 + reconstruction` | `19500M` | **`0.2970s`** |
 
-* *mamba-ssm: mamba_ssm-1.1.3.post1+cu122torch2.2cxx11abiFALSE-cp310-cp310-linux_x86_64.whl*
-* *sscore: selective_scan_cuda_core*
-* *ssoflex: selective_scan_cuda_oflex, oflex means output flexible*
+* *mamba-ssm: `mamba_ssm-1.1.3.post1+cu122torch2.2cxx11abiFALSE-cp310-cp310-linux_x86_64.whl`*
+* *sscore: `selective_scan_cuda_core`*
+* *ssoflex: `selective_scan_cuda_oflex`, `oflex` means output flexible*
 * *csm: `cross scan` and `cross merge`*
+* *i16o32: `input fp16 + output fp32`*
 
 ## Abstract
 
