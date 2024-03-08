@@ -13,8 +13,10 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 </div>
 
 ## Updates
-* **` March. 8th, 2024`**: Update: we update the performance of `VMamba-T`, `Vmamba-S`, `VMamba-B` with nightly build, checkpoints and logs are coming soon. 
-* **` March. 8th, 2024`**: Improvement: we implemented `CrossScan` and `CrossMerge` in `triton`, which speed the training up again. `CrossScan` and `CrossMerge` implemented in triton is ~2x faster than implemented in pytorch. 
+* **` March. 8th, 2024`**: Update: we update the performance of `VMamba-T`, `Vmamba-S`, `VMamba-B` with nightly build, checkpoints and logs are coming soon. (Note that these models are trained without `CrossScanTriton` or `forwardtype=v4`, you can modify those configs yourself to raise the speed with almost no cost!)
+
+* **` March. 8th, 2024`**: Improvement: we implemented `CrossScan` and `CrossMerge` in `triton`, which speed the training up again. `CrossScan` and `CrossMerge` implemented in triton is ~2x faster than implemented in pytorch. Meanwhile, use `v4` rather than `v3` or `v2` in forwardtype also raise the speed GREATLY!.
+
 * **` Feb. 26th, 2024`:** Improvement: we now support flexible output of `selective scan`. That means whatever type the input is, the output can always be float32. The feature is useful as when training with float16, the loss often get nan due to the overflow over float16. In the meantime, training with float32 costs more time. Input with float16 and output with float32 can be fast, but in the meantime, the loss is less likely to be NaN.   Try `SelectiveScanOflex` with float16 input and float32 output to enjoy that feature!
 
 * **` Feb. 22th, 2024`:** Pre-Release: we set a pre-release to share nightly-build checkpoints in classificaion. Feel free to enjoy those new features with faster code and higher performance! 
@@ -57,7 +59,7 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 | ssoflex + fused csm | 24986M | 0.3940s |
 | `ssoflex + fused csm + i16o32` | `19842M` | `0.3650s` |
 | ssoflex + csm in triton + i16o32 | 19888M | 0.3610s |
-| `ssoflex + csm in triton + i16o32 + reconstruction` | `19500M` | **`0.2970s`** |
+| `ssoflex + csm in triton + i16o32 + v4` | `19500M` | **`0.2970s`** |
 
 * *mamba-ssm: `mamba_ssm-1.1.3.post1+cu122torch2.2cxx11abiFALSE-cp310-cp310-linux_x86_64.whl`*
 * *sscore: `selective_scan_cuda_core`*
