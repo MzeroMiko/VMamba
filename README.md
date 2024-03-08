@@ -13,6 +13,8 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 </div>
 
 ## Updates
+* **` March. 8th, 2024`**: Update: we update the performance of `VMamba-T`, `Vmamba-S`, `VMamba-B` with nightly build, checkpoints and logs are coming soon. 
+* **` March. 8th, 2024`**: Improvement: we implemented `CrossScan` and `CrossMerge` in `triton`, which speed the training up again. `CrossScan` and `CrossMerge` implemented in triton is ~2x faster than implemented in pytorch. 
 * **` Feb. 26th, 2024`:** Improvement: we now support flexible output of `selective scan`. That means whatever type the input is, the output can always be float32. The feature is useful as when training with float16, the loss often get nan due to the overflow over float16. In the meantime, training with float32 costs more time. Input with float16 and output with float32 can be fast, but in the meantime, the loss is less likely to be NaN.   Try `SelectiveScanOflex` with float16 input and float32 output to enjoy that feature!
 
 * **` Feb. 22th, 2024`:** Pre-Release: we set a pre-release to share nightly-build checkpoints in classificaion. Feel free to enjoy those new features with faster code and higher performance! 
@@ -48,16 +50,18 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 | mamba-ssm + float16 | 20439M | 0.4195s |
 | mamba-ssm + fused cross scan | 25675M | 0.4820s |
 | mamba-ssm + fused cross scan + fused cross merge | 25596M | 0.4020s |
-| `sscore + fused cross scan + fused cross merge` | `24984M` | `0.3930s` |
-| sscore + fused cross scan + fused cross merge + forward nrow | 24984M | 0.4090s |
-| sscore + fused cross scan + fused cross merge + backward nrow | 24984M | 0.4490s |
-| sscore + fused cross scan + fused cross merge + forward nrow + backward nrow | 24984M | 0.4640s |
-| ssoflex + fused cross scan + fused cross merge | 24986M | 0.3940s |
-| `ssoflex + fused cross scan + fused cross merge + input fp16 + output fp32` | `19842M` | `0.3650s` |
+| `sscore + fused csm` | `24984M` | `0.3930s` |
+| sscore + fused csm + forward nrow | 24984M | 0.4090s |
+| sscore + fused csm + backward nrow | 24984M | 0.4490s |
+| sscore + fused csm + forward nrow + backward nrow | 24984M | 0.4640s |
+| ssoflex + fused csm | 24986M | 0.3940s |
+| `ssoflex + fused csm + input fp16 + output fp32` | `19842M` | `0.3650s` |
+| `ssoflex + csm in triton + input fp16 + output fp32` | `19842M` | `0.3610s` |
 
 * *mamba-ssm: mamba_ssm-1.1.3.post1+cu122torch2.2cxx11abiFALSE-cp310-cp310-linux_x86_64.whl*
 * *sscore: selective_scan_cuda_core*
 * *ssoflex: selective_scan_cuda_oflex, oflex means output flexible*
+* *csm: `cross scan` and `cross merge`*
 
 ## Abstract
 
@@ -106,7 +110,10 @@ inspiration from the recently introduced state space model and propose the Visua
 | :---: | :---: | :---: | :---: | :---: | :---: |:---: | :---: | :---: | :---: | :---: |
 | VMamba-T(0220) | ImageNet-1K | 224x224 | 82.5 | 32M | 5G | [config](classification/configs/vssm1/vssm_tiny_224_0220.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240220/vssmtiny_dp02_e258_ema.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240220/vssmtiny_dp02_ckpt_epoch_258.pth) | 258 | true | 25036M | 8.53min |
 | VMamba-T(0229) | ImageNet-1K | 224x224 | 82.4 | 29M | 4.5G | [config](classification/configs/vssm1/vssm_tiny_224_0229.yaml)/[log](#)/[ckpt](#) | 262 | true | 22454M | 8.28min |
-| VMamba-T(0229flex) | ImageNet-1K | 224x224 | ? | 29M | 4.5G | [config](classification/configs/vssm1/vssm_tiny_224_0229flex.yaml)/[log](#)/[ckpt](#) | ? | true | 17292M | 7.77min |
+| VMamba-T(0229flex) | ImageNet-1K | 224x224 | 82.3 | 29M | 4.5G | [config](classification/configs/vssm1/vssm_tiny_224_0229flex.yaml)/[log](#)/[ckpt](#) | 282 | true | 17292M | 7.77min |
+| VMamba-T(0230) | ImageNet-1K | 224x224 | 82.5 | 30M | 4.8G | [config](classification/configs/vssm1/vssm_tiny_224_0229flex.yaml)/[log](#)/[ckpt](#) | 262 | true | 18234M | 8.12min |
+| VMamba-S | ImageNet-1K | 224x224 | 83.6 | 50M | 8.7G | [config](classification/configs/vssm1/vssm_small_224.yaml)/[log](#)/[ckpt](#) | 222 | true | 27634M | 11.86min |
+| VMamba-B | ImageNet-1K | 224x224 | 83.9 | 89M | 15.4G | [config](classification/configs/vssm1/vssm_base_224.yaml)/[log](#)/[ckpt](#) | 237 | true | 37122M | 15.08min |
 
 ### **Classification on ImageNet-1K**
 

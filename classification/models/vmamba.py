@@ -907,12 +907,14 @@ class SS2D(nn.Module):
         return out
 
 
-try:
-    from .ss2d_ablations import SS2D_TEST
-    SS2D = SS2D_TEST
-    print("DEBUG MODE ===========================================")
-except:
-    ...
+if False:
+    try:
+        from .ss2d_ablations import SS2D_TEST
+        SS2D = SS2D_TEST
+        print("DEBUG MODE ===========================================")
+    except:
+        pass
+
 
 class Permute(nn.Module):
     def __init__(self, *args):
