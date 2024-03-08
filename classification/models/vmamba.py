@@ -345,27 +345,6 @@ class SelectiveScanOflex(torch.autograd.Function):
         return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None, None, None)
 
 
-class SelectiveScanFake(torch.autograd.Function):
-    # comment all checks if inside cross_selective_scan
-    @staticmethod
-    @torch.cuda.amp.custom_fwd
-    def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, nrows=1, backnrows=1, oflex=True):
-        ctx.delta_softplus = delta_softplus
-        ctx.backnrows = backnrows
-        x = delta
-        out = u
-        ctx.save_for_backward(u, delta, A, B, C, D, delta_bias, x)
-        return out
-    
-    @staticmethod
-    @torch.cuda.amp.custom_bwd
-    def backward(ctx, dout, *args):
-        u, delta, A, B, C, D, delta_bias, x = ctx.saved_tensors
-        if dout.stride(-1) != 1:
-            dout = dout.contiguous()
-        du, ddelta, dA, dB, dC, dD, ddelta_bias = u * 0, delta * 0, A * 0, B * 0, C * 0, C * 0, (D * 0 if D else None), (delta_bias * 0 if delta_bias else None)
-        return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None, None, None)
-
 # =============
 class CrossScan(torch.autograd.Function):
     @staticmethod
@@ -515,8 +494,8 @@ def cross_selective_scan(
     ssoflex=True, # True: out fp32 in SSOflex; else, SSOflex is the same as SSCore
     # ==============================
     SelectiveScan=None,
-    CrossScan=CrossScanTriton,
-    CrossMerge=CrossMergeTriton,
+    CrossScan=CrossScan,
+    CrossMerge=CrossMerge,
     no_einsum=False, # replace einsum with linear or conv1d to raise throughput
 ):
     # out_norm: whatever fits (B, L, C); LayerNorm; Sigmoid; Softmax(dim=1);...
@@ -694,15 +673,12 @@ class SS2D(nn.Module):
             v0=self.forward_corev0,
             v2=partial(self.forward_corev2, force_fp32=(not self.disable_force32), SelectiveScan=SelectiveScanCore),
             v3=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex),
-            v31d=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, cross_selective_scan=partial(
-                cross_selective_scan, CrossScan=CrossScan_Ab_1direction, CrossMerge=CrossMerge_Ab_1direction,
-            )),
-            v32d=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, cross_selective_scan=partial(
-                cross_selective_scan, CrossScan=CrossScan_Ab_2direction, CrossMerge=CrossMerge_Ab_2direction,
-            )),
-            v4=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, no_einsum=True),
+            v31d=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, CrossScan=CrossScan_Ab_1direction, CrossMerge=CrossMerge_Ab_1direction,
+            ),
+            v32d=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, CrossScan=CrossScan_Ab_2direction, CrossMerge=CrossMerge_Ab_2direction,
+            ),
+            v4=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, no_einsum=True, CrossScan=CrossScanTriton, CrossMerge=CrossMergeTriton),
             # ===============================
-            fake=partial(self.forward_corev2, force_fp32=(not self.disable_force32), SelectiveScan=SelectiveScanFake),
             v1=partial(self.forward_corev2, force_fp32=True, SelectiveScan=SelectiveScanOflex),
             v01=partial(self.forward_corev2, force_fp32=(not self.disable_force32), SelectiveScan=SelectiveScanMamba),
         )
@@ -885,7 +861,7 @@ class SS2D(nn.Module):
 
         return (y.to(x.dtype) if to_dtype else y)
     
-    def forward_corev2(self, x: torch.Tensor, channel_first=False, SelectiveScan=SelectiveScanOflex, cross_selective_scan=cross_selective_scan, force_fp32=None, no_einsum=False):
+    def forward_corev2(self, x: torch.Tensor, channel_first=False, SelectiveScan=SelectiveScanOflex, cross_selective_scan=cross_selective_scan, force_fp32=None, no_einsum=False, CrossScan=CrossScan, CrossMerge=CrossMerge):
         if not channel_first:
             x = x.permute(0, 3, 1, 2).contiguous()
         x = cross_selective_scan(
@@ -895,6 +871,8 @@ class SS2D(nn.Module):
             out_norm_shape=getattr(self, "out_norm_shape", "v0"),
             force_fp32=force_fp32,
             SelectiveScan=SelectiveScan,
+            CrossScan=CrossScan,
+            CrossMerge=CrossMerge,
             no_einsum=no_einsum,
         )
         return x
@@ -906,18 +884,18 @@ class SS2D(nn.Module):
             x, z = x.chunk(2, dim=-1) # (b, h, w, d)
             if not self.disable_z_act:
                 z = self.act(z)
+        x = x.permute(0, 3, 1, 2).contiguous()
         if with_dconv:
-            x = x.permute(0, 3, 1, 2).contiguous()
             x = self.conv2d(x) # (b, d, h, w)
         x = self.act(x)
-        y = self.forward_core(x, channel_first=with_dconv)
+        y = self.forward_core(x, channel_first=True)
         if not self.disable_z:
             y = y * z
         out = self.dropout(self.out_proj(y))
         return out
 
 
-if False:
+if True:
 # if True:
     try:
         from .ss2d_ablations import SS2DDev
