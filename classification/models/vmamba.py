@@ -1024,7 +1024,7 @@ class SS2D(nn.Module):
         return out
 
 
-if True:
+if False:
 # if True:
     try:
         from .ss2d_ablations import SS2DDev
