@@ -1,5 +1,5 @@
 _base_ = [
-    './upernet_swin_4xb4-160k_ade20k-896x896_small.py'
+    '../vssm/upernet_swin_4xb4-160k_ade20k-896x896_small.py'
 ]
 model = dict(
     backbone=dict(
