@@ -25,7 +25,7 @@ model = dict(
 )
 
 # too big
-train_dataloader = dict(batch_size=1) # as gpus=16
+# train_dataloader = dict(batch_size=1) # as gpus=16
 
 
 

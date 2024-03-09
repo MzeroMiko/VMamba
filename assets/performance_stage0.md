@@ -1,5 +1,4 @@
-
-
+# Main Results compatible with [arXiv 2401.10166](https://arxiv.org/abs/2401.10166)
 
 ### **Classification on ImageNet-1K**
 
