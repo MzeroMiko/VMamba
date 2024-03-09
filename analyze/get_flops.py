@@ -25,6 +25,16 @@ selective_scan_flop_jit: Callable = build.vmamba.selective_scan_flop_jit
 VSSM: nn.Module = build.vmamba.VSSM
 Backbone_VSSM: nn.Module = build.vmamba.Backbone_VSSM
 
+supported_ops={
+    "aten::silu": None, # as relu is in _IGNORED_OPS
+    "aten::neg": None, # as relu is in _IGNORED_OPS
+    "aten::exp": None, # as relu is in _IGNORED_OPS
+    "aten::flip": None, # as permute is in _IGNORED_OPS
+    "prim::PythonOp.SelectiveScanFn": selective_scan_flop_jit, # latter
+    "prim::PythonOp.SelectiveScanOflex": selective_scan_flop_jit, # latter
+    "prim::PythonOp.SelectiveScanCore": selective_scan_flop_jit, # latter
+    "prim::PythonOp.SelectiveScan": selective_scan_flop_jit, # latter
+}
 
 def mmengine_flop_count(model: nn.Module = None, input_shape = (3, 224, 224), show_table=False, show_arch=False, _get_model_complexity_info=False):
     from mmengine.analysis.print_helper import is_tuple_of, FlopAnalyzer, ActivationAnalyzer, parameter_count, _format_size, complexity_stats_table, complexity_stats_str
@@ -65,14 +75,6 @@ def mmengine_flop_count(model: nn.Module = None, input_shape = (3, 224, 224), sh
                     'one input tensor) or a `tuple of tuple of int` (to construct'
                     'multiple input tensors).')
 
-
-        supported_ops={
-            "aten::silu": None, # as relu is in _IGNORED_OPS
-            "aten::neg": None, # as relu is in _IGNORED_OPS
-            "aten::exp": None, # as relu is in _IGNORED_OPS
-            "aten::flip": None, # as permute is in _IGNORED_OPS
-            "prim::PythonOp.SelectiveScanFn": selective_scan_flop_jit, # latter
-        }
         flop_handler = FlopAnalyzer(model, inputs).set_op_handle(**supported_ops)
         # activation_handler = ActivationAnalyzer(model, inputs)
 
@@ -153,14 +155,6 @@ def fvcore_flop_count(model: nn.Module, inputs=None, input_shape=(3, 224, 224), 
     from fvcore.nn.print_model_statistics import flop_count_str, flop_count_table
     from fvcore.nn.jit_analysis import _IGNORED_OPS
     from fvcore.nn.jit_handles import get_shape, addmm_flop_jit
-    
-    supported_ops={
-        "aten::silu": None, # as relu is in _IGNORED_OPS
-        "aten::neg": None, # as relu is in _IGNORED_OPS
-        "aten::exp": None, # as relu is in _IGNORED_OPS
-        "aten::flip": None, # as permute is in _IGNORED_OPS
-        "prim::PythonOp.SelectiveScanFn": selective_scan_flop_jit, # latter
-    }
     
     if inputs is None:
         assert input_shape is not None
@@ -303,7 +297,7 @@ def mmdet_flops(config=None):
 
     
 if __name__ == '__main__':
-    if True:
+    if False:
         print("fvcore flops count for vssm ====================", flush=True)
         vssm_flops()
         print("mmengine flops count for vssm ====================", flush=True)
@@ -314,7 +308,7 @@ if __name__ == '__main__':
 
     if True:
         mmdet_mmseg_vssm()
-        if True:
+        if False:
             mmseg_flops(config=f"{segpath}/upernet/upernet_r50_4xb4-160k_ade20k-512x512.py", input_shape=(3, 512, 2048)) # GFlops:  952.616667136 Params:  66516108
             mmseg_flops(config=f"{segpath}/upernet/upernet_r101_4xb4-160k_ade20k-512x512.py", input_shape=(3, 512, 2048)) # GFlops:  1030.4084234239997 Params:  85508236
             mmseg_flops(config=f"{segpath}/vit/vit_deit-s16_mln_upernet_8xb2-160k_ade20k-512x512.py", input_shape=(3, 512, 2048)) # GFlops:  1216.821829632 Params:  57994796
@@ -326,11 +320,22 @@ if __name__ == '__main__':
             mmseg_flops(config=f"{segpath}/vssm/upernet_convnext_4xb4-160k_ade20k-640x640_small.py", input_shape=(3, 640, 2560)) # GFlops:  1606.538496 Params:  81877196
             mmseg_flops(config=f"{segpath}/vssm/upernet_vssm_4xb4-160k_ade20k-640x640_small.py", input_shape=(3, 640, 2560)) # GFlops:  1619.8110944 Params:  76070924
     
-        if True:
+        if False:
             mmdet_flops(config=f"{detpath}/vssm/mask_rcnn_vssm_fpn_coco_tiny.py") # 42.4M 262093532640.0
             mmdet_flops(config=f"{detpath}/vssm/mask_rcnn_vssm_fpn_coco_small.py") # 63.924M 357006236640.0
             mmdet_flops(config=f"{detpath}/vssm/mask_rcnn_vssm_fpn_coco_base.py") # 95.628M 482127568640.0
             mmdet_flops(config=f"{detpath}/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py") # 44.396M 260152304640.0
             mmdet_flops(config=f"{detpath}/mask_rcnn/mask-rcnn_r101_fpn_1x_coco.py") # 63.388M 336434160640.0
+
+        if True:
+            mmseg_flops(config=f"{segpath}/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_tiny.py", input_shape=(3, 512, 2048)) # GFlops:  947.7798358240001 Params:  62359340
+            mmseg_flops(config=f"{segpath}/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_small.py", input_shape=(3, 512, 2048)) # GFlops:  1028.404888464 Params:  81801260
+            mmseg_flops(config=f"{segpath}/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_base.py", input_shape=(3, 512, 2048)) # GFlops:  1170.3442882240001 Params:  122069292
+            mmseg_flops(config=f"{segpath}/vssm1/upernet_vssm_4xb4-160k_ade20k-640x640_small.py", input_shape=(3, 640, 2560)) # GFlops:  1606.8682596 Params:  81801260
+    
+        if True:
+            mmdet_flops(config=f"{detpath}/vssm1/mask_rcnn_vssm_fpn_coco_tiny.py") # 50.212M 270186348640.0
+            mmdet_flops(config=f"{detpath}/vssm1/mask_rcnn_vssm_fpn_coco_small.py") # 69.654M 348921708640.0
+            mmdet_flops(config=f"{detpath}/vssm1/mask_rcnn_vssm_fpn_coco_base.py") # 0.108G 485496108640.0
 
     
