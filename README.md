@@ -41,9 +41,11 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 
 ## The History of Speed Up
 
-*Time is tested on 1xA100 with batch_size 128; the config file is `vssm1/vssm_tiny_224_0220.yaml`. GPU memory is adopted from the log.*
+*Time is tested on 1xA100 with batch_size 128 for `training`; the config file is `vssm1/vssm_tiny_224_0220.yaml`. GPU memory is adopted from the log.*
 
-*The experiments ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166)) done before #20240119 used `mamba-ssm + group-parallel`. The experiments done since #20240201 use `sscore + fused cross scan + fused cross merge`. We plan to use `ssoflex + fused cross scan + fused cross merge + input16output32` in the future.*
+*The experiments ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166)) done before #20240119 used `mamba-ssm + group-parallel`.*
+
+*The experiments done since #20240201 use `sscore + fused cross scan + fused cross merge`. We plan to use `ssoflex + fused cross scan + fused cross merge + input16output32` in the future.*
 
 | name | GPU Memory | time (s/iter) |
 | :--- | :---: | :---: |
