@@ -760,11 +760,11 @@ class SS2D(nn.Module):
 
             if forward_type.startswith("xv2"):
                 self.in_proj = nn.Conv2d(d_model, d_inner + d_inner + 8 * d_state, 1, bias=bias, **factory_kwargs)
-                self.forward = self.forwardxv2
+                self.forward = partial(self.forwardxv2, mode="xv2")
                 del self.dt_projs_weight
 
             if forward_type.startswith("xv3"):
-                self.forward = self.forwardxv3
+                self.forward = partial(self.forwardxv1, mode="xv3")
                 self.in_proj = nn.Conv2d(d_model, d_inner + 4 * dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
 
     @staticmethod
@@ -825,8 +825,9 @@ class SS2D(nn.Module):
 
     # only used to run previous version
     def forward_corev0(self, x: torch.Tensor, to_dtype=False):
+        SelectiveScan = SelectiveScanCore
         def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True, nrows=1):
-            return SelectiveScanCore.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, False)
+            return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, False)
 
         B, D, H, W = x.shape
         D, N = self.A_logs.shape
@@ -902,7 +903,7 @@ class SS2D(nn.Module):
         out = self.dropout(self.out_proj(y))
         return out
 
-    def forwardxv1(self, x: torch.Tensor, **kwargs):
+    def forwardxv1(self, x: torch.Tensor, mode="xv1", **kwargs):
         B, H, W, C = x.shape
         L = H * W
         K = 4
@@ -925,116 +926,20 @@ class SS2D(nn.Module):
         x = self.conv2d(x) # (b, d, h, w)
         x = self.act(x)
         x = self.in_proj(x)
-        us, dts, Bs, Cs = x.split([self.d_inner, self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
-        
-        us = CrossScanTriton.apply(us).contiguous().view(B, -1, L)
-        dts = CrossScanTriton.apply(dts)
-        dts = F.conv1d(dts.view(B, -1, L), dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K).contiguous().view(B, -1, L)
-        Bs, Cs = Bs.view(B, K, -1, L).contiguous(), Cs.view(B, K, -1, L).contiguous()
-    
-        As = -torch.exp(A_logs.to(torch.float)) # (k * c, d_state)
-        Ds = Ds.to(torch.float) # (K * c)
-        delta_bias = dt_projs_bias.view(-1).to(torch.float)
 
-        if force_fp32:
-            us, dts, Bs, Cs = to_fp32(us, dts, Bs, Cs)
+        if mode in ["xv1"]:
+            us, dts, Bs, Cs = x.split([self.d_inner, self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
+            dts = CrossScanTriton.apply(dts)
+            dts = F.conv1d(dts.view(B, -1, L), dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K).contiguous().view(B, -1, L)
+        elif mode in ["xv2"]:
+            us, dts, Bs, Cs = x.split([self.d_inner, self.d_inner, 4 * self.d_state, 4 * self.d_state], dim=1)
+            dts = CrossScanTriton.apply(dts).contiguous().view(B, -1, L)
+        elif mode in ["xv3"]:
+            us, dts, Bs, Cs = x.split([self.d_inner, 4 * self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
+            dts = CrossScanTriton.apply(dts.contiguous().view(B, K, -1, H, W), 3)
+            dts = F.conv1d(dts.view(B, -1, L), dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K).contiguous().view(B, -1, L)
 
-        ys: torch.Tensor = selective_scan(
-            us, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus
-        ).view(B, K, -1, H, W)
-            
-        y: torch.Tensor = CrossMergeTriton.apply(ys)
-
-        if out_norm_shape in ["v1"]: # (B, C, H, W)
-            y = out_norm(y.view(B, -1, H, W)).permute(0, 2, 3, 1) # (B, H, W, C)
-        else: # (B, L, C)
-            y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
-            y = out_norm(y).view(B, H, W, -1)
-
-        y = (y.to(x.dtype) if to_dtype else y)
-        out = self.dropout(self.out_proj(y))
-        return out
-
-    def forwardxv2(self, x: torch.Tensor, **kwargs):
-        B, H, W, C = x.shape
-        L = H * W
-        K = 4
-        # dt_projs_weight = self.dt_projs_weight
-        A_logs = self.A_logs
-        dt_projs_bias = self.dt_projs_bias
-        force_fp32 = False
-        delta_softplus = True
-        out_norm_shape = getattr(self, "out_norm_shape", "v0")
-        out_norm = self.out_norm
-        to_dtype = True
-        Ds = self.Ds
-
-        to_fp32 = lambda *args: (_a.to(torch.float32) for _a in args)
-
-        def selective_scan(u, delta, A, B, C, D, delta_bias, delta_softplus):
-            return SelectiveScanOflex.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, 1, 1, True)
-
-        x = x.permute(0, 3, 1, 2).contiguous()
-        x = self.conv2d(x) # (b, d, h, w)
-        x = self.act(x)
-        x = self.in_proj(x)
-        us, dts, Bs, Cs = x.split([self.d_inner, self.d_inner, 4 * self.d_state, 4 * self.d_state], dim=1)
-        
-        us = CrossScanTriton.apply(us).contiguous().view(B, -1, L)
-        dts = CrossScanTriton.apply(dts).contiguous().view(B, -1, L)
-        Bs, Cs = Bs.view(B, K, -1, L).contiguous(), Cs.view(B, K, -1, L).contiguous()
-    
-        As = -torch.exp(A_logs.to(torch.float)) # (k * c, d_state)
-        Ds = Ds.to(torch.float) # (K * c)
-        delta_bias = dt_projs_bias.view(-1).to(torch.float)
-
-        if force_fp32:
-            us, dts, Bs, Cs = to_fp32(us, dts, Bs, Cs)
-
-        ys: torch.Tensor = selective_scan(
-            us, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus
-        ).view(B, K, -1, H, W)
-            
-        y: torch.Tensor = CrossMergeTriton.apply(ys)
-
-        if out_norm_shape in ["v1"]: # (B, C, H, W)
-            y = out_norm(y.view(B, -1, H, W)).permute(0, 2, 3, 1) # (B, H, W, C)
-        else: # (B, L, C)
-            y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
-            y = out_norm(y).view(B, H, W, -1)
-
-        y = (y.to(x.dtype) if to_dtype else y)
-        out = self.dropout(self.out_proj(y))
-        return out
-
-    def forwardxv3(self, x: torch.Tensor, **kwargs):
-        B, H, W, C = x.shape
-        L = H * W
-        K = 4
-        dt_projs_weight = self.dt_projs_weight
-        A_logs = self.A_logs
-        dt_projs_bias = self.dt_projs_bias
-        force_fp32 = False
-        delta_softplus = True
-        out_norm_shape = getattr(self, "out_norm_shape", "v0")
-        out_norm = self.out_norm
-        to_dtype = True
-        Ds = self.Ds
-
-        to_fp32 = lambda *args: (_a.to(torch.float32) for _a in args)
-
-        def selective_scan(u, delta, A, B, C, D, delta_bias, delta_softplus):
-            return SelectiveScanOflex.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, 1, 1, True)
-
-        x = x.permute(0, 3, 1, 2).contiguous()
-        x = self.conv2d(x) # (b, d, h, w)
-        x = self.act(x)
-        x = self.in_proj(x)
-        us, dts, Bs, Cs = x.split([self.d_inner, 4 * self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
-        
         us = CrossScanTriton.apply(us.contiguous()).view(B, -1, L)
-        dts = CrossScanTriton.apply(dts.contiguous().view(B, K, -1, H, W), 3)
-        dts = F.conv1d(dts.view(B, -1, L), dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K).contiguous().view(B, -1, L)
         Bs, Cs = Bs.view(B, K, -1, L).contiguous(), Cs.view(B, K, -1, L).contiguous()
     
         As = -torch.exp(A_logs.to(torch.float)) # (k * c, d_state)
