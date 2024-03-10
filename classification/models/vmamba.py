@@ -32,6 +32,9 @@ def triton_cross_scan(
     DW: tl.constexpr,
     NH: tl.constexpr,
     NW: tl.constexpr,
+    MODE: tl.constexpr, 
+    # MODE: 1: scan, 2: merge, 3: scan one by one, 4: merge one by one
+    # MODE: 5: scan 1 direction 6: merge 1 direction 7: scan 2 direction 8: merge 2 direction
 ):
     i_hw, i_c, i_b = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     i_h, i_w = (i_hw // NW), (i_hw % NW)
@@ -49,65 +52,92 @@ def triton_cross_scan(
     p_y3 = y + i_b * 4 * _tmp1 + 2 * _tmp1 + _tmp0 + (NH - i_h - 1) * BH * DW  + (BH - 1 - tl.arange(0, BH)[:, None]) * DW + (NW - i_w - 1) * BW + (BW - 1 - tl.arange(0, BW)[None, :]) + (DH - NH * BH) * DW + (DW - NW * BW) # flip
     p_y4 = y + i_b * 4 * _tmp1 + 3 * _tmp1 + _tmp0 + (NW - i_w - 1) * BW * DH  + (BW - 1 - tl.arange(0, BW)[None, :]) * DH + (NH - i_h - 1) * BH + (BH - 1 - tl.arange(0, BH)[:, None]) + (DH - NH * BH) + (DW - NW * BW) * DH  # trans + flip
 
-    for idxc in range(_for_C):
-        _idx = idxc * DH * DW
-        _x = tl.load(p_x + _idx, mask=_mask_hw)
-        tl.store(p_y1 + _idx, _x, mask=_mask_hw)
-        tl.store(p_y2 + _idx, _x, mask=_mask_hw)
-        tl.store(p_y3 + _idx, _x, mask=_mask_hw)
-        tl.store(p_y4 + _idx, _x, mask=_mask_hw)
-
-
-@triton.jit
-def triton_cross_merge(
-    x, # (B, C, H, W)
-    y, # (B, 4, C, H, W)
-    BC: tl.constexpr,
-    BH: tl.constexpr,
-    BW: tl.constexpr,
-    DC: tl.constexpr,
-    DH: tl.constexpr,
-    DW: tl.constexpr,
-    NH: tl.constexpr,
-    NW: tl.constexpr,
-):
-    i_hw, i_c, i_b = tl.program_id(0), tl.program_id(1), tl.program_id(2)
-    i_h, i_w = (i_hw // NW), (i_hw % NW)
-    _mask_h = (i_h * BH + tl.arange(0, BH)) < DH
-    _mask_w = (i_w * BW + tl.arange(0, BW)) < DW
-    _mask_hw = _mask_h[:, None] & _mask_w[None, :]
-    _for_C = min(DC - i_c * BC, BC)
-
-    _tmp0 = i_c * BC * DH * DW
-    _tmp1 = DC * DH * DW
-    _tmp2 = _tmp0 + i_h * BH * DW  + tl.arange(0, BH)[:, None] * DW + i_w * BW + tl.arange(0, BW)[None, :]
-    p_x = x + i_b * _tmp1 + _tmp2
-    p_y1 = y + i_b * 4 * _tmp1 + _tmp2 # same
-    p_y2 = y + i_b * 4 * _tmp1 + _tmp1 + _tmp0 + i_w * BW * DH + tl.arange(0, BW)[None, :] * DH + i_h * BH + tl.arange(0, BH)[:, None]  # trans
-    p_y3 = y + i_b * 4 * _tmp1 + 2 * _tmp1 + _tmp0 + (NH - i_h - 1) * BH * DW  + (BH - 1 - tl.arange(0, BH)[:, None]) * DW + (NW - i_w - 1) * BW + (BW - 1 - tl.arange(0, BW)[None, :]) + (DH - NH * BH) * DW + (DW - NW * BW) # flip
-    p_y4 = y + i_b * 4 * _tmp1 + 3 * _tmp1 + _tmp0 + (NW - i_w - 1) * BW * DH  + (BW - 1 - tl.arange(0, BW)[None, :]) * DH + (NH - i_h - 1) * BH + (BH - 1 - tl.arange(0, BH)[:, None]) + (DH - NH * BH) + (DW - NW * BW) * DH  # trans + flip
-
-    for idxc in range(_for_C):
-        _idx = idxc * DH * DW
-        _y1 = tl.load(p_y1 + _idx, mask=_mask_hw)
-        _y2 = tl.load(p_y2 + _idx, mask=_mask_hw)
-        _y3 = tl.load(p_y3 + _idx, mask=_mask_hw)
-        _y4 = tl.load(p_y4 + _idx, mask=_mask_hw)
-        tl.store(p_x + _idx, _y1 + _y2 + _y3 + _y4, mask=_mask_hw)
+    if MODE == 1:
+        for idxc in range(_for_C):
+            _idx = idxc * DH * DW
+            _x = tl.load(p_x + _idx)
+            tl.store(p_y1 + _idx, _x, mask=_mask_hw)
+            tl.store(p_y2 + _idx, _x, mask=_mask_hw)
+            tl.store(p_y3 + _idx, _x, mask=_mask_hw)
+            tl.store(p_y4 + _idx, _x, mask=_mask_hw)
+    elif MODE == 2:
+        for idxc in range(_for_C):
+            _idx = idxc * DH * DW
+            _y1 = tl.load(p_y1 + _idx)
+            _y2 = tl.load(p_y2 + _idx)
+            _y3 = tl.load(p_y3 + _idx)
+            _y4 = tl.load(p_y4 + _idx)
+            tl.store(p_x + _idx, _y1 + _y2 + _y3 + _y4, mask=_mask_hw)
+    elif MODE == 3:
+        p_x1 = x + i_b * 4 * _tmp1 + _tmp2
+        p_x2 = p_x1 + _tmp1
+        p_x3 = p_x2 + _tmp1
+        p_x4 = p_x3 + _tmp1
+        for idxc in range(_for_C):
+            _idx = idxc * DH * DW
+            tl.store(p_y1 + _idx, tl.load(p_x1 + _idx), mask=_mask_hw)
+            tl.store(p_y2 + _idx, tl.load(p_x2 + _idx), mask=_mask_hw)
+            tl.store(p_y3 + _idx, tl.load(p_x3 + _idx), mask=_mask_hw)
+            tl.store(p_y4 + _idx, tl.load(p_x4 + _idx), mask=_mask_hw)
+    elif MODE == 4:
+        p_x1 = x + i_b * 4 * _tmp1 + _tmp2
+        p_x2 = p_x1 + _tmp1
+        p_x3 = p_x2 + _tmp1
+        p_x4 = p_x3 + _tmp1
+        for idxc in range(_for_C):
+            _idx = idxc * DH * DW
+            tl.store(p_x1 + _idx, tl.load(p_y1 + _idx), mask=_mask_hw)
+            tl.store(p_x2 + _idx, tl.load(p_y2 + _idx), mask=_mask_hw)
+            tl.store(p_x3 + _idx, tl.load(p_y3 + _idx), mask=_mask_hw)
+            tl.store(p_x4 + _idx, tl.load(p_y4 + _idx), mask=_mask_hw)
+    elif MODE == 5:
+        for idxc in range(_for_C):
+            _idx = idxc * DH * DW
+            _x = tl.load(p_x + _idx)
+            tl.store(p_y1 + _idx, _x, mask=_mask_hw)
+            tl.store(p_y1 + _tmp1 + _idx, _x, mask=_mask_hw)
+            tl.store(p_y1 + 2 * _tmp1 + _idx, _x, mask=_mask_hw)
+            tl.store(p_y1 + 3 * _tmp1 + _idx, _x, mask=_mask_hw)
+    elif MODE == 6:
+        for idxc in range(_for_C):
+            _idx = idxc * DH * DW
+            _y1 = tl.load(p_y1 + _idx)
+            _y2 = tl.load(p_y1 + _tmp1 + _idx)
+            _y3 = tl.load(p_y1 + 2 * _tmp1 + _idx)
+            _y4 = tl.load(p_y1 + 3 * _tmp1 + _idx)
+            tl.store(p_x + _idx, _y1 + _y2 + _y3 + _y4, mask=_mask_hw)
+    elif MODE == 7:
+        for idxc in range(_for_C):
+            _idx = idxc * DH * DW
+            _x = tl.load(p_x + _idx)
+            tl.store(p_y1 + _idx, _x, mask=_mask_hw)
+            tl.store(p_y1 + _tmp1 + _idx, _x, mask=_mask_hw)
+            tl.store(p_y3 + _idx, _x, mask=_mask_hw)
+            tl.store(p_y3 + _tmp1 + _idx, _x, mask=_mask_hw)
+    elif MODE == 8:
+        for idxc in range(_for_C):
+            _idx = idxc * DH * DW
+            _y1 = tl.load(p_y1 + _idx)
+            _y2 = tl.load(p_y1 + _tmp1 + _idx)
+            _y3 = tl.load(p_y3 + _idx)
+            _y4 = tl.load(p_y3 + _tmp1 + _idx)
+            tl.store(p_x + _idx, _y1 + _y2 + _y3 + _y4, mask=_mask_hw)
+    else:
+        ...
 
 
 class CrossScanTriton(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, x: torch.Tensor):
-        B, C, H, W = x.shape
-        B, C, H, W = int(B), int(C), int(H), int(W)
-        BC, BH, BW = min(triton.next_power_of_2(C), 2), min(triton.next_power_of_2(H), 32), min(triton.next_power_of_2(W), 32)
+    def forward(ctx, x: torch.Tensor, MODE=1):
+        B, C, H, W = int(x.shape[0]), int(x.shape[-3]), int(x.shape[-2]), int(x.shape[-1])
+        BC, BH, BW = min(triton.next_power_of_2(C), 1), min(triton.next_power_of_2(H), 32), min(triton.next_power_of_2(W), 32)
         NH, NW, NC = triton.cdiv(H, BH), triton.cdiv(W, BW), triton.cdiv(C, BC)
         ctx.shape = (B, C, H, W)
         ctx.triton_shape = (BC, BH, BW, NC, NH, NW)
+        ctx.MODE = MODE
         x = x.contiguous()
         y = x.new_empty((B, 4, C, H, W))
-        triton_cross_scan[(NH * NW, NC, B)](x, y, BC, BH, BW, C, H, W, NH, NW)
+        triton_cross_scan[(NH * NW, NC, B)](x, y, BC, BH, BW, C, H, W, NH, NW, MODE=ctx.MODE)
         return y.view(B, 4, C, -1)
     
     @staticmethod
@@ -115,25 +145,25 @@ class CrossScanTriton(torch.autograd.Function):
         # out: (b, k, d, l)
         B, C, H, W = ctx.shape
         BC, BH, BW, NC, NH, NW = ctx.triton_shape
-        y = y.contiguous().view(B, 4, C, H, W)
-        x = y.new_empty((B, C, H, W))
-        triton_cross_merge[(NH * NW, NC, B)](x, y, BC, BH, BW, C, H, W, NH, NW)
-        return x
+        y = y.contiguous()
+        x = y.new_empty((B, 4, C, H, W)) if ctx.MODE in [3] else y.new_empty((B, C, H, W))
+        triton_cross_scan[(NH * NW, NC, B)](x, y, BC, BH, BW, C, H, W, NH, NW, MODE=(ctx.MODE + 1))
+        return x, None
 
 
 class CrossMergeTriton(torch.autograd.Function):
     @staticmethod
-    def forward(ctx, y: torch.Tensor):
-        B, K, C, H, W = y.shape
-        B, C, H, W = int(B), int(C), int(H), int(W)
-        BC, BH, BW = min(triton.next_power_of_2(C), 2), min(triton.next_power_of_2(H), 32), min(triton.next_power_of_2(W), 32)
+    def forward(ctx, y: torch.Tensor, MODE=1):
+        B, C, H, W = int(y.shape[0]), int(y.shape[-3]), int(y.shape[-2]), int(y.shape[-1])
+        BC, BH, BW = min(triton.next_power_of_2(C), 1), min(triton.next_power_of_2(H), 32), min(triton.next_power_of_2(W), 32)
         NH, NW, NC = triton.cdiv(H, BH), triton.cdiv(W, BW), triton.cdiv(C, BC)
         ctx.shape = (B, C, H, W)
         ctx.triton_shape = (BC, BH, BW, NC, NH, NW)
-        y = y.contiguous().view(B, 4, C, H, W)
-        x = y.new_empty((B, C, H, W))
-        triton_cross_merge[(NH * NW, NC, B)](x, y, BC, BH, BW, C, H, W, NH, NW)
-        return x.view(B, C, -1)
+        ctx.MODE = MODE
+        y = y.contiguous()
+        x = y.new_empty((B, 4, C, H, W)) if ctx.MODE in [3] else y.new_empty((B, C, H, W))
+        triton_cross_scan[(NH * NW, NC, B)](x, y, BC, BH, BW, C, H, W, NH, NW, MODE=(ctx.MODE + 1))
+        return x.view(B, 4, C, -1) if ctx.MODE in [3] else x.view(B, C, -1)
     
     @staticmethod
     def backward(ctx, x: torch.Tensor):
@@ -142,8 +172,8 @@ class CrossMergeTriton(torch.autograd.Function):
         BC, BH, BW, NC, NH, NW = ctx.triton_shape
         x = x.contiguous()
         y = x.new_empty((B, 4, C, H, W))
-        triton_cross_scan[(NH * NW, NC, B)](x, y, BC, BH, BW, C, H, W, NH, NW)
-        return y
+        triton_cross_scan[(NH * NW, NC, B)](x, y, BC, BH, BW, C, H, W, NH, NW, MODE=ctx.MODE)
+        return y, None
 
 
 # import selective scan ==============================
@@ -167,6 +197,13 @@ except Exception as e:
     ...
     # print(f"WARNING: can not import selective_scan_cuda.", flush=True)
     # print(e, flush=True)
+
+
+def check_nan_inf(tag: str, x: torch.Tensor, enable=True):
+    if enable:
+        if torch.isinf(x).any() or torch.isnan(x).any():
+            print(tag, torch.isinf(x).any(), torch.isnan(x).any(), flush=True)
+            import pdb; pdb.set_trace()
 
 
 # fvcore flops =======================================
@@ -395,80 +432,41 @@ class CrossMerge(torch.autograd.Function):
 class CrossScan_Ab_2direction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x: torch.Tensor):
-        B, C, H, W = x.shape
-        ctx.shape = (B, C, H, W)
-        xs = x.new_empty((B, 4, C, H * W))
-        xs[:, 0] = x.flatten(2, 3)
-        xs[:, 1] = x.flatten(2, 3)
-        xs[:, 2:4] = torch.flip(xs[:, 0:2], dims=[-1])
-        return xs
+        return CrossScanTriton.forward(ctx, x, 7)
     
     @staticmethod
     def backward(ctx, ys: torch.Tensor):
-        # out: (b, k, d, l)
-        B, C, H, W = ctx.shape
-        L = H * W
-        ys = ys[:, 0:2] + ys[:, 2:4].flip(dims=[-1]).view(B, 2, -1, L)
-        y = ys[:, 0] + ys[:, 1].view(B, -1, W, H).transpose(dim0=2, dim1=3).contiguous().view(B, -1, L)
-        return y.view(B, -1, H, W)
+        return CrossScanTriton.backward(ctx, ys)
 
 
 class CrossMerge_Ab_2direction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, ys: torch.Tensor):
-        B, K, D, H, W = ys.shape
-        ctx.shape = (H, W)
-        ys = ys.view(B, K, D, -1)
-        ys = ys[:, 0:2] + ys[:, 2:4].flip(dims=[-1]).view(B, 2, D, -1)
-        y = ys.sum(dim=1)
-        return y
+        return CrossMergeTriton.forward(ctx, ys, 7)
     
     @staticmethod
     def backward(ctx, x: torch.Tensor):
-        # B, D, L = x.shape
-        # out: (b, k, d, l)
-        H, W = ctx.shape
-        B, C, L = x.shape
-        xs = x.new_empty((B, 4, C, L))
-        xs[:, 0] = x
-        xs[:, 1] = x
-        xs[:, 2:4] = torch.flip(xs[:, 0:2], dims=[-1])
-        xs = xs.view(B, 4, C, H, W)
-        return xs
+        return CrossMergeTriton.backward(ctx, x)
 
 
 class CrossScan_Ab_1direction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x: torch.Tensor):
-        B, C, H, W = x.shape
-        ctx.shape = (B, C, H, W)
-        xs = x.view(B, 1, C, H * W).repeat(1, 4, 1, 1).contiguous()
-        return xs
+        return CrossScanTriton.forward(ctx, x, 5)
     
     @staticmethod
     def backward(ctx, ys: torch.Tensor):
-        # out: (b, k, d, l)
-        B, C, H, W = ctx.shape
-        y = ys.sum(dim=1).view(B, C, H, W)
-        return y
+        return CrossScanTriton.backward(ctx, ys)
 
 
 class CrossMerge_Ab_1direction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, ys: torch.Tensor):
-        B, K, D, H, W = ys.shape
-        ctx.shape = (H, W)
-        y = ys.sum(dim=1).view(B, D, H * W)
-        return y
+        return CrossMergeTriton.forward(ctx, ys, 5)
     
     @staticmethod
     def backward(ctx, x: torch.Tensor):
-        # B, D, L = x.shape
-        # out: (b, k, d, l)
-        H, W = ctx.shape
-        B, C, L = x.shape
-        xs = x.view(B, 1, C, L).repeat(1, 4, 1, 1).contiguous().view(B, 4, C, H, W)
-        return xs
+        return CrossMergeTriton.backward(ctx, x)
 
 
 # =============
@@ -759,13 +757,10 @@ class SS2D(nn.Module):
             # simple init dt_projs, A_logs, Ds
             self.Ds = nn.Parameter(torch.ones((k_group * d_inner)))
             self.A_logs = nn.Parameter(torch.zeros((k_group * d_inner, d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
-            self.dt_projs_weight = nn.Parameter(torch.randn((k_group, d_inner, dt_rank)))
-            self.dt_projs_bias = nn.Parameter(torch.randn((k_group, d_inner)))
+            self.dt_projs_weight = nn.Parameter(0.1 * torch.rand((k_group, d_inner, dt_rank)))
+            self.dt_projs_bias = nn.Parameter(0.1 * torch.rand((k_group, d_inner)))
     
         if forward_type.startswith("xv"):
-            del self.x_proj_weight
-            self.in_proj = nn.Conv2d(d_model, d_inner + dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
-            self.act: nn.Module = act_layer()
             self.d_state = d_state
             self.dt_rank = dt_rank
             self.d_inner = d_inner
@@ -780,12 +775,21 @@ class SS2D(nn.Module):
                     padding=(d_conv - 1) // 2,
                     **factory_kwargs,
                 )
+            self.act: nn.Module = act_layer()
+            del self.x_proj_weight
 
-            self.forward = self.forwardxv1
+            if forward_type.startswith("xv1"):
+                self.in_proj = nn.Conv2d(d_model, d_inner + dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
+                self.forward = self.forwardxv1
+
             if forward_type.startswith("xv2"):
                 self.in_proj = nn.Conv2d(d_model, d_inner + d_inner + 8 * d_state, 1, bias=bias, **factory_kwargs)
-                del self.dt_projs_weight
                 self.forward = self.forwardxv2
+                del self.dt_projs_weight
+
+            if forward_type.startswith("xv3"):
+                self.forward = self.forwardxv3
+                self.in_proj = nn.Conv2d(d_model, d_inner + 4 * dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
 
     @staticmethod
     def dt_init(dt_rank, d_inner, dt_scale=1.0, dt_init="random", dt_min=0.001, dt_max=0.1, dt_init_floor=1e-4, **factory_kwargs):
@@ -1028,6 +1032,59 @@ class SS2D(nn.Module):
         out = self.dropout(self.out_proj(y))
         return out
 
+    def forwardxv3(self, x: torch.Tensor, **kwargs):
+        B, H, W, C = x.shape
+        L = H * W
+        K = 4
+        dt_projs_weight = self.dt_projs_weight
+        A_logs = self.A_logs
+        dt_projs_bias = self.dt_projs_bias
+        force_fp32 = False
+        delta_softplus = True
+        out_norm_shape = getattr(self, "out_norm_shape", "v0")
+        out_norm = self.out_norm
+        to_dtype = True
+        Ds = self.Ds
+
+        to_fp32 = lambda *args: (_a.to(torch.float32) for _a in args)
+
+        def selective_scan(u, delta, A, B, C, D, delta_bias, delta_softplus):
+            return SelectiveScanOflex.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, 1, 1, True)
+
+        x = x.permute(0, 3, 1, 2).contiguous()
+        x = self.conv2d(x) # (b, d, h, w)
+        x = self.act(x)
+        x = self.in_proj(x)
+        us, dts, Bs, Cs = x.split([self.d_inner, 4 * self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
+        
+        us = CrossScanTriton.apply(us.contiguous()).view(B, -1, L)
+        dts = CrossScanTriton.apply(dts.contiguous().view(B, K, -1, H, W), 3)
+        dts = F.conv1d(dts.view(B, -1, L), dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K).contiguous().view(B, -1, L)
+        Bs, Cs = Bs.view(B, K, -1, L).contiguous(), Cs.view(B, K, -1, L).contiguous()
+    
+        As = -torch.exp(A_logs.to(torch.float)) # (k * c, d_state)
+        Ds = Ds.to(torch.float) # (K * c)
+        delta_bias = dt_projs_bias.view(-1).to(torch.float)
+
+        if force_fp32:
+            us, dts, Bs, Cs = to_fp32(us, dts, Bs, Cs)
+
+        ys: torch.Tensor = selective_scan(
+            us, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus
+        ).view(B, K, -1, H, W)
+            
+        y: torch.Tensor = CrossMergeTriton.apply(ys)
+
+        if out_norm_shape in ["v1"]: # (B, C, H, W)
+            y = out_norm(y.view(B, -1, H, W)).permute(0, 2, 3, 1) # (B, H, W, C)
+        else: # (B, L, C)
+            y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
+            y = out_norm(y).view(B, H, W, -1)
+
+        y = (y.to(x.dtype) if to_dtype else y)
+        out = self.dropout(self.out_proj(y))
+        return out
+
 
 if False:
 # if True:
@@ -1040,6 +1097,7 @@ if False:
             pass
         print(e, flush=True)
         pass
+
 
 class Permute(nn.Module):
     def __init__(self, *args):
@@ -1688,24 +1746,143 @@ class CHECKS:
         y = torch.randn((B, 4, C, H, W), dtype=dtype, device=torch.device("cuda")).requires_grad_(True)
         x1 = x.clone().detach().requires_grad_(True)
         y1 = y.clone().detach().requires_grad_(True)
-        o0 = CrossScan.apply(x)
-        o1 = CrossScanTriton.apply(x1)
-        o0.backward(y.view(B, 4, C, H * W))
-        o1.backward(y.view(B, 4, C, H * W))
-        print((o0 - o1).abs().max())
-        print((x.grad - x1.grad).abs().max())
-        o0 = CrossMerge.apply(y)
-        o1 = CrossMergeTriton.apply(y1)
-        o0.backward(x.view(B, C, H * W))
-        o1.backward(x.view(B, C, H * W))
-        print((o0 - o1).abs().max())
-        print((y.grad - y1.grad).abs().max())
 
-        res0 = triton.testing.do_bench(lambda :CrossScan.apply(x))
-        res1 = triton.testing.do_bench(lambda :CrossScanTriton.apply(x))
-        res2 = triton.testing.do_bench(lambda :CrossMerge.apply(y))
-        res3 = triton.testing.do_bench(lambda :CrossMergeTriton.apply(y))
-        print(res0, res1, res2, res3)
+        def cross_scan(x: torch.Tensor):
+            B, C, H, W = x.shape
+            L = H * W
+            xs = torch.stack([
+                x.view(B, C, L),
+                torch.transpose(x, dim0=2, dim1=3).contiguous().view(B, C, L),
+                torch.flip(x.contiguous().view(B, C, L), dims=[-1]),
+                torch.flip(torch.transpose(x, dim0=2, dim1=3).contiguous().view(B, C, L), dims=[-1]),
+            ], dim=1).view(B, 4, C, L)
+            return xs
+        
+        def cross_merge(out_y: torch.Tensor):
+            B, K, D, H, W = out_y.shape
+            L = H * W
+            out_y = out_y.view(B, K, D, L)
+            inv_y = torch.flip(out_y[:, 2:4], dims=[-1]).view(B, 2, -1, L)
+            wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
+            invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
+            y = out_y[:, 0] + inv_y[:, 0] + wh_y + invwh_y
+            return y
+
+        if True:
+            res0 = triton.testing.do_bench(lambda :cross_scan(x))
+            res1 = triton.testing.do_bench(lambda :CrossScan.apply(x))
+            res2 = triton.testing.do_bench(lambda :CrossScanTriton.apply(x))
+            res3 = triton.testing.do_bench(lambda :cross_merge(y))
+            res4 = triton.testing.do_bench(lambda :CrossMerge.apply(y))
+            res5 = triton.testing.do_bench(lambda :CrossMergeTriton.apply(y))
+            print(res0, res1, res2, res3, res4, res5)
+
+        print("test cross scan")
+        if True:
+            o0 = cross_scan(x)
+            o1 = CrossScanTriton.apply(x1)
+            o0.backward(y.view(B, 4, C, H * W))
+            o1.backward(y.view(B, 4, C, H * W))
+            print((o0 - o1).abs().max())
+            print((x.grad - x1.grad).abs().max())
+            o0 = cross_merge(y)
+            o1 = CrossMergeTriton.apply(y1)
+            o0.backward(x.view(B, C, H * W))
+            o1.backward(x.view(B, C, H * W))
+            print((o0 - o1).abs().max())
+            print((y.grad - y1.grad).abs().max())
+            x.grad, x1.grad, y.grad, y1.grad = None, None, None, None
+
+        print("test cross scan 1d")
+        if True:
+            def cross_scan_1d(x: torch.Tensor):
+                B, C, H, W = x.shape
+                return torch.stack([x,x,x,x], dim=1).view(B, 4, C, -1)
+            def cross_merge_1d(x: torch.Tensor):
+                return x.sum(dim=1).flatten(2, 3)
+            o0 = cross_scan_1d(x)
+            o1 = CrossScanTriton.apply(x1, 5)
+            o1 = CrossScan_Ab_1direction.apply(x1)
+            o0.backward(y.view(B, 4, C, H * W))
+            o1.backward(y.view(B, 4, C, H * W))
+            print((o0 - o1).abs().max())
+            print((x.grad - x1.grad).abs().max())
+            x.grad, x1.grad, y.grad, y1.grad = None, None, None, None
+            o0 = cross_merge_1d(y)
+            o1 = CrossMergeTriton.apply(y1, 5)
+            o1 = CrossMerge_Ab_1direction.apply(y1)
+            o0.backward(x.view(B, C, H * W))
+            o1.backward(x.view(B, C, H * W))
+            print((o0 - o1).abs().max()) # failed with CrossMergeTriton
+            print((y.grad - y1.grad).abs().max())
+            x.grad, x1.grad, y.grad, y1.grad = None, None, None, None
+        
+        print("test cross scan 2d")
+        if True:
+            def cross_scan_2d(x: torch.Tensor):
+                B, C, H, W = x.shape
+                x = x.flatten(2, 3)
+                return torch.stack([x,x,x.flip(dims=[-1]), x.flip(dims=[-1])], dim=1).view(B, 4, C, -1)
+            def cross_merge_2d(out_y: torch.Tensor):
+                B, K, D, H, W = out_y.shape
+                L = H * W
+                out_y = out_y.view(B, K, D, L)
+                inv_y = torch.flip(out_y[:, 2:4], dims=[-1]).view(B, 2, -1, L)
+                y = (out_y[:, 0:2] + inv_y[:, 0:2]).sum(1)
+                return y
+            
+            o0 = cross_scan_2d(x)
+            o1 = CrossScanTriton.apply(x1, 7)
+            o1 = CrossScan_Ab_2direction.apply(x1)
+            o0.backward(y.view(B, 4, C, H * W))
+            o1.backward(y.view(B, 4, C, H * W))
+            print((o0 - o1).abs().max())
+            print((x.grad - x1.grad).abs().max())
+            x.grad, x1.grad, y.grad, y1.grad = None, None, None, None
+            o0 = cross_merge_2d(y)
+            o1 = CrossMergeTriton.apply(y1, 7)
+            o1 = CrossMerge_Ab_2direction.apply(y1)
+            o0.backward(x.view(B, C, H * W))
+            o1.backward(x.view(B, C, H * W))
+            print((o0 - o1).abs().max()) # failed with CrossMergeTriton
+            print((y.grad - y1.grad).abs().max())
+            x.grad, x1.grad, y.grad, y1.grad = None, None, None, None
+        
+        print("test cross scan one by one")
+        if True:
+            def cross_scan_1b1(x: torch.Tensor):
+                B, K, C, H, W = x.shape
+                L = H * W
+                xs = torch.stack([
+                    x[:, 0].view(B, C, L),
+                    torch.transpose(x[:, 1], dim0=2, dim1=3).contiguous().view(B, C, L),
+                    torch.flip(x[:, 2].contiguous().view(B, C, L), dims=[-1]),
+                    torch.flip(torch.transpose(x[:, 3], dim0=2, dim1=3).contiguous().view(B, C, L), dims=[-1]),
+                ], dim=1).view(B, 4, C, L)
+                return xs
+            def cross_merge_1b1(x: torch.Tensor):
+                B, K, C, H, W = x.shape
+                L = H * W
+                xs = torch.stack([
+                    x[:, 0].view(B, C, L),
+                    torch.transpose(x[:, 1].view(B, C, W, H), dim0=2, dim1=3).contiguous().view(B, C, L),
+                    torch.flip(x[:, 2].contiguous().view(B, C, L), dims=[-1]),
+                    torch.flip(torch.transpose(x[:, 3].view(B, C, W, H), dim0=2, dim1=3).contiguous().view(B, C, L), dims=[-1]),
+                ], dim=1).view(B, 4, C, L)
+                return xs            
+            o0 = cross_scan_1b1(y)
+            o1 = CrossScanTriton.apply(y1, 3)
+            o0.backward(y.view(B, 4, C, H * W))
+            o1.backward(y.view(B, 4, C, H * W))
+            print((o0 - o1).abs().max())
+            print((y.grad - y1.grad).abs().max())
+            o0 = cross_merge_1b1(y)
+            o1 = CrossMergeTriton.apply(y1, 3)
+            o0.backward(y.view(B, 4, C, H * W))
+            o1.backward(y.view(B, 4, C, H * W))
+            print((o0 - o1).abs().max()) # failed with CrossMergeTriton !!!
+            print((y.grad - y1.grad).abs().max())
+            x.grad, x1.grad, y.grad, y1.grad = None, None, None, None
 
     def check_einsum():
         B, D, L, R, K = 128, 192, 56 * 56, 12, 4
@@ -1721,7 +1898,6 @@ class CHECKS:
         y1.backward(o)
         y2.backward(o)
         print((x.grad - x1.grad).abs().max())
-        breakpoint()
 
     def check_vssblock():
         import triton
@@ -1905,8 +2081,12 @@ if __name__ == "__main__":
     # print(VSSM(forward_type="v2nozact").flops())
 
     # CHECKS.check_vssm1_ssoflex_equals_mambassm()
-    # CHECKS.check_csm_triton()
-    CHECKS.check_einsum()
+    CHECKS.check_csm_triton()
+    # CHECKS.check_einsum()
+
+
+    
+    breakpoint()
 
     
 
