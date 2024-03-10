@@ -379,32 +379,12 @@ def print_jit_input_names(inputs):
 
 
 # cross selective scan ===============================
+# comment all checks if inside cross_selective_scan
 class SelectiveScanMamba(torch.autograd.Function):
-    # comment all checks if inside cross_selective_scan
     @staticmethod
     @torch.cuda.amp.custom_fwd
     def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, nrows=1, backnrows=1, oflex=True):
-        # assert nrows in [1, 2, 3, 4], f"{nrows}" # 8+ is too slow to compile
-        # assert u.shape[1] % (B.shape[1] * nrows) == 0, f"{nrows}, {u.shape}, {B.shape}"
         ctx.delta_softplus = delta_softplus
-        # all in float
-        # if u.stride(-1) != 1:
-        #     u = u.contiguous()
-        # if delta.stride(-1) != 1:
-        #     delta = delta.contiguous()
-        # if D is not None and D.stride(-1) != 1:
-        #     D = D.contiguous()
-        # if B.stride(-1) != 1:
-        #     B = B.contiguous()
-        # if C.stride(-1) != 1:
-        #     C = C.contiguous()
-        # if B.dim() == 3:
-        #     B = B.unsqueeze(dim=1)
-        #     ctx.squeeze_B = True
-        # if C.dim() == 3:
-        #     C = C.unsqueeze(dim=1)
-        #     ctx.squeeze_C = True
-        
         out, x, *rest = selective_scan_cuda.fwd(u, delta, A, B, C, D, None, delta_bias, delta_softplus)
         ctx.save_for_backward(u, delta, A, B, C, D, delta_bias, x)
         return out
@@ -420,13 +400,10 @@ class SelectiveScanMamba(torch.autograd.Function):
             u, delta, A, B, C, D, None, delta_bias, dout, x, None, None, ctx.delta_softplus,
             False
         )
-        # dB = dB.squeeze(1) if getattr(ctx, "squeeze_B", False) else dB
-        # dC = dC.squeeze(1) if getattr(ctx, "squeeze_C", False) else dC
         return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None, None, None)
 
 
 class SelectiveScanCore(torch.autograd.Function):
-    # comment all checks if inside cross_selective_scan
     @staticmethod
     @torch.cuda.amp.custom_fwd
     def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, nrows=1, backnrows=1, oflex=True):
@@ -448,7 +425,6 @@ class SelectiveScanCore(torch.autograd.Function):
 
 
 class SelectiveScanOflex(torch.autograd.Function):
-    # comment all checks if inside cross_selective_scan
     @staticmethod
     @torch.cuda.amp.custom_fwd
     def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, nrows=1, backnrows=1, oflex=True):
@@ -467,8 +443,6 @@ class SelectiveScanOflex(torch.autograd.Function):
             u, delta, A, B, C, D, delta_bias, dout, x, ctx.delta_softplus, 1
         )
         return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None, None, None)
-
-
 
 
 # =============
@@ -897,7 +871,7 @@ class SS2D(nn.Module):
         return (y.to(x.dtype) if to_dtype else y)
     
     def forward_corev2(self, x: torch.Tensor, SelectiveScan=SelectiveScanOflex, cross_selective_scan=cross_selective_scan, force_fp32=None, no_einsum=False, CrossScan=CrossScan, CrossMerge=CrossMerge):
-        x = cross_selective_scan(
+        return cross_selective_scan(
             x, self.x_proj_weight, None, self.dt_projs_weight, self.dt_projs_bias,
             self.A_logs, self.Ds, delta_softplus=True,
             out_norm=getattr(self, "out_norm", None),
@@ -908,7 +882,6 @@ class SS2D(nn.Module):
             CrossMerge=CrossMerge,
             no_einsum=no_einsum,
         )
-        return x
     
     def forward(self, x: torch.Tensor, **kwargs):
         with_dconv = (self.d_conv > 1)
