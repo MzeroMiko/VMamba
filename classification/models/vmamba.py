@@ -68,41 +68,64 @@ class CrossMerge(torch.autograd.Function):
 class CrossScan_Ab_2direction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x: torch.Tensor):
-        return CrossScanTriton.forward(ctx, x, 7)
+        B, C, H, W = x.shape
+        ctx.shape = (B, C, H, W)
+        x = x.view(B, 1, C, H * W).repeat(1, 2, 1, 1)
+        x = torch.cat([x, x.flip(dims=[-1])], dim=1)
+        return x
     
     @staticmethod
     def backward(ctx, ys: torch.Tensor):
-        return CrossScanTriton.backward(ctx, ys)
+        B, C, H, W = ctx.shape
+        L = H * W
+        ys = ys[:, 0:2] + ys[:, 2:4].flip(dims=[-1]).view(B, 2, -1, L)
+        return ys.sum(1).view(B, -1, H, W)
 
 
 class CrossMerge_Ab_2direction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, ys: torch.Tensor):
-        return CrossMergeTriton.forward(ctx, ys, 7)
+        B, K, D, H, W = ys.shape
+        ctx.shape = (H, W)
+        ys = ys.view(B, K, D, -1)
+        ys = ys[:, 0:2] + ys[:, 2:4].flip(dims=[-1]).view(B, 2, D, -1)
+        return ys.contiguous().sum(1)
     
     @staticmethod
     def backward(ctx, x: torch.Tensor):
-        return CrossMergeTriton.backward(ctx, x)
+        H, W = ctx.shape
+        B, C, L = x.shape
+        x = x.view(B, 1, C, H * W).repeat(1, 2, 1, 1)
+        x = torch.cat([x, x.flip(dims=[-1])], dim=1)
+        return x.view(B, 4, C, H, W)
 
 
 class CrossScan_Ab_1direction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, x: torch.Tensor):
-        return CrossScanTriton.forward(ctx, x, 5)
+        B, C, H, W = x.shape
+        ctx.shape = (B, C, H, W)
+        x = x.view(B, 1, C, H * W).repeat(1, 4, 1, 1)
+        return x
+    
     
     @staticmethod
     def backward(ctx, ys: torch.Tensor):
-        return CrossScanTriton.backward(ctx, ys)
+        B, C, H, W = ctx.shape
+        return ys.view(B, 4, -1, H, W).sum(1)
 
 
 class CrossMerge_Ab_1direction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, ys: torch.Tensor):
-        return CrossMergeTriton.forward(ctx, ys, 5)
+        B, K, C, H, W = ys.shape
+        ctx.shape = (B, C, H, W)
+        return ys.view(B, 4, -1, H * W).sum(1)
     
     @staticmethod
     def backward(ctx, x: torch.Tensor):
-        return CrossMergeTriton.backward(ctx, x)
+        B, C, H, W = ctx.shape
+        return x.view(B, 1, C, H, W).repeat(1, 4, 1, 1, 1)
 
 
 # import selective scan ==============================
