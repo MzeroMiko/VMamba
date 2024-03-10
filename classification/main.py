@@ -34,8 +34,10 @@ from utils.utils import load_checkpoint_ema, load_pretrained_ema, save_checkpoin
 from fvcore.nn import FlopCountAnalysis, flop_count_str, flop_count
 
 from timm.utils import ModelEma as ModelEma
-print(f"||{torch.multiprocessing.get_start_method()}||", end="")
-torch.multiprocessing.set_start_method("spawn", force=True)
+
+if torch.multiprocessing.get_start_method() != "spawn":
+    print(f"||{torch.multiprocessing.get_start_method()}||", end="")
+    torch.multiprocessing.set_start_method("spawn", force=True)
 
 
 def str2bool(v):
