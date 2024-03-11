@@ -775,23 +775,21 @@ class SS2D(nn.Module):
         D._no_weight_decay = True
         return D
 
-    def forward_corev2(self, x: torch.Tensor, SelectiveScan=SelectiveScanOflex, cross_selective_scan=cross_selective_scan, force_fp32=None, no_einsum=False, CrossScan=CrossScan, CrossMerge=CrossMerge):
+    def forward_corev2(self, x: torch.Tensor, cross_selective_scan=cross_selective_scan, **kwargs):
         x_proj_weight = self.x_proj_weight
         dt_projs_weight = self.dt_projs_weight
         dt_projs_bias = self.dt_projs_bias
         A_logs = self.A_logs
         Ds = self.Ds
+        out_norm = getattr(self, "out_norm", None)
+        out_norm_shape = getattr(self, "out_norm_shape", "v0")
 
         return cross_selective_scan(
             x, x_proj_weight, None, dt_projs_weight, dt_projs_bias,
             A_logs, Ds, delta_softplus=True,
-            out_norm=getattr(self, "out_norm", None),
-            out_norm_shape=getattr(self, "out_norm_shape", "v0"),
-            force_fp32=force_fp32,
-            SelectiveScan=SelectiveScan,
-            CrossScan=CrossScan,
-            CrossMerge=CrossMerge,
-            no_einsum=no_einsum,
+            out_norm=out_norm,
+            out_norm_shape=out_norm_shape,
+            **kwargs,
         )
     
     # only used to run previous version
