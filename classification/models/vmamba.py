@@ -632,7 +632,7 @@ class SS2D(nn.Module):
 
             if forward_type.startswith("xv2"):
                 self.in_proj = nn.Conv2d(d_model, d_inner + d_inner + 8 * d_state, 1, bias=bias, **factory_kwargs)
-                self.forward = partial(self.forwardxv2, mode="xv2")
+                self.forward = partial(self.forwardxv, mode="xv2")
                 del self.dt_projs_weight
 
             if forward_type.startswith("xv3"):
@@ -642,6 +642,12 @@ class SS2D(nn.Module):
             if forward_type.startswith("xv4"):
                 self.forward = partial(self.forwardxv, mode="xv3")
                 self.in_proj = nn.Conv2d(d_model, d_inner + 4 * dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
+                self.out_act = nn.GELU()
+
+            if forward_type.startswith("xv5"):
+                self.in_proj = nn.Conv2d(d_model, d_inner + d_inner + 8 * d_state, 1, bias=bias, **factory_kwargs)
+                self.forward = partial(self.forwardxv, mode="xv2")
+                del self.dt_projs_weight
                 self.out_act = nn.GELU()
 
     # only used to run previous version
@@ -887,7 +893,7 @@ class SS2D(nn.Module):
         B, H, W, C = x.shape
         L = H * W
         K = 4
-        dt_projs_weight = self.dt_projs_weight
+        dt_projs_weight = getattr(self, "dt_projs_weight", None)
         A_logs = self.A_logs
         dt_projs_bias = self.dt_projs_bias
         force_fp32 = False
