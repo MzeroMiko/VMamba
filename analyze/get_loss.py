@@ -565,12 +565,19 @@ def main_vssm1():
         # ti0217 = f"{logpath}/vssm_tiny_224_0217.log",
         # ti0218 = f"{logpath}/vssm_tiny_224_0218.log",
         # ti0219 = f"{logpath}/vssm_tiny_224_0219.log",
-        ti0220 = f"{logpath}/vssm_tiny_224_0220.log",
+        # ti0220 = f"{logpath}/vssm_tiny_224_0220.log",
         # ti0221 = f"{logpath}/vssm_tiny_224_0221.log",
         # ti0222 = f"{logpath}/vssm_tiny_224_0222.log",
         # ti0223 = f"{logpath}/vssm_tiny_224_0223.log",
         # ti0225 = f"{logpath}/vssm_tiny_224_0225.log",
-        ti0229 = f"{logpath}/vssm_tiny_224_0229.log",
+        # ti0229 = f"{logpath}/vssm_tiny_224_0229.log",
+        ti0230 = f"/media/Disk2/LiuYue/TmpMount/ZuNode1/DataHPC8/nodeHPC8/outputs/classification/vssm1_tiny_0230/20240227152057/log_rank0.txt",
+        ti0309 = f"/media/Disk2/LiuYue/TmpMount/ZuNode1/DataHPC8/nodeHPC8/out/vssm1_tiny_0309/20240308171406/log_rank0.txt",
+        ti0310 = f"/media/Disk2/LiuYue/TmpMount/ZuNode1/DataHPC9/nodeHPC9/out/vssm1_tiny_0310/20240309044533/log_rank0.txt",
+        ti0311 = f"/media/Disk2/LiuYue/TmpMount/ZuNode1/DataHPC8/nodeHPC8/out/vssm1_tiny_0311/20240310033609/log_rank0.txt",
+        ti0312 = f"/media/Disk2/LiuYue/TmpMount/ZuNode1/DataHPC9/nodeHPC9/out/vssm1_tiny_0312/20240310163346/log_rank0.txt",
+        ti0313 = f"/media/Disk2/LiuYue/TmpMount/ZuNode1/DataHPC8/nodeHPC8/out/vssm1_tiny_0313/20240311144105/log_rank0.txt",
+        ti0314 = f"/media/Disk2/LiuYue/TmpMount/ZuNode1/DataHPC9/nodeHPC9/out/vssm1_tiny_0314/20240312030720/log_rank0.txt",
     )
     
     for name, file in files.items():
