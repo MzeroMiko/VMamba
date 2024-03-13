@@ -938,7 +938,9 @@ class SS2D(nn.Module):
         return out
 
     def forwardxv(self, x: torch.Tensor, mode="xv1", **kwargs):
-        B, H, W, C = x.shape
+        B, C, H, W = x.shape
+        if not self.channel_first:
+            B, H, W, C = x.shape
         L = H * W
         K = 4
         dt_projs_weight = getattr(self, "dt_projs_weight", None)
