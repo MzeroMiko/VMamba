@@ -650,6 +650,11 @@ class SS2D(nn.Module):
                 del self.dt_projs_weight
                 self.out_act = nn.GELU()
 
+            if forward_type.startswith("xv6"):
+                self.forward = partial(self.forwardxv, mode="xv1")
+                self.in_proj = nn.Conv2d(d_model, d_inner + dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
+                self.out_act = nn.GELU()
+
     # only used to run previous version
     def __initv0__(
         self,
@@ -917,17 +922,27 @@ class SS2D(nn.Module):
 
         if mode in ["xv1"]:
             us, dts, Bs, Cs = x.split([self.d_inner, self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
-            dts = CrossScanTriton.apply(dts)
-            dts = F.conv1d(dts.view(B, -1, L), dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K).contiguous().view(B, -1, L)
+            us = CrossScanTriton.apply(us.contiguous()).view(B, -1, L)
+            dts = CrossScanTriton.apply(dts.contiguous()).view(B, -1, L)
+            dts = F.conv1d(dts, dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K).contiguous().view(B, -1, L)
+            # below is slower
+            # us_dts, Bs, Cs = x.split([self.d_inner + self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
+            # us_dts = CrossScanTriton.apply(us_dts.contiguous())
+            # us = us_dts[:, :, :self.d_inner, :].contiguous().view(B, -1, L)
+            # dts = us_dts[:, :, self.d_inner:, :].contiguous().view(B, -1, L)
+            # dts = F.conv1d(dts, dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K).contiguous().view(B, -1, L)
         elif mode in ["xv2"]:
             us, dts, Bs, Cs = x.split([self.d_inner, self.d_inner, 4 * self.d_state, 4 * self.d_state], dim=1)
+            us = CrossScanTriton.apply(us.contiguous()).view(B, -1, L)
             dts = CrossScanTriton.apply(dts).contiguous().view(B, -1, L)
         elif mode in ["xv3"]:
             us, dts, Bs, Cs = x.split([self.d_inner, 4 * self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
+            us = CrossScanTriton.apply(us.contiguous()).view(B, -1, L)
             dts = CrossScanTriton1b1.apply(dts.contiguous().view(B, K, -1, H, W))
             dts = F.conv1d(dts.view(B, -1, L), dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K).contiguous().view(B, -1, L)
+        else:
+            ...
 
-        us = CrossScanTriton.apply(us.contiguous()).view(B, -1, L)
         Bs, Cs = Bs.view(B, K, -1, L).contiguous(), Cs.view(B, K, -1, L).contiguous()
     
         As = -torch.exp(A_logs.to(torch.float)) # (k * c, d_state)
@@ -993,6 +1008,27 @@ class Mlp(nn.Module):
         x = self.act(x)
         x = self.drop(x)
         x = self.fc2(x)
+        x = self.drop(x)
+        return x
+
+
+class gMlp(nn.Module):
+    def __init__(self, in_features, hidden_features=None, out_features=None, act_layer=nn.GELU, drop=0.,channels_first=False):
+        super().__init__()
+        self.channel_first = channels_first
+        out_features = out_features or in_features
+        hidden_features = hidden_features or in_features
+
+        Linear = partial(nn.Conv2d, kernel_size=1, padding=0) if channels_first else nn.Linear
+        self.fc1 = Linear(in_features, 2 * hidden_features)
+        self.act = act_layer()
+        self.fc2 = Linear(hidden_features, out_features)
+        self.drop = nn.Dropout(drop)
+
+    def forward(self, x: torch.Tensor):
+        x = self.fc1(x)
+        x, z = x.chunk(2, dim=(1 if self.channel_first else -1))
+        x = self.fc2(self.drop(x) * self.act(z))
         x = self.drop(x)
         return x
 
@@ -1927,8 +1963,8 @@ if __name__ == "__main__":
 
     # CHECKS.check_vssblock()
     # CHECKS.check_vssm_equals_vmambadp()
-    CHECKS.check_vssm1_equals_vssm(forward_type="v0")
-    CHECKS.check_vssm1_equals_vssm(forward_type="v0_seq")
+    # CHECKS.check_vssm1_equals_vssm(forward_type="v0")
+    # CHECKS.check_vssm1_equals_vssm(forward_type="v0_seq")
     # CHECKS.check_vssm1_equals_vssm(forward_type="v2")
     # print(VSSM(forward_type="v0").flops())
     # print(VSSM(forward_type="v2").flops())
