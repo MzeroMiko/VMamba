@@ -1038,7 +1038,7 @@ class VSSBlock(nn.Module):
         self,
         hidden_dim: int = 0,
         drop_path: float = 0,
-        norm_layer: Callable[..., torch.nn.Module] = partial(nn.LayerNorm, eps=1e-6),
+        norm_layer: nn.Module = nn.LayerNorm,
         # =============================
         ssm_d_state: int = 16,
         ssm_ratio=2.0,
@@ -1836,6 +1836,28 @@ class CHECKS:
         print(ms)
         import time; time.sleep(10000)
 
+    def check_ln2d():
+        import triton
+        inp = torch.randn((16, 128, 16, 128)).cuda().requires_grad_()
+        inp2 = inp.detach().permute(0, 3, 1, 2).clone().requires_grad_()
+
+        torch.manual_seed(0); torch.cuda.manual_seed(0)
+        n1 = nn.LayerNorm(128).cuda()
+        torch.manual_seed(0); torch.cuda.manual_seed(0)
+        n2 = nn.Sequential(Permute(0, 2, 3, 1), nn.LayerNorm(128), Permute(0, 3, 1, 2)).cuda()
+        o1 = n1(inp)
+        o2 = n2(inp2)
+        print((o1.permute(0, 3, 1, 2) - o2).abs().max())
+        o1.backward(inp.data)
+        o2.backward(inp.data.permute(0, 3, 1, 2))
+        print((inp.grad.permute(0, 3, 1, 2) - inp2.grad).abs().max())
+
+        ms1 = triton.testing.do_bench(lambda:n1(inp))
+        ms2 = triton.testing.do_bench(lambda:n2(inp2))
+        ms3 = triton.testing.do_bench(lambda:n1(inp))
+        print(ms1, ms2, ms3)
+
+
     def check_profile():
         vss = VSSM(depths=[1], dims=1024).half().cuda()
         input = torch.randn((128, 3, 56, 56)).half().cuda()
@@ -1971,8 +1993,9 @@ if __name__ == "__main__":
     # print(VSSM(forward_type="v2nozact").flops())
 
     # CHECKS.check_vssm1_ssoflex_equals_mambassm()
-    CHECKS.check_csm_triton()
+    # CHECKS.check_csm_triton()
     # CHECKS.check_einsum()
+    CHECKS.check_ln2d()
 
 
     
