@@ -956,7 +956,8 @@ class SS2D(nn.Module):
         def selective_scan(u, delta, A, B, C, D, delta_bias, delta_softplus):
             return SelectiveScanOflex.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, 1, 1, True)
 
-        x = x.permute(0, 3, 1, 2).contiguous()
+        if not self.channel_first:
+            x = x.permute(0, 3, 1, 2).contiguous()
 
         if self.d_conv > 1:
             x = self.conv2d(x) # (b, d, h, w)
