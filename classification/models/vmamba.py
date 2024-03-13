@@ -326,6 +326,7 @@ def cross_selective_scan(
     delta_softplus = True,
     out_norm: torch.nn.Module=None,
     out_norm_shape="v0",
+    channel_first=False,
     # ==============================
     to_dtype=True, # True: final out to dtype
     force_fp32=False, # True: input fp32
@@ -408,6 +409,15 @@ def cross_selective_scan(
     
     y: torch.Tensor = CrossMerge.apply(ys)
 
+    if channel_first:
+        y = y.view(B, -1, H, W)
+        if out_norm_shape in ["v1"]:
+            y = out_norm(y)
+        else:
+            y = out_norm(y.permute(0, 2, 3, 1))
+            y = y.permute(0, 3, 1, 2)
+        return (y.to(x.dtype) if to_dtype else y)
+
     if out_norm_shape in ["v1"]: # (B, C, H, W)
         y = out_norm(y.view(B, -1, H, W)).permute(0, 2, 3, 1) # (B, H, W, C)
     else: # (B, L, C)
@@ -426,6 +436,20 @@ def selective_scan_flop_jit(inputs, outputs):
 
 
 # =====================================================
+# we have this class as linear and conv init differ from each other
+class Linear2d(nn.Linear):
+    def forward(self, x: torch.Tensor):
+        # B, C, H, W = x.shape
+        return F.conv2d(x, self.weight[:, :, None, None], self.bias)
+
+
+class LayerNorm2d(nn.LayerNorm):
+    def forward(self, x: torch.Tensor):
+        x = x.permute(0, 2, 3, 1)
+        x = nn.functional.layer_norm(x, self.normalized_shape, self.weight, self.bias, self.eps)
+        x = x.permute(0, 3, 1, 2)
+        return x
+
 
 class PatchMerging2D(nn.Module):
     def __init__(self, dim, out_dim=-1, norm_layer=nn.LayerNorm):
@@ -478,6 +502,7 @@ class SS2D(nn.Module):
         initialize="v0",
         # ======================
         forward_type="v2",
+        channel_first=False,
         # ======================
         **kwargs,
     ):
@@ -491,6 +516,8 @@ class SS2D(nn.Module):
         d_inner = int(ssm_ratio * d_model)
         dt_rank = math.ceil(d_model / 16) if dt_rank == "auto" else dt_rank
         self.d_conv = d_conv
+        self.channel_first = channel_first
+        Linear = Linear2d if channel_first else nn.Linear
 
         # tags for forward_type ==============================
         def checkpostfix(tag, value):
@@ -504,20 +531,27 @@ class SS2D(nn.Module):
         self.disable_z_act, forward_type = checkpostfix("nozact", forward_type)
 
         # softmax | sigmoid | dwconv | norm ===========================
+        self.out_norm_shape = "v1"
         if forward_type[-len("none"):] == "none":
             forward_type = forward_type[:-len("none")]
             self.out_norm = nn.Identity()
         elif forward_type[-len("dwconv3"):] == "dwconv3":
             forward_type = forward_type[:-len("dwconv3")]
             self.out_norm = nn.Conv2d(d_inner, d_inner, kernel_size=3, padding=1, groups=d_inner, bias=False)
-            self.out_norm_shape = "v1"
         elif forward_type[-len("softmax"):] == "softmax":
             forward_type = forward_type[:-len("softmax")]
-            self.out_norm = nn.Softmax(dim=1)
+            class SoftmaxSpatial(nn.Softmax):
+                def forward(self, x: torch.Tensor):
+                    B, C, H, W = x.shape
+                    return super().forward(x.view(B, C, -1)).view(B, C, H, W)
+            self.out_norm = SoftmaxSpatial(dim=-1)
         elif forward_type[-len("sigmoid"):] == "sigmoid":
             forward_type = forward_type[:-len("sigmoid")]
             self.out_norm = nn.Sigmoid()
+        elif channel_first:
+            self.out_norm = LayerNorm2d(d_inner)
         else:
+            self.out_norm_shape = "v0"
             self.out_norm = nn.LayerNorm(d_inner)
 
         # forward_type debug =======================================
@@ -554,7 +588,7 @@ class SS2D(nn.Module):
 
         # in proj =======================================
         d_proj = d_inner if self.disable_z else (d_inner * 2)
-        self.in_proj = nn.Linear(d_model, d_proj, bias=bias, **factory_kwargs)
+        self.in_proj = Linear(d_model, d_proj, bias=bias, **factory_kwargs)
         self.act: nn.Module = act_layer()
         
         # conv =======================================
@@ -578,7 +612,7 @@ class SS2D(nn.Module):
         del self.x_proj
         
         # out proj =======================================
-        self.out_proj = nn.Linear(d_inner, d_model, bias=bias, **factory_kwargs)
+        self.out_proj = Linear(d_inner, d_model, bias=bias, **factory_kwargs)
         self.dropout = nn.Dropout(dropout) if dropout > 0. else nn.Identity()
 
         if initialize in ["v0"]:
@@ -626,6 +660,7 @@ class SS2D(nn.Module):
             self.out_act: nn.Module = nn.Identity()
             del self.x_proj_weight
 
+            # change Conv2d to Linear2d Next
             if forward_type.startswith("xv1"):
                 self.in_proj = nn.Conv2d(d_model, d_inner + dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
                 self.forward = self.forwardxv
@@ -799,6 +834,7 @@ class SS2D(nn.Module):
             x, x_proj_weight, None, dt_projs_weight, dt_projs_bias,
             A_logs, Ds, delta_softplus=True,
             out_norm=out_norm,
+            channel_first=self.channel_first,
             out_norm_shape=out_norm_shape,
             **kwargs,
         )
@@ -808,7 +844,8 @@ class SS2D(nn.Module):
         x = self.in_proj(x)
         x, z = x.chunk(2, dim=-1) # (b, h, w, d)
         z = self.act(z)
-        x = x.permute(0, 3, 1, 2).contiguous()
+        if not self.channel_first:
+            x = x.permute(0, 3, 1, 2).contiguous()
         x = self.conv2d(x) # (b, d, h, w)
         x = self.act(x)
         
@@ -868,8 +905,12 @@ class SS2D(nn.Module):
         wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
         invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
         y = out_y[:, 0] + inv_y[:, 0] + wh_y + invwh_y
-        y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
-        y = self.out_norm(y).view(B, H, W, -1)
+        
+        if not self.channel_first:
+            y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
+            y = self.out_norm(y).view(B, H, W, -1)
+        else:
+            y = self.out_norm(y.view(B, -1, H, W))
 
         y = y * z
         out = self.dropout(self.out_proj(y))
@@ -879,10 +920,12 @@ class SS2D(nn.Module):
         with_dconv = (self.d_conv > 1)
         x = self.in_proj(x)
         if not self.disable_z:
-            x, z = x.chunk(2, dim=-1) # (b, h, w, d)
+            x, z = x.chunk(2, dim=(1 if self.channel_first else -1)) # (b, h, w, d)
             if not self.disable_z_act:
                 z = self.act(z)
-        x = x.permute(0, 3, 1, 2).contiguous()
+        
+        if not self.channel_first:
+            x = x.permute(0, 3, 1, 2).contiguous()
         if with_dconv:
             x = self.conv2d(x) # (b, d, h, w)
         x = self.act(x)
@@ -957,12 +1000,18 @@ class SS2D(nn.Module):
         ).view(B, K, -1, H, W)
             
         y: torch.Tensor = CrossMergeTriton.apply(ys)
+        y = y.view(B, -1, H, W)
 
-        if out_norm_shape in ["v1"]: # (B, C, H, W)
-            y = out_norm(y.view(B, -1, H, W)).permute(0, 2, 3, 1) # (B, H, W, C)
-        else: # (B, L, C)
-            y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
-            y = out_norm(y).view(B, H, W, -1)
+        # originally:
+        # y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
+        # y = out_norm(y).view(B, H, W, -1)
+
+        if (not self.channel_first) or (out_norm_shape in ["v0"]):
+            y = out_norm(y.permute(0, 2, 3, 1))
+            if self.channel_first:
+                y = y.permute(0, 3, 1, 2)
+        else:
+            y = out_norm(y)
 
         y = (y.to(x.dtype) if to_dtype else y)
         out = self.dropout(self.out_proj(self.out_act(y)))
@@ -997,7 +1046,7 @@ class Mlp(nn.Module):
         out_features = out_features or in_features
         hidden_features = hidden_features or in_features
 
-        Linear = partial(nn.Conv2d, kernel_size=1, padding=0) if channels_first else nn.Linear
+        Linear = Linear2d if channels_first else nn.Linear
         self.fc1 = Linear(in_features, hidden_features)
         self.act = act_layer()
         self.fc2 = Linear(hidden_features, out_features)
@@ -1019,7 +1068,7 @@ class gMlp(nn.Module):
         out_features = out_features or in_features
         hidden_features = hidden_features or in_features
 
-        Linear = partial(nn.Conv2d, kernel_size=1, padding=0) if channels_first else nn.Linear
+        Linear = Linear2d if channels_first else nn.Linear
         self.fc1 = Linear(in_features, 2 * hidden_features)
         self.act = act_layer()
         self.fc2 = Linear(hidden_features, out_features)
@@ -1039,6 +1088,7 @@ class VSSBlock(nn.Module):
         hidden_dim: int = 0,
         drop_path: float = 0,
         norm_layer: nn.Module = nn.LayerNorm,
+        channel_first=False,
         # =============================
         ssm_d_state: int = 16,
         ssm_ratio=2.0,
@@ -1087,6 +1137,7 @@ class VSSBlock(nn.Module):
                 initialize=ssm_init,
                 # ==========================
                 forward_type=forward_type,
+                channel_first=channel_first,
             )
         
         self.drop_path = DropPath(drop_path)
@@ -1094,7 +1145,7 @@ class VSSBlock(nn.Module):
         if self.mlp_branch:
             self.norm2 = norm_layer(hidden_dim)
             mlp_hidden_dim = int(hidden_dim * mlp_ratio)
-            self.mlp = Mlp(in_features=hidden_dim, hidden_features=mlp_hidden_dim, act_layer=mlp_act_layer, drop=mlp_drop_rate, channels_first=False)
+            self.mlp = Mlp(in_features=hidden_dim, hidden_features=mlp_hidden_dim, act_layer=mlp_act_layer, drop=mlp_drop_rate, channels_first=channel_first)
 
     def _forward(self, input: torch.Tensor):
         if self.ssm_branch:
@@ -1141,13 +1192,14 @@ class VSSM(nn.Module):
         # =========================
         drop_path_rate=0.1, 
         patch_norm=True, 
-        norm_layer="LN",
+        norm_layer="LN", # "BN", "LN2D"
         downsample_version: str = "v2", # "v1", "v2", "v3"
         patchembed_version: str = "v1", # "v1", "v2"
         use_checkpoint=False,  
         **kwargs,
     ):
         super().__init__()
+        self.channel_first = (norm_layer.lower() in ["bn", "ln2d"])
         self.num_classes = num_classes
         self.num_layers = len(depths)
         if isinstance(dims, int):
@@ -1158,6 +1210,7 @@ class VSSM(nn.Module):
         
         _NORMLAYERS = dict(
             ln=nn.LayerNorm,
+            ln2d=LayerNorm2d,
             bn=nn.BatchNorm2d,
         )
 
@@ -1168,20 +1221,15 @@ class VSSM(nn.Module):
             sigmoid=nn.Sigmoid,
         )
 
-        if isinstance(norm_layer, str) and norm_layer.lower() in ["ln"]:
-            norm_layer: nn.Module = _NORMLAYERS[norm_layer.lower()]
-
-        if isinstance(ssm_act_layer, str) and ssm_act_layer.lower() in ["silu", "gelu", "relu"]:
-            ssm_act_layer: nn.Module = _ACTLAYERS[ssm_act_layer.lower()]
-
-        if isinstance(mlp_act_layer, str) and mlp_act_layer.lower() in ["silu", "gelu", "relu"]:
-            mlp_act_layer: nn.Module = _ACTLAYERS[mlp_act_layer.lower()]
+        norm_layer: nn.Module = _NORMLAYERS.get(norm_layer.lower(), None)
+        ssm_act_layer: nn.Module = _ACTLAYERS.get(ssm_act_layer.lower(), None)
+        mlp_act_layer: nn.Module = _ACTLAYERS.get(mlp_act_layer.lower(), None)
 
         _make_patch_embed = dict(
             v1=self._make_patch_embed, 
             v2=self._make_patch_embed_v2,
         ).get(patchembed_version, None)
-        self.patch_embed = _make_patch_embed(in_chans, dims[0], patch_size, patch_norm, norm_layer)
+        self.patch_embed = _make_patch_embed(in_chans, dims[0], patch_size, patch_norm, norm_layer, channel_first=self.channel_first)
 
         _make_downsample = dict(
             v1=PatchMerging2D, 
@@ -1196,6 +1244,7 @@ class VSSM(nn.Module):
                 self.dims[i_layer], 
                 self.dims[i_layer + 1], 
                 norm_layer=norm_layer,
+                channel_first=self.channel_first,
             ) if (i_layer < self.num_layers - 1) else nn.Identity()
 
             self.layers.append(self._make_layer(
@@ -1204,6 +1253,7 @@ class VSSM(nn.Module):
                 use_checkpoint=use_checkpoint,
                 norm_layer=norm_layer,
                 downsample=downsample,
+                channel_first=self.channel_first,
                 # =================
                 ssm_d_state=ssm_d_state,
                 ssm_ratio=ssm_ratio,
@@ -1222,7 +1272,7 @@ class VSSM(nn.Module):
 
         self.classifier = nn.Sequential(OrderedDict(
             norm=norm_layer(self.num_features), # B,H,W,C
-            permute=Permute(0, 3, 1, 2),
+            permute=(Permute(0, 3, 1, 2) if not self.channel_first else nn.Identity()),
             avgpool=nn.AdaptiveAvgPool2d(1),
             flatten=nn.Flatten(1),
             head=nn.Linear(self.num_features, num_classes),
@@ -1250,42 +1300,59 @@ class VSSM(nn.Module):
     #     return {}
 
     @staticmethod
-    def _make_patch_embed(in_chans=3, embed_dim=96, patch_size=4, patch_norm=True, norm_layer=nn.LayerNorm):
-        return nn.Sequential(
-            nn.Conv2d(in_chans, embed_dim, kernel_size=patch_size, stride=patch_size, bias=True),
-            Permute(0, 2, 3, 1),
-            (norm_layer(embed_dim) if patch_norm else nn.Identity()), 
-        )
+    def _make_patch_embed(in_chans=3, embed_dim=96, patch_size=4, patch_norm=True, norm_layer=nn.LayerNorm, channel_first=False):
+        # if channel first, then Norm and Output are both channel_first
+        seq = [nn.Conv2d(in_chans, embed_dim, kernel_size=patch_size, stride=patch_size, bias=True),]
+        if not channel_first:
+            seq.append(Permute(0, 2, 3, 1))
+        if patch_norm:
+            seq.append(norm_layer(embed_dim))
+        return nn.Sequential(*seq)
 
     @staticmethod
-    def _make_patch_embed_v2(in_chans=3, embed_dim=96, patch_size=4, patch_norm=True, norm_layer=nn.LayerNorm):
+    def _make_patch_embed_v2(in_chans=3, embed_dim=96, patch_size=4, patch_norm=True, norm_layer=nn.LayerNorm, channel_first=False):
+        # if channel first, then Norm and Output are both channel_first
         assert patch_size == 4
-        return nn.Sequential(
-            nn.Conv2d(in_chans, embed_dim // 2, kernel_size=3, stride=2, padding=1),
-            (Permute(0, 2, 3, 1) if patch_norm else nn.Identity()),
-            (norm_layer(embed_dim // 2) if patch_norm else nn.Identity()),
-            (Permute(0, 3, 1, 2) if patch_norm else nn.Identity()),
+        seq = [nn.Conv2d(in_chans, embed_dim // 2, kernel_size=3, stride=2, padding=1)]
+        if patch_norm:
+            seq.extend([
+                Permute(0, 2, 3, 1), 
+                norm_layer(embed_dim // 2), 
+                Permute(0, 3, 1, 2)
+            ] if not channel_first else [norm_layer(embed_dim // 2)])
+        seq.extend([
             nn.GELU(),
             nn.Conv2d(embed_dim // 2, embed_dim, kernel_size=3, stride=2, padding=1),
-            Permute(0, 2, 3, 1),
-            (norm_layer(embed_dim) if patch_norm else nn.Identity()),
-        )
+        ])
+        if not channel_first:
+            seq.append(Permute(0, 2, 3, 1))
+        if patch_norm:
+            seq.append(norm_layer(embed_dim))
+        return nn.Sequential(*seq)
     
     @staticmethod
-    def _make_downsample(dim=96, out_dim=192, norm_layer=nn.LayerNorm):
+    def _make_downsample(dim=96, out_dim=192, norm_layer=nn.LayerNorm, channel_first=False):
+        # if channel first, then Norm and Output are both channel_first
         return nn.Sequential(
             Permute(0, 3, 1, 2),
             nn.Conv2d(dim, out_dim, kernel_size=2, stride=2),
             Permute(0, 2, 3, 1),
             norm_layer(out_dim),
+        ) if not channel_first else nn.Sequential(
+            nn.Conv2d(dim, out_dim, kernel_size=2, stride=2),
+            norm_layer(out_dim),
         )
 
     @staticmethod
-    def _make_downsample_v3(dim=96, out_dim=192, norm_layer=nn.LayerNorm):
+    def _make_downsample_v3(dim=96, out_dim=192, norm_layer=nn.LayerNorm, channel_first=False):
+        # if channel first, then Norm and Output are both channel_first
         return nn.Sequential(
             Permute(0, 3, 1, 2),
             nn.Conv2d(dim, out_dim, kernel_size=3, stride=2, padding=1),
             Permute(0, 2, 3, 1),
+            norm_layer(out_dim),
+        ) if not channel_first else nn.Sequential(
+            nn.Conv2d(dim, out_dim, kernel_size=3, stride=2, padding=1),
             norm_layer(out_dim),
         )
 
@@ -1296,6 +1363,7 @@ class VSSM(nn.Module):
         use_checkpoint=False, 
         norm_layer=nn.LayerNorm,
         downsample=nn.Identity(),
+        channel_first=False,
         # ===========================
         ssm_d_state=16,
         ssm_ratio=2.0,
@@ -1312,6 +1380,7 @@ class VSSM(nn.Module):
         mlp_drop_rate=0.0,
         **kwargs,
     ):
+        # if channel first, then Norm and Output are both channel_first
         depth = len(drop_path)
         blocks = []
         for d in range(depth):
@@ -1319,6 +1388,7 @@ class VSSM(nn.Module):
                 hidden_dim=dim, 
                 drop_path=drop_path[d],
                 norm_layer=norm_layer,
+                channel_first=channel_first,
                 ssm_d_state=ssm_d_state,
                 ssm_ratio=ssm_ratio,
                 ssm_dt_rank=ssm_dt_rank,
@@ -1838,25 +1908,89 @@ class CHECKS:
 
     def check_ln2d():
         import triton
-        inp = torch.randn((16, 128, 16, 128)).cuda().requires_grad_()
-        inp2 = inp.detach().permute(0, 3, 1, 2).clone().requires_grad_()
+        inp = torch.randn((64, 192, 56, 57)).cuda().requires_grad_()
+        inp2 = inp.detach().permute(0, 2, 3, 1).clone().requires_grad_()
 
         torch.manual_seed(0); torch.cuda.manual_seed(0)
-        n1 = nn.LayerNorm(128).cuda()
+        n1 = LayerNorm2d(192).cuda()
         torch.manual_seed(0); torch.cuda.manual_seed(0)
-        n2 = nn.Sequential(Permute(0, 2, 3, 1), nn.LayerNorm(128), Permute(0, 3, 1, 2)).cuda()
+        n2 = nn.LayerNorm(192).cuda()
         o1 = n1(inp)
         o2 = n2(inp2)
-        print((o1.permute(0, 3, 1, 2) - o2).abs().max())
+        print((o1.permute(0, 2, 3, 1) - o2).abs().max())
         o1.backward(inp.data)
-        o2.backward(inp.data.permute(0, 3, 1, 2))
-        print((inp.grad.permute(0, 3, 1, 2) - inp2.grad).abs().max())
+        o2.backward(inp.data.permute(0, 2, 3, 1))
+        print((inp.grad.permute(0, 2, 3, 1) - inp2.grad).abs().max())
 
         ms1 = triton.testing.do_bench(lambda:n1(inp))
         ms2 = triton.testing.do_bench(lambda:n2(inp2))
         ms3 = triton.testing.do_bench(lambda:n1(inp))
         print(ms1, ms2, ms3)
 
+    def check_linear_2d():
+        import triton
+        inp = torch.randn((64, 192, 56, 57)).cuda().requires_grad_()
+        inp2 = inp.detach().permute(0, 2, 3, 1).clone().requires_grad_()
+
+        torch.manual_seed(0); torch.cuda.manual_seed(0)
+        n1 = Mlp(192, 4*192, 384, channels_first=True).cuda()
+        catch_random1 = torch.randn((1,))
+        torch.manual_seed(0); torch.cuda.manual_seed(0)
+        n2 = Mlp(192, 4*192, 384, channels_first=False).cuda()
+        catch_random2 = torch.randn((1,))
+        print(catch_random1, catch_random2)
+        with torch.cuda.amp.autocast():
+            o1 = n1(inp)
+            o2 = n2(inp2)
+        print((o1.permute(0, 2, 3, 1) - o2).abs().max())
+        o1.sum().backward()
+        o2.sum().backward()
+        print((inp.grad.permute(0, 2, 3, 1) - inp2.grad).abs().max())
+
+        i1, i2 = inp.float(), inp2.float()
+        ms2 = triton.testing.do_bench(lambda:n2(i2))
+        ms1 = triton.testing.do_bench(lambda:n1(i1))
+        ms4 = triton.testing.do_bench(lambda:n2(i2).sum().backward())
+        ms3 = triton.testing.do_bench(lambda:n1(i1).sum().backward())
+        print(ms1, ms2, ms3, ms4)
+
+    def check_channel_first():
+        import triton
+        inp = torch.randn((64, 3, 224, 224)).cuda().half().requires_grad_()
+        inp2 = inp.detach().clone().requires_grad_()
+
+        torch.manual_seed(0); torch.cuda.manual_seed(0)
+        n1 = VSSM(norm_layer="ln").cuda()
+        catch_random1 = torch.randn((1,))
+        torch.manual_seed(0); torch.cuda.manual_seed(0)
+        n2 = VSSM(norm_layer="ln2d").cuda()
+        catch_random2 = torch.randn((1,))
+        print(catch_random1, catch_random2)
+        with torch.cuda.amp.autocast():
+            # o1 = nn.Sequential(*n1.layers)(n1.patch_embed(inp))
+            # o2 = nn.Sequential(*n2.layers)(n2.patch_embed(inp2))
+            # o1 = n1.layers[0](n1.patch_embed(inp))
+            # o2 = n2.layers[0](n2.patch_embed(inp2))
+            # o1 = n1.layers[2](n1.layers[1](n1.layers[0](n1.patch_embed(inp))))
+            # o2 = n2.layers[2](n2.layers[1](n2.layers[0](n2.patch_embed(inp2))))
+            _n1 = lambda x:n1.layers[3].blocks[0].norm(n1.layers[2](n1.layers[1](n1.layers[0](n1.patch_embed(x)))))
+            _n2 = lambda x:n2.layers[3].blocks[0].norm(n2.layers[2](n2.layers[1](n2.layers[0](n2.patch_embed(x)))))
+            o1 = n1.layers[3].blocks[0].op(_n1(inp))
+            o2 = n2.layers[3].blocks[0].op(_n2(inp2))
+            o1 = _n1(inp)
+            o2 = _n2(inp2)
+        print((o1.abs().sum() - o2.abs().sum()).abs().max())
+        o1.sum().backward()
+        o2.sum().backward()
+        print((inp.grad - inp2.grad).abs().max())
+        breakpoint()
+
+        i1, i2 = inp.float(), inp2.float()
+        ms2 = triton.testing.do_bench(lambda:n2(i2))
+        ms1 = triton.testing.do_bench(lambda:n1(i1))
+        ms4 = triton.testing.do_bench(lambda:n2(i2).sum().backward())
+        ms3 = triton.testing.do_bench(lambda:n1(i1).sum().backward())
+        print(ms1, ms2, ms3, ms4)
 
     def check_profile():
         vss = VSSM(depths=[1], dims=1024).half().cuda()
@@ -1996,6 +2130,8 @@ if __name__ == "__main__":
     # CHECKS.check_csm_triton()
     # CHECKS.check_einsum()
     CHECKS.check_ln2d()
+    CHECKS.check_linear_2d()
+    CHECKS.check_channel_first()
 
 
     
