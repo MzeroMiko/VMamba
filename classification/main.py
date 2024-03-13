@@ -187,6 +187,8 @@ def main(config):
     if config.THROUGHPUT_MODE:
         throughput(data_loader_val, model, logger)
         if model_ema is not None:
+            torch.cuda.synchronize()
+            torch.cuda.empty_cache()
             throughput(data_loader_val, model_ema.ema, logger)
         return
 
