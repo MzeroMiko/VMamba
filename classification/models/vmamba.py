@@ -437,10 +437,15 @@ def selective_scan_flop_jit(inputs, outputs):
 
 # =====================================================
 # we have this class as linear and conv init differ from each other
+# this function enable loading from both conv2d or linear
 class Linear2d(nn.Linear):
     def forward(self, x: torch.Tensor):
         # B, C, H, W = x.shape
         return F.conv2d(x, self.weight[:, :, None, None], self.bias)
+
+    def _load_from_state_dict(self, state_dict, prefix, local_metadata, strict, missing_keys, unexpected_keys, error_msgs):
+        state_dict[prefix + "weight"] = state_dict[prefix + "weight"].view(self.weight.shape)
+        return super()._load_from_state_dict(state_dict, prefix, local_metadata, strict, missing_keys, unexpected_keys, error_msgs)
 
 
 class LayerNorm2d(nn.LayerNorm):
@@ -1911,13 +1916,14 @@ class CHECKS:
 
     def check_ln2d():
         import triton
-        inp = torch.randn((64, 192, 56, 57)).cuda().requires_grad_()
+        B, C, H, W = 128, 8192, 7, 7
+        inp = torch.randn((B, C, H, W)).cuda().requires_grad_()
         inp2 = inp.detach().permute(0, 2, 3, 1).clone().requires_grad_()
 
         torch.manual_seed(0); torch.cuda.manual_seed(0)
-        n1 = LayerNorm2d(192).cuda()
+        n1 = LayerNorm2d(C).cuda()
         torch.manual_seed(0); torch.cuda.manual_seed(0)
-        n2 = nn.LayerNorm(192).cuda()
+        n2 = nn.LayerNorm(C).cuda()
         o1 = n1(inp)
         o2 = n2(inp2)
         print((o1.permute(0, 2, 3, 1) - o2).abs().max())
