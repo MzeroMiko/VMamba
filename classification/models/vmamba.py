@@ -916,9 +916,9 @@ class SS2D(nn.Module):
         # conv =======================================
         if d_conv > 1:
             self.conv2d = nn.Conv2d(
-                in_channels=d_inner,
-                out_channels=d_inner,
-                groups=d_inner,
+                in_channels=d_model,
+                out_channels=d_model,
+                groups=d_model,
                 bias=conv_bias,
                 kernel_size=d_conv,
                 padding=(d_conv - 1) // 2,
