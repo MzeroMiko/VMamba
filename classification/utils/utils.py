@@ -56,7 +56,7 @@ def load_checkpoint_ema(config, model, optimizer, lr_scheduler, loss_scaler, log
     return max_accuracy, max_accuracy_ema
 
 
-def load_pretrained_ema(config, model, logger, model_ema: ModelEma=None, load_ema_separately=False):
+def load_pretrained_ema(config, model, logger, model_ema: ModelEma=None):
     logger.info(f"==============> Loading weight {config.MODEL.PRETRAINED} for fine-tuning......")
     checkpoint = torch.load(config.MODEL.PRETRAINED, map_location='cpu')
     
@@ -68,7 +68,9 @@ def load_pretrained_ema(config, model, logger, model_ema: ModelEma=None, load_em
         logger.warning(f"No 'model' found in {config.MODEL.PRETRAINED}! ")
 
     if model_ema is not None:
-        key = "model_ema" if load_ema_separately else "model"
+        if "model_ema" in checkpoint:
+            logger.info(f"=> loading 'model_ema' separately...")
+        key = "model_ema" if ("model_ema" in checkpoint) else "model"
         if key in checkpoint:
             msg = model_ema.ema.load_state_dict(checkpoint[key], strict=False)
             logger.warning(msg)
