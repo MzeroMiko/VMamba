@@ -534,6 +534,9 @@ class gMlp(nn.Module):
         return x
 
 
+# =====================================================
+
+
 class SS2D(nn.Module):
     def __init__(
         self,
@@ -594,6 +597,8 @@ class SS2D(nn.Module):
         force_fp32=True,
         **kwargs,
     ):
+        if "channel_first" in kwargs:
+            assert not kwargs["channel_first"]
         act_layer = nn.SiLU
         dt_min = 0.001
         dt_max = 0.1
@@ -1029,8 +1034,7 @@ class SS2D(nn.Module):
         x = self.in_proj(x)
         x, z = x.chunk(2, dim=-1) # (b, h, w, d)
         z = self.act(z)
-        if not self.channel_first:
-            x = x.permute(0, 3, 1, 2).contiguous()
+        x = x.permute(0, 3, 1, 2).contiguous()
         x = self.conv2d(x) # (b, d, h, w)
         x = self.act(x)
         
@@ -1091,11 +1095,8 @@ class SS2D(nn.Module):
         invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
         y = out_y[:, 0] + inv_y[:, 0] + wh_y + invwh_y
         
-        if not self.channel_first:
-            y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
-            y = self.out_norm(y).view(B, H, W, -1)
-        else:
-            y = self.out_norm(y.view(B, -1, H, W))
+        y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
+        y = self.out_norm(y).view(B, H, W, -1)
 
         y = y * z
         out = self.dropout(self.out_proj(y))
@@ -2232,23 +2233,16 @@ if __name__ == "__main__":
     import triton
 
     # CHECKS.check_vssblock()
-    # CHECKS.check_vssm_equals_vmambadp()
-    # CHECKS.check_vssm1_equals_vssm(forward_type="v0")
-    # CHECKS.check_vssm1_equals_vssm(forward_type="v0_seq")
+    CHECKS.check_vssm_equals_vmambadp()
+    CHECKS.check_vssm1_equals_vssm(forward_type="v0")
+    CHECKS.check_vssm1_equals_vssm(forward_type="v0_seq")
     # CHECKS.check_vssm1_equals_vssm(forward_type="v2")
-    # print(VSSM(forward_type="v0").flops())
-    # print(VSSM(forward_type="v2").flops())
-    # print(VSSM(forward_type="v2nozact").flops())
-
-    # CHECKS.check_vssm1_ssoflex_equals_mambassm()
-    # CHECKS.check_csm_triton()
-    # CHECKS.check_einsum()
+    CHECKS.check_vssm1_ssoflex_equals_mambassm()
+    CHECKS.check_csm_triton()
+    CHECKS.check_einsum()
     CHECKS.check_ln2d()
     CHECKS.check_linear_2d()
     CHECKS.check_channel_first()
-
-
-    
     # breakpoint()
 
     
