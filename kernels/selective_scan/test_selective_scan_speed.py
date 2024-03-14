@@ -227,6 +227,184 @@ def selective_scan_ref(u, delta, A, B, C, D=None, z=None, delta_bias=None, delta
     return out if not return_last_state else (out, last_state)
 
 
+def selective_scan_easy_v2(us, dts, As, Bs, Cs, Ds, delta_bias=None, delta_softplus=False, return_last_state=False, chunksize=3):
+    """
+    # B: batch_size, G: groups, D: dim, N: state dim, L: seqlen
+    us: B, G * D, L 
+    dts: B, G * D, L
+    As: G * D, N
+    Bs: B, G, N, L
+    Cs: B, G, N, L
+    Ds: G * D
+    delta_bias: G * D
+    # chunksize can be any as you like. But as the chunksize raises, hs may get None, as exp(sum(delta) A) is really small
+    """
+    def selective_scan_chunk(us, dts, As, Bs, Cs, hprefix, Mask):
+        """
+        partial(h) / partial(t) = Ah + Bu; y = Ch + Du;
+        => partial(h*exp(-At)) / partial(t) = Bu*exp(-At);
+        => h_t = h_0 + sum_{0}_{t}_{Bu*exp(A(t-v)) dv};
+        => h_b = exp(A(dt_a + ... + dt_{b-1})) * (h_a + sum_{a}_{b-1}_{Bu*exp(-A(dt_a + ... + dt_i)) dt_i});
+           y_i = C_i*h_i + D*u_i
+        """
+        """
+        us, dts: (L, B, G, D) # L is chunk_size
+        As: (G, D, N)
+        Bs, Cs: (L, B, G, N)
+        Ds: (G, D)
+        hprefix: (B, G, D, N)
+        """
+        LChunk = us.shape[0]
+        ts = dts.cumsum(dim=0)
+        K_chunk_tmp = torch.einsum("gdn,lbgd->lbgdn", -As, ts)
+        K_chunk = K_chunk_tmp.exp()
+        Ats = (-K_chunk_tmp).exp()
+        Q_chunk = torch.einsum("lbgd,lbgn->lbgdn", dts * us, Bs)
+        if LChunk < chunksize:
+            Qm_chunk = Mask[:LChunk, :LChunk, None, None, None, None] * Q_chunk.unsqueeze(0).repeat(LChunk, 1, 1, 1, 1, 1)
+        else:
+            Qm_chunk = Mask[:, :, None, None, None, None] * Q_chunk.unsqueeze(0).repeat(LChunk, 1, 1, 1, 1, 1)
+        H_tmp = Ats * torch.einsum("rlbgdn,lbgdn->rbgdn", Qm_chunk, K_chunk)
+        hs = H_tmp + Ats * hprefix.unsqueeze(0)
+        ys = torch.einsum("lbgn,lbgdn->lbgd", Cs, hs)
+        return ys, hs
+
+    dtype = torch.float32
+    # dtype = torch.float16
+    inp_dtype = us.dtype
+    has_D = Ds is not None
+    if chunksize < 1:
+        chunksize = Bs.shape[-1]
+    Mask = torch.tril(us.new_ones((chunksize, chunksize)))
+
+    dts = dts.to(dtype)
+    if delta_bias is not None:
+        dts = dts + delta_bias.view(1, -1, 1).to(dtype)
+    if delta_softplus:
+        dts = torch.nn.functional.softplus(dts)
+    
+    if len(Bs.shape) == 3:
+        Bs = Bs.unsqueeze(1)
+    if len(Cs.shape) == 3:
+        Cs = Cs.unsqueeze(1)
+    B, G, N, L = Bs.shape
+    us = us.view(B, G, -1, L).permute(3, 0, 1, 2).to(dtype)
+    dts = dts.view(B, G, -1, L).permute(3, 0, 1, 2).to(dtype)
+    As = As.view(G, -1, N).to(dtype)
+    Bs = Bs.permute(3, 0, 1, 2).to(dtype)
+    Cs = Cs.permute(3, 0, 1, 2).to(dtype)
+    Ds = Ds.view(G, -1).to(dtype) if has_D else None
+    D = As.shape[1]
+    
+    oys = []
+    hprefix = us.new_zeros((B, G, D, N), dtype=dtype)
+    for i in range(0, L, chunksize):
+        ys, hs = selective_scan_chunk(
+            us[i:i + chunksize], dts[i:i + chunksize], 
+            As, Bs[i:i + chunksize], Cs[i:i + chunksize], hprefix, Mask
+        )
+        oys.append(ys)
+        hprefix = hs[-1]
+
+    oys = torch.cat(oys, dim=0)
+    if has_D:
+        oys = oys + Ds * us
+    oys = oys.permute(1, 2, 3, 0).view(B, -1, L)
+
+    # return oys, hprefix.view(B, G * D, N)
+    return oys.to(inp_dtype) if not return_last_state else (oys.to(inp_dtype), hprefix.view(B, G * D, N).float())
+
+
+def selective_scan_easy(us, dts, As, Bs, Cs, Ds, delta_bias=None, delta_softplus=False, return_last_state=False, chunksize=64):
+    """
+    # B: batch_size, G: groups, D: dim, N: state dim, L: seqlen
+    us: B, G * D, L 
+    dts: B, G * D, L
+    As: G * D, N
+    Bs: B, G, N, L
+    Cs: B, G, N, L
+    Ds: G * D
+    delta_bias: G * D
+    # chunksize can be any as you like. But as the chunksize raises, hs may get None, as exp(sum(delta) A) is really small
+    """
+    def selective_scan_chunk(us, dts, As, Bs, Cs, hprefix):
+        """
+        partial(h) / partial(t) = Ah + Bu; y = Ch + Du;
+        => partial(h*exp(-At)) / partial(t) = Bu*exp(-At);
+        => h_t = h_0 + sum_{0}_{t}_{Bu*exp(A(t-v)) dv};
+        => h_b = exp(A(dt_a + ... + dt_{b-1})) * (h_a + sum_{a}_{b-1}_{Bu*exp(-A(dt_a + ... + dt_i)) dt_i});
+           y_i = C_i*h_i + D*u_i
+        """
+        """
+        us, dts: (L, B, G, D) # L is chunk_size
+        As: (G, D, N)
+        Bs, Cs: (L, B, G, N)
+        Ds: (G, D)
+        hprefix: (B, G, D, N)
+        """
+        ts = dts.cumsum(dim=0)
+        Ats = torch.einsum("gdn,lbgd->lbgdn", As, ts).exp()
+        # scale = Ats[-1].detach()
+        scale = 1
+        rAts = Ats / scale
+        duts = dts * us
+        dtBus = torch.einsum("lbgd,lbgn->lbgdn", duts, Bs)
+        hs_tmp = rAts * (dtBus / rAts).cumsum(dim=0) 
+        hs = hs_tmp + Ats * hprefix.unsqueeze(0)
+        ys = torch.einsum("lbgn,lbgdn->lbgd", Cs, hs) 
+        return ys, hs
+    
+
+    dtype = torch.float32
+    # dtype = torch.float16
+    inp_dtype = us.dtype
+    has_D = Ds is not None
+    if chunksize < 1:
+        chunksize = Bs.shape[-1]
+
+    dts = dts.to(dtype)
+    if delta_bias is not None:
+        dts = dts + delta_bias.view(1, -1, 1).to(dtype)
+    if delta_softplus:
+        dts = torch.nn.functional.softplus(dts)
+    
+    if len(Bs.shape) == 3:
+        Bs = Bs.unsqueeze(1)
+    if len(Cs.shape) == 3:
+        Cs = Cs.unsqueeze(1)
+    B, G, N, L = Bs.shape
+    us = us.view(B, G, -1, L).permute(3, 0, 1, 2).to(dtype)
+    dts = dts.view(B, G, -1, L).permute(3, 0, 1, 2).to(dtype)
+    As = As.view(G, -1, N).to(dtype)
+    Bs = Bs.permute(3, 0, 1, 2).to(dtype)
+    Cs = Cs.permute(3, 0, 1, 2).to(dtype)
+    Ds = Ds.view(G, -1).to(dtype) if has_D else None
+    D = As.shape[1]
+    
+    oys = []
+    hprefix = us.new_zeros((B, G, D, N), dtype=dtype)
+    for i in range(0, L, chunksize):
+        ys, hs = selective_scan_chunk(
+            us[i:i + chunksize], dts[i:i + chunksize], 
+            As, Bs[i:i + chunksize], Cs[i:i + chunksize], hprefix, 
+        )
+        oys.append(ys)
+        hprefix = hs[-1]
+
+    oys = torch.cat(oys, dim=0)
+    if has_D:
+        oys = oys + Ds * us
+    oys = oys.permute(1, 2, 3, 0).view(B, -1, L)
+
+    # return oys, hprefix.view(B, G * D, N)
+    return oys.to(inp_dtype) if not return_last_state else (oys.to(inp_dtype), hprefix.view(B, G * D, N).float())
+
+
+from test_selective_scan_easy import selective_scan_easyv3
+selective_scan_easy = selective_scan_easyv3
+from ssmtriton import selective_scan_easyv3
+selective_scan_easy_v2 = selective_scan_easyv3
+
 def test_speed():
     MODE = "sscore"
     # MODE = "sscorendstate"
@@ -252,7 +430,7 @@ def test_speed():
     # dstate = 24
     delta_softplus = True
     device = 'cuda'
-    TIMES = 1000
+    TIMES = 100
     import selective_scan_cuda_core
     import selective_scan_cuda
     # copied from test_selective_scan ======================
@@ -302,14 +480,16 @@ def test_speed():
     ends = []
     tests = [
         partial(build_selective_scan_fn(selective_scan_cuda, mode="mamba_ssm", tag="ori"), u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state=True),
-        partial(build_selective_scan_fn(selective_scan_cuda_core, mode=MODE, tag="f1b1"), u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state=True, nrows=1, backnrows=1),
-        partial(build_selective_scan_fn(selective_scan_cuda_core, mode=MODE, tag="f2b1"), u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state=True, nrows=2, backnrows=1),
-        partial(build_selective_scan_fn(selective_scan_cuda_core, mode=MODE, tag="f3b1"), u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state=True, nrows=3, backnrows=1),
-        partial(build_selective_scan_fn(selective_scan_cuda_core, mode=MODE, tag="f4b1"), u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state=True, nrows=4, backnrows=1),
-        partial(build_selective_scan_fn(selective_scan_cuda_core, mode=MODE, tag="f1b2"), u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state=True, nrows=1, backnrows=2),
-        partial(build_selective_scan_fn(selective_scan_cuda_core, mode=MODE, tag="f2b2"), u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state=True, nrows=2, backnrows=2),
-        partial(build_selective_scan_fn(selective_scan_cuda_core, mode=MODE, tag="f2b3"), u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state=True, nrows=3, backnrows=3),
-        partial(build_selective_scan_fn(selective_scan_cuda_core, mode=MODE, tag="f4b4"), u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state=True, nrows=4, backnrows=4),
+        partial(selective_scan_easy, u, delta, A, B, C, D, delta_bias, delta_softplus, return_last_state=True),
+        partial(selective_scan_easy_v2, u, delta, A, B, C, D, delta_bias, delta_softplus, return_last_state=True),
+        # partial(build_selective_scan_fn(selective_scan_cuda_core, mode=MODE, tag="f1b1"), u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state=True, nrows=1, backnrows=1),
+        # partial(build_selective_scan_fn(selective_scan_cuda_core, mode=MODE, tag="f2b1"), u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state=True, nrows=2, backnrows=1),
+        # partial(build_selective_scan_fn(selective_scan_cuda_core, mode=MODE, tag="f3b1"), u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state=True, nrows=3, backnrows=1),
+        # partial(build_selective_scan_fn(selective_scan_cuda_core, mode=MODE, tag="f4b1"), u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state=True, nrows=4, backnrows=1),
+        # partial(build_selective_scan_fn(selective_scan_cuda_core, mode=MODE, tag="f1b2"), u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state=True, nrows=1, backnrows=2),
+        # partial(build_selective_scan_fn(selective_scan_cuda_core, mode=MODE, tag="f2b2"), u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state=True, nrows=2, backnrows=2),
+        # partial(build_selective_scan_fn(selective_scan_cuda_core, mode=MODE, tag="f2b3"), u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state=True, nrows=3, backnrows=3),
+        # partial(build_selective_scan_fn(selective_scan_cuda_core, mode=MODE, tag="f4b4"), u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state=True, nrows=4, backnrows=4),
         partial(build_selective_scan_fn(selective_scan_cuda, mode="mamba_ssm", tag="ori"), u, delta, A, B, C, D, z, delta_bias, delta_softplus, return_last_state=True),
     ]
 
