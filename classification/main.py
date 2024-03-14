@@ -183,6 +183,9 @@ def main(config):
         if model_ema is not None:
             acc1_ema, acc5_ema, loss_ema = validate(config, data_loader_val, model_ema.ema)
             logger.info(f"Accuracy of the network ema on the {len(dataset_val)} test images: {acc1_ema:.1f}%")
+        
+        if config.EVAL_MODE:
+            return
 
     if config.THROUGHPUT_MODE:
         throughput(data_loader_val, model, logger)
