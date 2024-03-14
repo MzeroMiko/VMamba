@@ -1427,44 +1427,34 @@ class VSSM(nn.Module):
     @staticmethod
     def _make_patch_embed(in_chans=3, embed_dim=96, patch_size=4, patch_norm=True, norm_layer=nn.LayerNorm, channel_first=False):
         # if channel first, then Norm and Output are both channel_first
-        seq = [nn.Conv2d(in_chans, embed_dim, kernel_size=patch_size, stride=patch_size, bias=True),]
-        if not channel_first:
-            seq.append(Permute(0, 2, 3, 1))
-        if patch_norm:
-            seq.append(norm_layer(embed_dim))
-        return nn.Sequential(*seq)
+        return nn.Sequential(
+            nn.Conv2d(in_chans, embed_dim, kernel_size=patch_size, stride=patch_size, bias=True),
+            (nn.Identity() if channel_first else Permute(0, 2, 3, 1)),
+            (norm_layer(embed_dim) if patch_norm else nn.Identity()),
+        )
 
     @staticmethod
     def _make_patch_embed_v2(in_chans=3, embed_dim=96, patch_size=4, patch_norm=True, norm_layer=nn.LayerNorm, channel_first=False):
         # if channel first, then Norm and Output are both channel_first
         assert patch_size == 4
-        seq = [nn.Conv2d(in_chans, embed_dim // 2, kernel_size=3, stride=2, padding=1)]
-        if patch_norm:
-            seq.extend([
-                Permute(0, 2, 3, 1), 
-                norm_layer(embed_dim // 2), 
-                Permute(0, 3, 1, 2)
-            ] if not channel_first else [norm_layer(embed_dim // 2)])
-        seq.extend([
+        return nn.Sequential(
+            nn.Conv2d(in_chans, embed_dim // 2, kernel_size=3, stride=2, padding=1),
+            (nn.Identity() if (channel_first or (not patch_norm)) else Permute(0, 2, 3, 1)),
+            (norm_layer(embed_dim // 2) if patch_norm else nn.Identity()),
+            (nn.Identity() if (channel_first or (not patch_norm)) else Permute(0, 3, 1, 2)),
             nn.GELU(),
             nn.Conv2d(embed_dim // 2, embed_dim, kernel_size=3, stride=2, padding=1),
-        ])
-        if not channel_first:
-            seq.append(Permute(0, 2, 3, 1))
-        if patch_norm:
-            seq.append(norm_layer(embed_dim))
-        return nn.Sequential(*seq)
+            (nn.Identity() if channel_first else Permute(0, 2, 3, 1)),
+            (norm_layer(embed_dim) if patch_norm else nn.Identity()),
+        )
     
     @staticmethod
     def _make_downsample(dim=96, out_dim=192, norm_layer=nn.LayerNorm, channel_first=False):
         # if channel first, then Norm and Output are both channel_first
         return nn.Sequential(
-            Permute(0, 3, 1, 2),
+            (nn.Identity() if channel_first else Permute(0, 3, 1, 2)),
             nn.Conv2d(dim, out_dim, kernel_size=2, stride=2),
-            Permute(0, 2, 3, 1),
-            norm_layer(out_dim),
-        ) if not channel_first else nn.Sequential(
-            nn.Conv2d(dim, out_dim, kernel_size=2, stride=2),
+            (nn.Identity() if channel_first else Permute(0, 2, 3, 1)),
             norm_layer(out_dim),
         )
 
@@ -1472,12 +1462,9 @@ class VSSM(nn.Module):
     def _make_downsample_v3(dim=96, out_dim=192, norm_layer=nn.LayerNorm, channel_first=False):
         # if channel first, then Norm and Output are both channel_first
         return nn.Sequential(
-            Permute(0, 3, 1, 2),
+            (nn.Identity() if channel_first else Permute(0, 3, 1, 2)),
             nn.Conv2d(dim, out_dim, kernel_size=3, stride=2, padding=1),
-            Permute(0, 2, 3, 1),
-            norm_layer(out_dim),
-        ) if not channel_first else nn.Sequential(
-            nn.Conv2d(dim, out_dim, kernel_size=3, stride=2, padding=1),
+            (nn.Identity() if channel_first else Permute(0, 2, 3, 1)),
             norm_layer(out_dim),
         )
 
