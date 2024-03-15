@@ -143,7 +143,7 @@ inspiration from the recently introduced state space model and propose the Visua
 | Swin-T | 48M | 267G | MaskRCNN@3x | 46.0| 41.6 |-- |-- |
 | VMamba-T | 50M | 270G | MaskRCNN@3x | 48.9| 43.7 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny_ms_3x.py)/[log](#)/[ckpt](#) | 36 |
 | Swin-S | 69M | 354G | MaskRCNN@3x | 48.2| 43.2 |-- |-- |
-| VMamba-S | 70M | 384G | MaskRCNN@3x | 49.7| 44.2 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_small_ms_3x.py)/[log](#)/[ckpt](#) | 35 |
+| VMamba-S | 70M | 384G | MaskRCNN@3x | 49.9| 44.2 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_small_ms_3x.py)/[log](#)/[ckpt](#) | 32 |
 
 * *The total batch size of VMamba-B in COCO is `8`, which is supposed to be `16` as in other experiments. This is a `mistake`, not feature. We may fix that later.*
 
