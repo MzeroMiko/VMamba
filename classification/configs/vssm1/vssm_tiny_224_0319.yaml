@@ -4,7 +4,7 @@ MODEL:
   DROP_PATH_RATE: 0.2
   VSSM:
     EMBED_DIM: 96 # 128
-    DEPTHS: [2, 2, 5, 2] # [ 3,3,27,3 ]
+    DEPTHS: [2, 2, 5, 2]
     SSM_D_STATE: 1
     SSM_DT_RANK: "auto"
     SSM_RATIO: 2.0
