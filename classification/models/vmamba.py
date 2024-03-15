@@ -1595,8 +1595,7 @@ class VSSM(nn.Module):
 
 # compatible with openmmlab
 class Backbone_VSSM(VSSM):
-    def __init__(self, out_indices=(0, 1, 2, 3), pretrained=None, norm_layer=nn.LayerNorm, **kwargs):
-        kwargs.update(norm_layer=norm_layer)
+    def __init__(self, out_indices=(0, 1, 2, 3), pretrained=None, **kwargs):
         super().__init__(**kwargs)
         
         self.out_indices = out_indices
