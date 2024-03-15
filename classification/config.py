@@ -93,7 +93,7 @@ _C.MODEL.VSSM.PATCH_NORM = True
 _C.MODEL.VSSM.NORM_LAYER = "ln"
 _C.MODEL.VSSM.DOWNSAMPLE = "v2"
 _C.MODEL.VSSM.PATCHEMBED = "v2"
-_C.MODEL.VSSM.CHANNEL_FIRST = False
+_C.MODEL.VSSM.GMLP = False
 
 # -----------------------------------------------------------------------------
 # Training settings

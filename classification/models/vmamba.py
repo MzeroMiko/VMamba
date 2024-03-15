@@ -529,7 +529,7 @@ class gMlp(nn.Module):
     def forward(self, x: torch.Tensor):
         x = self.fc1(x)
         x, z = x.chunk(2, dim=(1 if self.channel_first else -1))
-        x = self.fc2(self.drop(x) * self.act(z))
+        x = self.fc2(x * self.act(z))
         x = self.drop(x)
         return x
 
@@ -912,7 +912,12 @@ class SS2D(nn.Module):
                 self.forward = partial(self.forwardxv, mode="xv1")
                 self.in_proj = Linear2d(d_model, d_inner + dt_rank + 8 * d_state, bias=bias, **factory_kwargs)
                 self.out_act = nn.GELU()
-
+            
+            if forward_type.startswith("xv7"):
+                self.forward = partial(self.forwardxv, mode="xv7")
+                self.in_proj = Linear2d(d_model, d_inner + dt_rank + 8 * d_state, bias=bias, **factory_kwargs)
+                self.out_act = nn.GELU()
+            
         # conv =======================================
         if d_conv > 1:
             self.conv2d = nn.Conv2d(
@@ -1152,9 +1157,9 @@ class SS2D(nn.Module):
             x = self.act(x)
         x = self.in_proj(x)
 
-        if mode in ["xv1"]:
-            us, dts, Bs, Cs = x.split([self.d_inner, self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
-            us = CrossScanTriton.apply(us.contiguous()).view(B, -1, L)
+        if mode in ["xv1", "xv7"]:
+            _us, dts, Bs, Cs = x.split([self.d_inner, self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
+            us = CrossScanTriton.apply(_us.contiguous()).view(B, -1, L)
             dts = CrossScanTriton.apply(dts.contiguous()).view(B, -1, L)
             dts = F.conv1d(dts, dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K).contiguous().view(B, -1, L)
             # below is slower
@@ -1164,12 +1169,12 @@ class SS2D(nn.Module):
             # dts = us_dts[:, :, self.d_inner:, :].contiguous().view(B, -1, L)
             # dts = F.conv1d(dts, dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K).contiguous().view(B, -1, L)
         elif mode in ["xv2"]:
-            us, dts, Bs, Cs = x.split([self.d_inner, self.d_inner, 4 * self.d_state, 4 * self.d_state], dim=1)
-            us = CrossScanTriton.apply(us.contiguous()).view(B, -1, L)
+            _us, dts, Bs, Cs = x.split([self.d_inner, self.d_inner, 4 * self.d_state, 4 * self.d_state], dim=1)
+            us = CrossScanTriton.apply(_us.contiguous()).view(B, -1, L)
             dts = CrossScanTriton.apply(dts).contiguous().view(B, -1, L)
         elif mode in ["xv3"]:
-            us, dts, Bs, Cs = x.split([self.d_inner, 4 * self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
-            us = CrossScanTriton.apply(us.contiguous()).view(B, -1, L)
+            _us, dts, Bs, Cs = x.split([self.d_inner, 4 * self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
+            us = CrossScanTriton.apply(_us.contiguous()).view(B, -1, L)
             dts = CrossScanTriton1b1.apply(dts.contiguous().view(B, K, -1, H, W))
             dts = F.conv1d(dts.view(B, -1, L), dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K).contiguous().view(B, -1, L)
         else:
@@ -1203,7 +1208,10 @@ class SS2D(nn.Module):
             y = out_norm(y)
 
         y = (y.to(x.dtype) if to_dtype else y)
-        out = self.dropout(self.out_proj(self.out_act(y)))
+        y = self.out_act(y)
+        if mode in ["xv7"]:
+            y = y * (_us.permute(0, 2, 3, 1) if not self.channel_first else _us)
+        out = self.dropout(self.out_proj(y))
         return out
 
 
@@ -1228,6 +1236,7 @@ class VSSBlock(nn.Module):
         mlp_ratio=4.0,
         mlp_act_layer=nn.GELU,
         mlp_drop_rate: float = 0.0,
+        gmlp=False,
         # =============================
         use_checkpoint: bool = False,
         post_norm: bool = False,
@@ -1268,9 +1277,10 @@ class VSSBlock(nn.Module):
         self.drop_path = DropPath(drop_path)
         
         if self.mlp_branch:
+            _MLP = Mlp if not gmlp else gMlp
             self.norm2 = norm_layer(hidden_dim)
             mlp_hidden_dim = int(hidden_dim * mlp_ratio)
-            self.mlp = Mlp(in_features=hidden_dim, hidden_features=mlp_hidden_dim, act_layer=mlp_act_layer, drop=mlp_drop_rate, channels_first=channel_first)
+            self.mlp = _MLP(in_features=hidden_dim, hidden_features=mlp_hidden_dim, act_layer=mlp_act_layer, drop=mlp_drop_rate, channels_first=channel_first)
 
     def _forward(self, input: torch.Tensor):
         if self.ssm_branch:
@@ -1314,6 +1324,7 @@ class VSSM(nn.Module):
         mlp_ratio=4.0,
         mlp_act_layer="gelu",
         mlp_drop_rate=0.0,
+        gmlp=False,
         # =========================
         drop_path_rate=0.1, 
         patch_norm=True, 
@@ -1393,6 +1404,7 @@ class VSSM(nn.Module):
                 mlp_ratio=mlp_ratio,
                 mlp_act_layer=mlp_act_layer,
                 mlp_drop_rate=mlp_drop_rate,
+                gmlp=gmlp,
             ))
 
         self.classifier = nn.Sequential(OrderedDict(
@@ -1490,6 +1502,7 @@ class VSSM(nn.Module):
         mlp_ratio=4.0,
         mlp_act_layer=nn.GELU,
         mlp_drop_rate=0.0,
+        gmlp=False,
         **kwargs,
     ):
         # if channel first, then Norm and Output are both channel_first
@@ -1513,6 +1526,7 @@ class VSSM(nn.Module):
                 mlp_ratio=mlp_ratio,
                 mlp_act_layer=mlp_act_layer,
                 mlp_drop_rate=mlp_drop_rate,
+                gmlp=gmlp,
                 use_checkpoint=use_checkpoint,
             ))
         
@@ -2075,6 +2089,34 @@ class CHECKS:
         ms3 = triton.testing.do_bench(lambda:n1(i1).sum().backward())
         print(ms1, ms2, ms3, ms4)
 
+    def check_gmlp():
+        import triton
+        inp = torch.randn((64, 192, 56, 57)).cuda().requires_grad_()
+        inp2 = inp.detach().permute(0, 2, 3, 1).clone().requires_grad_()
+
+        torch.manual_seed(0); torch.cuda.manual_seed(0)
+        n1 = Mlp(192, 4*192, 384, channels_first=True).cuda()
+        catch_random1 = torch.randn((1,))
+        torch.manual_seed(0); torch.cuda.manual_seed(0)
+        n2 = gMlp(192, 2*192, 384, channels_first=False).cuda()
+        catch_random2 = torch.randn((1,))
+        print(catch_random1, catch_random2)
+        with torch.cuda.amp.autocast():
+            o1 = n1(inp)
+            o2 = n2(inp2)
+        print((o1.permute(0, 2, 3, 1) - o2).abs().max())
+        o1.sum().backward()
+        o2.sum().backward()
+        print((inp.grad.permute(0, 2, 3, 1) - inp2.grad).abs().max())
+
+        i1, i2 = inp.float(), inp2.float()
+        ms2 = triton.testing.do_bench(lambda:n2(i2))
+        ms1 = triton.testing.do_bench(lambda:n1(i1))
+        ms4 = triton.testing.do_bench(lambda:n2(i2).sum().backward())
+        ms3 = triton.testing.do_bench(lambda:n1(i1).sum().backward())
+        print(ms1, ms2, ms3, ms4)
+
+
     def check_channel_first():
         import triton
         inp = torch.randn((64, 3, 224, 224)).cuda().half().requires_grad_()
@@ -2231,12 +2273,12 @@ if __name__ == "__main__":
     CHECKS.check_vssm_equals_vmambadp()
     CHECKS.check_vssm1_equals_vssm(forward_type="v0")
     CHECKS.check_vssm1_equals_vssm(forward_type="v0_seq")
-    # CHECKS.check_vssm1_equals_vssm(forward_type="v2")
     CHECKS.check_vssm1_ssoflex_equals_mambassm()
     CHECKS.check_csm_triton()
     CHECKS.check_einsum()
     CHECKS.check_ln2d()
     CHECKS.check_linear_2d()
+    CHECKS.check_gmlp()
     CHECKS.check_channel_first()
     # breakpoint()
 

@@ -46,7 +46,7 @@ def build_vssm_model(config, is_pretrain=False):
             norm_layer=config.MODEL.VSSM.NORM_LAYER,
             downsample_version=config.MODEL.VSSM.DOWNSAMPLE,
             patchembed_version=config.MODEL.VSSM.PATCHEMBED,
-            channel_first=config.MODEL.VSSM.CHANNEL_FIRST,
+            gmlp=config.MODEL.VSSM.GMLP,
             use_checkpoint=config.TRAIN.USE_CHECKPOINT,
         )
         return model
