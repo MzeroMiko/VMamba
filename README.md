@@ -11,8 +11,8 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 
 </div>
 
-* [**Updates**](#white_check_mark-updates)
-* [**Speed Up History**](#rocket-the-history-of-speed-up)
+* [**updates**](#white_check_mark-updates)
+* [**speed up history**](#rocket-the-history-of-speed-up)
 * [**abstract**](#abstract)
 * [**overview & derivation**](#overview--derivations)
 * [**main results**](#main-results)
