@@ -39,7 +39,7 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 
 * **` Jan. 19th, 2024`:** The source code for classification, object detection, and semantic segmentation are provided. 
 
-## The History of Speed Up
+## :rocket: The History of Speed Up
 
 *Time is tested on 1xA100 with batch_size 128 for `training`; the config file is `vssm1/vssm_tiny_224_0220.yaml`. GPU memory is adopted from the log.*
 
@@ -107,10 +107,10 @@ inspiration from the recently introduced state space model and propose the Visua
 
 ## Main Results
 
-:rocket: 
+:book:
 ***Attention: The configs/logs/checkpoints of `Classification on ImageNet-1K`, `Object Detection on COCO`, `Semantic Segmentation on ADE20K` corresponding to [`arXiv 2401.10166`](https://arxiv.org/abs/2401.10166) has been moved [`here`](assets/performance_stage0.md).***
 
-:rocket: 
+:book: 
 ***The checkpoints of the models listed below will be released in weeks!***
 
 ### **Classification on ImageNet-1K with nightly builds**
