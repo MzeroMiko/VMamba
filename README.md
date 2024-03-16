@@ -12,7 +12,7 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 
 </div>
 
-## Updates
+## :white_check_mark: Updates
 * **` March. 8th, 2024`**: Update: we update the performance of `VMamba-T`, `Vmamba-S`, `VMamba-B` with nightly build, checkpoints and logs are coming soon. (Note that these models are trained without `CrossScanTriton` or `forwardtype=v4`, you can modify those configs yourself to raise the speed with almost no cost!)
 
 * **` March. 8th, 2024`**: Improvement: we implemented `CrossScan` and `CrossMerge` in `triton`, which speed the training up again. `CrossScan` and `CrossMerge` implemented in triton is ~2x faster than implemented in pytorch. Meanwhile, use `v4` rather than `v3` or `v2` in forwardtype also raise the speed GREATLY!.
