@@ -187,13 +187,13 @@ def main(config):
         if config.EVAL_MODE:
             return
 
-    if config.THROUGHPUT_MODE:
-        throughput(data_loader_val, model, logger)
-        if model_ema is not None:
-            torch.cuda.synchronize()
-            torch.cuda.empty_cache()
-            throughput(data_loader_val, model_ema.ema, logger)
-        return
+    if config.THROUGHPUT_MODE and (dist.get_rank() == 0):
+            throughput(data_loader_val, model, logger)
+            if model_ema is not None:
+                torch.cuda.synchronize()
+                torch.cuda.empty_cache()
+                throughput(data_loader_val, model_ema.ema, logger)
+            return
 
     logger.info("Start training")
     start_time = time.time()
