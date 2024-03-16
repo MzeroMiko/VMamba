@@ -875,7 +875,6 @@ class SS2D(nn.Module):
 
         k_group = 4
         # in proj =======================================
-        self.act: nn.Module = act_layer()
         self.out_act: nn.Module = nn.Identity()
         if True:
             # change Conv2d to Linear2d Next
@@ -929,6 +928,7 @@ class SS2D(nn.Module):
                 padding=(d_conv - 1) // 2,
                 **factory_kwargs,
             )
+            self.act: nn.Module = act_layer()
 
         # out proj =======================================
         self.out_proj = Linear(d_inner, d_model, bias=bias, **factory_kwargs)
