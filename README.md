@@ -107,7 +107,10 @@ inspiration from the recently introduced state space model and propose the Visua
 
 ## Main Results
 
-***`Classification on ImageNet-1K`, `Object Detection on COCO`, `Semantic Segmentation on ADE20K` corresponding to [`arXiv 2401.10166`](https://arxiv.org/abs/2401.10166) has been moved [`here`](assets/performance_stage0.md).***
+:rocket: :rocket: :rocket:  
+***Attention: The configs/logs/checkpoints of `Classification on ImageNet-1K`, `Object Detection on COCO`, `Semantic Segmentation on ADE20K` corresponding to [`arXiv 2401.10166`](https://arxiv.org/abs/2401.10166) has been moved [`here`](assets/performance_stage0.md).***
+
+***The checkpoints of the models listed below will be released in weeks!***
 
 ### **Classification on ImageNet-1K with nightly builds**
 
