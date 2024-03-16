@@ -116,9 +116,9 @@ inspiration from the recently introduced state space model and propose the Visua
 
 * **The form of mamba may be all you need** 
 
-    * [`Gated linear attention may be a flavor of mamba`](VMamba/assets/derivation_wdk.png)  
-    * [`Mamba can be different models`](VMamba/assets/derivation_wdv.png)  
-    * [`Ndstate == 1 makes mamba quite easier`](VMamba/assets/derivation_dk1.png)
+    * [`Gated linear attention may be a flavor of mamba`](assets/derivation_wdk.png)  
+    * [`Mamba can be different models`](assets/derivation_wdv.png)  
+    * [`Ndstate == 1 makes mamba quite easier`](assets/derivation_dk1.png)
 
 
 
