@@ -107,6 +107,19 @@ inspiration from the recently introduced state space model and propose the Visua
   <img src="assets/derivation.png" alt="derivation" width="80%">
 </p>
 
+* **Mamba is quite similar to Transformer** 
+
+<p align="center">
+  <img src="assets/derivation_general.png" alt="derivation_general" width="80%">
+</p>
+
+
+* **The form of mamba may be all you need** 
+
+    * [`Gated linear attention is a flavor of mamba`](VMamba/assets/derivation_wdk.png)  
+    * [`Mamba can be different models`](VMamba/assets/derivation_wdv.png)  
+    * [`Ndstate == 1 makes mamba quite easier`](VMamba/assets/derivation_dk1.png)
+
 
 
 ## Main Results
