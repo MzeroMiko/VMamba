@@ -876,7 +876,8 @@ class SS2D(nn.Module):
         k_group = 4
         # in proj =======================================
         self.out_act: nn.Module = nn.Identity()
-        if True:
+        # 0309 -> 0319 needs to be rerun...
+        if False:
             # change Conv2d to Linear2d Next
             if forward_type.startswith("xv1"):
                 self.in_proj = nn.Conv2d(d_model, d_inner + dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
@@ -913,10 +914,29 @@ class SS2D(nn.Module):
                 self.out_act = nn.GELU()
             
             if forward_type.startswith("xv7"):
-                self.forward = partial(self.forwardxv, mode="xv7")
+                self.forward = partial(self.forwardxv, mode="xv1", omul=True)
                 self.in_proj = Linear2d(d_model, d_inner + dt_rank + 8 * d_state, bias=bias, **factory_kwargs)
                 self.out_act = nn.GELU()
             
+        if True:
+            omul, forward_type = checkpostfix("mul", forward_type)
+            if omul:
+                self.omul = nn.Identity()
+            oact, forward_type = checkpostfix("act", forward_type)
+            self.out_act = nn.GELU() if oact else nn.Identity()
+
+            if forward_type.startswith("xv1a"):
+                self.forward = partial(self.forwardxv, mode="xv1a", omul=omul)
+                self.in_proj = Linear2d(d_model, d_inner + dt_rank + 8 * d_state, bias=bias, **factory_kwargs)
+
+            if forward_type.startswith("xv2a"):
+                self.forward = partial(self.forwardxv, mode="xv2a", omul=omul)
+                self.in_proj = Linear2d(d_model, d_inner + d_inner + 8 * d_state,bias=bias, **factory_kwargs)
+
+            if forward_type.startswith("xv3a"):
+                self.forward = partial(self.forwardxv, mode="xv3a", omul=omul)
+                self.in_proj = Linear2d(d_model, d_inner + 4 * dt_rank + 8 * d_state,bias=bias, **factory_kwargs)
+
         # conv =======================================
         if d_conv > 1:
             self.conv2d = nn.Conv2d(
@@ -959,7 +979,10 @@ class SS2D(nn.Module):
             self.A_logs = nn.Parameter(torch.zeros((k_group * d_inner, d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
             self.dt_projs_weight = nn.Parameter(0.1 * torch.rand((k_group, d_inner, dt_rank)))
             self.dt_projs_bias = nn.Parameter(0.1 * torch.rand((k_group, d_inner)))
-        
+
+        if forward_type.startswith("xv2"):
+            del self.dt_projs_weight
+
     @staticmethod
     def dt_init(dt_rank, d_inner, dt_scale=1.0, dt_init="random", dt_min=0.001, dt_max=0.1, dt_init_floor=1e-4, **factory_kwargs):
         dt_proj = nn.Linear(dt_rank, d_inner, bias=True, **factory_kwargs)
@@ -1128,7 +1151,8 @@ class SS2D(nn.Module):
         out = self.dropout(self.out_proj(y))
         return out
 
-    def forwardxv(self, x: torch.Tensor, mode="xv1", **kwargs):
+    # all implementation of [xv1, xv2, xv3, xv4, xv5, xv6, xv7 are wrong!]
+    def forwardxv(self, x: torch.Tensor, mode="xv1a", omul=False, **kwargs):
         B, C, H, W = x.shape
         if not self.channel_first:
             B, H, W, C = x.shape
@@ -1157,7 +1181,11 @@ class SS2D(nn.Module):
             x = self.act(x)
         x = self.in_proj(x)
 
-        if mode in ["xv1", "xv7"]:
+        if mode in ["xv1", "xv2", "xv3", "xv7"]:
+            print(f"ERROR: MODE {mode} is wrong, and will be deleted in the future, use {mode}a instead.")
+
+        # WRONG!!!
+        if mode in ["xv1"]:
             _us, dts, Bs, Cs = x.split([self.d_inner, self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
             us = CrossScanTriton.apply(_us.contiguous()).view(B, -1, L)
             dts = CrossScanTriton.apply(dts.contiguous()).view(B, -1, L)
@@ -1179,6 +1207,37 @@ class SS2D(nn.Module):
             dts = F.conv1d(dts.view(B, -1, L), dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K).contiguous().view(B, -1, L)
         else:
             ...
+
+        if mode in ["xv1a"]:
+            udts, BCs = x.split([self.d_inner + self.dt_rank, 8 * self.d_state], dim=1)
+            _us = udts[:, :self.d_inner, :, :]
+            udts = CrossScanTriton.apply(udts.contiguous()).view(B, 4, -1, L)
+            BCs = CrossScanTriton1b1.apply(BCs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
+            us, dts = udts.split([self.d_inner, self.dt_rank], dim=2)
+            Bs, Cs = BCs.split([self.d_state, self.d_state], dim=2)
+            nn.Conv1d
+            dts = F.conv1d(dts.contiguous().view(B, -1, L), dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
+            us, dts = us.contiguous().view(B, -1, L), dts
+            _us = us.view(B, K, -1, H, W)[:, 0, :, :, :]
+        elif mode in ["xv2a"]:
+            udts, BCs = x.split([self.d_inner + self.d_inner, 8 * self.d_state], dim=1)
+            _us = udts[:, :self.d_inner, :, :]
+            udts = CrossScanTriton.apply(udts.contiguous()).view(B, 4, -1, L)
+            BCs = CrossScanTriton1b1.apply(BCs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
+            us, dts = udts.split([self.d_inner, self.d_inner], dim=2)
+            Bs, Cs = BCs.split([self.d_state, self.d_state], dim=2)
+            us, dts = us.contiguous().view(B, -1, L), dts.contiguous().view(B, -1, L)
+        elif mode in ["xv3a"]:
+            us, dtBCs = x.split([self.d_inner, 4 * self.dt_rank + 8 * self.d_state], dim=1)
+            _us = us
+            us = CrossScanTriton.apply(us.contiguous()).view(B, 4, -1, L)
+            dtBCs = CrossScanTriton1b1.apply(dtBCs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
+            dts, Bs, Cs = dtBCs.split([self.dt_rank, self.d_state, self.d_state], dim=2)
+            dts = F.conv1d(dts.contiguous().view(B, -1, L), dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
+            us, dts = us.contiguous().view(B, -1, L), dts
+        else:
+            ...
+
 
         Bs, Cs = Bs.view(B, K, -1, L).contiguous(), Cs.view(B, K, -1, L).contiguous()
     
@@ -1209,7 +1268,7 @@ class SS2D(nn.Module):
 
         y = (y.to(x.dtype) if to_dtype else y)
         y = self.out_act(y)
-        if mode in ["xv7"]:
+        if omul:
             y = y * (_us.permute(0, 2, 3, 1) if not self.channel_first else _us)
         out = self.dropout(self.out_proj(y))
         return out
