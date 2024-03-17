@@ -584,6 +584,8 @@ def main_vssm1():
         ti0318 = f"/home/LiuYue/TmpMount/DataHPC8/nodeHPC8/out/vssm1_tiny_0318/20240314161620/log_rank0.txt",
         ti03182 = f"/home/LiuYue/TmpMount/DataHPC8/nodeHPC8/out/vssm1_tiny_03182/20240316020121/log_rank0.txt",
         ti0319 = f"/home/LiuYue/TmpMount/DataHPC9/nodeHPC9/out/vssm1_tiny_0319/20240316022352/log_rank0.txt",
+        ti0322 = f"/home/LiuYue/TmpMount/DataHPC9/nodeHPC9/out/vssm1_tiny_0322/20240317041032/log_rank0.txt",
+        ti0323 = f"/home/LiuYue/TmpMount/DataHPC8/nodeHPC8/out/vssm1_tiny_0323/20240317040640/log_rank0.txt",
     )
     
     for name, file in files.items():
