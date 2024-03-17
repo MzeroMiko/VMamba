@@ -40,7 +40,7 @@ def triton_cross_scan(
         tl.store(p_y2 + _idx, _x, mask=_mask_hw)
         tl.store(p_y3 + _idx, _x, mask=_mask_hw)
         tl.store(p_y4 + _idx, _x, mask=_mask_hw)
-
+    tl.debug_barrier()
 
 @triton.jit
 def triton_cross_merge(
@@ -78,7 +78,7 @@ def triton_cross_merge(
         _y3 = tl.load(p_y3 + _idx, mask=_mask_hw)
         _y4 = tl.load(p_y4 + _idx, mask=_mask_hw)
         tl.store(p_x + _idx, _y1 + _y2 + _y3 + _y4, mask=_mask_hw)
-
+    tl.debug_barrier()
 
 @triton.jit
 def triton_cross_scan_1b1(
@@ -118,7 +118,7 @@ def triton_cross_scan_1b1(
         tl.store(p_y2 + _idx, tl.load(p_x2 + _idx), mask=_mask_hw)
         tl.store(p_y3 + _idx, tl.load(p_x3 + _idx), mask=_mask_hw)
         tl.store(p_y4 + _idx, tl.load(p_x4 + _idx), mask=_mask_hw)
-
+    tl.debug_barrier()
 
 @triton.jit
 def triton_cross_merge_1b1(
@@ -158,6 +158,7 @@ def triton_cross_merge_1b1(
         tl.store(p_x2 + _idx, tl.load(p_y2 + _idx), mask=_mask_hw)
         tl.store(p_x3 + _idx, tl.load(p_y3 + _idx), mask=_mask_hw)
         tl.store(p_x4 + _idx, tl.load(p_y4 + _idx), mask=_mask_hw)
+    tl.debug_barrier()
 
 
 class CrossScanTriton(torch.autograd.Function):
@@ -165,7 +166,7 @@ class CrossScanTriton(torch.autograd.Function):
     def forward(ctx, x: torch.Tensor):
         B, C, H, W = x.shape
         B, C, H, W = int(B), int(C), int(H), int(W)
-        BC, BH, BW = min(triton.next_power_of_2(C), 2), min(triton.next_power_of_2(H), 32), min(triton.next_power_of_2(W), 32)
+        BC, BH, BW = min(triton.next_power_of_2(C), 1), min(triton.next_power_of_2(H), 64), min(triton.next_power_of_2(W), 64)
         NH, NW, NC = triton.cdiv(H, BH), triton.cdiv(W, BW), triton.cdiv(C, BC)
         ctx.shape = (B, C, H, W)
         ctx.triton_shape = (BC, BH, BW, NC, NH, NW)
@@ -190,7 +191,7 @@ class CrossMergeTriton(torch.autograd.Function):
     def forward(ctx, y: torch.Tensor):
         B, K, C, H, W = y.shape
         B, C, H, W = int(B), int(C), int(H), int(W)
-        BC, BH, BW = min(triton.next_power_of_2(C), 2), min(triton.next_power_of_2(H), 32), min(triton.next_power_of_2(W), 32)
+        BC, BH, BW = min(triton.next_power_of_2(C), 1), min(triton.next_power_of_2(H), 64), min(triton.next_power_of_2(W), 64)
         NH, NW, NC = triton.cdiv(H, BH), triton.cdiv(W, BW), triton.cdiv(C, BC)
         ctx.shape = (B, C, H, W)
         ctx.triton_shape = (BC, BH, BW, NC, NH, NW)
@@ -215,7 +216,7 @@ class CrossScanTriton1b1(torch.autograd.Function):
     def forward(ctx, x: torch.Tensor):
         B, K, C, H, W = x.shape
         B, C, H, W = int(B), int(C), int(H), int(W)
-        BC, BH, BW = min(triton.next_power_of_2(C), 2), min(triton.next_power_of_2(H), 32), min(triton.next_power_of_2(W), 32)
+        BC, BH, BW = min(triton.next_power_of_2(C), 1), min(triton.next_power_of_2(H), 64), min(triton.next_power_of_2(W), 64)
         NH, NW, NC = triton.cdiv(H, BH), triton.cdiv(W, BW), triton.cdiv(C, BC)
         ctx.shape = (B, C, H, W)
         ctx.triton_shape = (BC, BH, BW, NC, NH, NW)
