@@ -1209,35 +1209,34 @@ class SS2D(nn.Module):
             ...
 
         if mode in ["xv1a"]:
-            udts, BCs = x.split([self.d_inner + self.dt_rank, 8 * self.d_state], dim=1)
-            _us = udts[:, :self.d_inner, :, :]
-            udts = CrossScanTriton.apply(udts.contiguous()).view(B, 4, -1, L)
-            BCs = CrossScanTriton1b1.apply(BCs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
-            us, dts = udts.split([self.d_inner, self.dt_rank], dim=2)
-            Bs, Cs = BCs.split([self.d_state, self.d_state], dim=2)
-            nn.Conv1d
+            us, dts, Bs, Cs = x.split([self.d_inner, self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
+            _us = us
+            us = CrossScanTriton.apply(us.contiguous()).view(B, 4, -1, L)
+            dts = CrossScanTriton.apply(dts.contiguous()).view(B, 4, -1, L)
+            Bs = CrossScanTriton1b1.apply(Bs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
+            Cs = CrossScanTriton1b1.apply(Cs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
             dts = F.conv1d(dts.contiguous().view(B, -1, L), dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
             us, dts = us.contiguous().view(B, -1, L), dts
             _us = us.view(B, K, -1, H, W)[:, 0, :, :, :]
         elif mode in ["xv2a"]:
-            udts, BCs = x.split([self.d_inner + self.d_inner, 8 * self.d_state], dim=1)
-            _us = udts[:, :self.d_inner, :, :]
-            udts = CrossScanTriton.apply(udts.contiguous()).view(B, 4, -1, L)
-            BCs = CrossScanTriton1b1.apply(BCs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
-            us, dts = udts.split([self.d_inner, self.d_inner], dim=2)
-            Bs, Cs = BCs.split([self.d_state, self.d_state], dim=2)
-            us, dts = us.contiguous().view(B, -1, L), dts.contiguous().view(B, -1, L)
-        elif mode in ["xv3a"]:
-            us, dtBCs = x.split([self.d_inner, 4 * self.dt_rank + 8 * self.d_state], dim=1)
+            us, dts, Bs, Cs = x.split([self.d_inner, self.d_inner, 4 * self.d_state, 4 * self.d_state], dim=1)
             _us = us
             us = CrossScanTriton.apply(us.contiguous()).view(B, 4, -1, L)
-            dtBCs = CrossScanTriton1b1.apply(dtBCs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
-            dts, Bs, Cs = dtBCs.split([self.dt_rank, self.d_state, self.d_state], dim=2)
+            dts = CrossScanTriton.apply(dts.contiguous()).view(B, 4, -1, L)
+            Bs = CrossScanTriton1b1.apply(Bs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
+            Cs = CrossScanTriton1b1.apply(Cs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
+            us, dts = us.contiguous().view(B, -1, L), dts.contiguous().view(B, -1, L)
+        elif mode in ["xv3a"]:
+            us, dts, Bs, Cs = x.split([self.d_inner, 4 * self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
+            _us = us
+            us = CrossScanTriton.apply(us.contiguous()).view(B, 4, -1, L)
+            dts = CrossScanTriton1b1.apply(dts.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
+            Bs = CrossScanTriton1b1.apply(Bs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
+            Cs = CrossScanTriton1b1.apply(Cs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
             dts = F.conv1d(dts.contiguous().view(B, -1, L), dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
             us, dts = us.contiguous().view(B, -1, L), dts
-        else:
+        else: 
             ...
-
 
         Bs, Cs = Bs.view(B, K, -1, L).contiguous(), Cs.view(B, K, -1, L).contiguous()
     
