@@ -1227,6 +1227,14 @@ class SS2D(nn.Module):
             Cs = CrossScanTriton1b1.apply(Cs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
             us, dts = us.contiguous().view(B, -1, L), dts.contiguous().view(B, -1, L)
         elif mode in ["xv3a"]:
+            # us, dtBCs = x.split([self.d_inner, 4 * self.dt_rank + 4 * self.d_state + 4 * self.d_state], dim=1)
+            # _us = us
+            # us = CrossScanTriton.apply(us.contiguous()).view(B, 4, -1, L)
+            # dtBCs = CrossScanTriton1b1.apply(dtBCs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
+            # dts, Bs, Cs = dtBCs.split([self.dt_rank, self.d_state, self.d_state], dim=2)
+            # dts = F.conv1d(dts.contiguous().view(B, -1, L), dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
+            # us, dts = us.contiguous().view(B, -1, L), dts
+            
             us, dts, Bs, Cs = x.split([self.d_inner, 4 * self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
             _us = us
             us = CrossScanTriton.apply(us.contiguous()).view(B, 4, -1, L)
