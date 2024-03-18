@@ -1242,7 +1242,7 @@ class SS2D(nn.Module):
     
         As = -torch.exp(A_logs.to(torch.float)) # (k * c, d_state)
         Ds = Ds.to(torch.float) # (K * c)
-        delta_bias = dt_projs_bias.view(-1).to(torch.float)
+        delta_bias = dt_projs_bias.view(-1).to(torch.float) # (K * c)
 
         if force_fp32:
             us, dts, Bs, Cs = to_fp32(us, dts, Bs, Cs)
