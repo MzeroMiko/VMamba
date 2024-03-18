@@ -165,15 +165,15 @@ inspiration from the recently introduced state space model and propose the Visua
 | Backbone | #params | FLOPs | Detector | box mAP | mask mAP | configs/logs/ckpts | best epoch |
 | :---: | :---: | :---: | :---: | :---: | :---: |:---: |:---: |
 | Swin-T | 48M | 267G | MaskRCNN@1x | 42.7| 39.3 |-- |-- |
-| VMamba-T | 50M | 270G | MaskRCNN@1x | 47.4| 42.7 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny.py)/[log](#)/[ckpt](#) | 12 |
+| VMamba-T | 50M | 270G | MaskRCNN@1x | 47.4| 42.7 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny.py)/[log]/[ckpt] | 12 |
 | Swin-S | 69M | 354G | MaskRCNN@1x | 44.8| 40.9 |-- |-- |
-| VMamba-S | 70M | 384G | MaskRCNN@1x | 48.7| 43.7 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_small.py)/[log](#)/[ckpt](#) | 11 |
+| VMamba-S | 70M | 384G | MaskRCNN@1x | 48.7| 43.7 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_small.py)/[log]/[ckpt] | 11 |
 | Swin-B | 107M | 496G | MaskRCNN@1x | 46.9| 42.3 |-- |-- |
-| VMamba-B* | 108M | 485G | MaskRCNN@1x | 49.2| 43.9 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_base.py)/[log](#)/[ckpt](#) | 12 |
+| VMamba-B* | 108M | 485G | MaskRCNN@1x | 49.2| 43.9 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_base.py)/[log]/[ckpt] | 12 |
 | Swin-T | 48M | 267G | MaskRCNN@3x | 46.0| 41.6 |-- |-- |
-| VMamba-T | 50M | 270G | MaskRCNN@3x | 48.9| 43.7 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny_ms_3x.py)/[log](#)/[ckpt](#) | 36 |
+| VMamba-T | 50M | 270G | MaskRCNN@3x | 48.9| 43.7 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny_ms_3x.py)/[log]/[ckpt] | 36 |
 | Swin-S | 69M | 354G | MaskRCNN@3x | 48.2| 43.2 |-- |-- |
-| VMamba-S | 70M | 384G | MaskRCNN@3x | 49.9| 44.2 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_small_ms_3x.py)/[log](#)/[ckpt](#) | 32 |
+| VMamba-S | 70M | 384G | MaskRCNN@3x | 49.9| 44.2 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_small_ms_3x.py)/[log]/[ckpt] | 32 |
 
 * *The total batch size of VMamba-B in COCO is `8`, which is supposed to be `16` as in other experiments. This is a `mistake`, not feature. We may fix that later.*
 
@@ -184,13 +184,13 @@ inspiration from the recently introduced state space model and propose the Visua
 | Backbone | Input|  #params | FLOPs | Segmentor | mIoU(SS) | mIoU(MS) | configs/logs/logs(ms)/ckpts | best iter |
 | :---: | :---: | :---: | :---: | :---: | :---: |:---: |:---: |:---: |
 | Swin-T | 512x512 | 60M | 945G | UperNet@160k | 44.4| 45.8| -- | -- |
-| VMamba-T| 512x512 | 62M | 948G | UperNet@160k | 48.3| 48.6| [config](segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_tiny.py)/[log](#abstract)/[log(ms)](#)/[ckpt](#) | 160k |
+| VMamba-T| 512x512 | 62M | 948G | UperNet@160k | 48.3| 48.6| [config](segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_tiny.py)/[log](#abstract)/[log(ms)]/[ckpt] | 160k |
 | Swin-S | 512x512 | 81M | 1039G | UperNet@160k | 47.6| 49.5| -- | -- |
-| VMamba-S| 512x512 | 82M | 1028G | UperNet@160k | 50.6| 51.2|[config](segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_small.py)/[log](#)/[log(ms)](#)/[ckpt](#) | 144k |
+| VMamba-S| 512x512 | 82M | 1028G | UperNet@160k | 50.6| 51.2|[config](segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_small.py)/[log]/[log(ms)]/[ckpt] | 144k |
 | Swin-B | 512x512 | 121M | 1188G | UperNet@160k | 48.1| 49.7|-- |
-| VMamba-B| 512x512 | 122M | 1170G | UperNet@160k | 51.0| 51.6|[config](segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_base.py)/[log](#)/[log(ms)](#)/[ckpt](#) | 160k |
+| VMamba-B| 512x512 | 122M | 1170G | UperNet@160k | 51.0| 51.6|[config](segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_base.py)/[log]/[log(ms)]/[ckpt] | 160k |
 <!-- | Swin-S | 640x640 | 81M | 1614G | UperNet@160k | 47.9| 48.8| -- | -- |
-| VMamba-S| 640x640 | 82M | 1607G | UperNet@160k | 50.7| 51.2| [config](segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-640x640_small.py)/[log](#)/[log(ms)](#)/[ckpt](#) | 160k | -->
+| VMamba-S| 640x640 | 82M | 1607G | UperNet@160k | 50.7| 51.2| [config](segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-640x640_small.py)/[log]/[log(ms)]/[ckpt] | 160k | -->
 
 * *we now calculate FLOPs with the algrithm @albertgu [provides](https://github.com/state-spaces/mamba/issues/110), which will be bigger than previous calculation (which is based on the `selective_scan_ref` function, and ignores the hardware-aware algrithm).*
 
