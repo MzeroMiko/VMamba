@@ -581,7 +581,7 @@ def main_vssm1():
         # ti0315 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/Collect/classification/vssm1/vssm1_tiny_0315/log_rank0.txt",
         # ti0316 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/Collect/classification/vssm1/vssm1_tiny_0316/log_rank0.txt",
         # ti0317 = f"/home/LiuYue/TmpMount/DataHPC9/nodeHPC9/out/vssm1_tiny_0317/20240314160739/log_rank0.txt",
-        ti0318 = f"/home/LiuYue/TmpMount/DataHPC8/nodeHPC8/out/vssm1_tiny_0318/20240314161620/log_rank0.txt",
+        # ti0318 = f"/home/LiuYue/TmpMount/DataHPC8/nodeHPC8/out/vssm1_tiny_0318/20240314161620/log_rank0.txt",
         ti03182 = f"/home/LiuYue/TmpMount/DataHPC8/nodeHPC8/out/vssm1_tiny_03182/20240316020121/log_rank0.txt",
         ti0319 = f"/home/LiuYue/TmpMount/DataHPC9/nodeHPC9/out/vssm1_tiny_0319/20240316022352/log_rank0.txt",
         ti0322 = f"/home/LiuYue/TmpMount/DataHPC9/nodeHPC9/out/vssm1_tiny_0322/20240317142359/log_rank0.txt",
