@@ -199,7 +199,7 @@ class CHECKS:
 
     def check_csm_triton():
 
-        B, C, H, W = 128, 192, 56, 57
+        B, C, H, W = 256, 192, 56, 57
         dtype=torch.float16
         dtype=torch.float32
         x = torch.randn((B, C, H, W), dtype=dtype, device=torch.device("cuda")).requires_grad_(True)
@@ -228,6 +228,17 @@ class CHECKS:
             y = out_y[:, 0] + inv_y[:, 0] + wh_y + invwh_y
             return y
 
+        def cross_scan_1b1(x: torch.Tensor):
+            B, K, C, H, W = x.shape
+            L = H * W
+            xs = torch.stack([
+                x[:, 0].view(B, C, L),
+                torch.transpose(x[:, 1], dim0=2, dim1=3).contiguous().view(B, C, L),
+                torch.flip(x[:, 2].contiguous().view(B, C, L), dims=[-1]),
+                torch.flip(torch.transpose(x[:, 3], dim0=2, dim1=3).contiguous().view(B, C, L), dims=[-1]),
+            ], dim=1).view(B, 4, C, L)
+            return xs
+        
         if True:
             res0 = triton.testing.do_bench(lambda :cross_scan(x))
             res1 = triton.testing.do_bench(lambda :CrossScan.apply(x))
@@ -255,16 +266,6 @@ class CHECKS:
 
         print("test cross scan one by one")
         if True:
-            def cross_scan_1b1(x: torch.Tensor):
-                B, K, C, H, W = x.shape
-                L = H * W
-                xs = torch.stack([
-                    x[:, 0].view(B, C, L),
-                    torch.transpose(x[:, 1], dim0=2, dim1=3).contiguous().view(B, C, L),
-                    torch.flip(x[:, 2].contiguous().view(B, C, L), dims=[-1]),
-                    torch.flip(torch.transpose(x[:, 3], dim0=2, dim1=3).contiguous().view(B, C, L), dims=[-1]),
-                ], dim=1).view(B, 4, C, L)
-                return xs
             o0 = cross_scan_1b1(y)
             o1 = CrossScanTriton1b1.apply(y1)
             o0.backward(y.view(B, 4, C, H * W))
@@ -272,6 +273,15 @@ class CHECKS:
             print((o0 - o1).abs().max())
             print((y.grad - y1.grad).abs().max())
             x.grad, x1.grad, y.grad, y1.grad = None, None, None, None
+
+        x = torch.arange(0, 16, 1).view(1, 1, 4, 4)
+        print(x)
+        print(cross_scan(x))
+        print(cross_merge(cross_scan(x).view(1, 4, 1, 4, 4)))
+        x = torch.arange(0, 16, 1).view(1, 4, 1, 2, 2)
+        print(x)
+        print(cross_scan_1b1(x))
+
 
     def check_einsum():
         B, D, L, R, K = 128, 192, 56 * 56, 12, 4
