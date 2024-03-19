@@ -40,7 +40,6 @@ def triton_cross_scan(
         tl.store(p_y2 + _idx, _x, mask=_mask_hw)
         tl.store(p_y3 + _idx, _x, mask=_mask_hw)
         tl.store(p_y4 + _idx, _x, mask=_mask_hw)
-    tl.debug_barrier()
 
 @triton.jit
 def triton_cross_merge(
@@ -78,7 +77,6 @@ def triton_cross_merge(
         _y3 = tl.load(p_y3 + _idx, mask=_mask_hw)
         _y4 = tl.load(p_y4 + _idx, mask=_mask_hw)
         tl.store(p_x + _idx, _y1 + _y2 + _y3 + _y4, mask=_mask_hw)
-    tl.debug_barrier()
 
 @triton.jit
 def triton_cross_scan_1b1(
@@ -114,11 +112,10 @@ def triton_cross_scan_1b1(
     p_x4 = p_x3 + _tmp1
     for idxc in range(_for_C):
         _idx = idxc * DH * DW
-        tl.store(p_y1 + _idx, tl.load(p_x1 + _idx), mask=_mask_hw)
-        tl.store(p_y2 + _idx, tl.load(p_x2 + _idx), mask=_mask_hw)
-        tl.store(p_y3 + _idx, tl.load(p_x3 + _idx), mask=_mask_hw)
-        tl.store(p_y4 + _idx, tl.load(p_x4 + _idx), mask=_mask_hw)
-    tl.debug_barrier()
+        tl.store(p_y1 + _idx, tl.load(p_x1 + _idx, mask=_mask_hw), mask=_mask_hw)
+        tl.store(p_y2 + _idx, tl.load(p_x2 + _idx, mask=_mask_hw), mask=_mask_hw)
+        tl.store(p_y3 + _idx, tl.load(p_x3 + _idx, mask=_mask_hw), mask=_mask_hw)
+        tl.store(p_y4 + _idx, tl.load(p_x4 + _idx, mask=_mask_hw), mask=_mask_hw)
 
 @triton.jit
 def triton_cross_merge_1b1(
@@ -158,7 +155,6 @@ def triton_cross_merge_1b1(
         tl.store(p_x2 + _idx, tl.load(p_y2 + _idx), mask=_mask_hw)
         tl.store(p_x3 + _idx, tl.load(p_y3 + _idx), mask=_mask_hw)
         tl.store(p_x4 + _idx, tl.load(p_y4 + _idx), mask=_mask_hw)
-    tl.debug_barrier()
 
 
 class CrossScanTriton(torch.autograd.Function):
