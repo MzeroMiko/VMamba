@@ -168,9 +168,7 @@ class CrossScanTriton(torch.autograd.Function):
         ctx.triton_shape = (BC, BH, BW, NC, NH, NW)
         x = x.contiguous()
         y = x.new_empty((B, 4, C, H, W))
-        torch.cuda.synchronize()
         triton_cross_scan[(NH * NW, NC, B)](x, y, BC, BH, BW, C, H, W, NH, NW)
-        torch.cuda.synchronize()
         return y.view(B, 4, C, -1)
     
     @staticmethod
@@ -180,9 +178,7 @@ class CrossScanTriton(torch.autograd.Function):
         BC, BH, BW, NC, NH, NW = ctx.triton_shape
         y = y.contiguous().view(B, 4, C, H, W)
         x = y.new_empty((B, C, H, W))
-        torch.cuda.synchronize()
         triton_cross_merge[(NH * NW, NC, B)](x, y, BC, BH, BW, C, H, W, NH, NW)
-        torch.cuda.synchronize()
         return x
 
 
@@ -197,9 +193,7 @@ class CrossMergeTriton(torch.autograd.Function):
         ctx.triton_shape = (BC, BH, BW, NC, NH, NW)
         y = y.contiguous().view(B, 4, C, H, W)
         x = y.new_empty((B, C, H, W))
-        torch.cuda.synchronize()
         triton_cross_merge[(NH * NW, NC, B)](x, y, BC, BH, BW, C, H, W, NH, NW)
-        torch.cuda.synchronize()
         return x.view(B, C, -1)
     
     @staticmethod
@@ -209,9 +203,7 @@ class CrossMergeTriton(torch.autograd.Function):
         BC, BH, BW, NC, NH, NW = ctx.triton_shape
         x = x.contiguous()
         y = x.new_empty((B, 4, C, H, W))
-        torch.cuda.synchronize()
         triton_cross_scan[(NH * NW, NC, B)](x, y, BC, BH, BW, C, H, W, NH, NW)
-        torch.cuda.synchronize()
         return y
 
 
@@ -226,9 +218,7 @@ class CrossScanTriton1b1(torch.autograd.Function):
         ctx.triton_shape = (BC, BH, BW, NC, NH, NW)
         x = x.contiguous()
         y = x.new_empty((B, 4, C, H, W))
-        torch.cuda.synchronize()
         triton_cross_scan_1b1[(NH * NW, NC, B)](x, y, BC, BH, BW, C, H, W, NH, NW)
-        torch.cuda.synchronize()
         return y.view(B, 4, C, -1)
     
     @staticmethod
@@ -238,9 +228,7 @@ class CrossScanTriton1b1(torch.autograd.Function):
         BC, BH, BW, NC, NH, NW = ctx.triton_shape
         y = y.contiguous().view(B, 4, C, H, W)
         x = y.new_empty((B, 4, C, H, W))
-        torch.cuda.synchronize()
         triton_cross_merge_1b1[(NH * NW, NC, B)](x, y, BC, BH, BW, C, H, W, NH, NW)
-        torch.cuda.synchronize()
         return x
 
 
