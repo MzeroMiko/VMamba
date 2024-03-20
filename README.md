@@ -13,7 +13,7 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 
 * [**updates**](#white_check_mark-updates)
 * [**abstract**](#abstract)
-* [**overview & derivation**](#overview--derivations)
+* [**overview**](#overview--derivations)
 * [**main results**](#main-results)
 * [**getting started**](#getting-started)
 * [**star history**](#star-history)
