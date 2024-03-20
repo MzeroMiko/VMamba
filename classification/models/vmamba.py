@@ -312,116 +312,6 @@ class SelectiveScanOflex(torch.autograd.Function):
         return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None, None, None)
 
 
-# =============
-# Note: we did not use csm_triton in and before vssm1_0230, we used pytorch version !
-# Note: we did not use no_einsum in and before vssm1_0230, we used einsum version !
-def cross_selective_scan(
-    x: torch.Tensor=None, 
-    x_proj_weight: torch.Tensor=None,
-    x_proj_bias: torch.Tensor=None,
-    dt_projs_weight: torch.Tensor=None,
-    dt_projs_bias: torch.Tensor=None,
-    A_logs: torch.Tensor=None,
-    Ds: torch.Tensor=None,
-    delta_softplus = True,
-    out_norm: torch.nn.Module=None,
-    out_norm_shape="v0",
-    channel_first=False,
-    # ==============================
-    to_dtype=True, # True: final out to dtype
-    force_fp32=False, # True: input fp32
-    # ==============================
-    nrows = -1, # for SelectiveScanNRow; 0: auto; -1: disable;
-    backnrows = -1, # for SelectiveScanNRow; 0: auto; -1: disable;
-    ssoflex=True, # True: out fp32 in SSOflex; else, SSOflex is the same as SSCore
-    # ==============================
-    SelectiveScan=None,
-    CrossScan=CrossScan,
-    CrossMerge=CrossMerge,
-    no_einsum=False, # replace einsum with linear or conv1d to raise throughput
-    **kwargs,
-):
-    # out_norm: whatever fits (B, L, C); LayerNorm; Sigmoid; Softmax(dim=1);...
-
-    B, D, H, W = x.shape
-    D, N = A_logs.shape
-    K, D, R = dt_projs_weight.shape
-    L = H * W
-
-    if nrows == 0:
-        if D % 4 == 0:
-            nrows = 4
-        elif D % 3 == 0:
-            nrows = 3
-        elif D % 2 == 0:
-            nrows = 2
-        else:
-            nrows = 1
-        
-    if backnrows == 0:
-        if D % 4 == 0:
-            backnrows = 4
-        elif D % 3 == 0:
-            backnrows = 3
-        elif D % 2 == 0:
-            backnrows = 2
-        else:
-            backnrows = 1
-
-    def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True):
-        return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, backnrows, ssoflex)
-    
-    if no_einsum:
-        xs = CrossScan.apply(x)
-        x_dbl = F.conv1d(xs.view(B, -1, L), x_proj_weight.view(-1, D, 1), bias=(x_proj_bias.view(-1) if x_proj_bias is not None else None), groups=K)
-        dts, Bs, Cs = torch.split(x_dbl.view(B, K, -1, L), [R, N, N], dim=2)
-        dts = F.conv1d(dts.contiguous().view(B, -1, L), dt_projs_weight.view(K * D, -1, 1), groups=K)
-    else:
-        xs = CrossScan.apply(x)
-        x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, x_proj_weight)
-        if x_proj_bias is not None:
-            x_dbl = x_dbl + x_proj_bias.view(1, K, -1, 1)
-        dts, Bs, Cs = torch.split(x_dbl, [R, N, N], dim=2)
-        dts = torch.einsum("b k r l, k d r -> b k d l", dts, dt_projs_weight)
-
-    xs = xs.view(B, -1, L)
-    dts = dts.contiguous().view(B, -1, L)
-    As = -torch.exp(A_logs.to(torch.float)) # (k * c, d_state)
-    Bs = Bs.contiguous().view(B, K, N, L)
-    Cs = Cs.contiguous().view(B, K, N, L)
-    Ds = Ds.to(torch.float) # (K * c)
-    delta_bias = dt_projs_bias.view(-1).to(torch.float)
-
-    if force_fp32:
-        xs = xs.to(torch.float)
-        dts = dts.to(torch.float)
-        Bs = Bs.to(torch.float)
-        Cs = Cs.to(torch.float)
-
-    ys: torch.Tensor = selective_scan(
-        xs, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus
-    ).view(B, K, -1, H, W)
-    
-    y: torch.Tensor = CrossMerge.apply(ys)
-
-    if channel_first:
-        y = y.view(B, -1, H, W)
-        if out_norm_shape in ["v1"]:
-            y = out_norm(y)
-        else:
-            y = out_norm(y.permute(0, 2, 3, 1))
-            y = y.permute(0, 3, 1, 2)
-        return (y.to(x.dtype) if to_dtype else y)
-
-    if out_norm_shape in ["v1"]: # (B, C, H, W)
-        y = out_norm(y.view(B, -1, H, W)).permute(0, 2, 3, 1) # (B, H, W, C)
-    else: # (B, L, C)
-        y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
-        y = out_norm(y).view(B, H, W, -1)
-
-    return (y.to(x.dtype) if to_dtype else y)
-
-
 def selective_scan_flop_jit(inputs, outputs):
     print_jit_input_names(inputs)
     B, D, L = inputs[0].type().sizes()
@@ -1106,8 +996,36 @@ class SS2D(nn.Module):
         y = y * z
         out = self.dropout(self.out_proj(y))
         return out
-    
-    def forward_corev2(self, x: torch.Tensor, cross_selective_scan=cross_selective_scan, **kwargs):
+
+    # Note: we did not use csm_triton in and before vssm1_0230, we used pytorch version !
+    # Note: we did not use no_einsum in and before vssm1_0230, we used einsum version !    
+    def forward_corev2(
+        self,
+        x: torch.Tensor=None, 
+        x_proj_weight: torch.Tensor=None,
+        x_proj_bias: torch.Tensor=None,
+        dt_projs_weight: torch.Tensor=None,
+        dt_projs_bias: torch.Tensor=None,
+        A_logs: torch.Tensor=None,
+        Ds: torch.Tensor=None,
+        delta_softplus = True,
+        out_norm: torch.nn.Module=None,
+        out_norm_shape="v0",
+        channel_first=False,
+        # ==============================
+        to_dtype=True, # True: final out to dtype
+        force_fp32=False, # True: input fp32
+        # ==============================
+        nrows = -1, # for SelectiveScanNRow; 0: auto; -1: disable;
+        backnrows = -1, # for SelectiveScanNRow; 0: auto; -1: disable;
+        ssoflex=True, # True: out fp32 in SSOflex; else, SSOflex is the same as SSCore
+        # ==============================
+        SelectiveScan=None,
+        CrossScan=CrossScan,
+        CrossMerge=CrossMerge,
+        no_einsum=False, # replace einsum with linear or conv1d to raise throughput
+        **kwargs,
+    ):
         x_proj_weight = self.x_proj_weight
         dt_projs_weight = self.dt_projs_weight
         dt_projs_bias = self.dt_projs_bias
@@ -1115,15 +1033,87 @@ class SS2D(nn.Module):
         Ds = self.Ds
         out_norm = getattr(self, "out_norm", None)
         out_norm_shape = getattr(self, "out_norm_shape", "v0")
+        channel_first = self.channel_first
 
-        return cross_selective_scan(
-            x, x_proj_weight, None, dt_projs_weight, dt_projs_bias,
-            A_logs, Ds, delta_softplus=True,
-            out_norm=out_norm,
-            channel_first=self.channel_first,
-            out_norm_shape=out_norm_shape,
-            **kwargs,
-        )
+        # out_norm: whatever fits (B, L, C); LayerNorm; Sigmoid; Softmax(dim=1);...
+
+        B, D, H, W = x.shape
+        D, N = A_logs.shape
+        K, D, R = dt_projs_weight.shape
+        L = H * W
+
+        if nrows == 0:
+            if D % 4 == 0:
+                nrows = 4
+            elif D % 3 == 0:
+                nrows = 3
+            elif D % 2 == 0:
+                nrows = 2
+            else:
+                nrows = 1
+            
+        if backnrows == 0:
+            if D % 4 == 0:
+                backnrows = 4
+            elif D % 3 == 0:
+                backnrows = 3
+            elif D % 2 == 0:
+                backnrows = 2
+            else:
+                backnrows = 1
+
+        def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True):
+            return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, backnrows, ssoflex)
+        
+        if no_einsum:
+            xs = CrossScan.apply(x)
+            x_dbl = F.conv1d(xs.view(B, -1, L), x_proj_weight.view(-1, D, 1), bias=(x_proj_bias.view(-1) if x_proj_bias is not None else None), groups=K)
+            dts, Bs, Cs = torch.split(x_dbl.view(B, K, -1, L), [R, N, N], dim=2)
+            dts = F.conv1d(dts.contiguous().view(B, -1, L), dt_projs_weight.view(K * D, -1, 1), groups=K)
+        else:
+            xs = CrossScan.apply(x)
+            x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, x_proj_weight)
+            if x_proj_bias is not None:
+                x_dbl = x_dbl + x_proj_bias.view(1, K, -1, 1)
+            dts, Bs, Cs = torch.split(x_dbl, [R, N, N], dim=2)
+            dts = torch.einsum("b k r l, k d r -> b k d l", dts, dt_projs_weight)
+
+        xs = xs.view(B, -1, L)
+        dts = dts.contiguous().view(B, -1, L)
+        As = -torch.exp(A_logs.to(torch.float)) # (k * c, d_state)
+        Bs = Bs.contiguous().view(B, K, N, L)
+        Cs = Cs.contiguous().view(B, K, N, L)
+        Ds = Ds.to(torch.float) # (K * c)
+        delta_bias = dt_projs_bias.view(-1).to(torch.float)
+
+        if force_fp32:
+            xs = xs.to(torch.float)
+            dts = dts.to(torch.float)
+            Bs = Bs.to(torch.float)
+            Cs = Cs.to(torch.float)
+
+        ys: torch.Tensor = selective_scan(
+            xs, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus
+        ).view(B, K, -1, H, W)
+        
+        y: torch.Tensor = CrossMerge.apply(ys)
+
+        if channel_first:
+            y = y.view(B, -1, H, W)
+            if out_norm_shape in ["v1"]:
+                y = out_norm(y)
+            else:
+                y = out_norm(y.permute(0, 2, 3, 1))
+                y = y.permute(0, 3, 1, 2)
+            return (y.to(x.dtype) if to_dtype else y)
+
+        if out_norm_shape in ["v1"]: # (B, C, H, W)
+            y = out_norm(y.view(B, -1, H, W)).permute(0, 2, 3, 1) # (B, H, W, C)
+        else: # (B, L, C)
+            y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
+            y = out_norm(y).view(B, H, W, -1)
+
+        return (y.to(x.dtype) if to_dtype else y)
 
     def forwardv2(self, x: torch.Tensor, **kwargs):
         with_dconv = (self.d_conv > 1)
