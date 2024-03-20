@@ -12,9 +12,8 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 </div>
 
 * [**updates**](#white_check_mark-updates)
-* [**speed up history**](#rocket-the-history-of-speed-up)
 * [**abstract**](#abstract)
-* [**overview & derivation**](#overview--derivations)
+* [**overview**](#overview--derivations)
 * [**main results**](#main-results)
 * [**getting started**](#getting-started)
 * [**star history**](#star-history)
@@ -52,36 +51,6 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 
 * **` Jan. 19th, 2024`:** The source code for classification, object detection, and semantic segmentation are provided. 
 
-## :rocket: The History of Speed Up
-
-*Time is tested on 1xA100 with batch_size 128 for `training`; the config file is `vssm1/vssm_tiny_224_0220.yaml`. GPU memory is adopted from the log.*
-
-*The experiments ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166)) done before #20240119 used `mamba-ssm + group-parallel`.*
-
-*The experiments done since #20240201 use `sscore + fused cross scan + fused cross merge`. We plan to use `ssoflex + fused cross scan + fused cross merge + input16output32` in the future.*
-
-| name | GPU Memory | time (s/iter) |
-| :--- | :---: | :---: |
-| mamba-ssm + sequence scan | 25927M | 0.6585s |
-| `mamba-ssm + group parallel` | `25672M` | `0.4860s` |
-| mamba-ssm + float16 | 20439M | 0.4195s |
-| mamba-ssm + fused cross scan | 25675M | 0.4820s |
-| mamba-ssm + fused csm | 25596M | 0.4020s |
-| `sscore + fused csm` | `24984M` | `0.3930s` |
-| sscore + fused csm + forward nrow | 24984M | 0.4090s |
-| sscore + fused csm + backward nrow | 24984M | 0.4490s |
-| sscore + fused csm + forward nrow + backward nrow | 24984M | 0.4640s |
-| ssoflex + fused csm | 24986M | 0.3940s |
-| `ssoflex + fused csm + i16o32` | `19842M` | `0.3650s` |
-| ssoflex + csm in triton + i16o32 | 19888M | 0.3610s |
-| `ssoflex + csm in triton + i16o32 + v4` | `19500M` | **`0.2970s`** |
-
-* *mamba-ssm: `mamba_ssm-1.1.3.post1+cu122torch2.2cxx11abiFALSE-cp310-cp310-linux_x86_64.whl`*
-* *sscore: `selective_scan_cuda_core`*
-* *ssoflex: `selective_scan_cuda_oflex`, `oflex` means output flexible*
-* *csm: `cross scan` and `cross merge`*
-* *i16o32: `input fp16 + output fp32`*
-
 ## Abstract
 
 Convolutional Neural Networks (CNNs) and Vision Transformers (ViTs) stand as the two most popular foundation models for visual representation learning. While
@@ -109,26 +78,6 @@ inspiration from the recently introduced state space model and propose the Visua
 <p align="center">
   <img src="assets/erf_comp.png" alt="erf" width="50%">
 </p>
-
-* **To better understand How SSMScanOp can be derived from Continuous State Space Model**
-
-<p align="center">
-  <img src="assets/derivation.png" alt="derivation" width="80%">
-</p>
-
-* **Mamba is quite similar to Transformer** 
-
-<p align="center">
-  <img src="assets/derivation_general.png" alt="derivation_general" width="80%">
-</p>
-
-
-* **The form of mamba may be all you need** 
-
-    * [`Gated linear attention may be a flavor of mamba`](assets/derivation_wdk.png)  
-    * [`Mamba can be different models`](assets/derivation_wdv.png)  
-    * [`Ndstate == 1 makes mamba quite easier`](assets/derivation_dk1.png)
-
 
 
 ## Main Results
