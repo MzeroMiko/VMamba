@@ -339,7 +339,7 @@ def cross_selective_scan(
     CrossScan=CrossScan,
     CrossMerge=CrossMerge,
     no_einsum=False, # replace einsum with linear or conv1d to raise throughput
-    dt_low_rank=True,
+    **kwargs,
 ):
     # out_norm: whatever fits (B, L, C); LayerNorm; Sigmoid; Softmax(dim=1);...
 
@@ -371,12 +371,7 @@ def cross_selective_scan(
     def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True):
         return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, backnrows, ssoflex)
     
-    if (not dt_low_rank):
-        x_dbl = F.conv1d(x.view(B, -1, L), x_proj_weight.view(-1, D, 1), bias=(x_proj_bias.view(-1) if x_proj_bias is not None else None), groups=K)
-        dts, Bs, Cs = torch.split(x_dbl.view(B, -1, L), [D, 4 * N, 4 * N], dim=1)
-        xs = CrossScan.apply(x)
-        dts = CrossScan.apply(dts)
-    elif no_einsum:
+    if no_einsum:
         xs = CrossScan.apply(x)
         x_dbl = F.conv1d(xs.view(B, -1, L), x_proj_weight.view(-1, D, 1), bias=(x_proj_bias.view(-1) if x_proj_bias is not None else None), groups=K)
         dts, Bs, Cs = torch.split(x_dbl.view(B, K, -1, L), [R, N, N], dim=2)
