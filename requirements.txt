@@ -2,6 +2,7 @@ torch
 torchvision
 torchaudio
 packaging
+triton
 timm==0.4.12
 pytest 
 chardet 
