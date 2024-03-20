@@ -1098,8 +1098,8 @@ class SS2D(nn.Module):
         
         y: torch.Tensor = CrossMerge.apply(ys)
 
-        if getattr(self, "DEBUG", False):
-            setattr(self, "data", dict(
+        if getattr(self, "__DEBUG__", False):
+            setattr(self, "__data__", dict(
                 A_logs=A_logs, Bs=Bs, Cs=Cs, Ds=Ds,
                 us=xs, dts=dts, delta_bias=delta_bias,
                 ys=ys, y=y,
@@ -1246,8 +1246,8 @@ class SS2D(nn.Module):
         y: torch.Tensor = CrossMergeTriton.apply(ys)
         y = y.view(B, -1, H, W)
 
-        if getattr(self, "DEBUG", False):
-            setattr(self, "data", dict(
+        if getattr(self, "__DEBUG__", False):
+            setattr(self, "__data__", dict(
                 A_logs=A_logs, Bs=Bs, Cs=Cs, Ds=Ds,
                 us=us, dts=dts, delta_bias=delta_bias,
                 ys=ys, y=y,
