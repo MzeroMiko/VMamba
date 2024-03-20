@@ -79,26 +79,6 @@ inspiration from the recently introduced state space model and propose the Visua
   <img src="assets/erf_comp.png" alt="erf" width="50%">
 </p>
 
-* **To better understand How SSMScanOp can be derived from Continuous State Space Model**
-
-<p align="center">
-  <img src="assets/derivation.png" alt="derivation" width="80%">
-</p>
-
-* **Mamba is quite similar to Transformer** 
-
-<p align="center">
-  <img src="assets/derivation_general.png" alt="derivation_general" width="80%">
-</p>
-
-
-* **The form of mamba may be all you need** 
-
-    * [`Gated linear attention may be a flavor of mamba`](assets/derivation_wdk.png)  
-    * [`Mamba can be different models`](assets/derivation_wdv.png)  
-    * [`Ndstate == 1 makes mamba quite easier`](assets/derivation_dk1.png)
-
-
 
 ## Main Results
 
