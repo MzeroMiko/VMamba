@@ -342,7 +342,7 @@ class LayerNorm2d(nn.LayerNorm):
 
 
 class PatchMerging2D(nn.Module):
-    def __init__(self, dim, out_dim=-1, norm_layer=nn.LayerNorm):
+    def __init__(self, dim, out_dim=-1, norm_layer=nn.LayerNorm, **kwargs):
         super().__init__()
         self.dim = dim
         self.reduction = nn.Linear(4 * dim, (2 * dim) if out_dim < 0 else out_dim, bias=False)
