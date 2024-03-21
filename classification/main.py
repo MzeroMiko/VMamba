@@ -202,7 +202,7 @@ def main(config):
         logger.info(f"train cost mode ==============================")
         assert dist.get_world_size() == 1, "it is better to test in one card"
         data_loader_train.sampler.set_epoch(0)
-        test_train_cost(config, model, criterion, data_loader_train, optimizer, 0, mixup_fn, lr_scheduler, loss_scaler, model_ema, times=100)
+        test_train_cost(config, model, criterion, data_loader_train, optimizer, 0, mixup_fn, lr_scheduler, loss_scaler, None, times=100)
         return
 
     logger.info("Start training")
