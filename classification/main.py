@@ -301,7 +301,7 @@ def test_train_cost(config, model, criterion, data_loader, optimizer, epoch, mix
 
     start = time.time()
     end = time.time()
-    samples, targets = iter(next(data_loader))
+    samples, targets = next(iter(data_loader))
     samples = samples.new_randn(samples.shape)
     targets = targets.new_randn(targets.shape)
 
