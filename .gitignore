@@ -16,6 +16,8 @@ ckpts
 log
 ckpt
 
+classification/configs/vssm01
+
 analyze/show
 
 cross_selective_scan
