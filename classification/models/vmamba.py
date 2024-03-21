@@ -457,7 +457,7 @@ class SS2D(nn.Module):
             initialize=initialize, forward_type=forward_type, channel_first=channel_first,
         )
         # only used to run previous version
-        if forward_type.startswith("v0"):
+        if forward_type in ["v0", "v0seq"]:
             self.__initv0__(seq=("seq" in forward_type), **kwargs)
             return
         elif forward_type.startswith("xv"):

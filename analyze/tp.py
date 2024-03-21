@@ -8,6 +8,8 @@ import logging
 from torchvision import datasets, transforms
 from timm.data import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 from torchvision.models.vision_transformer import EncoderBlock
+from fvcore.nn import FlopCountAnalysis, flop_count_str, flop_count, parameter_count
+
 
 def import_abspy(name="models", path="classification/"):
     import sys
@@ -65,7 +67,7 @@ def throughput(data_loader, model, logger):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--batch-size', type=int, default=64, help="batch size for single GPU")
+    parser.add_argument('--batch-size', type=int, default=128, help="batch size for single GPU")
     parser.add_argument('--data-path', type=str, required=True, help='path to dataset')
     parser.add_argument('--size', type=int, default=224, help='path to dataset')
     args = parser.parse_args()
@@ -78,7 +80,17 @@ if __name__ == "__main__":
         img_size=args.size,
     )
 
-    MODEL = "VSSM"
+    if True:
+        model = import_abspy("models_mamba", "/home/zjy/nodeHPC8/Vim/vim")
+        model = model.vim_small_patch16_224_bimambav2_final_pool_mean_abs_pos_embed_with_midclstok_div2()
+        model.cuda().eval()
+        print(parameter_count(model))
+        throughput(data_loader=dataloader, model=model, logger=logging)
+        # PYTHONPATH=/home/zjy/nodeHPC8/Vim/mamba-1p1p1:$PYTHONPATH python /home/zjy/nodeHPC8/VMamba/analyze/tp.py --data-path /media/memfs/ImageNet_ILSVRC2012/
+        # PYTHONPATH=/home/zjy/nodeHPC8/Vim/mamba-1p1p1:$PYTHONPATH CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 --use_env main.py --model vim_small_patch16_224_bimambav2_final_pool_mean_abs_pos_embed_with_midclstok_div2 --batch-size 128 --drop-path 0.05 --weight-decay 0.05 --lr 1e-3 --num_workers 25 --data-path /media/memfs/ImageNet_ILSVRC2012/ --output_dir /tmp --no_amp
+
+
+    MODEL = None
 
     if MODEL in ["VSSM"]:
         VSSM = import_abspy(
@@ -142,8 +154,4 @@ if __name__ == "__main__":
         model = HEAT(dims=112, depths=[4,4,21,4])
         # INFO:root:batch_size 64 throughput 188.57667325700203
 
-    # model = vim_small_patch16_224_bimambav2_final_pool_mean_abs_pos_embed_with_midclstok_div2
-
-    model.cuda().eval()
-    throughput(data_loader=dataloader, model=model, logger=logging)
-
+    
