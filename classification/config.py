@@ -266,6 +266,8 @@ def update_config(config, args):
         config.EVAL_MODE = True
     if _check_args('throughput'):
         config.THROUGHPUT_MODE = True
+    if _check_args('traincost'):
+        config.TRAINCOST_MODE = True
 
     # [SimMIM]
     if _check_args('enable_amp'):

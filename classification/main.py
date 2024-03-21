@@ -85,6 +85,7 @@ def parse_option():
     parser.add_argument('--tag', default=time.strftime("%Y%m%d%H%M%S", time.localtime()), help='tag of experiment')
     parser.add_argument('--eval', action='store_true', help='Perform evaluation only')
     parser.add_argument('--throughput', action='store_true', help='Test throughput only')
+    parser.add_argument('--traincost', action='store_true', help='Test training cost only')
 
     parser.add_argument('--fused_layernorm', action='store_true', help='Use fused layernorm.')
     parser.add_argument('--optim', type=str, help='overwrite optimizer if provided, can be adamw/sgd.')
@@ -188,12 +189,16 @@ def main(config):
             return
 
     if config.THROUGHPUT_MODE and (dist.get_rank() == 0):
-            throughput(data_loader_val, model, logger)
-            if model_ema is not None:
-                torch.cuda.synchronize()
-                torch.cuda.empty_cache()
-                throughput(data_loader_val, model_ema.ema, logger)
-            return
+        throughput(data_loader_val, model, logger)
+        if model_ema is not None:
+            torch.cuda.synchronize()
+            torch.cuda.empty_cache()
+            throughput(data_loader_val, model_ema.ema, logger)
+        return
+    
+    if config.TRAINCOST_MODE and (dist.get_rank() == 0):
+        test_train_cost(config, model, criterion, data_loader_train, optimizer, 0, mixup_fn, lr_scheduler, loss_scaler, model_ema, times=100)
+        return
 
     logger.info("Start training")
     start_time = time.time()
@@ -285,6 +290,53 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
                 f'mem {memory_used:.0f}MB')
     epoch_time = time.time() - start
     logger.info(f"EPOCH {epoch} training takes {datetime.timedelta(seconds=int(epoch_time))}")
+
+
+def test_train_cost(config, model, criterion, data_loader, optimizer, epoch, mixup_fn, lr_scheduler, loss_scaler, model_ema=None, times=100):
+    model.train()
+    optimizer.zero_grad()
+
+    batch_time = AverageMeter()
+    data_time = AverageMeter()
+
+    start = time.time()
+    end = time.time()
+    samples, targets = iter(next(data_loader))
+    samples = samples.new_randn(samples.shape)
+    targets = targets.new_randn(targets.shape)
+
+    for idx in times:
+        torch.cuda.reset_peak_memory_stats()
+        samples = samples.cuda(non_blocking=True)
+        targets = targets.cuda(non_blocking=True)
+
+        if mixup_fn is not None:
+            samples, targets = mixup_fn(samples, targets)
+
+        data_time.update(time.time() - end)
+
+        with torch.cuda.amp.autocast(enabled=config.AMP_ENABLE):
+            outputs = model(samples)
+        loss = criterion(outputs, targets)
+        loss = loss / config.TRAIN.ACCUMULATION_STEPS
+
+        # this attribute is added by timm on one optimizer (adahessian)
+        is_second_order = hasattr(optimizer, 'is_second_order') and optimizer.is_second_order
+        grad_norm = loss_scaler(loss, optimizer, clip_grad=config.TRAIN.CLIP_GRAD,
+                                parameters=model.parameters(), create_graph=is_second_order,
+                                update_grad=True)
+        optimizer.zero_grad()
+        lr_scheduler.step_update(idx)
+        if model_ema is not None:
+            model_ema.update(model)
+
+        torch.cuda.synchronize()
+        batch_time.update(time.time() - end)
+        end = time.time()
+
+    if True:
+        memory_used = torch.cuda.max_memory_allocated() / (1024.0 * 1024.0)
+        logger.info(f'time {batch_time.val:.4f} ({batch_time.avg:.4f})\t', f'mem {memory_used:.0f}MB')
 
 
 @torch.no_grad()
