@@ -189,6 +189,7 @@ def main(config):
             return
 
     if config.THROUGHPUT_MODE and (dist.get_rank() == 0):
+        logger.info(f"throughput mode ==============================")
         throughput(data_loader_val, model, logger)
         if model_ema is not None:
             torch.cuda.synchronize()
@@ -197,6 +198,7 @@ def main(config):
         return
     
     if config.TRAINCOST_MODE and (dist.get_rank() == 0):
+        logger.info(f"train cost mode ==============================")
         test_train_cost(config, model, criterion, data_loader_train, optimizer, 0, mixup_fn, lr_scheduler, loss_scaler, model_ema, times=100)
         return
 
@@ -302,8 +304,8 @@ def test_train_cost(config, model, criterion, data_loader, optimizer, epoch, mix
     start = time.time()
     end = time.time()
     samples, targets = next(iter(data_loader))
-    samples = samples.new_randn(samples.shape)
-    targets = targets.new_randn(targets.shape)
+    samples = torch.randn_like(samples)
+    targets = torch.randn_like(targets)
 
     for idx in times:
         torch.cuda.reset_peak_memory_stats()
