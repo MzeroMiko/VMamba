@@ -197,13 +197,7 @@ def main(config):
             torch.cuda.empty_cache()
             throughput(data_loader_val, model_ema.ema, logger)
         return
-    
-    if config.TRAINCOST_MODE:
-        logger.info(f"train cost mode ==============================")
-        assert dist.get_world_size() == 1, "it is better to test in one card"
-        data_loader_train.sampler.set_epoch(0)
-        test_train_cost(config, model, criterion, data_loader_train, optimizer, 0, mixup_fn, lr_scheduler, loss_scaler, None, times=100)
-        return
+
 
     logger.info("Start training")
     start_time = time.time()
@@ -230,12 +224,13 @@ def main(config):
     logger.info('Training time {}'.format(total_time_str))
 
 
-def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mixup_fn, lr_scheduler, loss_scaler, model_ema=None):
+def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mixup_fn, lr_scheduler, loss_scaler, model_ema=None, model_time_warmup=50):
     model.train()
     optimizer.zero_grad()
 
     num_steps = len(data_loader)
     batch_time = AverageMeter()
+    model_time = AverageMeter()
     data_time = AverageMeter()
     loss_meter = AverageMeter()
     norm_meter = AverageMeter()
@@ -279,6 +274,9 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
         batch_time.update(time.time() - end)
         end = time.time()
 
+        if idx > model_time_warmup:
+            model_time.update(batch_time - data_time)
+
         if idx % config.PRINT_FREQ == 0:
             lr = optimizer.param_groups[0]['lr']
             wd = optimizer.param_groups[0]['weight_decay']
@@ -289,64 +287,13 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
                 f'eta {datetime.timedelta(seconds=int(etas))} lr {lr:.6f}\t wd {wd:.4f}\t'
                 f'time {batch_time.val:.4f} ({batch_time.avg:.4f})\t'
                 f'data time {data_time.val:.4f} ({data_time.avg:.4f})\t'
+                f'model time {model_time.val:.4f} ({model_time.avg:.4f})\t'
                 f'loss {loss_meter.val:.4f} ({loss_meter.avg:.4f})\t'
                 f'grad_norm {norm_meter.val:.4f} ({norm_meter.avg:.4f})\t'
                 f'loss_scale {scaler_meter.val:.4f} ({scaler_meter.avg:.4f})\t'
                 f'mem {memory_used:.0f}MB')
     epoch_time = time.time() - start
     logger.info(f"EPOCH {epoch} training takes {datetime.timedelta(seconds=int(epoch_time))}")
-
-
-def test_train_cost(config, model, criterion, data_loader, optimizer, epoch, mixup_fn, lr_scheduler, loss_scaler, model_ema=None, times=100, warmups=50):
-    model.train()
-    optimizer.zero_grad()
-
-    batch_time = AverageMeter()
-    data_time = AverageMeter()
-
-    start = time.time()
-    end = time.time()
-
-    samples, targets = None, None
-    try:
-        for idx, (samples, targets) in enumerate(data_loader):
-            torch.cuda.reset_peak_memory_stats()
-            samples = samples.cuda()
-            targets = targets.cuda()
-            break
-    except Exception as e:
-        pass
-    _samples = torch.randn_like(samples.to(torch.float32)).to(samples.dtype).cuda()
-    _targets = torch.zeros_like(targets.to(torch.float32)).to(targets.dtype).cuda()
-
-    for idx in tqdm.tqdm(range(times + warmups)):
-        torch.cuda.reset_peak_memory_stats()
-        samples, targets = _samples, _targets
-        data_time.update(time.time() - end)
-
-        with torch.cuda.amp.autocast(enabled=config.AMP_ENABLE):
-            outputs = model(samples)
-        loss = criterion(outputs, targets)
-        loss = loss / config.TRAIN.ACCUMULATION_STEPS
-
-        # this attribute is added by timm on one optimizer (adahessian)
-        is_second_order = hasattr(optimizer, 'is_second_order') and optimizer.is_second_order
-        grad_norm = loss_scaler(loss, optimizer, clip_grad=config.TRAIN.CLIP_GRAD,
-                                parameters=model.parameters(), create_graph=is_second_order,
-                                update_grad=True)
-        optimizer.zero_grad()
-        lr_scheduler.step_update(idx)
-        if model_ema is not None:
-            model_ema.update(model)
-
-        torch.cuda.synchronize()
-        if idx >= warmups:
-            batch_time.update(time.time() - end)
-        end = time.time()
-
-    if True:
-        memory_used = torch.cuda.max_memory_allocated() / (1024.0 * 1024.0)
-        logger.info(f'time {batch_time.val:.4f} ({batch_time.avg:.4f})\t' f'mem {memory_used:.0f}MB')
 
 
 @torch.no_grad()
