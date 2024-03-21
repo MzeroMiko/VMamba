@@ -247,6 +247,13 @@ class CHECKS:
             res4 = triton.testing.do_bench(lambda :CrossMerge.apply(y))
             res5 = triton.testing.do_bench(lambda :CrossMergeTriton.apply(y))
             print(res0, res1, res2, res3, res4, res5)
+            res0 = triton.testing.do_bench(lambda :cross_scan(x).sum().backward())
+            res1 = triton.testing.do_bench(lambda :CrossScan.apply(x).sum().backward())
+            res2 = triton.testing.do_bench(lambda :CrossScanTriton.apply(x).sum().backward())
+            res3 = triton.testing.do_bench(lambda :cross_merge(y).sum().backward())
+            res4 = triton.testing.do_bench(lambda :CrossMerge.apply(y).sum().backward())
+            res5 = triton.testing.do_bench(lambda :CrossMergeTriton.apply(y).sum().backward())
+            print(res0, res1, res2, res3, res4, res5)
 
         print("test cross scan")
         if True:
