@@ -275,7 +275,7 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
         end = time.time()
 
         if idx > model_time_warmup:
-            model_time.update(batch_time - data_time)
+            model_time.update(batch_time.val - data_time.val)
 
         if idx % config.PRINT_FREQ == 0:
             lr = optimizer.param_groups[0]['lr']
