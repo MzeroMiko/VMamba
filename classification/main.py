@@ -297,7 +297,7 @@ def train_one_epoch(config, model, criterion, data_loader, optimizer, epoch, mix
     logger.info(f"EPOCH {epoch} training takes {datetime.timedelta(seconds=int(epoch_time))}")
 
 
-def test_train_cost(config, model, criterion, data_loader, optimizer, epoch, mixup_fn, lr_scheduler, loss_scaler, model_ema=None, times=100):
+def test_train_cost(config, model, criterion, data_loader, optimizer, epoch, mixup_fn, lr_scheduler, loss_scaler, model_ema=None, times=100, warmups=50):
     model.train()
     optimizer.zero_grad()
 
@@ -316,7 +316,7 @@ def test_train_cost(config, model, criterion, data_loader, optimizer, epoch, mix
     _samples = torch.randn_like(samples.to(torch.float32)).to(samples.dtype).cuda()
     _targets = torch.zeros_like(targets.to(torch.float32)).to(targets.dtype).cuda()
 
-    for idx in tqdm.tqdm(range(times)):
+    for idx in tqdm.tqdm(range(times + warmups)):
         torch.cuda.reset_peak_memory_stats()
         samples, targets = _samples, _targets
 
@@ -341,7 +341,8 @@ def test_train_cost(config, model, criterion, data_loader, optimizer, epoch, mix
             model_ema.update(model)
 
         torch.cuda.synchronize()
-        batch_time.update(time.time() - end)
+        if idx >= warmups:
+            batch_time.update(time.time() - end)
         end = time.time()
 
     if True:
