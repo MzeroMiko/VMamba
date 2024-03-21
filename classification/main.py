@@ -308,21 +308,20 @@ def test_train_cost(config, model, criterion, data_loader, optimizer, epoch, mix
     end = time.time()
 
     samples, targets = None, None
-    for idx, (samples, targets) in enumerate(data_loader):
-        torch.cuda.reset_peak_memory_stats()
-        samples = samples.cuda()
-        targets = targets.cuda()
-        break
+    try:
+        for idx, (samples, targets) in enumerate(data_loader):
+            torch.cuda.reset_peak_memory_stats()
+            samples = samples.cuda()
+            targets = targets.cuda()
+            break
+    except Exception as e:
+        pass
     _samples = torch.randn_like(samples.to(torch.float32)).to(samples.dtype).cuda()
     _targets = torch.zeros_like(targets.to(torch.float32)).to(targets.dtype).cuda()
 
     for idx in tqdm.tqdm(range(times + warmups)):
         torch.cuda.reset_peak_memory_stats()
         samples, targets = _samples, _targets
-
-        if mixup_fn is not None:
-            samples, targets = mixup_fn(samples, targets)
-
         data_time.update(time.time() - end)
 
         with torch.cuda.amp.autocast(enabled=config.AMP_ENABLE):
