@@ -208,6 +208,8 @@ _C.SEED = 0
 _C.EVAL_MODE = False
 # Test throughput only, overwritten by command line argument
 _C.THROUGHPUT_MODE = False
+# Test traincost only, overwritten by command line argument
+_C.TRAINCOST_MODE = False
 # for acceleration
 _C.FUSED_LAYERNORM = False
 

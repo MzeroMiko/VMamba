@@ -13,6 +13,7 @@ import json
 import random
 import argparse
 import datetime
+import tqdm
 import numpy as np
 
 import torch
@@ -197,8 +198,10 @@ def main(config):
             throughput(data_loader_val, model_ema.ema, logger)
         return
     
-    if config.TRAINCOST_MODE and (dist.get_rank() == 0):
+    if config.TRAINCOST_MODE:
         logger.info(f"train cost mode ==============================")
+        assert dist.get_world_size() == 1, "it is better to test in one card"
+        data_loader_train.sampler.set_epoch(0)
         test_train_cost(config, model, criterion, data_loader_train, optimizer, 0, mixup_fn, lr_scheduler, loss_scaler, model_ema, times=100)
         return
 
@@ -304,13 +307,17 @@ def test_train_cost(config, model, criterion, data_loader, optimizer, epoch, mix
     start = time.time()
     end = time.time()
     samples, targets = next(iter(data_loader))
-    samples = torch.randn_like(samples)
-    targets = torch.randn_like(targets)
+    _samples = torch.randn_like(samples.to(torch.float32)).to(samples.dtype).cuda()
+    _targets = torch.randn_like(targets.to(torch.float32)).to(targets.dtype).cuda()
+    print("12")
 
-    for idx in times:
+    for idx, (samples, targets) in tqdm.tqdm(enumerate(data_loader)):
         torch.cuda.reset_peak_memory_stats()
         samples = samples.cuda(non_blocking=True)
         targets = targets.cuda(non_blocking=True)
+    # for idx in tqdm.tqdm(range(times)):
+    #     torch.cuda.reset_peak_memory_stats()
+    #     samples, targets = _samples, _targets
 
         if mixup_fn is not None:
             samples, targets = mixup_fn(samples, targets)
