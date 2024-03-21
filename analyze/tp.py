@@ -142,6 +142,8 @@ if __name__ == "__main__":
         model = HEAT(dims=112, depths=[4,4,21,4])
         # INFO:root:batch_size 64 throughput 188.57667325700203
 
+    # model = vim_small_patch16_224_bimambav2_final_pool_mean_abs_pos_embed_with_midclstok_div2
+
     model.cuda().eval()
     throughput(data_loader=dataloader, model=model, logger=logging)
 
