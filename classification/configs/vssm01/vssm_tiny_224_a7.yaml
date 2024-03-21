@@ -8,6 +8,7 @@ MODEL:
     SSM_D_STATE: 16
     SSM_DT_RANK: "auto"
     SSM_RATIO: 1.0
+    SSM_CONV: -1
     SSM_FORWARDTYPE: "v05"
     MLP_RATIO: 4.0
     DOWNSAMPLE: "v3"
