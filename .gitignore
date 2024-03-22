@@ -52,3 +52,4 @@ kernels/selective_scan/test_selective_scan_easy.py
 kernels/selective_scan/ssmtriton.py
 test.sh
 classification/models/vmamba copy.py
+analyze/convnexts4nd/extensions/kernels/build/*

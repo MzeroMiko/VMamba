@@ -80,7 +80,7 @@ if __name__ == "__main__":
         img_size=args.size,
     )
 
-    if True:
+    if False:
         model = import_abspy("models_mamba", "/home/zjy/nodeHPC8/Vim/vim")
         model = model.vim_small_patch16_224_bimambav2_final_pool_mean_abs_pos_embed_with_midclstok_div2()
         model.cuda().eval()
@@ -88,6 +88,18 @@ if __name__ == "__main__":
         throughput(data_loader=dataloader, model=model, logger=logging)
         # PYTHONPATH=/home/zjy/nodeHPC8/Vim/mamba-1p1p1:$PYTHONPATH python /home/zjy/nodeHPC8/VMamba/analyze/tp.py --data-path /media/memfs/ImageNet_ILSVRC2012/
         # PYTHONPATH=/home/zjy/nodeHPC8/Vim/mamba-1p1p1:$PYTHONPATH CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 --use_env main.py --model vim_small_patch16_224_bimambav2_final_pool_mean_abs_pos_embed_with_midclstok_div2 --batch-size 128 --drop-path 0.05 --weight-decay 0.05 --lr 1e-3 --num_workers 25 --data-path /media/memfs/ImageNet_ILSVRC2012/ --output_dir /tmp --no_amp
+    
+    if True:
+        model = import_abspy("convnext_timm", "/home/LiuYue/Workspace/PylanceAware/cvnxts4nd")
+        model = model.convnext_tiny_s4nd().cuda().eval()
+        print(parameter_count(model))
+        throughput(data_loader=dataloader, model=model, logger=logging) 
+        # PYTHONPATH=/home/LiuYue/Workspace/PylanceAware/cvnxts4nd:$PYTHONPATH python /home/LiuYue/Workspace/PylanceAware/VMamba/analyze/tp.py --data-path /media/Disk1/Dataset/ImageNet_ILSVRC2012
+
+        # 30007057
+        # in T14: 640
+        
+
 
 
     MODEL = None
