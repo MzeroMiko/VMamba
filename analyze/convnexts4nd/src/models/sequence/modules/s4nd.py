@@ -230,7 +230,7 @@ class S4ND(SequenceModule):
         L_input = u.shape[2:]
 
         L_kernel = [
-            l_i if l_k is None else min(l_i, round(l_k / rate)) for l_i, l_k in zip(L_input, self.l_max)
+            int(l_i if l_k is None else min(l_i, round(l_k / rate))) for l_i, l_k in zip(L_input, self.l_max)
         ]
 
         # Compute SS Kernel

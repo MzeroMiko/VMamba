@@ -41,6 +41,17 @@ if torch.multiprocessing.get_start_method() != "spawn":
     torch.multiprocessing.set_start_method("spawn", force=True)
 
 
+def import_abspy(name="models", path="classification/"):
+    import sys
+    import importlib
+    path = os.path.abspath(path)
+    assert os.path.isdir(path)
+    sys.path.insert(0, path)
+    module = importlib.import_module(name)
+    sys.path.pop(0)
+    return module
+
+
 def str2bool(v):
     """
     Converts string to bool type; enables command line 
@@ -105,12 +116,15 @@ def parse_option():
     return args, config
 
 
-def main(config):
+def main(config, args):
     dataset_train, dataset_val, data_loader_train, data_loader_val, mixup_fn = build_loader(config)
 
     logger.info(f"Creating model:{config.MODEL.TYPE}/{config.MODEL.NAME}")
     model = build_model(config)
-    
+
+    model = import_abspy("convnext_timm", os.path.join(os.path.dirname(__file__), "../analyze/convnexts4nd"))
+    model = model.convnext_tiny_s4nd()
+
     if dist.get_rank() == 0:
         if hasattr(model, 'flops'):
             logger.info(str(model))
@@ -433,4 +447,4 @@ if __name__ == '__main__':
         usable_memory = torch.cuda.get_device_properties(0).total_memory * args.memory_limit_rate / 1e6
         print(f"===========> GPU memory is limited to {usable_memory}MB", flush=True)
 
-    main(config)
+    main(config, args)

@@ -12,6 +12,10 @@ from timm.scheduler.cosine_lr import CosineLRScheduler
 from timm.scheduler.step_lr import StepLRScheduler
 from timm.scheduler.scheduler import Scheduler
 
+import timm
+if timm.__version__ != "0.4.12":
+    from .cosine_lr import CosineLRScheduler 
+
 
 def build_scheduler(config, optimizer, n_iter_per_epoch):
     num_steps = int(config.TRAIN.EPOCHS * n_iter_per_epoch)
