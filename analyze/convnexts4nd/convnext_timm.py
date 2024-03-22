@@ -1808,6 +1808,13 @@ def convnext_tiny_s4nd():
             dict(dt_min=0.1, dt_max=1.0),
         ],
     )
+    
+    def forward(self, x, resolution=1, state=None):
+        x = self.forward_features(x, resolution)
+        x = self.forward_head(x)
+        return x
+    
+    model.forward = partial(forward, model)
     return model
 
 if __name__ == '__main__':

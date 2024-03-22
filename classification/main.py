@@ -122,9 +122,6 @@ def main(config, args):
     logger.info(f"Creating model:{config.MODEL.TYPE}/{config.MODEL.NAME}")
     model = build_model(config)
 
-    model = import_abspy("convnext_timm", os.path.join(os.path.dirname(__file__), "../analyze/convnexts4nd"))
-    model = model.convnext_tiny_s4nd()
-
     if dist.get_rank() == 0:
         if hasattr(model, 'flops'):
             logger.info(str(model))
