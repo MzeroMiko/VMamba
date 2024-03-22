@@ -63,6 +63,25 @@ def throughput(data_loader, model, logger):
         tic2 = time.time()
         logger.info(f"batch_size {batch_size} throughput {30 * batch_size / (tic2 - tic1)}")
         return
+
+
+def testfwdbwd(data_loader, model, logger):
+    model.train()
+
+    for idx, (images, _) in enumerate(data_loader):
+        images = images.cuda(non_blocking=True)
+        batch_size = images.shape[0]
+        for i in range(50):
+            model(images).sum().backward()
+        torch.cuda.synchronize()
+        logger.info(f"throughput averaged with 30 times")
+        tic1 = time.time()
+        for i in range(30):
+            model(images)
+        torch.cuda.synchronize()
+        tic2 = time.time()
+        logger.info(f"batch_size {batch_size} throughput {30 * batch_size / (tic2 - tic1)}")
+        return
     
 
 if __name__ == "__main__":
@@ -80,12 +99,13 @@ if __name__ == "__main__":
         img_size=args.size,
     )
 
-    if False:
+    if True:
         model = import_abspy("models_mamba", "/home/zjy/nodeHPC8/Vim/vim")
         model = model.vim_small_patch16_224_bimambav2_final_pool_mean_abs_pos_embed_with_midclstok_div2()
         model.cuda().eval()
         print(parameter_count(model))
         throughput(data_loader=dataloader, model=model, logger=logging)
+        testfwdbwd(data_loader=dataloader, model=model, logger=logging)
         # PYTHONPATH=/home/zjy/nodeHPC8/Vim/mamba-1p1p1:$PYTHONPATH python /home/zjy/nodeHPC8/VMamba/analyze/tp.py --data-path /media/memfs/ImageNet_ILSVRC2012/
         # PYTHONPATH=/home/zjy/nodeHPC8/Vim/mamba-1p1p1:$PYTHONPATH CUDA_VISIBLE_DEVICES=0 python -m torch.distributed.launch --nproc_per_node=1 --use_env main.py --model vim_small_patch16_224_bimambav2_final_pool_mean_abs_pos_embed_with_midclstok_div2 --batch-size 128 --drop-path 0.05 --weight-decay 0.05 --lr 1e-3 --num_workers 25 --data-path /media/memfs/ImageNet_ILSVRC2012/ --output_dir /tmp --no_amp
     
@@ -99,7 +119,9 @@ if __name__ == "__main__":
 
         # 30007057
         # in T14: 640
-        
+
+
+      
 
 
 
