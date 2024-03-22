@@ -74,13 +74,13 @@ def testfwdbwd(data_loader, model, logger):
         for i in range(50):
             model(images).sum().backward()
         torch.cuda.synchronize()
-        logger.info(f"throughput averaged with 30 times")
+        logger.info(f"testfwdbwd averaged with 30 times")
         tic1 = time.time()
         for i in range(30):
-            model(images)
+            model(images).sum().backward()
         torch.cuda.synchronize()
         tic2 = time.time()
-        logger.info(f"batch_size {batch_size} throughput {30 * batch_size / (tic2 - tic1)}")
+        logger.info(f"batch_size {batch_size} testfwdbwd {30 * batch_size / (tic2 - tic1)}")
         return
     
 
