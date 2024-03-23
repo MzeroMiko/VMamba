@@ -31,7 +31,7 @@ def import_abspy(name="models", path="classification/"):
 
 
 
-def get_dataloader(batch_size=64, root="./val", img_size=224):
+def get_dataloader(batch_size=64, root="./val", img_size=224, sequential=True):
     size = int((256 / 224) * img_size)
     transform = transforms.Compose([
         transforms.Resize(size, interpolation=transforms.InterpolationMode.BICUBIC),
@@ -41,7 +41,11 @@ def get_dataloader(batch_size=64, root="./val", img_size=224):
     ])
 
     dataset = datasets.ImageFolder(root, transform=transform)
-    sampler = torch.utils.data.SequentialSampler(dataset)
+    if sequential:
+        sampler = torch.utils.data.SequentialSampler(dataset)
+    else:
+        sampler = torch.utils.data.DistributedSampler(dataset)
+    
     data_loader = torch.utils.data.DataLoader(
         dataset, sampler=sampler,
         batch_size=batch_size,
