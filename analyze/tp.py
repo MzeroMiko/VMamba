@@ -417,18 +417,6 @@ def main1():
         sys.path = sys.path[1:]
 
 
-
-
-        _model = import_abspy("vmamba", f"{os.path.dirname(__file__)}/../classification/models")
-        ta6 = partial(_model.VSSM, dims=96, depths=[2,2,9,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v05", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1", norm_layer="ln2d")
-        test_size(ta6)
-        taav1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        test_size(taav1)
-
-
-
-     
-
 if __name__ == "__main__":
     # main0()
     main1()
