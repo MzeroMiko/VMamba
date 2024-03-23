@@ -1,0 +1,759 @@
+convnext-s4nd ================================
+stem type:  new_s4nd_patch
+INFO:src.models.sequence.kernels.ssm:CUDA extension for structured kernels (Cauchy and Vandermonde multiplication) found.
+INFO:src.models.sequence.modules.s4nd:Constructing S4ND (H, N, L) = (3, 64, [16, 16])
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (3, 32, 16)
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (3, 32, 16)
+INFO:src.models.sequence.modules.s4nd:Constructing S4ND (H, N, L) = (96, 64, [56, 56])
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (96, 32, 56)
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (96, 32, 56)
+INFO:src.models.sequence.modules.s4nd:Constructing S4ND (H, N, L) = (96, 64, [56, 56])
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (96, 32, 56)
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (96, 32, 56)
+INFO:src.models.sequence.modules.s4nd:Constructing S4ND (H, N, L) = (96, 64, [56, 56])
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (96, 32, 56)
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (96, 32, 56)
+strided conv downsample
+INFO:src.models.sequence.modules.s4nd:Constructing S4ND (H, N, L) = (192, 64, [28, 28])
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (192, 32, 28)
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (192, 32, 28)
+INFO:src.models.sequence.modules.s4nd:Constructing S4ND (H, N, L) = (192, 64, [28, 28])
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (192, 32, 28)
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (192, 32, 28)
+INFO:src.models.sequence.modules.s4nd:Constructing S4ND (H, N, L) = (192, 64, [28, 28])
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (192, 32, 28)
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (192, 32, 28)
+strided conv downsample
+INFO:src.models.sequence.modules.s4nd:Constructing S4ND (H, N, L) = (384, 64, [14, 14])
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (384, 32, 14)
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (384, 32, 14)
+INFO:src.models.sequence.modules.s4nd:Constructing S4ND (H, N, L) = (384, 64, [14, 14])
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (384, 32, 14)
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (384, 32, 14)
+INFO:src.models.sequence.modules.s4nd:Constructing S4ND (H, N, L) = (384, 64, [14, 14])
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (384, 32, 14)
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (384, 32, 14)
+INFO:src.models.sequence.modules.s4nd:Constructing S4ND (H, N, L) = (384, 64, [14, 14])
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (384, 32, 14)
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (384, 32, 14)
+INFO:src.models.sequence.modules.s4nd:Constructing S4ND (H, N, L) = (384, 64, [14, 14])
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (384, 32, 14)
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (384, 32, 14)
+INFO:src.models.sequence.modules.s4nd:Constructing S4ND (H, N, L) = (384, 64, [14, 14])
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (384, 32, 14)
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (384, 32, 14)
+INFO:src.models.sequence.modules.s4nd:Constructing S4ND (H, N, L) = (384, 64, [14, 14])
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (384, 32, 14)
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (384, 32, 14)
+INFO:src.models.sequence.modules.s4nd:Constructing S4ND (H, N, L) = (384, 64, [14, 14])
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (384, 32, 14)
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (384, 32, 14)
+INFO:src.models.sequence.modules.s4nd:Constructing S4ND (H, N, L) = (384, 64, [14, 14])
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (384, 32, 14)
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (384, 32, 14)
+strided conv downsample
+INFO:src.models.sequence.modules.s4nd:Constructing S4ND (H, N, L) = (768, 64, [7, 7])
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (768, 32, 7)
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (768, 32, 7)
+INFO:src.models.sequence.modules.s4nd:Constructing S4ND (H, N, L) = (768, 64, [7, 7])
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (768, 32, 7)
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (768, 32, 7)
+INFO:src.models.sequence.modules.s4nd:Constructing S4ND (H, N, L) = (768, 64, [7, 7])
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (768, 32, 7)
+INFO:src.models.sequence.kernels.ssm:Constructing S4 (H, N, L) = (768, 32, 7)
+30007057
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 16
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 16
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 56
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 56
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 56
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 56
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 56
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 56
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 28
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 28
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 28
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 28
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 28
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 28
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 14
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 14
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 14
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 14
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 14
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 14
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 14
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 14
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 14
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 14
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 14
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 14
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 14
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 14
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 14
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 14
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 14
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 14
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 7
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 7
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 7
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 7
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 7
+INFO:src.models.sequence.kernels.ssm:S4: Initializing kernel to length 7
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 684.4703490392949
+INFO:root:batch_size 128 mem cost 3945.23486328125 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 969.148069261828
+INFO:root:batch_size 128 mem cost 3945.23486328125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 331.03009704884664
+INFO:root:batch_size 128 mem cost 18780.6455078125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 234.53354252367774
+INFO:root:batch_size 128 mem cost 24571.91455078125 MB
+vim ================================
+25796584
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 810.7858615488122
+INFO:root:batch_size 128 mem cost 1054.6875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1272.2677570829862
+INFO:root:batch_size 128 mem cost 722.5107421875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 343.3715898477767
+INFO:root:batch_size 128 mem cost 9057.921875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 231.86611909111733
+INFO:root:batch_size 128 mem cost 16142.8525390625 MB
+swin ================================
+/home/zjy/miniconda3/envs/cu12/lib/python3.10/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+28288354
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1247.288749011648
+INFO:root:batch_size 128 mem cost 2264.29833984375 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 3130.2023187724167
+INFO:root:batch_size 128 mem cost 1600.16455078125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 985.0920144874538
+INFO:root:batch_size 128 mem cost 8969.23681640625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 365.13993901308936
+INFO:root:batch_size 128 mem cost 13428.9677734375 MB
+49606258
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 718.7236361684256
+INFO:root:batch_size 128 mem cost 2345.75341796875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1982.8211877775664
+INFO:root:batch_size 128 mem cost 1683.61962890625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 640.3699850870437
+INFO:root:batch_size 128 mem cost 14203.26025390625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 209.37197172863756
+INFO:root:batch_size 128 mem cost 21378.7431640625 MB
+87768224
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 457.4244955213736
+INFO:root:batch_size 128 mem cost 3174.32568359375 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1501.550050557814
+INFO:root:batch_size 128 mem cost 2292.96826171875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 494.27328683612666
+INFO:root:batch_size 128 mem cost 19075.31982421875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 134.10959096648403
+INFO:root:batch_size 128 mem cost 28618.576171875 MB
+convnext ================================
+28589128
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1189.2529304485995
+INFO:root:batch_size 128 mem cost 1672.69189453125 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 2410.3968847370675
+INFO:root:batch_size 128 mem cost 1085.0859375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 700.7073041785249
+INFO:root:batch_size 128 mem cost 8626.0341796875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 368.350556814205
+INFO:root:batch_size 128 mem cost 14551.24560546875 MB
+50223688
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 681.8784862857607
+INFO:root:batch_size 128 mem cost 1756.47119140625 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1532.0104867599994
+INFO:root:batch_size 128 mem cost 1168.865234375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 444.1152141457491
+INFO:root:batch_size 128 mem cost 13163.4638671875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 209.14168611301486
+INFO:root:batch_size 128 mem cost 22707.56201171875 MB
+88591464
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 435.5101138893477
+INFO:root:batch_size 128 mem cost 2388.53759765625 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1144.8618641894363
+INFO:root:batch_size 128 mem cost 1605.216796875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 333.7715480511178
+INFO:root:batch_size 128 mem cost 17709.03466796875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 133.19394164712548
+INFO:root:batch_size 128 mem cost 30393.16259765625 MB
+hivit ================================
+19181668
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1391.0317044935168
+INFO:root:batch_size 128 mem cost 1347.27490234375 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 3916.0693148027026
+INFO:root:batch_size 128 mem cost 904.44482421875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 1300.1537117294797
+INFO:root:batch_size 128 mem cost 7985.25341796875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 446.04485083149626
+INFO:root:batch_size 128 mem cost 11680.712890625 MB
+37526464
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 711.3081045157992
+INFO:root:batch_size 128 mem cost 1419.69677734375 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 2069.873865408114
+INFO:root:batch_size 128 mem cost 978.08056640625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 697.0671415422461
+INFO:root:batch_size 128 mem cost 15180.27197265625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 229.6537866075201
+INFO:root:batch_size 128 mem cost 22404.1904296875 MB
+66418952
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 455.7709011229177
+INFO:root:batch_size 128 mem cost 1920.28271484375 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1583.717101944517
+INFO:root:batch_size 128 mem cost 1332.95654296875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 541.9223144051879
+INFO:root:batch_size 128 mem cost 20317.056640625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 146.55794214694185
+INFO:root:batch_size 128 mem cost 29870.02685546875 MB
+intern ================================
+using core type: DCNv3
+using activation layer: GELU
+using main norm layer: LN
+using dpr: linear, 0.2
+level2_post_norm: False
+level2_post_norm_block_ids: None
+res_post_norm: False
+remove_center: False
+22195704
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 980.5853048283551
+INFO:root:batch_size 128 mem cost 1351.578125 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1942.2024324247084
+INFO:root:batch_size 128 mem cost 959.96923828125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 483.380276211858
+INFO:root:batch_size 128 mem cost 12346.14013671875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 296.0068513667915
+INFO:root:batch_size 128 mem cost 17263.87548828125 MB
+using core type: DCNv3
+using activation layer: GELU
+using main norm layer: LN
+using dpr: linear, 0.2
+level2_post_norm: False
+level2_post_norm_block_ids: None
+res_post_norm: False
+remove_center: False
+50079880
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 559.6994869126016
+INFO:root:batch_size 128 mem cost 1633.05712890625 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1159.814269880151
+INFO:root:batch_size 128 mem cost 1157.31005859375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 282.3477359926145
+INFO:root:batch_size 128 mem cost 23337.29150390625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 156.32379046224324
+INFO:root:batch_size 128 mem cost 31789.90771484375 MB
+using core type: DCNv3
+using activation layer: GELU
+using main norm layer: LN
+using dpr: linear, 0.2
+level2_post_norm: False
+level2_post_norm_block_ids: None
+res_post_norm: False
+remove_center: False
+97461832
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 369.3696623312362
+INFO:root:batch_size 128 mem cost 2352.048828125 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 882.0642615919255
+INFO:root:batch_size 128 mem cost 1680.30224609375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 219.58238013802142
+INFO:root:batch_size 128 mem cost 32799.34716796875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 101.87264527315865
+INFO:root:batch_size 128 mem cost 44529.5810546875 MB
+vssm ================================
+vmamba v0-5 ================================
+22893448
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 425.4480300031207
+INFO:root:batch_size 128 mem cost 7522.44482421875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 503.3991318449598
+INFO:root:batch_size 128 mem cost 6820.3916015625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 137.5797353298097
+INFO:root:batch_size 128 mem cost 28586.068359375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 84.58913821660302
+INFO:root:batch_size 128 mem cost 37530.517578125 MB
+22893448
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 433.7012492522173
+INFO:root:batch_size 128 mem cost 6507.95068359375 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 516.3402428959938
+INFO:root:batch_size 128 mem cost 5989.3291015625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 157.265930856187
+INFO:root:batch_size 128 mem cost 27775.865234375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 91.21275706279665
+INFO:root:batch_size 128 mem cost 37513.64208984375 MB
+22893448
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 466.76341976242026
+INFO:root:batch_size 128 mem cost 5983.83349609375 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 562.5668072490417
+INFO:root:batch_size 128 mem cost 5573.7802734375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 164.8766883424668
+INFO:root:batch_size 128 mem cost 27947.494140625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 93.97216153032193
+INFO:root:batch_size 128 mem cost 37680.98583984375 MB
+22893448
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 463.0207932237244
+INFO:root:batch_size 128 mem cost 6148.57568359375 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 557.4003959221151
+INFO:root:batch_size 128 mem cost 5738.5224609375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 177.396644967599
+INFO:root:batch_size 128 mem cost 28106.587890625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 97.92027313667191
+INFO:root:batch_size 128 mem cost 37842.96240234375 MB
+22893448
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 463.05423280719907
+INFO:root:batch_size 128 mem cost 6310.63037109375 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 612.2797096343652
+INFO:root:batch_size 128 mem cost 4626.5771484375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 184.14949115985388
+INFO:root:batch_size 128 mem cost 21369.517578125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 97.92113577016212
+INFO:root:batch_size 128 mem cost 38020.88427734375 MB
+22893448
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 553.7598680888824
+INFO:root:batch_size 128 mem cost 6479.81787109375 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 703.7871173105879
+INFO:root:batch_size 128 mem cost 4795.6357421875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 199.40780781745968
+INFO:root:batch_size 128 mem cost 17978.986328125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 159.09648294648545
+INFO:root:batch_size 128 mem cost 31092.69677734375 MB
+vmamba a6-a8v3 ================================
+28991656
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 663.2265316186816
+INFO:root:batch_size 128 mem cost 6507.580078125 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 920.2912888027331
+INFO:root:batch_size 128 mem cost 4823.60595703125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 256.3566566810495
+INFO:root:batch_size 128 mem cost 15865.8642578125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 191.70716499089673
+INFO:root:batch_size 128 mem cost 26886.7958984375 MB
+28256680
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 853.6242310764675
+INFO:root:batch_size 128 mem cost 4248.81201171875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1296.4599951155737
+INFO:root:batch_size 128 mem cost 3299.75 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 361.40194393036563
+INFO:root:batch_size 128 mem cost 13078.8740234375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 250.09811622762288
+INFO:root:batch_size 128 mem cost 21536.6787109375 MB
+31795452
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 907.7231866321262
+INFO:root:batch_size 128 mem cost 5260.73046875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1486.041036588927
+INFO:root:batch_size 128 mem cost 4056.31494140625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 478.85982195689013
+INFO:root:batch_size 128 mem cost 15743.6298828125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 284.5208970784973
+INFO:root:batch_size 128 mem cost 26779.5673828125 MB
+31872804
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 880.4335420333175
+INFO:root:batch_size 128 mem cost 5375.42529296875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1423.4670968792238
+INFO:root:batch_size 128 mem cost 4161.142578125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 453.0260446287037
+INFO:root:batch_size 128 mem cost 15880.75146484375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 274.78590012459443
+INFO:root:batch_size 128 mem cost 26929.697265625 MB
+32027508
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 831.9406569531243
+INFO:root:batch_size 128 mem cost 5519.43017578125 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1305.5434056515658
+INFO:root:batch_size 128 mem cost 4279.6474609375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 407.5163620093105
+INFO:root:batch_size 128 mem cost 16058.35498046875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 256.3379863312741
+INFO:root:batch_size 128 mem cost 27149.056640625 MB
+32336916
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 738.4457540782346
+INFO:root:batch_size 128 mem cost 5649.36279296875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1117.4181226774697
+INFO:root:batch_size 128 mem cost 4360.580078125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 334.95918120202145
+INFO:root:batch_size 128 mem cost 16276.3994140625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 225.3583437980156
+INFO:root:batch_size 128 mem cost 27429.248046875 MB
+vmamba a9-abv4 ================================
+31795452
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 906.3905294475265
+INFO:root:batch_size 128 mem cost 4462.15234375 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1488.2461602148173
+INFO:root:batch_size 128 mem cost 3259.59619140625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 480.2059246018259
+INFO:root:batch_size 128 mem cost 14963.2392578125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 284.302130459225
+INFO:root:batch_size 128 mem cost 25997.6201171875 MB
+30705832
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 912.1369927637289
+INFO:root:batch_size 128 mem cost 5223.53955078125 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1547.5511114924602
+INFO:root:batch_size 128 mem cost 3871.251953125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 478.8313207077776
+INFO:root:batch_size 128 mem cost 15249.19384765625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 276.60610530417296
+INFO:root:batch_size 128 mem cost 26172.63671875 MB
+30713896
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 912.5119698969746
+INFO:root:batch_size 128 mem cost 5309.19580078125 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1513.2979901276549
+INFO:root:batch_size 128 mem cost 3956.5166015625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 473.266734089845
+INFO:root:batch_size 128 mem cost 15333.2626953125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 275.88593027482756
+INFO:root:batch_size 128 mem cost 26254.923828125 MB
+29722024
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1052.1003993455681
+INFO:root:batch_size 128 mem cost 5658.43505859375 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1731.499633889521
+INFO:root:batch_size 128 mem cost 4318.701171875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 533.073209609209
+INFO:root:batch_size 128 mem cost 14086.4150390625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 335.39210788170635
+INFO:root:batch_size 128 mem cost 23677.12109375 MB
+29722024
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1473.409168876092
+INFO:root:batch_size 128 mem cost 5737.26318359375 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1648.9916985913549
+INFO:root:batch_size 128 mem cost 4397.50390625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 521.2260851884323
+INFO:root:batch_size 128 mem cost 14203.49169921875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 462.82686702223725
+INFO:root:batch_size 128 mem cost 23799.62939453125 MB
+32610088
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1458.0243627372258
+INFO:root:batch_size 128 mem cost 6110.71923828125 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1644.9126184103545
+INFO:root:batch_size 128 mem cost 4628.7978515625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 538.6586842624882
+INFO:root:batch_size 128 mem cost 14218.28271484375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 483.63145556632855
+INFO:root:batch_size 128 mem cost 23729.61767578125 MB
+30098728
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1473.0204041802133
+INFO:root:batch_size 128 mem cost 5943.62744140625 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1649.2973348483347
+INFO:root:batch_size 128 mem cost 4590.6650390625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 521.5202755998828
+INFO:root:batch_size 128 mem cost 14381.33447265625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 462.2805970519383
+INFO:root:batch_size 128 mem cost 23976.38330078125 MB
+30169964
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1462.7314627544072
+INFO:root:batch_size 128 mem cost 5266.7939453125 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1613.5374339527827
+INFO:root:batch_size 128 mem cost 4081.47216796875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 552.2954373851401
+INFO:root:batch_size 128 mem cost 12899.4501953125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 503.462625760334
+INFO:root:batch_size 128 mem cost 21226.13330078125 MB
+29722024
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1443.8029609111322
+INFO:root:batch_size 128 mem cost 6072.94873046875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1627.894134553594
+INFO:root:batch_size 128 mem cost 4732.921875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 516.3836323649491
+INFO:root:batch_size 128 mem cost 15200.59130859375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 456.0906195565161
+INFO:root:batch_size 128 mem cost 25387.11181640625 MB
+32610088
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1431.5888306022314
+INFO:root:batch_size 128 mem cost 6370.06298828125 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1624.434890035826
+INFO:root:batch_size 128 mem cost 4887.8974609375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 533.506619258953
+INFO:root:batch_size 128 mem cost 15139.29638671875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 476.49761578525363
+INFO:root:batch_size 128 mem cost 25310.11767578125 MB
+30098728
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1444.6582028149176
+INFO:root:batch_size 128 mem cost 6202.80908203125 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1626.955668384489
+INFO:root:batch_size 128 mem cost 4849.2685546875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 516.4450290843533
+INFO:root:batch_size 128 mem cost 15298.35791015625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 455.06025516907886
+INFO:root:batch_size 128 mem cost 25557.00830078125 MB
+30169964
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1444.3955912294152
+INFO:root:batch_size 128 mem cost 5525.2685546875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1598.3474968137007
+INFO:root:batch_size 128 mem cost 4340.72802734375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 547.8818207915391
+INFO:root:batch_size 128 mem cost 13683.2626953125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 497.65015754831774
+INFO:root:batch_size 128 mem cost 22537.98095703125 MB
+vmamba v0 ================================
+22893448
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 425.7855599509047
+INFO:root:batch_size 128 mem cost 7512.44482421875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 503.90423705149834
+INFO:root:batch_size 128 mem cost 6811.3916015625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 137.626792978341
+INFO:root:batch_size 128 mem cost 28583.56640625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 84.56850289131576
+INFO:root:batch_size 128 mem cost 37521.57421875 MB
+44417416
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 233.95188749062933
+INFO:root:batch_size 128 mem cost 7766.36474609375 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 285.6558170103235
+INFO:root:batch_size 128 mem cost 7062.3115234375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 80.2952672830133
+INFO:root:batch_size 128 mem cost 51115.6123046875 MB
+batch_size 64
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 64 testfwdbwd 82.28770728753813
+INFO:root:batch_size 64 mem cost 25949.40185546875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 64 testfwdbwd 51.96162339577822
+INFO:root:batch_size 64 mem cost 33941.63330078125 MB
+76254056
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 167.76220261426568
+INFO:root:batch_size 128 mem cost 10375.62060546875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 216.6388740441605
+INFO:root:batch_size 128 mem cost 9469.642578125 MB
+batch_size 64
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 64 testfwdbwd 63.067541160819204
+INFO:root:batch_size 64 mem cost 34505.05419921875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 64 testfwdbwd 40.37720788264965
+INFO:root:batch_size 64 mem cost 45120.58251953125 MB
+vmamba v2 ================================
+30705832
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 645.1151999771212
+INFO:root:batch_size 128 mem cost 6612.51904296875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1048.3915759089775
+INFO:root:batch_size 128 mem cost 5259.2724609375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 381.5096158802252
+INFO:root:batch_size 128 mem cost 18718.11083984375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 133.9949624914826
+INFO:root:batch_size 128 mem cost 32294.3642578125 MB
+50147752
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 402.0214173931022
+INFO:root:batch_size 128 mem cost 6774.39892578125 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 694.1535698976431
+INFO:root:batch_size 128 mem cost 5421.15234375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 256.079472091875
+INFO:root:batch_size 128 mem cost 27949.28369140625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 93.32572803618001
+INFO:root:batch_size 128 mem cost 48899.9814453125 MB
+88557800
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 276.94953079212166
+INFO:root:batch_size 128 mem cost 8904.0625 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 528.4182630091375
+INFO:root:batch_size 128 mem cost 7103.9755859375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 197.16232408839986
+INFO:root:batch_size 128 mem cost 37140.25732421875 MB
+batch_size 64
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 64 testfwdbwd 191.61888240794573
+INFO:root:batch_size 64 mem cost 19592.71826171875 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 64 testfwdbwd 71.63587140252089
+INFO:root:batch_size 64 mem cost 33451.85107421875 MB
+vmamba v2 ================================
+30705832
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 912.2705972798964
+INFO:root:batch_size 128 mem cost 5119.39404296875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1553.5971199357652
+INFO:root:batch_size 128 mem cost 3766.2314453125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 479.82848576133784
+INFO:root:batch_size 128 mem cost 15154.75927734375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 276.7953871329074
+INFO:root:batch_size 128 mem cost 26077.8564453125 MB
+50147752
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 558.305565367442
+INFO:root:batch_size 128 mem cost 5285.64892578125 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 1044.649383323815
+INFO:root:batch_size 128 mem cost 3932.361328125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 324.5817342176655
+INFO:root:batch_size 128 mem cost 22888.45751953125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 171.63445917408927
+INFO:root:batch_size 128 mem cost 39628.7822265625 MB
+88557800
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 368.54838870962107
+INFO:root:batch_size 128 mem cost 7131.560546875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 128 throughput 795.4398121145128
+INFO:root:batch_size 128 mem cost 5331.4033203125 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 256.18489499930115
+INFO:root:batch_size 128 mem cost 30636.19140625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 128 testfwdbwd 115.95133368212528
+INFO:root:batch_size 128 mem cost 53031.302734375 MB
