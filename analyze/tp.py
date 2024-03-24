@@ -172,12 +172,14 @@ def main0():
     )
 
     # convnext-s4nd: this needs timm=0.5.4; install extentions/kernel
-    if False:
+    if True:
         print("convnext-s4nd ================================", flush=True)
         specpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "./convnexts4nd")
         sys.path.insert(0, specpath)
         import timm; assert timm.__version__ == "0.5.4"
         import structured_kernels
+        # model = import_abspy("vit_all", os.path.join(os.path.dirname(__file__), "./convnexts4nd"))
+        # testall(model.vit_base_s4nd(), dataloader, args.data_path, args.size, args.batch_size)
         model = import_abspy("convnext_timm", os.path.join(os.path.dirname(__file__), "./convnexts4nd"))
         testall(model.convnext_tiny_s4nd(), dataloader, args.data_path, args.size, args.batch_size)
         sys.path = sys.path[1:]
@@ -243,7 +245,7 @@ def main0():
         sys.path.insert(0, specpath)
         import DCNv3
         _model = import_abspy("intern_image", f"{HOME}/OTHERS/InternImage/classification/models/")
-        tiny = partial(_model.InternImage, core_op='DCNv3', channels=64, depths=[4, 4, 8, 4], groups=[4, 8, 16, 32], offset_scale=1.0, mlp_ratio=4.,)
+        tiny = partial(_model.InternImage, core_op='DCNv3', channels=64, depths=[4, 4, 18, 4], groups=[4, 8, 16, 32], offset_scale=1.0, mlp_ratio=4.,)
         small = partial(_model.InternImage, core_op='DCNv3', channels=80, depths=[4, 4, 21, 4], groups=[5, 10, 20, 40], layer_scale=1e-5, offset_scale=1.0, mlp_ratio=4., post_norm=True)
         base = partial(_model.InternImage, core_op='DCNv3', channels=112, depths=[4, 4, 21, 4], groups=[7, 14, 28, 56], layer_scale=1e-5, offset_scale=1.0, mlp_ratio=4., post_norm=True)
         

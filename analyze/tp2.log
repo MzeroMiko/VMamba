@@ -1,0 +1,92 @@
+vssm ta6 ================================
+testing size 224...
+22893448
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 32 throughput 626.6171995996156
+INFO:root:batch_size 32 mem cost 1585.21044921875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 32 throughput 675.5469118447193
+INFO:root:batch_size 32 mem cost 1164.1337890625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 32 testfwdbwd 189.05309492939804
+INFO:root:batch_size 32 mem cost 4379.5 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 32 testfwdbwd 166.34934631606762
+INFO:root:batch_size 32 mem cost 7407.88671875 MB
+testing size 384...
+22893448
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 32 throughput 211.78774160258908
+INFO:root:batch_size 32 mem cost 4635.47607421875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 32 throughput 230.00531010171449
+INFO:root:batch_size 32 mem cost 3399.4931640625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 32 testfwdbwd 64.72216824509121
+INFO:root:batch_size 32 mem cost 11986.82177734375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 32 testfwdbwd 56.06985130042106
+INFO:root:batch_size 32 mem cost 21005.20703125 MB
+testing size 512...
+22893448
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 32 throughput 137.39589660239508
+INFO:root:batch_size 32 mem cost 8196.38232421875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 32 throughput 213.66829719786048
+INFO:root:batch_size 32 mem cost 5996.3994140625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 32 testfwdbwd 52.84172574869073
+INFO:root:batch_size 32 mem cost 21004.22412109375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 32 testfwdbwd 37.23676928816567
+INFO:root:batch_size 32 mem cost 37062.70703125 MB
+testing size 640...
+22893448
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 32 throughput 86.97612613319988
+INFO:root:batch_size 32 mem cost 12728.72607421875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 32 throughput 96.09631387812635
+INFO:root:batch_size 32 mem cost 9290.3681640625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 32 testfwdbwd 26.90997340755602
+INFO:root:batch_size 32 mem cost 32096.00927734375 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 32 testfwdbwd 22.305015104915448
+INFO:root:batch_size 32 mem cost 57210.17578125 MB
+testing size 768...
+22893448
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 32 throughput 52.46684939640602
+INFO:root:batch_size 32 mem cost 17743.97607421875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 32 throughput 66.18303068677324
+INFO:root:batch_size 32 mem cost 12793.9931640625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 32 testfwdbwd 17.643389925452063
+INFO:root:batch_size 32 mem cost 46291.91943359375 MB
+batch_size 16
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 16 testfwdbwd 18.03012196317204
+INFO:root:batch_size 16 mem cost 23359.94384765625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 16 testfwdbwd 14.479159463553056
+INFO:root:batch_size 16 mem cost 41432.73193359375 MB
+testing size 1024...
+22893448
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 32 throughput 31.07908804696611
+INFO:root:batch_size 32 mem cost 31495.35888671875 MB
+INFO:root:throughput averaged with 30 times
+INFO:root:batch_size 32 throughput 49.105648751346465
+INFO:root:batch_size 32 mem cost 22695.3759765625 MB
+batch_size 16
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 16 testfwdbwd 12.797950930288458
+INFO:root:batch_size 16 mem cost 41250.50634765625 MB
+INFO:root:testfwdbwd averaged with 30 times
+INFO:root:batch_size 16 testfwdbwd 8.905029155783682
+INFO:root:batch_size 16 mem cost 73413.36474609375 MB
+testing size 1248...
+22893448

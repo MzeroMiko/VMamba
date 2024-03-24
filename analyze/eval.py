@@ -210,23 +210,16 @@ def main():
     # swin
     if mode in "swintiny":
         print("swin ================================", flush=True)
-        specpath = f"{HOME}/OTHERS/Swin-Transformer"
-        sys.path.insert(0, specpath)
-        import swin_window_process
-        _model = import_abspy("swin_transformer", f"{HOME}/OTHERS/Swin-Transformer/models")
-        model = partial(_model.SwinTransformer, embed_dim=96, depths=[2,2,6,2], num_heads=[ 3, 6, 12, 24 ], fused_window_process=True)
+        model = partial(build_mmpretrain_models, cfg="swin_tiny", ckpt=True, only_backbone=False, with_norm=True,)
         model = model()
-        ckpt ="/home/LiuYue/Workspace/PylanceAware/ckpts/others/swin_tiny_patch4_window7_224.pth"
-        model.load_state_dict(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))["model"])
         for size in [224, 384, 512, 640, 768, 1024]:
             _validate(model, img_size=size, batch_size=args.batch_size, data_path=args.data_path)
-        sys.path = sys.path[1:]
 
     # convnext
     if mode in "convnexttiny":
         print("convnext ================================", flush=True)
         _model = import_abspy("convnext", f"{HOME}/OTHERS/ConvNeXt/models")
-        model = _model.convnext_tiny
+        model = _model.convnext_tiny()
         ckpt ="/home/LiuYue/Workspace/PylanceAware/ckpts/others/convnext_tiny_1k_224_ema.pth"
         model.load_state_dict(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))["model"])
         for size in [224, 384, 512, 640, 768, 1024]:
@@ -239,7 +232,8 @@ def main():
         sys.path.insert(0, specpath)
         import DCNv3
         _model = import_abspy("intern_image", f"{HOME}/OTHERS/InternImage/classification/models/")
-        model = partial(_model.InternImage, core_op='DCNv3', channels=64, depths=[4, 4, 8, 4], groups=[4, 8, 16, 32], offset_scale=1.0, mlp_ratio=4.,)
+        model = partial(_model.InternImage, core_op='DCNv3', channels=64, depths=[4, 4, 18, 4], groups=[4, 8, 16, 32], offset_scale=1.0, mlp_ratio=4.,)
+        model = model()
         ckpt ="/home/LiuYue/Workspace/PylanceAware/ckpts/others/internimage_t_1k_224.pth"
         model.load_state_dict(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))["model"])
         for size in [224, 384, 512, 640, 768, 1024]:
