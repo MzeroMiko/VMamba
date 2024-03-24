@@ -345,6 +345,9 @@ def main1():
     parser.add_argument('--size', type=int, default=224, help='path to dataset')
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO)
+    
+    # modes = ["vssma6", "vssmaav1", "swin", "convnext", "hivit", "intern","deit", "resnet"]
+    modes = ["intern"]
 
     _build = import_abspy("models", f"{os.path.dirname(__file__)}/../classification")
     build_mmpretrain_models = _build.build_mmpretrain_models
@@ -361,7 +364,7 @@ def main1():
             testall(config(img_size=size), dataloader, args.data_path, size, args.batch_size)
 
     # vssm ta6: install selective_scan
-    if True:
+    if "vssma6" in modes:
         print("vssm ta6 ================================", flush=True)
         import triton, mamba_ssm, selective_scan_cuda_oflex
         _model = import_abspy("vmamba", f"{os.path.dirname(__file__)}/../classification/models")
@@ -369,39 +372,39 @@ def main1():
         test_size(ta6)
 
     # vssm taav1: install selective_scan
-    if True:
+    if "vssmaav1" in modes:
         print("vssm taav1 ================================", flush=True)
         taav1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
         test_size(taav1)
     
     # resnet
-    if True:
+    if "resnet" in modes:
         print("resnet ================================", flush=True)
         tiny = partial(build_mmpretrain_models, cfg="resnet50", ckpt=False, only_backbone=False, with_norm=True,)
         test_size(tiny)
 
     # deit
-    if True:
+    if "deit" in modes:
         print("deit ================================", flush=True)
         tiny = partial(build_mmpretrain_models, cfg="deit_small", ckpt=False, only_backbone=False, with_norm=True,)
         test_size(tiny)
 
     # convnext
-    if True:
+    if "convnext" in modes:
         print("convnext ================================", flush=True)
         _model = import_abspy("convnext", f"{HOME}/OTHERS/ConvNeXt/models")
         tiny = _model.convnext_tiny
         test_size(tiny)
 
     # hivit
-    if True:
+    if "hivit" in modes:
         print("hivit ================================", flush=True)
         _model = import_abspy("hivit", f"{HOME}/OTHERS/hivit/supervised/models/")
         tiny = partial(_model.HiViT, patch_size=16, inner_patches=4, embed_dim=384, depths=[1, 1, 10], num_heads=6, stem_mlp_ratio=3., mlp_ratio=4., ape=True, rpe=True,)
         test_size(tiny)
 
     # swin
-    if True:
+    if "swin" in modes:
         print("swin ================================", flush=True)
         specpath = f"{HOME}/OTHERS/Swin-Transformer"
         sys.path.insert(0, specpath)
@@ -412,19 +415,19 @@ def main1():
         sys.path = sys.path[1:]
 
     # internimage: install classification/ops_dcnv3
-    if True:
+    if "intern" in modes:
         print("intern ================================", flush=True)
         specpath = f"{HOME}/OTHERS/InternImage/classification"
         sys.path.insert(0, specpath)
         import DCNv3
         _model = import_abspy("intern_image", f"{HOME}/OTHERS/InternImage/classification/models/")
-        tiny = partial(_model.InternImage, core_op='DCNv3', channels=64, depths=[4, 4, 8, 4], groups=[4, 8, 16, 32], offset_scale=1.0, mlp_ratio=4.,)
+        tiny = partial(_model.InternImage, core_op='DCNv3', channels=64, depths=[4, 4, 18, 4], groups=[4, 8, 16, 32], offset_scale=1.0, mlp_ratio=4.,)
         test_size(tiny)
         sys.path = sys.path[1:]
 
 
 if __name__ == "__main__":
-    main0()
+    # main0()
     main1()
 
 
