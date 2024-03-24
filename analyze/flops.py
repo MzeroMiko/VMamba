@@ -1,4 +1,5 @@
 import os
+import sys
 
 import torch
 import torch.nn as nn
@@ -6,6 +7,12 @@ from torch import Tensor
 from torch.nn.modules import Module
 from functools import partial
 from typing import Callable, Tuple, Union, Tuple, Union, Any
+
+HOME = os.environ["HOME"].rstrip("/")
+
+torch.backends.cudnn.enabled = True
+torch.backends.cudnn.benchmark = True
+torch.backends.cudnn.deterministic = True
 
 def import_abspy(name="models", path="classification/"):
     import sys
@@ -26,11 +33,13 @@ VSSM: nn.Module = build.vmamba.VSSM
 Backbone_VSSM: nn.Module = build.vmamba.Backbone_VSSM
 
 supported_ops={
+    "aten::gelu": None, # as relu is in _IGNORED_OPS
     "aten::silu": None, # as relu is in _IGNORED_OPS
     "aten::neg": None, # as relu is in _IGNORED_OPS
     "aten::exp": None, # as relu is in _IGNORED_OPS
     "aten::flip": None, # as permute is in _IGNORED_OPS
     "prim::PythonOp.SelectiveScanFn": selective_scan_flop_jit, # latter
+    "prim::PythonOp.SelectiveScanMamba": selective_scan_flop_jit, # latter
     "prim::PythonOp.SelectiveScanOflex": selective_scan_flop_jit, # latter
     "prim::PythonOp.SelectiveScanCore": selective_scan_flop_jit, # latter
     "prim::PythonOp.SelectiveScan": selective_scan_flop_jit, # latter
@@ -200,44 +209,13 @@ def fvcore_flop_count(model: nn.Module, inputs=None, input_shape=(3, 224, 224), 
     return params, flops
 
 
+def check_mmengine_equals_fvcore():
+    model = VSSM().cuda()
+    mmengine_flop_count(model)
+    fvcore_flop_count(model)
+
+
 # ==============================
-
-
-def build_model_vssm(depths=[2, 2, 9, 2], embed_dim=96):
-    model = VSSM(depths=depths, dims=embed_dim, d_state=16, dt_rank="auto", ssm_ratio=2.0, mlp_ratio=0.0, downsample="v1")
-    def forward_backbone(self: VSSM, x):
-        x = self.patch_embed(x)
-        for layer in self.layers:
-            x = layer(x)
-        return x
-
-    model.forward = partial(forward_backbone, model)
-    try:
-        del model.norm
-    except:
-        pass
-    try:
-        del model.head
-    except:
-        pass
-    try:
-        del model.classifier
-    except:
-        pass
-    model.cuda().eval()
-    return model
-    
-
-def vssm_flops(core="fvcore"):
-    _flops_count = fvcore_flop_count
-    if core.startswith("mm"):
-        _flops_count = mmengine_flop_count
-    build_vmamba = build_model_vssm
-    _flops_count(build_vmamba(depths=[2, 2, 9, 2], embed_dim=96), input_shape=(3, 224, 224))
-    _flops_count(build_vmamba(depths=[2, 2, 27, 2], embed_dim=96), input_shape=(3, 224, 224))
-    _flops_count(build_vmamba(depths=[2, 2, 27, 2], embed_dim=128), input_shape=(3, 224, 224))
-    # 4.46 + 22.1, 9.11 + 43.6, 15.2 + 75.2
-
 
 def mmdet_mmseg_vssm():
     from mmengine.model import BaseModule
@@ -295,8 +273,137 @@ def mmdet_flops(config=None):
         print(params, mean_flops)
         os.chdir(oridir)
 
+
+# ==============================
+def main0():
+    modes = ["vssma6", "vssmaav1", "swin", "convnext", "hivit", "intern","deit", "resnet", "swinscale"]
+    modes = ["intern"]
+
+    _build = import_abspy("models", f"{os.path.dirname(__file__)}/../classification")
+    build_mmpretrain_models = _build.build_mmpretrain_models
+    
+    def _count(model, size, modify_attn=False, **kwargs):
+        print(f"shape {size}============", flush=True)
+        try:
+            model = model(img_size=size, **kwargs)
+        except Exception as e:
+            print(e, flush=True)
+            model = model(**kwargs)
+        # for attention =========================
+        if modify_attn:
+            from mmpretrain.models.utils.attention import scaled_dot_product_attention_pyimpl
+            def modify_model(m: nn.Module):
+                if hasattr(m, "scaled_dot_product_attention"):
+                    setattr(m, "scaled_dot_product_attention", scaled_dot_product_attention_pyimpl)
+                for name, value in m.named_children():
+                    if isinstance(value, nn.Module):
+                        modify_model(value)
+            modify_model(model)
+        # =======================================
+        model = model.cuda().eval()
+        fvcore_flop_count(model, input_shape=(3,size, size), show_arch=True)
+
+    # vssm ta6: install selective_scan
+    if "vssma6" in modes:
+        print("vssm ta6 ================================", flush=True)
+        import triton, mamba_ssm, selective_scan_cuda_oflex
+        _model = import_abspy("vmamba", f"{os.path.dirname(__file__)}/../classification/models")
+        ta6 = partial(_model.VSSM, dims=96, depths=[2,2,9,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v05", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1", norm_layer="ln2d")
+        for size in [224, 384, 512, 640, 768, 1024]:
+            _count(ta6, size)
+
+    # vssm taav1: install selective_scan
+    if "vssmaav1" in modes:
+        print("vssm taav1 ================================", flush=True)
+        taav1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
+        for size in [224, 384, 512, 640, 768, 1024]:
+            _count(taav1, size)
+    
+    # resnet
+    if "resnet" in modes:
+        print("resnet ================================", flush=True)
+        tiny = partial(build_mmpretrain_models, cfg="resnet50", ckpt=False, only_backbone=False, with_norm=True,)
+        for size in [224, 384, 512, 640, 768, 1024]:
+            _count(tiny, size)
+
+    # deit
+    if "deit" in modes:
+        print("deit ================================", flush=True)
+        tiny = partial(build_mmpretrain_models, cfg="deit_small", ckpt=False, only_backbone=False, with_norm=True,)
+        for size in [224, 384, 512, 640, 768, 1024]:
+            _count(tiny, size, modify_attn=True)
+
+    # convnext
+    if "convnext" in modes:
+        print("convnext ================================", flush=True)
+        _model = import_abspy("convnext", f"{HOME}/OTHERS/ConvNeXt/models")
+        tiny = _model.convnext_tiny
+        for size in [224, 384, 512, 640, 768, 1024]:
+            _count(tiny, size)
+
+    # hivit
+    if "hivit" in modes:
+        print("hivit ================================", flush=True)
+        _model = import_abspy("hivit", f"{HOME}/OTHERS/hivit/supervised/models/")
+        tiny = partial(_model.HiViT, patch_size=16, inner_patches=4, embed_dim=384, depths=[1, 1, 10], num_heads=6, stem_mlp_ratio=3., mlp_ratio=4., ape=True, rpe=True,)
+        for size in [224, 384, 512, 640, 768, 1024]:
+            _count(tiny, size)
+
+    # swin
+    if "swin" in modes:
+        print("swin ================================", flush=True)
+        tiny = partial(build_mmpretrain_models, cfg="swin_tiny", ckpt=True, only_backbone=False, with_norm=True,)
+        for size in [224, 384, 512, 640, 768, 1024]:
+            _count(tiny, size)
+
+    # swin
+    if "swinscale" in modes:
+        from mmpretrain.models import build_classifier, ImageClassifier, ConvNeXt, VisionTransformer, SwinTransformer
+        print("swin ================================", flush=True)
+        model = dict(
+            type='ImageClassifier',
+            backbone=dict(
+                type='SwinTransformer', arch='tiny', img_size=224, drop_path_rate=0.2),
+            neck=dict(type='GlobalAveragePooling'),
+            head=dict(
+                type='LinearClsHead',
+                num_classes=1000,
+                in_channels=768,
+                init_cfg=None,  # suppress the default init_cfg of LinearClsHead.
+                loss=dict(
+                    type='LabelSmoothLoss', label_smooth_val=0.1, mode='original'),
+                cal_acc=False),
+            init_cfg=[
+                dict(type='TruncNormal', layer='Linear', std=0.02, bias=0.),
+                dict(type='Constant', layer='LayerNorm', val=1., bias=0.)
+            ],
+            train_cfg=dict(augments=[
+                dict(type='Mixup', alpha=0.8),
+                dict(type='CutMix', alpha=1.0)
+            ]),
+        )
+        for size in [224, 384, 512, 640, 768, 1024]:
+            model["backbone"].update({"window_size": int(size // 32)})
+            _count(partial(build_classifier, model), size)
+
+    # internimage: we do not know how to count flops for DCNv3
+    if "intern" in modes:
+        print("intern ================================", flush=True)
+        specpath = f"{HOME}/OTHERS/InternImage/classification"
+        sys.path.insert(0, specpath)
+        import DCNv3
+        _model = import_abspy("intern_image", f"{HOME}/OTHERS/InternImage/classification/models/")
+        tiny = partial(_model.InternImage, core_op='DCNv3', channels=64, depths=[4, 4, 18, 4], groups=[4, 8, 16, 32], offset_scale=1.0, mlp_ratio=4.,)
+        for size in [224, 384, 512, 640, 768, 1024]:
+            _count(tiny, size)
+        sys.path = sys.path[1:]
+
+
     
 if __name__ == '__main__':
+    # check_mmengine_equals_fvcore()
+    main0()
+    breakpoint()
     if False:
         print("fvcore flops count for vssm ====================", flush=True)
         vssm_flops()
