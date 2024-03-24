@@ -422,7 +422,7 @@ def main1():
 
 
 if __name__ == "__main__":
-    # main0()
+    main0()
     main1()
 
 
