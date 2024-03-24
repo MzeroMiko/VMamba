@@ -194,9 +194,9 @@ def main0():
         sys.path = sys.path[1:]
 
     # swin: install kernels/window_process
-    if False:
+    if True:
         print("swin ================================", flush=True)
-        specpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{HOME}/OTHERS/Swin-Transformer")
+        specpath = f"{HOME}/OTHERS/Swin-Transformer"
         sys.path.insert(0, specpath)
         import swin_window_process
         _model = import_abspy("swin_transformer", f"{HOME}/OTHERS/Swin-Transformer/models")
@@ -239,7 +239,7 @@ def main0():
     # internimage: install classification/ops_dcnv3
     if False:
         print("intern ================================", flush=True)
-        specpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{HOME}/OTHERS/InternImage/classification")
+        specpath = f"{HOME}/OTHERS/InternImage/classification"
         sys.path.insert(0, specpath)
         import DCNv3
         _model = import_abspy("intern_image", f"{HOME}/OTHERS/InternImage/classification/models/")
@@ -401,7 +401,7 @@ def main1():
     # swin
     if True:
         print("swin ================================", flush=True)
-        specpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{HOME}/OTHERS/Swin-Transformer")
+        specpath = f"{HOME}/OTHERS/Swin-Transformer"
         sys.path.insert(0, specpath)
         import swin_window_process
         _model = import_abspy("swin_transformer", f"{HOME}/OTHERS/Swin-Transformer/models")
@@ -412,7 +412,7 @@ def main1():
     # internimage: install classification/ops_dcnv3
     if True:
         print("intern ================================", flush=True)
-        specpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{HOME}/OTHERS/InternImage/classification")
+        specpath = f"{HOME}/OTHERS/InternImage/classification"
         sys.path.insert(0, specpath)
         import DCNv3
         _model = import_abspy("intern_image", f"{HOME}/OTHERS/InternImage/classification/models/")
