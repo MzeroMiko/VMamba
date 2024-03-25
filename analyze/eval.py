@@ -160,8 +160,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch-size', type=int, default=32, help="batch size for single GPU")
     parser.add_argument('--data-path', type=str, required=True, help='path to dataset')
+    parser.add_argument('--mode', type=str, default="", help='path to dataset')
     args = parser.parse_args()
     modes = ["vssma6", "vssmaav1", "convnext", "resnet", "deit", "swin", "swinscale", "hivit", "intern"]
+    if args.mode != "":
+        modes = [args.mode]
 
     _build = import_abspy("models", f"{os.path.dirname(__file__)}/../classification")
     build_mmpretrain_models = _build.build_mmpretrain_models
@@ -252,10 +255,11 @@ def main():
             ]),
         )
         ckpt="https://download.openmmlab.com/mmclassification/v0/swin-transformer/swin_tiny_224_b16x64_300e_imagenet_20210616_090925-66df6be6.pth"
-        for size in [224, 384, 512, 640, 768, 1024]:
+        # for size in [224, 384, 512, 640, 768, 1024]:
+        for size in [384, 512, 640, 768, 1024]:
             model["backbone"].update({"window_size": int(size // 32)})
             tiny = build_classifier(model)
-            tiny.load_state_dict(CheckpointLoader.load_checkpoint(ckpt)['state_dict'])
+            tiny.load_state_dict(CheckpointLoader.load_checkpoint(ckpt)['state_dict'], strict=False)
             _validate(tiny, img_size=size, batch_size=args.batch_size, data_path=args.data_path)
 
     # intern
