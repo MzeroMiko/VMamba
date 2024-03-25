@@ -277,7 +277,7 @@ def mmdet_flops(config=None):
 # ==============================
 def main0():
     modes = ["vssma6", "vssmaav1", "swin", "convnext", "hivit", "intern","deit", "resnet", "swinscale"]
-    modes = ["intern"]
+    # modes = ["intern"]
 
     _build = import_abspy("models", f"{os.path.dirname(__file__)}/../classification")
     build_mmpretrain_models = _build.build_mmpretrain_models
@@ -333,22 +333,6 @@ def main0():
         for size in [224, 384, 512, 640, 768, 1024]:
             _count(tiny, size, modify_attn=True)
 
-    # convnext
-    if "convnext" in modes:
-        print("convnext ================================", flush=True)
-        _model = import_abspy("convnext", f"{HOME}/OTHERS/ConvNeXt/models")
-        tiny = _model.convnext_tiny
-        for size in [224, 384, 512, 640, 768, 1024]:
-            _count(tiny, size)
-
-    # hivit
-    if "hivit" in modes:
-        print("hivit ================================", flush=True)
-        _model = import_abspy("hivit", f"{HOME}/OTHERS/hivit/supervised/models/")
-        tiny = partial(_model.HiViT, patch_size=16, inner_patches=4, embed_dim=384, depths=[1, 1, 10], num_heads=6, stem_mlp_ratio=3., mlp_ratio=4., ape=True, rpe=True,)
-        for size in [224, 384, 512, 640, 768, 1024]:
-            _count(tiny, size)
-
     # swin
     if "swin" in modes:
         print("swin ================================", flush=True)
@@ -385,6 +369,22 @@ def main0():
         for size in [224, 384, 512, 640, 768, 1024]:
             model["backbone"].update({"window_size": int(size // 32)})
             _count(partial(build_classifier, model), size)
+
+    # convnext
+    if "convnext" in modes:
+        print("convnext ================================", flush=True)
+        _model = import_abspy("convnext", f"{HOME}/OTHERS/ConvNeXt/models")
+        tiny = _model.convnext_tiny
+        for size in [224, 384, 512, 640, 768, 1024]:
+            _count(tiny, size)
+
+    # hivit
+    if "hivit" in modes:
+        print("hivit ================================", flush=True)
+        _model = import_abspy("hivit", f"{HOME}/OTHERS/hivit/supervised/models/")
+        tiny = partial(_model.HiViT, patch_size=16, inner_patches=4, embed_dim=384, depths=[1, 1, 10], num_heads=6, stem_mlp_ratio=3., mlp_ratio=4., ape=True, rpe=True,)
+        for size in [224, 384, 512, 640, 768, 1024]:
+            _count(tiny, size)
 
     # internimage: we do not know how to count flops for DCNv3
     if "intern" in modes:

@@ -160,15 +160,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch-size', type=int, default=32, help="batch size for single GPU")
     parser.add_argument('--data-path', type=str, required=True, help='path to dataset')
-    parser.add_argument('--mode', type=str, default="vssmtaav1", help='model to test')
     args = parser.parse_args()
-    mode = args.mode
+    modes = ["vssma6", "vssmaav1", "convnext", "resnet", "deit", "swin", "swinscale", "hivit", "intern"]
 
     _build = import_abspy("models", f"{os.path.dirname(__file__)}/../classification")
     build_mmpretrain_models = _build.build_mmpretrain_models
 
     # vssm taav1: install selective_scan
-    if mode == "vssmtaav1":
+    if "vssmtaav1" in modes:
         print("vssm taav1 ================================", flush=True)
         import triton, mamba_ssm, selective_scan_cuda_oflex
         _model = import_abspy("vmamba", f"{os.path.dirname(__file__)}/../classification/models")
@@ -180,7 +179,7 @@ def main():
             _validate(model, img_size=size, batch_size=args.batch_size, data_path=args.data_path)
 
     # vssm ta6: install selective_scan
-    if mode == "vssmta6":
+    if "vssma6" in modes:
         print("vssm ta6 ================================", flush=True)
         import triton, mamba_ssm, selective_scan_cuda_oflex
         _model = import_abspy("vmamba", f"{os.path.dirname(__file__)}/../classification/models")
@@ -192,7 +191,7 @@ def main():
             _validate(model, img_size=size, batch_size=args.batch_size, data_path=args.data_path)
 
     # resnet
-    if mode == "resnet50":
+    if "resnet" in modes:
         print("resnet ================================", flush=True)
         model = partial(build_mmpretrain_models, cfg="resnet50", ckpt=True, only_backbone=False, with_norm=True,)
         model = model()
@@ -200,7 +199,7 @@ def main():
             _validate(model, img_size=size, batch_size=args.batch_size, data_path=args.data_path)
 
     # deit
-    if mode == "deitsmall":
+    if "deit" in modes:
         print("deit ================================", flush=True)
         model = partial(build_mmpretrain_models, cfg="deit_small", ckpt=True, only_backbone=False, with_norm=True,)
         model = model()
@@ -208,7 +207,7 @@ def main():
             _validate(model, img_size=size, batch_size=args.batch_size, data_path=args.data_path)
 
     # swin
-    if mode == "swintiny":
+    if "swin" in modes:
         print("swin ================================", flush=True)
         model = partial(build_mmpretrain_models, cfg="swin_tiny", ckpt=True, only_backbone=False, with_norm=True,)
         model = model()
@@ -216,7 +215,7 @@ def main():
             _validate(model, img_size=size, batch_size=args.batch_size, data_path=args.data_path)
 
     # convnext
-    if mode == "convnexttiny":
+    if "convnext" in modes:
         print("convnext ================================", flush=True)
         _model = import_abspy("convnext", f"{HOME}/OTHERS/ConvNeXt/models")
         model = _model.convnext_tiny()
@@ -226,7 +225,7 @@ def main():
             _validate(model, img_size=size, batch_size=args.batch_size, data_path=args.data_path)
 
     # swin
-    if mode == "swinscale":
+    if "swinscale" in modes:
         from mmengine.runner import CheckpointLoader
         from mmpretrain.models import build_classifier, ImageClassifier, ConvNeXt, VisionTransformer, SwinTransformer
         print("swin ================================", flush=True)
@@ -253,12 +252,14 @@ def main():
             ]),
         )
         ckpt="https://download.openmmlab.com/mmclassification/v0/swin-transformer/swin_tiny_224_b16x64_300e_imagenet_20210616_090925-66df6be6.pth"
-        model.load_state_dict(CheckpointLoader.load_checkpoint(ckpt)['state_dict'])
         for size in [224, 384, 512, 640, 768, 1024]:
-            _validate(model, img_size=size, batch_size=args.batch_size, data_path=args.data_path)
+            model["backbone"].update({"window_size": int(size // 32)})
+            tiny = build_classifier(model)
+            tiny.load_state_dict(CheckpointLoader.load_checkpoint(ckpt)['state_dict'])
+            _validate(tiny, img_size=size, batch_size=args.batch_size, data_path=args.data_path)
 
     # intern
-    if mode == "interntiny":
+    if "intern" in modes:
         print("intern ================================", flush=True)
         specpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{HOME}/OTHERS/InternImage/classification")
         sys.path.insert(0, specpath)

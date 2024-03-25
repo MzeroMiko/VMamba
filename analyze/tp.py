@@ -154,7 +154,7 @@ def testall(model, dataloader, data_path, img_size=224, _batch_size=128):
         except:
             batch_size = batch_size // 2
             print(f"batch_size {batch_size}", flush=True)
-        
+
 
 def main0():
     parser = argparse.ArgumentParser()
@@ -162,6 +162,8 @@ def main0():
     parser.add_argument('--data-path', type=str, required=True, help='path to dataset')
     parser.add_argument('--size', type=int, default=224, help='path to dataset')
     args = parser.parse_args()
+    modes = ["convnexts4nd"]
+    modes = ["vssm", "resnet", "deit", "vim", "swin", "convnext", "hivit", "intern"]
 
     logging.basicConfig(level=logging.INFO)
 
@@ -172,7 +174,7 @@ def main0():
     )
 
     # convnext-s4nd: this needs timm=0.5.4; install extentions/kernel
-    if True:
+    if "convnexts4nd" in modes:
         print("convnext-s4nd ================================", flush=True)
         specpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "./convnexts4nd")
         sys.path.insert(0, specpath)
@@ -186,7 +188,7 @@ def main0():
         breakpoint()
 
     # vim: install mamba_ssm
-    if False:
+    if "vim" in modes:
         print("vim ================================", flush=True)
         specpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{HOME}/OTHERS/Vim/mamba-1p1p1")
         sys.path.insert(0, specpath)
@@ -196,7 +198,7 @@ def main0():
         sys.path = sys.path[1:]
 
     # swin: install kernels/window_process
-    if True:
+    if "swin" in modes:
         print("swin ================================", flush=True)
         specpath = f"{HOME}/OTHERS/Swin-Transformer"
         sys.path.insert(0, specpath)
@@ -214,7 +216,7 @@ def main0():
         sys.path = sys.path[1:]
 
     # convnext:
-    if False:
+    if "convnext" in modes:
         print("convnext ================================", flush=True)
         sys.path.insert(0, "")
         _model = import_abspy("convnext", f"{HOME}/OTHERS/ConvNeXt/models")
@@ -226,7 +228,7 @@ def main0():
         sys.path = sys.path[1:]
 
     # hivit:
-    if False:
+    if "hivit" in modes:
         print("hivit ================================", flush=True)
         sys.path.insert(0, "")
         _model = import_abspy("hivit", f"{HOME}/OTHERS/hivit/supervised/models/")
@@ -239,7 +241,7 @@ def main0():
         sys.path = sys.path[1:]
 
     # internimage: install classification/ops_dcnv3
-    if False:
+    if "intern" in modes:
         print("intern ================================", flush=True)
         specpath = f"{HOME}/OTHERS/InternImage/classification"
         sys.path.insert(0, specpath)
@@ -254,7 +256,7 @@ def main0():
         sys.path = sys.path[1:]
 
     # vssm: install selective_scan
-    if True:
+    if "vssm" in modes:
         print("vssm ================================", flush=True)
         sys.path.insert(0, "")
         import triton, mamba_ssm, selective_scan_cuda_oflex
@@ -353,15 +355,20 @@ def main1():
     build_mmpretrain_models = _build.build_mmpretrain_models
 
     def test_size(config):
-        for size in [224, 384, 512, 640, 768, 1024, 1248]:
+        for size in [224, 384, 512, 640, 768, 1024]:
             print(f"testing size {size}...")
             dataloader = get_dataloader(
                 batch_size=args.batch_size, 
                 root=os.path.join(os.path.abspath(args.data_path), "val"),
                 img_size=size,
             )
+            try:
+                model = config(img_size=size)
+            except Exception as e:
+                print(e, flush=True)
+                model = config()
             # in most cases, it works
-            testall(config(img_size=size), dataloader, args.data_path, size, args.batch_size)
+            testall(model, dataloader, args.data_path, size, args.batch_size)
 
     # vssm ta6: install selective_scan
     if "vssma6" in modes:
@@ -426,9 +433,64 @@ def main1():
         sys.path = sys.path[1:]
 
 
+def main2():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--batch-size', type=int, default=256, help="batch size for single GPU")
+    parser.add_argument('--data-path', type=str, required=True, help='path to dataset')
+    parser.add_argument('--size', type=int, default=224, help='path to dataset')
+    args = parser.parse_args()
+
+    logging.basicConfig(level=logging.INFO)
+
+    dataloader = get_dataloader(
+        batch_size=args.batch_size, 
+        root=os.path.join(os.path.abspath(args.data_path), "val"),
+        img_size=args.size,
+    )
+
+    # https://github.com/OpenGVLab/InternImage/blob/ac5ed37f92a6807d3ecc793dbf62e2bf0c960ef2/classification/export.py#L41
+    def speed_test(model, input):
+        from tqdm import tqdm
+        # warmup
+        for _ in tqdm(range(100)):
+            _ = model(input)
+
+        # speed test
+        torch.cuda.synchronize()
+        start = time.time()
+        for _ in tqdm(range(100)):
+            _ = model(input)
+        end = time.time()
+        th = 100 / (end - start)
+        print(f"using time: {end - start}, throughput {th}")        
+
+    # internimage: install classification/ops_dcnv3
+    if True:
+        print("intern ================================", flush=True)
+        specpath = f"{HOME}/OTHERS/InternImage/classification"
+        sys.path.insert(0, specpath)
+        import DCNv3
+        _model = import_abspy("intern_image", f"{HOME}/OTHERS/InternImage/classification/models/")
+        tiny = partial(_model.InternImage, core_op='DCNv3', channels=64, depths=[4, 4, 18, 4], groups=[4, 8, 16, 32], offset_scale=1.0, mlp_ratio=4.,)
+        small = partial(_model.InternImage, core_op='DCNv3', channels=80, depths=[4, 4, 21, 4], groups=[5, 10, 20, 40], layer_scale=1e-5, offset_scale=1.0, mlp_ratio=4., post_norm=True)
+        base = partial(_model.InternImage, core_op='DCNv3', channels=112, depths=[4, 4, 21, 4], groups=[7, 14, 28, 56], layer_scale=1e-5, offset_scale=1.0, mlp_ratio=4., post_norm=True)
+        
+        for config in [base]:
+            torch.cuda.empty_cache()
+            model = config().cuda().eval()
+            for idx, (images, _) in enumerate(dataloader):
+                images = images.cuda()
+                # images = images[0][None]
+                speed_test(model, images)
+                break
+        sys.path = sys.path[1:]
+
+
+
 if __name__ == "__main__":
-    # main0()
-    main1()
+    main0()
+    # main1()
+    main2()
 
 
     
