@@ -278,10 +278,51 @@ def main():
         sys.path = sys.path[1:]
 
     if "hivit" in modes:
-        print("hivit ================================", flush=True)
+        from mmpretrain.models.builder import MODELS
         from mmengine.runner import CheckpointLoader
-        from mmpretrain.models import build_classifier, ImageClassifier
-        print("swin ================================", flush=True)
+        from mmpretrain.models import build_classifier, ImageClassifier, HiViT, VisionTransformer, SwinTransformer
+        from mmpretrain.models.backbones.vision_transformer import resize_pos_embed, to_2tuple, np
+        
+        @MODELS.register_module()
+        class HiViTx(HiViT):
+            def __init__(self, *args,**kwargs):
+                super().__init__(*args,**kwargs)
+                self.num_extra_tokens = 0
+                self.interpolate_mode = "bicubic"
+                self.patch_embed.init_out_size = self.patch_embed.patches_resolution
+                self._register_load_state_dict_pre_hook(self._prepare_abs_pos_embed)
+                self._register_load_state_dict_pre_hook(
+                    self._prepare_relative_position_bias_table)
+
+            # copied from SwinTransformer, change absolute_pos_embed to pos_embed
+            def _prepare_abs_pos_embed(self, state_dict, prefix, *args, **kwargs):
+                name = prefix + 'pos_embed'
+                if name not in state_dict.keys():
+                    return
+
+                ckpt_pos_embed_shape = state_dict[name].shape
+                if self.pos_embed.shape != ckpt_pos_embed_shape:
+                    from mmengine.logging import MMLogger
+                    logger = MMLogger.get_current_instance()
+                    logger.info(
+                        'Resize the pos_embed shape from '
+                        f'{ckpt_pos_embed_shape} to {self.pos_embed.shape}.')
+
+                    ckpt_pos_embed_shape = to_2tuple(
+                        int(np.sqrt(ckpt_pos_embed_shape[1] - self.num_extra_tokens)))
+                    pos_embed_shape = self.patch_embed.init_out_size
+
+                    state_dict[name] = resize_pos_embed(state_dict[name],
+                                                        ckpt_pos_embed_shape,
+                                                        pos_embed_shape,
+                                                        self.interpolate_mode,
+                                                        self.num_extra_tokens)
+
+            def _prepare_relative_position_bias_table(self, state_dict, *args, **kwargs):
+                del state_dict['backbone.relative_position_index']
+                return SwinTransformer._prepare_relative_position_bias_table(self, state_dict, *args, **kwargs)
+
+        print("hivit ================================", flush=True)
         model = dict(
             backbone=dict(
                 ape=True,
@@ -289,7 +330,7 @@ def main():
                 drop_path_rate=0.05,
                 img_size=224,
                 rpe=True,
-                type='HiViT'),
+                type='HiViTx'),
             head=dict(
                 cal_acc=False,
                 in_channels=384,
@@ -310,6 +351,7 @@ def main():
             type='ImageClassifier')
         ckpt="/home/LiuYue/Workspace/PylanceAware/ckpts/others/hivit-tiny-p16_8xb128_in1k/epoch_295.pth"
         for size in [224, 384, 512, 640, 768, 1024]:
+        # for size in [384, 512, 640, 768, 1024]:
             model["backbone"].update({"img_size": size})
             tiny = build_classifier(model)
             tiny.load_state_dict(CheckpointLoader.load_checkpoint(ckpt)['state_dict'], strict=False)
