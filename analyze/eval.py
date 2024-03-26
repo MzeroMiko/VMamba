@@ -277,6 +277,45 @@ def main():
             _validate(model, img_size=size, batch_size=args.batch_size, data_path=args.data_path)
         sys.path = sys.path[1:]
 
+    if "hivit" in modes:
+        print("hivit ================================", flush=True)
+        from mmengine.runner import CheckpointLoader
+        from mmpretrain.models import build_classifier, ImageClassifier
+        print("swin ================================", flush=True)
+        model = dict(
+            backbone=dict(
+                ape=True,
+                arch='tiny',
+                drop_path_rate=0.05,
+                img_size=224,
+                rpe=True,
+                type='HiViT'),
+            head=dict(
+                cal_acc=False,
+                in_channels=384,
+                init_cfg=None,
+                loss=dict(
+                    label_smooth_val=0.1, mode='original', type='LabelSmoothLoss'),
+                num_classes=1000,
+                type='LinearClsHead'),
+            init_cfg=[
+                dict(bias=0.0, layer='Linear', std=0.02, type='TruncNormal'),
+                dict(bias=0.0, layer='LayerNorm', type='Constant', val=1.0),
+            ],
+            neck=dict(type='GlobalAveragePooling'),
+            train_cfg=dict(augments=[
+                dict(alpha=0.8, type='Mixup'),
+                dict(alpha=1.0, type='CutMix'),
+            ]),
+            type='ImageClassifier')
+        ckpt="/home/LiuYue/Workspace/PylanceAware/ckpts/others/hivit-tiny-p16_8xb128_in1k/epoch_295.pth"
+        for size in [224, 384, 512, 640, 768, 1024]:
+            model["backbone"].update({"img_size": size})
+            tiny = build_classifier(model)
+            tiny.load_state_dict(CheckpointLoader.load_checkpoint(ckpt)['state_dict'], strict=False)
+            _validate(tiny, img_size=size, batch_size=args.batch_size, data_path=args.data_path)
+
+
 
 def run_code_dist_one(func):
     if torch.cuda.device_count() > 1:

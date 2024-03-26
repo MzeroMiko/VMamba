@@ -413,14 +413,41 @@ def main1():
 
     # swin
     if "swin" in modes:
+        from mmengine.runner import CheckpointLoader
+        from mmpretrain.models import build_classifier, ImageClassifier, ConvNeXt, VisionTransformer, SwinTransformer
         print("swin ================================", flush=True)
-        specpath = f"{HOME}/OTHERS/Swin-Transformer"
-        sys.path.insert(0, specpath)
-        import swin_window_process
-        _model = import_abspy("swin_transformer", f"{HOME}/OTHERS/Swin-Transformer/models")
-        tiny = partial(_model.SwinTransformer, embed_dim=96, depths=[2,2,6,2], num_heads=[ 3, 6, 12, 24 ], fused_window_process=True)
-        test_size(tiny)
-        sys.path = sys.path[1:]
+        model = dict(
+            type='ImageClassifier',
+            backbone=dict(
+                type='SwinTransformer', arch='tiny', img_size=224, drop_path_rate=0.2),
+            neck=dict(type='GlobalAveragePooling'),
+            head=dict(
+                type='LinearClsHead',
+                num_classes=1000,
+                in_channels=768,
+                init_cfg=None,  # suppress the default init_cfg of LinearClsHead.
+                loss=dict(
+                    type='LabelSmoothLoss', label_smooth_val=0.1, mode='original'),
+                cal_acc=False),
+            init_cfg=[
+                dict(type='TruncNormal', layer='Linear', std=0.02, bias=0.),
+                dict(type='Constant', layer='LayerNorm', val=1., bias=0.)
+            ],
+            train_cfg=dict(augments=[
+                dict(type='Mixup', alpha=0.8),
+                dict(type='CutMix', alpha=1.0)
+            ]),
+        )
+        for size in [224, 384, 512, 640, 768, 1024]:
+            model["backbone"].update({"window_size": 7, "img_size": size})
+            tiny = build_classifier(model)
+            print(f"testing size {size}...")
+            dataloader = get_dataloader(
+                batch_size=args.batch_size, 
+                root=os.path.join(os.path.abspath(args.data_path), "val"),
+                img_size=size,
+            )
+            testall(tiny, dataloader, args.data_path, size, args.batch_size)
 
     # swin
     if "swinscale" in modes:
