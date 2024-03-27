@@ -593,6 +593,7 @@ def main_vssm1():
         tia7 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a7/log_rank0.txt",
         tia8ln = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a8ln/log_rank0.txt",
         tia9 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a9/log_rank0.txt",
+        tia8d = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a8d/log_rank0.txt",
     )
     
     for name, file in files.items():
