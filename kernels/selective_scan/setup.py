@@ -49,11 +49,11 @@ def get_ext():
     # Check, if CUDA11 is installed for compute capability 8.0
     if CUDA_HOME is not None:
         _, bare_metal_version = get_cuda_bare_metal_version(CUDA_HOME)
-        if bare_metal_version < Version("11.6"):
-            raise RuntimeError(
-                f"package is only supported on CUDA 11.6 and above.  "
-                "Note: make sure nvcc has a supported version by running nvcc -V."
-            )
+        # if bare_metal_version < Version("11.6"):
+        #     raise RuntimeError(
+        #         f"package is only supported on CUDA 11.6 and above.  "
+        #         "Note: make sure nvcc has a supported version by running nvcc -V."
+        #     )
 
     cc_flag.append("-gencode")
     cc_flag.append("arch=compute_70,code=sm_70")
