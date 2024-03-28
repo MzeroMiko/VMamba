@@ -11,6 +11,7 @@
 #include <cub/block/block_raking_layout.cuh>
 // #include <cub/detail/uninitialized_copy.cuh>
 #include "uninitialized_copy.cuh"
+#include "cub_extra.cuh"
 
 /**
  * Perform a reverse sequential reduction over \p LENGTH elements of the \p input array.  The aggregate is returned.
@@ -117,7 +118,8 @@ struct WarpReverseScan {
     WarpReverseScan()
         : lane_id(cub::LaneId())
         , warp_id(IS_ARCH_WARP ? 0 : (lane_id / LOGICAL_WARP_THREADS))
-        , member_mask(cub::WarpMask<LOGICAL_WARP_THREADS>(warp_id))
+        // , member_mask(cub::WarpMask<LOGICAL_WARP_THREADS>(warp_id))
+        , member_mask(WarpMask<LOGICAL_WARP_THREADS>(warp_id))
     {
         if (!IS_ARCH_WARP) {
             lane_id = lane_id % LOGICAL_WARP_THREADS;
