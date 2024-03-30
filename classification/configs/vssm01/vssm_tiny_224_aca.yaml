@@ -1,11 +1,11 @@
 MODEL:
   TYPE: vssm
-  NAME: vssm_tiny_acb
+  NAME: vssm_tiny_aca
   DROP_PATH_RATE: 0.2
   VSSM:
     EMBED_DIM: 96
     DEPTHS: [ 2, 2, 5, 2 ]
-    SSM_D_STATE: 8
+    SSM_D_STATE: 16
     SSM_DT_RANK: "auto"
     SSM_RATIO: 1.0
     SSM_CONV: -1 # 3
