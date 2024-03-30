@@ -16,7 +16,7 @@ ckpts
 log
 ckpt
 
-classification/configs/vssm01
+# classification/configs/vssm01
 
 analyze/show
 
