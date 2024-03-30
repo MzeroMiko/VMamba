@@ -680,7 +680,7 @@ class SS2D(nn.Module):
         del self.x_proj
         
         # out proj =======================================
-        self.out_act = nn.GELU if self.oact else nn.Identity()
+        self.out_act = nn.GELU() if self.oact else nn.Identity()
         self.out_proj = Linear(d_inner, d_model, bias=bias, **factory_kwargs)
         self.dropout = nn.Dropout(dropout) if dropout > 0. else nn.Identity()
 
