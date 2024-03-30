@@ -605,6 +605,7 @@ class SS2D(nn.Module):
             return ret, value
 
         self.disable_force32, forward_type = checkpostfix("no32", forward_type)
+        self.oact, forward_type = checkpostfix("oact", forward_type)
         self.disable_z, forward_type = checkpostfix("noz", forward_type)
         self.disable_z_act, forward_type = checkpostfix("nozact", forward_type)
 
@@ -679,6 +680,7 @@ class SS2D(nn.Module):
         del self.x_proj
         
         # out proj =======================================
+        self.out_act = nn.GELU if self.oact else nn.Identity()
         self.out_proj = Linear(d_inner, d_model, bias=bias, **factory_kwargs)
         self.dropout = nn.Dropout(dropout) if dropout > 0. else nn.Identity()
 
@@ -1159,7 +1161,7 @@ class SS2D(nn.Module):
         x = self.act(x)
         
         y = self.forward_core(x)
-
+        y = self.out_act(y)
         if not self.disable_z:
             y = y * z
         out = self.dropout(self.out_proj(y))
