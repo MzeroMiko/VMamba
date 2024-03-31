@@ -3,16 +3,9 @@ import sys
 import time
 from functools import partial
 from typing import Callable
-
-import seaborn
 import numpy as np
-
 import torch
 import torch.nn as nn
-from torch import optim as optim
-from torch.utils.data import SequentialSampler, DataLoader, RandomSampler
-from torchvision import datasets, transforms
-
 from timm.utils import AverageMeter
 from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 
@@ -27,7 +20,7 @@ class visualize:
             return mpl.cm.get_cmap(name)
 
     @staticmethod
-    def visualize_attnmap(attnmap, savefig="1.jpg", figsize=(18, 16), cmap=None, sticks=True, dpi=40, **kwargs):
+    def visualize_attnmap(attnmap, savefig="1.jpg", figsize=(18, 16), cmap=None, sticks=True, dpi=400, **kwargs):
         import matplotlib.pyplot as plt
         if isinstance(attnmap, torch.Tensor):
             attnmap = attnmap.detach().cpu().numpy()
@@ -44,7 +37,7 @@ class visualize:
         plt.close()
 
     @staticmethod
-    def visualize_attnmaps(attnmaps, savefig="2.jpg", figsize=(18, 16), rows=1, cmap=None, **kwargs):
+    def visualize_attnmaps(attnmaps, savefig="2.jpg", figsize=(18, 16), rows=1, cmap=None, dpi=400, **kwargs):
         # attnmaps: [(map, title), (map, title),...]
         import math
         import matplotlib.pyplot as plt
@@ -53,7 +46,7 @@ class visualize:
         cols = math.ceil(len(attnmaps) / rows)
         plt.rcParams["font.size"] = max(figsize) * 3
         figsize=(cols * figsize[0], rows * figsize[1])
-        fig, axs = plt.subplots(rows, cols, squeeze=False, sharex="all", sharey="all", figsize=figsize)
+        fig, axs = plt.subplots(rows, cols, squeeze=False, sharex="all", sharey="all", figsize=figsize, dpi=dpi)
         for i in range(rows):
             for j in range(cols):
                 idx = i * cols + j
@@ -106,7 +99,7 @@ class visualize:
         return ax, mesh
 
     @classmethod
-    def visualize_snsmap(cls, attnmap, savefig="1.jpg", figsize=(18, 16), cmap=None, sticks=True, dpi=40, **kwargs):
+    def visualize_snsmap(cls, attnmap, savefig="1.jpg", figsize=(18, 16), cmap=None, sticks=True, dpi=400, **kwargs):
         import matplotlib.pyplot as plt
         if isinstance(attnmap, torch.Tensor):
             attnmap = attnmap.detach().cpu().numpy()
@@ -121,7 +114,7 @@ class visualize:
         plt.close()
 
     @classmethod
-    def visualize_snsmaps(cls, attnmaps, savefig="2.jpg", figsize=(18, 16), rows=1, cmap=None, sticks=True, dpi=40, **kwargs):
+    def visualize_snsmaps(cls, attnmaps, savefig="2.jpg", figsize=(18, 16), rows=1, cmap=None, sticks=True, dpi=400, **kwargs):
         # attnmaps: [(map, title), (map, title),...]
         import math
         import matplotlib.pyplot as plt
@@ -155,29 +148,6 @@ class visualize:
         print("")
 
 
-if True:
-    import matplotlib.pyplot as plt
-    plt.rcParams["font.family"] = "Times New Roman"
-    plt.rcParams["font.family"] = "Times New Roman"
-    import seaborn as sns
-    #   Set figure parameters
-    large = 24; med = 24; small = 24
-    params = {'axes.titlesize': large,
-            'legend.fontsize': med,
-            'figure.figsize': (16, 10),
-            'axes.labelsize': med,
-            'xtick.labelsize': med,
-            'ytick.labelsize': med,
-            'figure.titlesize': large}
-    plt.rcParams.update(params)
-    try:
-        plt.style.use('seaborn-whitegrid')
-    except:
-        plt.style.use('seaborn-v0_8-whitegrid')
-    sns.set_style("white")
-    # plt.rc('font', **{'family': 'Times New Roman'})
-    plt.rcParams['axes.unicode_minus'] = False
-
 def import_abspy(name="models", path="classification/"):
     import sys
     import importlib
@@ -188,10 +158,6 @@ def import_abspy(name="models", path="classification/"):
     sys.path.pop(0)
     return module
 
-build = import_abspy("models", os.path.join(os.path.dirname(os.path.abspath(__file__)), "../classification/"))
-build_mmpretrain_models: Callable = build.build_mmpretrain_models
-build_vssm_models: Callable = build.build_vssm_models_
-build_heat_models: Callable = build.build_heat_models_
 
 def simpnorm(data):
     data = np.power(data, 0.25)
@@ -257,8 +223,8 @@ def main0():
     results_before = []
     results_after = []
 
-    modes = ["resnet", "convnext", "intern", "swin", "hivit", "deit", "vssma6", "vssmaav1"]
-    # modes = ["resnet", "convnext", "swin", "hivit", "deit", "vssmaav1"]
+    # modes = ["resnet", "convnext", "intern", "swin", "hivit", "deit", "vssma6", "vssmaav1"]
+    modes = ["resnet", "convnext", "swin", "hivit", "deit", "vssmaav1"]
 
     _build = import_abspy("models", f"{os.path.dirname(__file__)}/../classification")
     build_mmpretrain_models = _build.build_mmpretrain_models
@@ -270,6 +236,33 @@ def main0():
             def forward(x):
                 return x.permute(0, 3, 1, 2)
         model.classifier = Permute() if permute else nn.Identity()
+        return model
+
+    def intern_backbone(model):
+        def forward(self, x):
+            x = self.patch_embed(x)
+            x = self.pos_drop(x)
+
+            for level in self.levels:
+                x = level(x)
+            return x.permute(0, 3, 1, 2)
+        
+        model.forward = partial(forward, model)
+        return model
+
+    def mmpretrain_backbone(model, with_norm=False):
+        from mmpretrain.models import build_classifier, ImageClassifier, ConvNeXt, VisionTransformer, SwinTransformer
+        if isinstance(model.backbone, ConvNeXt):
+            model.backbone.gap_before_final_norm = False
+        if isinstance(model.backbone, VisionTransformer):
+            model.backbone.out_type = 'featmap'
+
+        def forward_backbone(self: ImageClassifier, x):
+            x = self.backbone(x)[-1]
+            return x
+        if not with_norm:
+            setattr(model, f"norm{model.backbone.out_indices[-1]}", lambda x: x)
+        model.forward = partial(forward_backbone, model)
         return model
 
     if "resnet" in modes:
@@ -305,10 +298,10 @@ def main0():
         import DCNv3
         _model = import_abspy("intern_image", f"{HOME}/OTHERS/InternImage/classification/models/")
         model = partial(_model.InternImage, core_op='DCNv3', channels=64, depths=[4, 4, 18, 4], groups=[4, 8, 16, 32], offset_scale=1.0, mlp_ratio=4.,)
-        model_before = model()
-        model_after = model()
+        model_before = intern_backbone(model())
+        model_after = intern_backbone(model())
         ckpt ="/home/LiuYue/Workspace/PylanceAware/ckpts/others/internimage_t_1k_224.pth"
-        model_after.load_state_dict(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))["model"])
+        model_after.load_state_dict(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))["model"], strict=False)
         results_before.extend([
             (get_input_grad_avg(model_before, size=1024, data_path=data_path, norms=simpnorm), model_name)
         ])
@@ -320,8 +313,35 @@ def main0():
     if "swin" in modes:
         model_name = "swin_tiny"
         print(f"{model_name} ================================", flush=True)
-        model_before = partial(build_mmpretrain_models, cfg="swin_tiny", ckpt=False, only_backbone=True, with_norm=False,)()
-        model_after = partial(build_mmpretrain_models, cfg="swin_tiny", ckpt=True, only_backbone=True, with_norm=False,)()
+        from mmengine.runner import CheckpointLoader
+        from mmpretrain.models import build_classifier, ImageClassifier, ConvNeXt, VisionTransformer, SwinTransformer
+        model = dict(
+            type='ImageClassifier',
+            backbone=dict(
+                type='SwinTransformer', arch='tiny', img_size=224, drop_path_rate=0.2),
+            neck=dict(type='GlobalAveragePooling'),
+            head=dict(
+                type='LinearClsHead',
+                num_classes=1000,
+                in_channels=768,
+                init_cfg=None,  # suppress the default init_cfg of LinearClsHead.
+                loss=dict(
+                    type='LabelSmoothLoss', label_smooth_val=0.1, mode='original'),
+                cal_acc=False),
+            init_cfg=[
+                dict(type='TruncNormal', layer='Linear', std=0.02, bias=0.),
+                dict(type='Constant', layer='LayerNorm', val=1., bias=0.)
+            ],
+            train_cfg=dict(augments=[
+                dict(type='Mixup', alpha=0.8),
+                dict(type='CutMix', alpha=1.0)
+            ]),
+        )
+        ckpt="https://download.openmmlab.com/mmclassification/v0/swin-transformer/swin_tiny_224_b16x64_300e_imagenet_20210616_090925-66df6be6.pth"
+        model["backbone"].update({"img_size": 1024})
+        model_before = mmpretrain_backbone(build_classifier(model))
+        model_after = mmpretrain_backbone(build_classifier(model))
+        model_after.load_state_dict(CheckpointLoader.load_checkpoint(ckpt)['state_dict'], strict=False)
         results_before.extend([
             (get_input_grad_avg(model_before, size=1024, data_path=data_path, norms=simpnorm), model_name)
         ])
@@ -403,8 +423,9 @@ def main0():
             ]),
             type='ImageClassifier')
         ckpt="/home/LiuYue/Workspace/PylanceAware/ckpts/others/hivit-tiny-p16_8xb128_in1k/epoch_295.pth"
-        model_before = build_classifier(model)
-        model_after = build_classifier(model)
+        model["backbone"].update({"img_size": 1024})
+        model_before = mmpretrain_backbone(build_classifier(model))
+        model_after = mmpretrain_backbone(build_classifier(model))
         model_after.load_state_dict(CheckpointLoader.load_checkpoint(ckpt)['state_dict'], strict=False)
         results_before.extend([
             (get_input_grad_avg(model_before, size=1024, data_path=data_path, norms=simpnorm), model_name)
