@@ -1,20 +1,4 @@
-import os
-import time
-import math
-import copy
-from functools import partial
-from typing import Optional, Callable, Any
-from collections import OrderedDict
-
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
-# triton cross scan, 2x speed than pytorch implementation =========================
-try:
-    from .csm_triton import CrossScanTriton, CrossMergeTriton, CrossScanTriton1b1
-except:
-    from csm_triton import CrossScanTriton, CrossMergeTriton, CrossScanTriton1b1
 
 # pytorch cross scan =============
 class CrossScan(torch.autograd.Function):
