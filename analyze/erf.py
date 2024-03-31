@@ -79,6 +79,7 @@ class visualize:
         mask=None, ax=None,
         **kwargs
     ):
+        from matplotlib import pyplot as plt
         from seaborn.matrix import _HeatMapper
         # Initialize the plotter object
         plotter = _HeatMapper(data, vmin, vmax, cmap, center, robust, annot, fmt,
