@@ -133,9 +133,12 @@ def testfwdbwd(data_loader, model, logger, amp=True):
         return
     
 
-def testall(model, dataloader, data_path, img_size=224, _batch_size=128):
+def testall(model, dataloader, data_path, img_size=224, _batch_size=128, with_flops=False):
     torch.cuda.empty_cache()
     model.cuda().eval()
+    if with_flops:
+        from flops import fvcore_flop_count
+        fvcore_flop_count(model, input_shape=(3, 224, 224), show_arch=False)
     print(parameter_count(model)[""], flush=True)
     throughput(data_loader=dataloader, model=model, logger=logging)
     throughputamp(data_loader=dataloader, model=model, logger=logging) 
@@ -255,11 +258,26 @@ def main0():
             testall(config(), dataloader, args.data_path, args.size, args.batch_size)
         sys.path = sys.path[1:]
 
+
+def main01():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--batch-size', type=int, default=128, help="batch size for single GPU")
+    parser.add_argument('--data-path', type=str, required=True, help='path to dataset')
+    parser.add_argument('--size', type=int, default=224, help='path to dataset')
+    args = parser.parse_args()
+
+    logging.basicConfig(level=logging.INFO)
+
+    dataloader = get_dataloader(
+        batch_size=args.batch_size, 
+        root=os.path.join(os.path.abspath(args.data_path), "val"),
+        img_size=args.size,
+    )
+
     # vssm: install selective_scan
-    if "vssm" in modes:
+    if True:
         print("vssm ================================", flush=True)
         sys.path.insert(0, "")
-        import triton, mamba_ssm, selective_scan_cuda_oflex
         _model = import_abspy("vmamba", f"{os.path.dirname(__file__)}/../classification/models")
         tv0 = partial(_model.VSSM, dims=96, depths=[2,2,9,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v0", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1")
         sv0 = partial(_model.VSSM, dims=96, depths=[2,2,27,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v0", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1")
@@ -303,6 +321,21 @@ def main0():
         tacv2 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv2aact", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
         tacv3 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv3aact", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
         tacv4 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.6, ssm_conv=-1, forward_type="xv2aact", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
+
+        taca = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=0.8, ssm_conv=-1, forward_type="xv1aact", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
+        tacb = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=8, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=-1, forward_type="xv1aact", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
+
+        # ====================================
+        t0230v1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
+        t0230v1ab1d = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v051dnoz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
+        t0230v1ab2d = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v052dnoz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
+        t0230v1ab2dc = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v052dcnoz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
+
+
+        # testall(t0230v1(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) # 1081t14,30705832,4.8577420799999995,
+        # testall(t0230v1ab1d(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) # 894t14,30705832,4.8577420799999995,
+        # testall(t0230v1ab2d(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) # 827t14,30705832,4.8577420799999995,
+        testall(t0230v1ab2dc(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) # 612t14,30705832,4.8577420799999995,
 
         print("vmamba v0-6 ================================", flush=True)
         for config in [tv0, ta1, ta2, ta3, ta4, ta5, ta6]:
@@ -556,6 +589,7 @@ def main2():
 
 
 if __name__ == "__main__":
+    main01()
     main0()
     # main1()
     main2()
