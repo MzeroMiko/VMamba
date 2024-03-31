@@ -1508,10 +1508,10 @@ class VSSM(nn.Module):
             "aten::flip": None, # as permute is in _IGNORED_OPS
             # "prim::PythonOp.CrossScan": None,
             # "prim::PythonOp.CrossMerge": None,
-            "prim::PythonOp.SelectiveScanMamba": selective_scan_flop_jit,
-            "prim::PythonOp.SelectiveScanOflex": selective_scan_flop_jit,
-            "prim::PythonOp.SelectiveScanCore": selective_scan_flop_jit,
-            "prim::PythonOp.SelectiveScanNRow": selective_scan_flop_jit,
+            "prim::PythonOp.SelectiveScanMamba": partial(selective_scan_flop_jit, flops_fn=flops_selective_scan_fn),
+            "prim::PythonOp.SelectiveScanOflex": partial(selective_scan_flop_jit, flops_fn=flops_selective_scan_fn),
+            "prim::PythonOp.SelectiveScanCore": partial(selective_scan_flop_jit, flops_fn=flops_selective_scan_fn),
+            "prim::PythonOp.SelectiveScanNRow": partial(selective_scan_flop_jit, flops_fn=flops_selective_scan_fn),
         }
 
         model = copy.deepcopy(self)

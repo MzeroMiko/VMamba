@@ -291,11 +291,11 @@ class SelectiveScanOflex(torch.autograd.Function):
         return (du, ddelta, dA, dB, dC, dD, ddelta_bias, None, None, None, None)
 
 
-def selective_scan_flop_jit(inputs, outputs):
+def selective_scan_flop_jit(inputs, outputs, flops_fn=flops_selective_scan_fn):
     print_jit_input_names(inputs)
     B, D, L = inputs[0].type().sizes()
     N = inputs[2].type().sizes()[1]
-    flops = flops_selective_scan_fn(B=B, L=L, D=D, N=N, with_D=True, with_Z=False)
+    flops = flops_fn(B=B, L=L, D=D, N=N, with_D=True, with_Z=False)
     return flops
 
 
