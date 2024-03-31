@@ -928,6 +928,7 @@ class SS2D(nn.Module, mamba_init):
         out_norm = getattr(self, "out_norm", None)
         out_norm_shape = getattr(self, "out_norm_shape", "v0")
         channel_first = self.channel_first
+        to_fp32 = lambda *args: (_a.to(torch.float32) for _a in args)
 
         # out_norm: whatever fits (B, L, C); LayerNorm; Sigmoid; Softmax(dim=1);...
 
@@ -980,10 +981,7 @@ class SS2D(nn.Module, mamba_init):
         delta_bias = dt_projs_bias.view(-1).to(torch.float)
 
         if force_fp32:
-            xs = xs.to(torch.float)
-            dts = dts.to(torch.float)
-            Bs = Bs.to(torch.float)
-            Cs = Cs.to(torch.float)
+            xs, dts, Bs, Cs = to_fp32(xs, dts, Bs, Cs)
 
         ys: torch.Tensor = selective_scan(
             xs, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus
