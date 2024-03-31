@@ -358,7 +358,6 @@ def main():
             _validate(tiny, img_size=size, batch_size=args.batch_size, data_path=args.data_path)
 
 
-
 def run_code_dist_one(func):
     if torch.cuda.device_count() > 1:
         print("WARNING!!!  acc score would be inaccurate if num_procs > 1, as sampler always pads the dataset")

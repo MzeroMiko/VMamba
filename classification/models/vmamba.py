@@ -874,13 +874,6 @@ class SS2D(nn.Module, mamba_init):
         ).view(B, W, 2, -1, H).sum(dim=2).permute(0, 2, 3, 1)
         y = y_col
 
-        if getattr(self, "__DEBUG__", False):
-            setattr(self, "__data__", dict(
-                A_logs=A_logs, Bs=Bs, Cs=Cs, Ds=Ds,
-                us=xs, dts=dts, delta_bias=delta_bias,
-                ys=ys, y=y,
-            ))
-
         if channel_first:
             y = y.view(B, -1, H, W)
             if out_norm_shape in ["v1"]:
