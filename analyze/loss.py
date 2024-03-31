@@ -591,11 +591,14 @@ def main_vssm1():
         # ti0326 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm1_tiny_0326/log_rank0.txt",
         # ti0327 = f"/home/LiuYue/TmpMount/DataHPC8/nodeHPC8/out/vssm1_tiny_0327/20240320174001/log_rank0.txt",
         # tia7 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a7/log_rank0.txt",
-        tia8ln = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a8ln/log_rank0.txt",
-        tia9 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a9/log_rank0.txt",
-        tia8d = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a8d/log_rank0.txt",
-        tia9d = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a9d/log_rank0.txt",
-        tia9a = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a9a/log_rank0.txt",
+        # tia8ln = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a8ln/log_rank0.txt",
+
+        # tia8d = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a8d/log_rank0.txt",
+        # tia9d = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a9d/log_rank0.txt",
+        # tia9a = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a9a/log_rank0.txt",
+        # tia9 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a9/log_rank0.txt",
+        # tiaa = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_aa/log_rank0.txt",
+        
         tiabv1 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_abv1/log_rank0.txt",
         tiacv1 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm1_tiny_0326/log_rank0.txt",
         tiacb = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acb/log_rank0.txt",
@@ -610,7 +613,7 @@ def main_vssm1():
     draw_fig(data=[
         *[dict(x=file['xaxis'], y=file['accs']['acc1'], label=name) for name, file in results.items()], 
         *[dict(x=file['xaxis'], y=file['emaaccs']['acc1'], label=f"{name}_ema") for name, file in results.items()],
-    ], xlim=(30, 300), ylim=(60, 85), xstep=5, ystep=0.5, save_path=f"{showpath}/acc.jpg")
+    ], xlim=(30, 300), ylim=(70, 85), xstep=5, ystep=0.5, save_path=f"{showpath}/acc.jpg")
 
     draw_fig(data=[
         *[dict(x=file['loss_xaxis'], y=file['avglosses'], label=name)  for name, file in results.items()],
