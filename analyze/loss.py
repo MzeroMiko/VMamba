@@ -588,12 +588,17 @@ def main_vssm1():
         # ti0323 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm1_tiny_0323/log_rank0.txt",
         # ti0324 = f"/home/LiuYue/TmpMount/DataHPC9/nodeHPC9/out/vssm1_tiny_0324/20240319050447/log_rank0.txt",
         # ti0325 = f"/home/LiuYue/TmpMount/DataHPC8/nodeHPC8/out/vssm1_tiny_0325/20240319050428/log_rank0.txt",
-        ti0326 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm1_tiny_0326/log_rank0.txt",
+        # ti0326 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm1_tiny_0326/log_rank0.txt",
         # ti0327 = f"/home/LiuYue/TmpMount/DataHPC8/nodeHPC8/out/vssm1_tiny_0327/20240320174001/log_rank0.txt",
         # tia7 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a7/log_rank0.txt",
         tia8ln = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a8ln/log_rank0.txt",
         tia9 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a9/log_rank0.txt",
         tia8d = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a8d/log_rank0.txt",
+        tia9d = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a9d/log_rank0.txt",
+        tia9a = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a9a/log_rank0.txt",
+        tiabv1 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_abv1/log_rank0.txt",
+        tiacv1 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm1_tiny_0326/log_rank0.txt",
+        tiacb = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acb/log_rank0.txt",
     )
     
     for name, file in files.items():
