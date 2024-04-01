@@ -215,7 +215,7 @@ def main0():
         base384 = partial(build_mmpretrain_models, cfg="deit_base", ckpt=False, only_backbone=False, with_norm=True,)
         for config in [tiny, base, base384]:
             size = args.size if not config == base384 else 384
-            testall(config(), dataloader, args.data_path, size, args.batch_size)
+            testall(config(), dataloader, args.data_path, size, args.batch_size, with_flops=True)
 
     # swin: install kernels/window_process
     if "swin" in modes:
