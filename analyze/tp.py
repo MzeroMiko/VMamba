@@ -172,6 +172,7 @@ def main0():
     modes = ["convnexts4nd"]
     modes = ["vssm", "resnet", "deit", "vim", "swin", "convnext", "hivit", "intern"]
     modes = ["deit"]
+    modes = ["convnexts4nd"]
 
     logging.basicConfig(level=logging.INFO)
 
@@ -188,13 +189,12 @@ def main0():
         sys.path.insert(0, specpath)
         import timm; assert timm.__version__ == "0.5.4"
         import structured_kernels
-        # model = import_abspy("vit_all", os.path.join(os.path.dirname(__file__), "./convnexts4nd"))
-        # testall(model.vit_base_s4nd(), dataloader, args.data_path, args.size, args.batch_size)
+        model = import_abspy("vit_all", os.path.join(os.path.dirname(__file__), "./convnexts4nd"))
+        testall(model.vit_base_s4nd(), dataloader, args.data_path, args.size, args.batch_size)
         model = import_abspy("convnext_timm", os.path.join(os.path.dirname(__file__), "./convnexts4nd"))
         testall(model.convnext_tiny_s4nd(), dataloader, args.data_path, args.size, args.batch_size)
         sys.path = sys.path[1:]
         breakpoint()
-
 
     # vim: install mamba_ssm
     if "vim" in modes:
@@ -644,7 +644,7 @@ def main2():
 
 
 if __name__ == "__main__":
-    main01()
+    # main01()
     main0()
     # main1()
     main2()

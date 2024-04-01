@@ -520,6 +520,58 @@ def vit_base_patch16_224(pretrained=False, **kwargs):
     return model
 
 # ============================
+# s4/configs/experiment/s4nd/vit/vit_b_16_s4_imagenet_v2.yaml
+"""
+model:
+  _name_: vit_b_16
+  dropout: 0.0
+  drop_path_rate: 0.1
+  d_model: 768
+  depth: 12
+  expand: 4
+  norm: layer
+  layer_reps: 1
+  use_cls_token: false
+  use_pos_embed: false
+
+  layer:
+    d_state: 64
+    final_act: glu
+    bidirectional: true
+    channels: 2
+    lr: 0.001
+    n_ssm: 1
+    contract_version: 1  # 0 is for 2d, 1 for 1d or 3d (or other)
+"""
+
+# s4/configs/model/layer/s4nd.yaml
+"""
+_name_: s4nd
+d_state: 64
+channels: 1
+bidirectional: true
+activation: gelu
+final_act: glu
+initializer: null
+weight_norm: false
+trank: 1
+dropout: ${..dropout} # Same as null
+tie_dropout: ${oc.select:model.tie_dropout,null}
+init: legs
+rank: 1
+dt_min: 0.001
+dt_max: 0.1
+lr:
+  dt: 0.001
+  A: 0.001
+  B: 0.001
+n_ssm: 1
+deterministic: false # Special C init
+l_max: ${oc.select:dataset.__l_max,null} # Grab dataset length if exists, otherwise set to null and kernel will automatically resize
+verbose: true
+linear: false
+"""
+
 def vit_base_s4nd():
     """
     model:
@@ -577,6 +629,20 @@ def vit_base_s4nd():
             lr=0.001,
             n_ssm=1,
             contract_version=1,
+            # contract_version=0,
+            activation="gelu",
+            initializer=None,
+            weight_norm=False,
+            trank=1,
+            dropout=0,
+            tie_dropout=0,
+            init="legs",
+            dt_min=0.001,
+            dt_max=0.1,
+            deterministic=False,
+            l_max=None,
+            verbose=True,
+            linear=False,
         )
     )
     
