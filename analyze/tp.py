@@ -171,8 +171,8 @@ def main0():
     args = parser.parse_args()
     modes = ["convnexts4nd"]
     modes = ["vssm", "resnet", "deit", "vim", "swin", "convnext", "hivit", "intern"]
+    modes = ["deit", "convnexts4nd"]
     modes = ["deit"]
-    modes = ["convnexts4nd"]
 
     logging.basicConfig(level=logging.INFO)
 
@@ -194,7 +194,6 @@ def main0():
         model = import_abspy("convnext_timm", os.path.join(os.path.dirname(__file__), "./convnexts4nd"))
         testall(model.convnext_tiny_s4nd(), dataloader, args.data_path, args.size, args.batch_size)
         sys.path = sys.path[1:]
-        breakpoint()
 
     # vim: install mamba_ssm
     if "vim" in modes:
