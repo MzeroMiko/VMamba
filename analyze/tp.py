@@ -138,7 +138,7 @@ def testall(model, dataloader, data_path, img_size=224, _batch_size=128, with_fl
     model.cuda().eval()
     if with_flops:
         from flops import fvcore_flop_count
-        fvcore_flop_count(model, input_shape=(3, 224, 224), show_arch=False)
+        fvcore_flop_count(model, input_shape=(3, img_size, img_size), show_arch=False)
     print(parameter_count(model)[""], flush=True)
     throughput(data_loader=dataloader, model=model, logger=logging)
     throughputamp(data_loader=dataloader, model=model, logger=logging) 
@@ -158,6 +158,10 @@ def testall(model, dataloader, data_path, img_size=224, _batch_size=128, with_fl
             batch_size = batch_size // 2
             print(f"batch_size {batch_size}", flush=True)
 
+def get_variable_name(variable, loc=locals()):
+    for k,v in loc.items():
+        if loc[k] is variable:
+            return k
 
 def main0():
     parser = argparse.ArgumentParser()
@@ -207,7 +211,11 @@ def main0():
         build_mmpretrain_models = _build.build_mmpretrain_models
         print("deit ================================", flush=True)
         tiny = partial(build_mmpretrain_models, cfg="deit_small", ckpt=False, only_backbone=False, with_norm=True,)
-        # test_size(tiny)
+        base = partial(build_mmpretrain_models, cfg="deit_base", ckpt=False, only_backbone=False, with_norm=True,)
+        base384 = partial(build_mmpretrain_models, cfg="deit_base", ckpt=False, only_backbone=False, with_norm=True,)
+        for config in [tiny, base, base384]:
+            size = args.size if not config == base384 else 384
+            testall(config(), dataloader, args.data_path, size, args.batch_size)
 
     # swin: install kernels/window_process
     if "swin" in modes:
@@ -304,12 +312,12 @@ def main01():
 
         ta7 = partial(_model.VSSM, dims=96, depths=[2,2,2,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1,  forward_type="v05", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
         ta8 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=-1,  forward_type="v05", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
+        ta8d = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=0.9, ssm_conv=-1,  forward_type="v05", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
         ta9 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.6, ssm_conv=-1,  forward_type="v05", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
         ta9v1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=2, ssm_dt_rank="auto", ssm_ratio=1.6, ssm_conv=-1,  forward_type="v05", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
         ta9v2 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=4, ssm_dt_rank="auto", ssm_ratio=1.6, ssm_conv=-1,  forward_type="v05", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
         ta9v3 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=8, ssm_dt_rank="auto", ssm_ratio=1.6, ssm_conv=-1,  forward_type="v05", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
         
-        # taa = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.6, ssm_conv=-1,  forward_type="v05", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
         taa = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1,  forward_type="v05noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
         taav1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
         taav2 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=True, forward_type="v05noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
@@ -345,6 +353,38 @@ def main01():
         t0230v1ab2d = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v052dnoz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
         t0230v1ab2dc = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v052dcnoz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
 
+
+        img_size = 224
+        import copy
+        from flops import fvcore_flop_count, supported_ops, selective_scan_flop_jit, flops_selective_scan_fn, flops_selective_scan_ref
+        
+        if True:
+            supported_ops_ref = copy.copy(supported_ops)
+            selective_scan_flop_jit = partial(selective_scan_flop_jit, flops_fn=flops_selective_scan_ref)
+            supported_ops_ref.update({
+                "prim::PythonOp.SelectiveScanFn": selective_scan_flop_jit, # latter
+                "prim::PythonOp.SelectiveScanMamba": selective_scan_flop_jit, # latter
+                "prim::PythonOp.SelectiveScanOflex": selective_scan_flop_jit, # latter
+                "prim::PythonOp.SelectiveScanCore": selective_scan_flop_jit, # latter
+                "prim::PythonOp.SelectiveScan": selective_scan_flop_jit, # latter
+            })
+            for n in [
+                tv0, sv0, bv0, 
+                ta1, ta2, ta3, ta4, ta5, ta6, 
+                sa6, ba6,
+                ta7, ta8d,
+                # ta8, ta9, ta9v1, ta9v2, ta9v3,
+                # taa, taav1, taav2, 
+                # t0230, s0229, b0229,
+                t0230v1, s0229v1, b0229v1,
+                ta8d, ta9d,
+            ]:
+                model = n().cuda().eval()
+                print(get_variable_name(n, locals()), "============")
+                out1 = fvcore_flop_count(model, input_shape=(3, img_size, img_size), show_arch=False, supported_ops=supported_ops_ref, verbose=False)
+                out2 = fvcore_flop_count(model, input_shape=(3, img_size, img_size), show_arch=False, supported_ops=supported_ops, verbose=False)
+                print(out1, out2)
+        breakpoint()
 
         # testall(t0230v1(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) # 1081t14,30705832,4.8577420799999995,
         # testall(t0230v1ab1d(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) # 894t14,30705832,4.8577420799999995,

@@ -29,6 +29,8 @@ build = import_abspy(
     os.path.join(os.path.dirname(os.path.abspath(__file__)), "../classification/"),
 )
 selective_scan_flop_jit: Callable = build.vmamba.selective_scan_flop_jit
+flops_selective_scan_fn: Callable = build.vmamba.flops_selective_scan_fn
+flops_selective_scan_ref: Callable = build.vmamba.flops_selective_scan_ref 
 VSSM: nn.Module = build.vmamba.VSSM
 Backbone_VSSM: nn.Module = build.vmamba.Backbone_VSSM
 
@@ -158,7 +160,7 @@ def mmengine_flop_count(model: nn.Module = None, input_shape = (3, 224, 224), sh
     #       'flops computation is correct.')
 
 
-def fvcore_flop_count(model: nn.Module, inputs=None, input_shape=(3, 224, 224), show_table=False, show_arch=False):
+def fvcore_flop_count(model: nn.Module, inputs=None, input_shape=(3, 224, 224), show_table=False, show_arch=False, supported_ops=supported_ops, verbose=True):
     from fvcore.nn.parameter_count import parameter_count as fvcore_parameter_count
     from fvcore.nn.flop_count import flop_count, FlopCountAnalysis, _DEFAULT_SUPPORTED_OPS
     from fvcore.nn.print_model_statistics import flop_count_str, flop_count_table
@@ -200,12 +202,14 @@ def fvcore_flop_count(model: nn.Module, inputs=None, input_shape=(3, 224, 224), 
 
     if show_table:
         print(flops_table)
-    
-    print(Gflops.items())
 
     params = fvcore_parameter_count(model)[""]
     flops = sum(Gflops.values())
-    print("GFlops: ", flops, "Params: ", params, flush=True)
+
+    if verbose:
+        print(Gflops.items())
+        print("GFlops: ", flops, "Params: ", params, flush=True)
+    
     return params, flops
 
 
