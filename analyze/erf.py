@@ -20,11 +20,11 @@ class visualize:
             return mpl.cm.get_cmap(name)
 
     @staticmethod
-    def visualize_attnmap(attnmap, savefig="1.jpg", figsize=(18, 16), cmap=None, sticks=True, dpi=400, **kwargs):
+    def visualize_attnmap(attnmap, savefig="1.jpg", figsize=(18, 16), cmap=None, sticks=True, dpi=400, fontsize=35, linewidth=2, **kwargs):
         import matplotlib.pyplot as plt
         if isinstance(attnmap, torch.Tensor):
             attnmap = attnmap.detach().cpu().numpy()
-        plt.rcParams["font.size"] = 20
+        plt.rcParams["font.size"] = fontsize
         plt.figure(figsize=figsize, dpi=dpi, **kwargs)
         ax = plt.gca()
         im = ax.imshow(attnmap, cmap=cmap)
@@ -37,14 +37,14 @@ class visualize:
         plt.close()
 
     @staticmethod
-    def visualize_attnmaps(attnmaps, savefig="2.jpg", figsize=(18, 16), rows=1, cmap=None, dpi=400, **kwargs):
+    def visualize_attnmaps(attnmaps, savefig="2.jpg", figsize=(18, 16), rows=1, cmap=None, dpi=400, fontsize=35, linewidth=2, **kwargs):
         # attnmaps: [(map, title), (map, title),...]
         import math
         import matplotlib.pyplot as plt
         vmin = min([np.min((a.detach().cpu().numpy() if isinstance(a, torch.Tensor) else a)) for a, t in attnmaps])
         vmax = max([np.max((a.detach().cpu().numpy() if isinstance(a, torch.Tensor) else a)) for a, t in attnmaps])
         cols = math.ceil(len(attnmaps) / rows)
-        plt.rcParams["font.size"] = max(figsize) * 3
+        plt.rcParams["font.size"] = fontsize
         figsize=(cols * figsize[0], rows * figsize[1])
         fig, axs = plt.subplots(rows, cols, squeeze=False, sharex="all", sharey="all", figsize=figsize, dpi=dpi)
         for i in range(rows):
@@ -100,14 +100,14 @@ class visualize:
         return ax, mesh
 
     @classmethod
-    def visualize_snsmap(cls, attnmap, savefig="1.jpg", figsize=(18, 16), cmap=None, sticks=True, dpi=400, **kwargs):
+    def visualize_snsmap(cls, attnmap, savefig="1.jpg", figsize=(18, 16), cmap=None, sticks=True, dpi=400, fontsize=35, linewidth=2, **kwargs):
         import matplotlib.pyplot as plt
         if isinstance(attnmap, torch.Tensor):
             attnmap = attnmap.detach().cpu().numpy()
-        plt.rcParams["font.size"] = 20
+        plt.rcParams["font.size"] = fontsize
         plt.figure(figsize=figsize, dpi=dpi, **kwargs)
         ax = plt.gca()
-        _, mesh = cls.seanborn_heatmap(attnmap, xticklabels=sticks, yticklabels=sticks, cmap=cmap,
+        _, mesh = cls.seanborn_heatmap(attnmap, xticklabels=sticks, yticklabels=sticks, cmap=cmap, linewidths=linewidth,
                 center=0, annot=False, ax=ax, cbar=False, annot_kws={"size": 24}, fmt='.2f')
         cb = ax.figure.colorbar(mesh, ax=ax)
         cb.outline.set_linewidth(0)
@@ -115,14 +115,14 @@ class visualize:
         plt.close()
 
     @classmethod
-    def visualize_snsmaps(cls, attnmaps, savefig="2.jpg", figsize=(18, 16), rows=1, cmap=None, sticks=True, dpi=400, **kwargs):
+    def visualize_snsmaps(cls, attnmaps, savefig="2.jpg", figsize=(18, 16), rows=1, cmap=None, sticks=True, dpi=400, fontsize=35, linewidth=2, **kwargs):
         # attnmaps: [(map, title), (map, title),...]
         import math
         import matplotlib.pyplot as plt
         vmin = min([np.min((a.detach().cpu().numpy() if isinstance(a, torch.Tensor) else a)) for a, t in attnmaps])
         vmax = max([np.max((a.detach().cpu().numpy() if isinstance(a, torch.Tensor) else a)) for a, t in attnmaps])
         cols = math.ceil(len(attnmaps) / rows)
-        plt.rcParams["font.size"] = max(figsize) * 3
+        plt.rcParams["font.size"] = fontsize
         figsize=(cols * figsize[0], rows * figsize[1])
         fig, axs = plt.subplots(rows, cols, squeeze=False, sharex="all", sharey="all", figsize=figsize, dpi=dpi)
         for i in range(rows):
@@ -136,7 +136,7 @@ class visualize:
                 if isinstance(image, torch.Tensor):
                     image = image.detach().cpu().numpy()
                 _, im = cls.seanborn_heatmap(image, xticklabels=sticks, yticklabels=sticks, 
-                                             vmin=vmin, vmax=vmax, cmap=cmap,
+                                             vmin=vmin, vmax=vmax, cmap=cmap, linewidths=linewidth,
                                              center=0, annot=False, ax=axs[i, j], 
                                              cbar=False, annot_kws={"size": 24}, fmt='.2f')
                 axs[i, j].set_title(title)
@@ -226,6 +226,7 @@ def main0():
 
     # modes = ["resnet", "convnext", "intern", "swin", "hivit", "deit", "vssma6", "vssmaav1"]
     modes = ["resnet", "convnext", "swin", "hivit", "deit", "vssmaav1"]
+    modes = ["resnet"]
 
     _build = import_abspy("models", f"{os.path.dirname(__file__)}/../classification")
     build_mmpretrain_models = _build.build_mmpretrain_models
@@ -267,7 +268,7 @@ def main0():
         return model
 
     if "resnet" in modes:
-        model_name = "resnet50"
+        model_name = ""
         print(f"{model_name} ================================", flush=True)
         model_before = partial(build_mmpretrain_models, cfg="resnet50", ckpt=False, only_backbone=True, with_norm=False)()
         model_after = partial(build_mmpretrain_models, cfg="resnet50", ckpt=True, only_backbone=True, with_norm=False)()
@@ -279,7 +280,7 @@ def main0():
         ])
 
     if "convnext" in modes:
-        model_name = "convnext_tiny"
+        model_name = ""
         print(f"{model_name} ================================", flush=True)
         model_before = partial(build_mmpretrain_models, cfg="convnext_tiny", ckpt=False, only_backbone=True, with_norm=False,)()
         model_after = partial(build_mmpretrain_models, cfg="convnext_tiny", ckpt=True, only_backbone=True, with_norm=False,)()
@@ -292,7 +293,7 @@ def main0():
 
     if "intern" in modes:
         HOME = os.environ["HOME"].rstrip("/")
-        model_name = "internimage_tiny"
+        model_name = ""
         print("intern ================================", flush=True)
         specpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{HOME}/OTHERS/InternImage/classification")
         sys.path.insert(0, specpath)
@@ -312,7 +313,7 @@ def main0():
         sys.path = sys.path[1:]
 
     if "swin" in modes:
-        model_name = "swin_tiny"
+        model_name = ""
         print(f"{model_name} ================================", flush=True)
         from mmengine.runner import CheckpointLoader
         from mmpretrain.models import build_classifier, ImageClassifier, ConvNeXt, VisionTransformer, SwinTransformer
@@ -351,7 +352,7 @@ def main0():
         ])
 
     if "hivit" in modes:
-        model_name = "hivit_tiny"
+        model_name = ""
         print(f"{model_name} ================================", flush=True)
         from mmpretrain.models.builder import MODELS
         from mmengine.runner import CheckpointLoader
@@ -436,7 +437,7 @@ def main0():
         ])
 
     if "deit" in modes:
-        model_name = "deit_small"
+        model_name = ""
         print(f"{model_name} ================================", flush=True)
         model_before = partial(build_mmpretrain_models, cfg="deit_small", ckpt=False, only_backbone=True, with_norm=False,)()
         model_after = partial(build_mmpretrain_models, cfg="deit_small", ckpt=True, only_backbone=True, with_norm=False,)()
@@ -448,7 +449,7 @@ def main0():
         ])
 
     if "vssma6" in modes:
-        model_name = "vssma6"
+        model_name = ""
         print(f"{model_name} ================================", flush=True)
         _model = import_abspy("vmamba", f"{os.path.dirname(__file__)}/../classification/models")
         ta6 = partial(_model.VSSM, dims=96, depths=[2,2,9,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v05", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1", norm_layer="ln2d")
@@ -464,7 +465,7 @@ def main0():
         ])
 
     if "vssmaav1" in modes:
-        model_name = "vssmaav1"
+        model_name = ""
         print(f"{model_name} ================================", flush=True)
         _model = import_abspy("vmamba", f"{os.path.dirname(__file__)}/../classification/models")
         taav1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")

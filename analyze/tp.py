@@ -190,6 +190,7 @@ def main0():
         sys.path = sys.path[1:]
         breakpoint()
 
+
     # vim: install mamba_ssm
     if "vim" in modes:
         print("vim ================================", flush=True)
@@ -199,6 +200,14 @@ def main0():
         model = import_abspy("models_mamba", f"{HOME}/OTHERS/Vim/vim")
         testall(model.vim_small_patch16_224_bimambav2_final_pool_mean_abs_pos_embed_with_midclstok_div2(), dataloader, args.data_path, args.size, args.batch_size)
         sys.path = sys.path[1:]
+
+    # deit
+    if "deit" in modes:
+        _build = import_abspy("models", f"{os.path.dirname(__file__)}/../classification")
+        build_mmpretrain_models = _build.build_mmpretrain_models
+        print("deit ================================", flush=True)
+        tiny = partial(build_mmpretrain_models, cfg="deit_small", ckpt=False, only_backbone=False, with_norm=True,)
+        # test_size(tiny)
 
     # swin: install kernels/window_process
     if "swin" in modes:
