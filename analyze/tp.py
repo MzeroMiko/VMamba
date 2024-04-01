@@ -171,6 +171,7 @@ def main0():
     args = parser.parse_args()
     modes = ["convnexts4nd"]
     modes = ["vssm", "resnet", "deit", "vim", "swin", "convnext", "hivit", "intern"]
+    modes = ["deit"]
 
     logging.basicConfig(level=logging.INFO)
 
