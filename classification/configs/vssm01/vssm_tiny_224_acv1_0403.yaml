@@ -1,6 +1,6 @@
 MODEL:
   TYPE: vssm
-  NAME: vssm_tiny_acv1_0402
+  NAME: vssm_tiny_acv1_0403
   DROP_PATH_RATE: 0.15
   VSSM:
     EMBED_DIM: 96
