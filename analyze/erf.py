@@ -100,14 +100,14 @@ class visualize:
         return ax, mesh
 
     @classmethod
-    def visualize_snsmap(cls, attnmap, savefig="1.jpg", figsize=(18, 16), cmap=None, sticks=True, dpi=400, fontsize=35, linewidth=2, **kwargs):
+    def visualize_snsmap(cls, attnmap, savefig="1.jpg", figsize=(18, 16), cmap=None, sticks=True, dpi=80, fontsize=35, linewidth=2, **kwargs):
         import matplotlib.pyplot as plt
         if isinstance(attnmap, torch.Tensor):
             attnmap = attnmap.detach().cpu().numpy()
         plt.rcParams["font.size"] = fontsize
         plt.figure(figsize=figsize, dpi=dpi, **kwargs)
         ax = plt.gca()
-        _, mesh = cls.seanborn_heatmap(attnmap, xticklabels=sticks, yticklabels=sticks, cmap=cmap, linewidths=linewidth,
+        _, mesh = cls.seanborn_heatmap(attnmap, xticklabels=sticks, yticklabels=sticks, cmap=cmap, linewidths=0,
                 center=0, annot=False, ax=ax, cbar=False, annot_kws={"size": 24}, fmt='.2f')
         cb = ax.figure.colorbar(mesh, ax=ax)
         cb.outline.set_linewidth(0)
@@ -115,7 +115,7 @@ class visualize:
         plt.close()
 
     @classmethod
-    def visualize_snsmaps(cls, attnmaps, savefig="2.jpg", figsize=(18, 16), rows=1, cmap=None, sticks=True, dpi=400, fontsize=35, linewidth=2, **kwargs):
+    def visualize_snsmaps(cls, attnmaps, savefig="2.jpg", figsize=(18, 16), rows=1, cmap=None, sticks=True, dpi=80, fontsize=35, linewidth=2, **kwargs):
         # attnmaps: [(map, title), (map, title),...]
         import math
         import matplotlib.pyplot as plt
@@ -136,17 +136,14 @@ class visualize:
                 if isinstance(image, torch.Tensor):
                     image = image.detach().cpu().numpy()
                 _, im = cls.seanborn_heatmap(image, xticklabels=sticks, yticklabels=sticks, 
-                                             vmin=vmin, vmax=vmax, cmap=cmap, linewidths=linewidth,
+                                             vmin=vmin, vmax=vmax, cmap=cmap,
                                              center=0, annot=False, ax=axs[i, j], 
                                              cbar=False, annot_kws={"size": 24}, fmt='.2f')
                 axs[i, j].set_title(title)
-                # print(title, "max", np.max(image), "min", np.min(image), end=" | ")
-            # print("")
         cb = axs[0, 0].figure.colorbar(im, ax=axs)
         cb.outline.set_linewidth(0)
         plt.savefig(savefig)
         plt.close()
-        print("")
 
 
 def import_abspy(name="models", path="classification/"):
@@ -192,6 +189,7 @@ def get_input_grad(model, samples, square=True):
 
 
 def get_input_grad_avg(model: nn.Module, size=1024, data_path=".", num_images=50, norms=lambda x:x):
+    import tqdm
     from torchvision import datasets, transforms
     from torch.utils.data import SequentialSampler, DataLoader, RandomSampler
     transform = transforms.Compose([
@@ -205,7 +203,7 @@ def get_input_grad_avg(model: nn.Module, size=1024, data_path=".", num_images=50
 
     meter = AverageMeter()
     model.cuda().eval()
-    for _, (samples, _) in enumerate(data_loader_val):
+    for _, (samples, _) in tqdm.tqdm(enumerate(data_loader_val)):
         if meter.count == num_images:
             break
         samples = samples.cuda(non_blocking=True).requires_grad_()
@@ -225,8 +223,7 @@ def main0():
     results_after = []
 
     # modes = ["resnet", "convnext", "intern", "swin", "hivit", "deit", "vssma6", "vssmaav1"]
-    modes = ["resnet", "convnext", "swin", "hivit", "deit", "vssmaav1"]
-    modes = ["resnet"]
+    modes = ["resnet", "convnext", "swin", "deit", "hivit", "vssmaav1"]
 
     _build = import_abspy("models", f"{os.path.dirname(__file__)}/../classification")
     build_mmpretrain_models = _build.build_mmpretrain_models
@@ -350,6 +347,18 @@ def main0():
         results_after.extend([
             (get_input_grad_avg(model_after, size=1024, data_path=data_path, norms=simpnorm), model_name)
         ])
+    
+    if "deit" in modes:
+        model_name = ""
+        print(f"{model_name} ================================", flush=True)
+        model_before = partial(build_mmpretrain_models, cfg="deit_small", ckpt=False, only_backbone=True, with_norm=False,)()
+        model_after = partial(build_mmpretrain_models, cfg="deit_small", ckpt=True, only_backbone=True, with_norm=False,)()
+        results_before.extend([
+            (get_input_grad_avg(model_before, size=1024, data_path=data_path, norms=simpnorm), model_name)
+        ])
+        results_after.extend([
+            (get_input_grad_avg(model_after, size=1024, data_path=data_path, norms=simpnorm), model_name)
+        ])
 
     if "hivit" in modes:
         model_name = ""
@@ -436,18 +445,6 @@ def main0():
             (get_input_grad_avg(model_after, size=1024, data_path=data_path, norms=simpnorm), model_name)
         ])
 
-    if "deit" in modes:
-        model_name = ""
-        print(f"{model_name} ================================", flush=True)
-        model_before = partial(build_mmpretrain_models, cfg="deit_small", ckpt=False, only_backbone=True, with_norm=False,)()
-        model_after = partial(build_mmpretrain_models, cfg="deit_small", ckpt=True, only_backbone=True, with_norm=False,)()
-        results_before.extend([
-            (get_input_grad_avg(model_before, size=1024, data_path=data_path, norms=simpnorm), model_name)
-        ])
-        results_after.extend([
-            (get_input_grad_avg(model_after, size=1024, data_path=data_path, norms=simpnorm), model_name)
-        ])
-
     if "vssma6" in modes:
         model_name = ""
         print(f"{model_name} ================================", flush=True)
@@ -480,6 +477,7 @@ def main0():
             (get_input_grad_avg(model_after, size=1024, data_path=data_path, norms=simpnorm), model_name)
         ])
     
+
     visualize.visualize_snsmaps(
         results_before + results_after, savefig=showpath, rows=2, sticks=False, figsize=(10, 10.75), cmap='RdYlGn', 
     )
