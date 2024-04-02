@@ -1396,14 +1396,16 @@ class VSSM(nn.Module):
     @staticmethod
     def _make_patch_embed_v2(in_chans=3, embed_dim=96, patch_size=4, patch_norm=True, norm_layer=nn.LayerNorm, channel_first=False):
         # if channel first, then Norm and Output are both channel_first
-        assert patch_size == 4
+        stride = patch_size // 2
+        kernel_size = stride + 1
+        padding = 1
         return nn.Sequential(
-            nn.Conv2d(in_chans, embed_dim // 2, kernel_size=3, stride=2, padding=1),
+            nn.Conv2d(in_chans, embed_dim // 2, kernel_size=kernel_size, stride=stride, padding=padding),
             (nn.Identity() if (channel_first or (not patch_norm)) else Permute(0, 2, 3, 1)),
             (norm_layer(embed_dim // 2) if patch_norm else nn.Identity()),
             (nn.Identity() if (channel_first or (not patch_norm)) else Permute(0, 3, 1, 2)),
             nn.GELU(),
-            nn.Conv2d(embed_dim // 2, embed_dim, kernel_size=3, stride=2, padding=1),
+            nn.Conv2d(embed_dim // 2, embed_dim, kernel_size=kernel_size, stride=stride, padding=padding),
             (nn.Identity() if channel_first else Permute(0, 2, 3, 1)),
             (norm_layer(embed_dim) if patch_norm else nn.Identity()),
         )
