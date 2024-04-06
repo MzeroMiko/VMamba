@@ -594,16 +594,18 @@ def main_vssm1():
         # tia8ln = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a8ln/log_rank0.txt",
 
         # tia8d = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a8d/log_rank0.txt",
-        tia9d = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a9d/log_rank0.txt",
-        tia9a = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a9a/log_rank0.txt",
+        # tia9d = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a9d/log_rank0.txt",
+        # tia9a = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a9a/log_rank0.txt",
         # tia9 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_a9/log_rank0.txt",
         # tiaa = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_aa/log_rank0.txt",
         
         # tiabv1 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_abv1/log_rank0.txt",
         tiacv1 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm1_tiny_0326/log_rank0.txt",
-        tiacb = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acb/log_rank0.txt",
-        tiacv10401 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_0401/log_rank0.txt",
-        tiacv10403 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_0403/log_rank0.txt",
+        # tiacb = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acb/log_rank0.txt",
+        # tiacv10401 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_0401/log_rank0.txt",
+        # tiacv10403 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_0403/log_rank0.txt",
+        tiacv10405 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_0405/log_rank0.txt",
+        tiacv10406 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_0406/log_rank0.txt",
     )
     
     for name, file in files.items():
