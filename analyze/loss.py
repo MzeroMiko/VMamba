@@ -606,6 +606,8 @@ def main_vssm1():
         # tiacv10403 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_0403/log_rank0.txt",
         tiacv10405 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_0405/log_rank0.txt",
         tiacv10406 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_0406/log_rank0.txt",
+        tiacv10407 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_0407/log_rank0.txt",
+        tiacv10408 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_0408/log_rank0.txt",
     )
     
     for name, file in files.items():
