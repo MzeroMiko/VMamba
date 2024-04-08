@@ -641,9 +641,9 @@ class SS2D(nn.Module, mamba_init):
 
             if self.ocov2 or self.ocov:
                 self.oconv2d = nn.Conv2d(
-                    in_channels=d_model,
-                    out_channels=d_model,
-                    groups=d_model,
+                    in_channels=d_inner,
+                    out_channels=d_inner,
+                    groups=d_inner,
                     bias=conv_bias,
                     kernel_size=d_conv,
                     padding=(d_conv - 1) // 2,
@@ -1182,7 +1182,7 @@ class SS2D(nn.Module, mamba_init):
         if self.omul:
             y = y * (_us.permute(0, 2, 3, 1) if not self.channel_first else _us)
         elif self.ocov or self.ocov2:
-            y = y + self.act(self.oconv2d(x))
+            y = y + self.act(self.oconv2d(_us))
 
         out = self.dropout(self.out_proj(y))
         return out
