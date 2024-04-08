@@ -599,36 +599,58 @@ class SS2D(nn.Module, mamba_init):
                 self.out_act = nn.GELU()
             
         if True:
-            omul, forward_type = checkpostfix("mul", forward_type)
-            if omul:
-                self.omul = nn.Identity()
+            self.ocov2, forward_type = checkpostfix("ocov2", forward_type)
+            self.ocov, forward_type = checkpostfix("ocov", forward_type)
+            self.omul, forward_type = checkpostfix("mul", forward_type)
+            if self.ocov2:
+                self.f_ocov2 = nn.Identity()
+            if self.ocov:
+                self.f_ocov = nn.Identity()
+            if self.omul:
+                self.f_omul = nn.Identity()
             oact, forward_type = checkpostfix("act", forward_type)
             self.out_act = nn.GELU() if oact else nn.Identity()
 
             if forward_type.startswith("xv1a"):
-                self.forward = partial(self.forwardxv, mode="xv1a", omul=omul)
+                self.forward = partial(self.forwardxv, mode="xv1a")
                 self.in_proj = Linear2d(d_model, d_inner + dt_rank + 8 * d_state, bias=bias, **factory_kwargs)
 
             if forward_type.startswith("xv2a"):
-                self.forward = partial(self.forwardxv, mode="xv2a", omul=omul)
+                self.forward = partial(self.forwardxv, mode="xv2a")
                 self.in_proj = Linear2d(d_model, d_inner + d_inner + 8 * d_state,bias=bias, **factory_kwargs)
 
             if forward_type.startswith("xv3a"):
-                self.forward = partial(self.forwardxv, mode="xv3a", omul=omul)
+                self.forward = partial(self.forwardxv, mode="xv3a")
                 self.in_proj = Linear2d(d_model, d_inner + 4 * dt_rank + 8 * d_state,bias=bias, **factory_kwargs)
 
         # conv =======================================
         if d_conv > 1:
-            self.conv2d = nn.Conv2d(
-                in_channels=d_model,
-                out_channels=d_model,
-                groups=d_model,
-                bias=conv_bias,
-                kernel_size=d_conv,
-                padding=(d_conv - 1) // 2,
-                **factory_kwargs,
-            )
             self.act: nn.Module = act_layer()
+
+            if self.ocov2 or (not self.ocov):
+                self.conv2d = nn.Conv2d(
+                    in_channels=d_model,
+                    out_channels=d_model,
+                    groups=d_model,
+                    bias=conv_bias,
+                    kernel_size=d_conv,
+                    padding=(d_conv - 1) // 2,
+                    **factory_kwargs,
+                )
+                
+
+            if self.ocov2 or self.ocov:
+                self.oconv2d = nn.Conv2d(
+                    in_channels=d_model,
+                    out_channels=d_model,
+                    groups=d_model,
+                    bias=conv_bias,
+                    kernel_size=d_conv,
+                    padding=(d_conv - 1) // 2,
+                    **factory_kwargs,
+                )    
+
+                            
 
         # out proj =======================================
         self.out_proj = Linear(d_inner, d_model, bias=bias, **factory_kwargs)
@@ -1058,7 +1080,7 @@ class SS2D(nn.Module, mamba_init):
         if not self.channel_first:
             x = x.permute(0, 3, 1, 2).contiguous()
 
-        if self.d_conv > 1:
+        if (self.d_conv > 1) and (not self.ocov):
             x = self.conv2d(x) # (b, d, h, w)
             x = self.act(x)
         x = self.in_proj(x)
@@ -1157,8 +1179,11 @@ class SS2D(nn.Module, mamba_init):
 
         y = (y.to(x.dtype) if to_dtype else y)
         y = self.out_act(y)
-        if omul:
+        if self.omul:
             y = y * (_us.permute(0, 2, 3, 1) if not self.channel_first else _us)
+        elif self.ocov or self.ocov2:
+            y = y + self.act(self.oconv2d(x))
+
         out = self.dropout(self.out_proj(y))
         return out
 
@@ -1231,11 +1256,12 @@ class VSSBlock(nn.Module):
             self.mlp = _MLP(in_features=hidden_dim, hidden_features=mlp_hidden_dim, act_layer=mlp_act_layer, drop=mlp_drop_rate, channels_first=channel_first)
 
     def _forward(self, input: torch.Tensor):
+        x = input
         if self.ssm_branch:
             if self.post_norm:
-                x = input + self.drop_path(self.norm(self.op(input)))
+                x = x + self.drop_path(self.norm(self.op(x)))
             else:
-                x = input + self.drop_path(self.op(self.norm(input)))
+                x = x + self.drop_path(self.op(self.norm(x)))
         if self.mlp_branch:
             if self.post_norm:
                 x = x + self.drop_path(self.norm2(self.mlp(x))) # FFN
