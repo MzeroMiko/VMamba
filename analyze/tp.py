@@ -358,7 +358,7 @@ def main01():
         import copy
         from flops import fvcore_flop_count, supported_ops, selective_scan_flop_jit, flops_selective_scan_fn, flops_selective_scan_ref
         
-        if True:
+        if False:
             supported_ops_ref = copy.copy(supported_ops)
             selective_scan_flop_jit = partial(selective_scan_flop_jit, flops_fn=flops_selective_scan_ref)
             supported_ops_ref.update({
@@ -384,11 +384,11 @@ def main01():
                 out1 = fvcore_flop_count(model, input_shape=(3, img_size, img_size), show_arch=False, supported_ops=supported_ops_ref, verbose=False)
                 out2 = fvcore_flop_count(model, input_shape=(3, img_size, img_size), show_arch=False, supported_ops=supported_ops, verbose=False)
                 print(out1, out2)
-        breakpoint()
+            breakpoint()
 
-        # testall(t0230v1(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) # 1081t14,30705832,4.8577420799999995,
-        # testall(t0230v1ab1d(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) # 894t14,30705832,4.8577420799999995,
-        # testall(t0230v1ab2d(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) # 827t14,30705832,4.8577420799999995,
+        testall(t0230v1(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) # 1081t14,30705832,4.8577420799999995,
+        testall(t0230v1ab1d(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) # 894t14,30705832,4.8577420799999995,
+        testall(t0230v1ab2d(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) # 827t14,30705832,4.8577420799999995,
         testall(t0230v1ab2dc(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) # 612t14,30705832,4.8577420799999995,
 
         print("vmamba v0-6 ================================", flush=True)

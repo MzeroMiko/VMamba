@@ -12,7 +12,7 @@ import triton
 from functools import partial
 from collections import OrderedDict
 
-from vmamba import CrossScan, CrossMerge, CrossScan_Ab_1direction, CrossMerge_Ab_1direction, CrossScan_Ab_2direction, CrossMerge_Ab_2direction
+from vmamba import CrossScan, CrossMerge, CrossScan_Ab_1direction, CrossMerge_Ab_1direction, CrossScan_Ab_2direction, CrossMerge_Ab_2direction, getCSM
 from vmamba import CrossScanTriton, CrossMergeTriton, CrossScanTriton1b1
 from vmamba import VSSM, PatchMerging2D, Mlp, gMlp, LayerNorm2d, VSSBlock
 
@@ -239,6 +239,27 @@ class CHECKS:
             ], dim=1).view(B, 4, C, L)
             return xs
         
+        def unidi_scan(x):
+            B, C, H, W = x.shape
+            x = x.view(B, 1, C, H * W).repeat(1, 4, 1, 1)
+            return x
+        
+        def unidi_merge(ys):
+            B, K, C, H, W = ys.shape
+            return ys.view(B, 4, -1, H * W).sum(1)
+
+        def bidi_scan(x):
+            B, C, H, W = x.shape
+            x = x.view(B, 1, C, H * W).repeat(1, 2, 1, 1)
+            x = torch.cat([x, x.flip(dims=[-1])], dim=1)
+            return x
+        
+        def bidi_merge(ys):
+            B, K, D, H, W = ys.shape
+            ys = ys.view(B, K, D, -1)
+            ys = ys[:, 0:2] + ys[:, 2:4].flip(dims=[-1]).view(B, 2, D, -1)
+            return ys.contiguous().sum(1)
+
         if True:
             res0 = triton.testing.do_bench(lambda :cross_scan(x))
             res1 = triton.testing.do_bench(lambda :CrossScan.apply(x))
@@ -256,15 +277,20 @@ class CHECKS:
             print(res0, res1, res2, res3, res4, res5)
 
         print("test cross scan")
-        if True:
-            o0 = cross_scan(x)
-            o1 = CrossScanTriton.apply(x1)
+        for (cs0, cm0, cs1, cm1) in [
+            (cross_scan, cross_merge, CrossScanTriton, CrossMergeTriton),
+            (unidi_scan, unidi_merge, getCSM(1)[0], getCSM(1)[1]),
+            (bidi_scan, bidi_merge, getCSM(2)[0], getCSM(2)[1]),
+        ]:
+            x.grad, x1.grad, y.grad, y1.grad = None, None, None, None
+            o0 = cs0(x)
+            o1 = cs1.apply(x1)
             o0.backward(y.view(B, 4, C, H * W))
             o1.backward(y.view(B, 4, C, H * W))
             print((o0 - o1).abs().max())
             print((x.grad - x1.grad).abs().max())
-            o0 = cross_merge(y)
-            o1 = CrossMergeTriton.apply(y1)
+            o0 = cm0(y)
+            o1 = cm1.apply(y1)
             o0.backward(x.view(B, C, H * W))
             o1.backward(x.view(B, C, H * W))
             print((o0 - o1).abs().max())

@@ -19,13 +19,13 @@ torch.backends.cudnn.benchmark = True
 torch.backends.cudnn.deterministic = True
 
 try:
-    from .csm_triton import CrossScanTriton, CrossMergeTriton, CrossScanTriton1b1
+    from .csm_triton import CrossScanTriton, CrossMergeTriton, CrossScanTriton1b1, getCSM
     from .csms6s import CrossScan, CrossMerge
     from .csms6s import CrossScan_Ab_1direction, CrossMerge_Ab_1direction, CrossScan_Ab_2direction, CrossMerge_Ab_2direction
     from .csms6s import SelectiveScanMamba, SelectiveScanCore, SelectiveScanOflex
     from .csms6s import flops_selective_scan_fn, flops_selective_scan_ref, selective_scan_flop_jit
 except:
-    from csm_triton import CrossScanTriton, CrossMergeTriton, CrossScanTriton1b1
+    from csm_triton import CrossScanTriton, CrossMergeTriton, CrossScanTriton1b1, getCSM
     from csms6s import CrossScan, CrossMerge
     from csms6s import CrossScan_Ab_1direction, CrossMerge_Ab_1direction, CrossScan_Ab_2direction, CrossMerge_Ab_2direction
     from csms6s import SelectiveScanMamba, SelectiveScanCore, SelectiveScanOflex
@@ -411,9 +411,9 @@ class SS2D(nn.Module, mamba_init):
             ),
             v32dc=partial(self.forward_corev1, force_fp32=False, SelectiveScan=SelectiveScanOflex),
             # ===============================
-            v051d=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, no_einsum=True, CrossScan=CrossScan_Ab_1direction, CrossMerge=CrossMerge_Ab_1direction,
+            v051d=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, no_einsum=True, CrossScan=getCSM(1)[0], CrossMerge=getCSM(1)[1],
             ),
-            v052d=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, no_einsum=True, CrossScan=CrossScan_Ab_2direction, CrossMerge=CrossMerge_Ab_2direction,
+            v052d=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, no_einsum=True, CrossScan=getCSM(2)[0], CrossMerge=getCSM(2)[1],
             ),
             v052dc=partial(self.forward_corev1, force_fp32=False, SelectiveScan=SelectiveScanOflex, no_einsum=True),
             # ===============================
