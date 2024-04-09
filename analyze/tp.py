@@ -133,7 +133,7 @@ def testfwdbwd(data_loader, model, logger, amp=True):
         return
     
 
-def testall(model, dataloader, data_path, img_size=224, _batch_size=128, with_flops=False):
+def testall(model, dataloader, data_path, img_size=224, _batch_size=128, with_flops=False, inference_only=False):
     torch.cuda.empty_cache()
     model.cuda().eval()
     if with_flops:
@@ -142,6 +142,8 @@ def testall(model, dataloader, data_path, img_size=224, _batch_size=128, with_fl
     print(parameter_count(model)[""], flush=True)
     throughput(data_loader=dataloader, model=model, logger=logging)
     throughputamp(data_loader=dataloader, model=model, logger=logging) 
+    if inference_only:
+        return
     PASS = False
     batch_size = _batch_size
     while (not PASS) and (batch_size > 0):
@@ -386,10 +388,13 @@ def main01():
                 print(out1, out2)
             breakpoint()
 
-        testall(t0230v1(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) # 1081t14,30705832,4.8577420799999995,
-        testall(t0230v1ab1d(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) # 894t14,30705832,4.8577420799999995,
-        testall(t0230v1ab2d(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) # 827t14,30705832,4.8577420799999995,
-        testall(t0230v1ab2dc(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) # 612t14,30705832,4.8577420799999995,
+        if True:
+            print("ab111111111111")
+            testall(t0230v1(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) # 1270t14,30705832,4.8577420799999995,
+            testall(t0230v1ab1d(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) # 1265t14,30705832,4.8577420799999995,
+            testall(t0230v1ab2d(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) #  t14,30705832,4.8577420799999995,
+            testall(t0230v1ab2dc(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True) #  t14,30705832,4.8577420799999995,
+            breakpoint()
 
         print("vmamba v0-6 ================================", flush=True)
         for config in [tv0, ta1, ta2, ta3, ta4, ta5, ta6]:
@@ -643,7 +648,7 @@ def main2():
 
 
 if __name__ == "__main__":
-    # main01()
+    main01()
     main0()
     # main1()
     main2()
