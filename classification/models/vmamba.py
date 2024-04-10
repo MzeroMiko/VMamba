@@ -813,51 +813,7 @@ class SS2Dv2:
         return out
 
 
-class SS2D(nn.Module, mamba_init, SS2Dv0, SS2Dv2):
-    def __init__(
-        self,
-        # basic dims ===========
-        d_model=96,
-        d_state=16,
-        ssm_ratio=2.0,
-        dt_rank="auto",
-        act_layer=nn.SiLU,
-        # dwconv ===============
-        d_conv=3, # < 2 means no conv 
-        conv_bias=True,
-        # ======================
-        dropout=0.0,
-        bias=False,
-        # dt init ==============
-        dt_min=0.001,
-        dt_max=0.1,
-        dt_init="random",
-        dt_scale=1.0,
-        dt_init_floor=1e-4,
-        initialize="v0",
-        # ======================
-        forward_type="v2",
-        channel_first=False,
-        # ======================
-        **kwargs,
-    ):
-        kwargs.update(
-            d_model=d_model, d_state=d_state, ssm_ratio=ssm_ratio, dt_rank=dt_rank,
-            act_layer=act_layer, d_conv=d_conv, conv_bias=conv_bias, dropout=dropout, bias=bias,
-            dt_min=dt_min, dt_max=dt_max, dt_init=dt_init, dt_scale=dt_scale, dt_init_floor=dt_init_floor,
-            initialize=initialize, forward_type=forward_type, channel_first=channel_first,
-        )
-        # only used to run previous version
-        if forward_type in ["v0", "v0seq"]:
-            self.__initv0__(seq=("seq" in forward_type), **kwargs)
-            return
-        elif forward_type.startswith("xv"):
-            self.__initxv__(**kwargs)
-            return
-        else:
-            self.__initv2__(**kwargs)
-            return
-
+class SS2Dv3:
     def __initxv__(
         self,
         # basic dims ===========
@@ -1191,6 +1147,51 @@ class SS2D(nn.Module, mamba_init, SS2Dv0, SS2Dv2):
 
         out = self.dropout(self.out_proj(y))
         return out
+
+
+class SS2D(nn.Module, mamba_init, SS2Dv0, SS2Dv2, SS2Dv3):
+    def __init__(
+        self,
+        # basic dims ===========
+        d_model=96,
+        d_state=16,
+        ssm_ratio=2.0,
+        dt_rank="auto",
+        act_layer=nn.SiLU,
+        # dwconv ===============
+        d_conv=3, # < 2 means no conv 
+        conv_bias=True,
+        # ======================
+        dropout=0.0,
+        bias=False,
+        # dt init ==============
+        dt_min=0.001,
+        dt_max=0.1,
+        dt_init="random",
+        dt_scale=1.0,
+        dt_init_floor=1e-4,
+        initialize="v0",
+        # ======================
+        forward_type="v2",
+        channel_first=False,
+        # ======================
+        **kwargs,
+    ):
+        kwargs.update(
+            d_model=d_model, d_state=d_state, ssm_ratio=ssm_ratio, dt_rank=dt_rank,
+            act_layer=act_layer, d_conv=d_conv, conv_bias=conv_bias, dropout=dropout, bias=bias,
+            dt_min=dt_min, dt_max=dt_max, dt_init=dt_init, dt_scale=dt_scale, dt_init_floor=dt_init_floor,
+            initialize=initialize, forward_type=forward_type, channel_first=channel_first,
+        )
+        if forward_type in ["v0", "v0seq"]:
+            self.__initv0__(seq=("seq" in forward_type), **kwargs)
+            return
+        elif forward_type.startswith("xv"):
+            self.__initxv__(**kwargs)
+            return
+        else:
+            self.__initv2__(**kwargs)
+            return
 
 
 class VSSBlock(nn.Module):
