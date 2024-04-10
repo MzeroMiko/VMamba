@@ -17,15 +17,9 @@ ckpts
 log
 ckpt
 
-# classification/configs/vssm01
-
 analyze/show
-
 cross_selective_scan
-
 classification/models/pscan.py
-
-# we do not release code of heat series
 classification/configs/heat
 classification/models/heat
 classification/models/heat.py
