@@ -1,0 +1,28 @@
+MODEL:
+  TYPE: vssm
+  NAME: vssm1_tiny_0220
+  DROP_PATH_RATE: 0.2
+  VSSM:
+    EMBED_DIM: 96
+    DEPTHS: [ 2, 2, 4, 2 ]
+    SSM_D_STATE: 1
+    SSM_DT_RANK: "auto"
+    SSM_RATIO: 2.0
+    SSM_CONV: 3
+    # SSM_CONV: -1
+    # SSM_CONV_BIAS: false
+    SSM_SIMPLE_INIT: true
+    MLP_RATIO: 4.0
+    DOWNSAMPLE: "v3"
+    PATCHEMBED: "v2"
+
+# in 4090 24G:
+# 96 + 2,2,4,2 + 1 + 2.0 + 3 + 4.0 + v3 + v2 + [simple init; ] = 32.49M + 5.05G + <10min (the speed is related to A init...)
+# 96 + 2,2,4,2 + 1 + 2.0 + 3 + 4.0 + v3 + v2 = 32.49M + 5.05G + 10.0min
+# 96 + 2,2,4,2 + 1 + 2.0 + -1 + 4.0 + v3 + v2 = 32.42M + 5.02G + 10.5min
+# 96 + 2,2,4,2 + 1 + 2.0 + -1 + 4.0 + v3 + v1 = 32.38M + 4.89G + 9.6min
+# 96 + 2,2,4,2 + 1 + 2.0 + -1 + 4.0 + v2 + v1 = 30.4M + 4.67G + 9.5min
+# 96 + 2,2,4,2 + 1 + 2.0 + -1 + 0.0 + v2 + v1 = 15.5M + 2.35G + 8.3min
+# 96 + 2,2,6,2 + 1 + 2.0 + -1 + 0.0 + v2 + v1 = 17.6M + 2.78G + 8.8min
+# 96 + 2,2,9,2 + 1 + 2.0 + -1 + 0.0 + v2 + v1 = 20.8M + 3.41G + 10.0min
+# 

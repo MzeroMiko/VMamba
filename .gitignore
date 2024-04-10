@@ -8,9 +8,10 @@
 **/dist
 **/*.so
 *.so
-tmp
-output
-work_dirs
+**/build
+**/tmp
+**/output
+**/work_dirs
 logs
 ckpts
 log
@@ -32,17 +33,8 @@ classification/models/vim.py
 classification/models/pscan.py
 
 detection/data
-detection/work_dirs
-
 segmentation/data
-segmentation/work_dirs
 
-kernels/cross_scan/build
-kernels/selective_scan/build
-
-classification/configs/vssm1/_test_vssm_tiny_224_0221.yaml
-
-classification/models/ss2d_ablations.py
 kernels/selective_scan/1.log
 classification/dev.py
 classification/models/triton_parts.py
@@ -52,5 +44,3 @@ kernels/selective_scan/test_selective_scan_easy.py
 kernels/selective_scan/ssmtriton.py
 test.sh
 classification/models/vmamba copy.py
-analyze/convnexts4nd/extensions/kernels/build/*
-analyze/attnmap.py
