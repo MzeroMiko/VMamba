@@ -205,51 +205,7 @@ class mamba_init:
         return D
 
 
-class SS2D(nn.Module, mamba_init):
-    def __init__(
-        self,
-        # basic dims ===========
-        d_model=96,
-        d_state=16,
-        ssm_ratio=2.0,
-        dt_rank="auto",
-        act_layer=nn.SiLU,
-        # dwconv ===============
-        d_conv=3, # < 2 means no conv 
-        conv_bias=True,
-        # ======================
-        dropout=0.0,
-        bias=False,
-        # dt init ==============
-        dt_min=0.001,
-        dt_max=0.1,
-        dt_init="random",
-        dt_scale=1.0,
-        dt_init_floor=1e-4,
-        initialize="v0",
-        # ======================
-        forward_type="v2",
-        channel_first=False,
-        # ======================
-        **kwargs,
-    ):
-        kwargs.update(
-            d_model=d_model, d_state=d_state, ssm_ratio=ssm_ratio, dt_rank=dt_rank,
-            act_layer=act_layer, d_conv=d_conv, conv_bias=conv_bias, dropout=dropout, bias=bias,
-            dt_min=dt_min, dt_max=dt_max, dt_init=dt_init, dt_scale=dt_scale, dt_init_floor=dt_init_floor,
-            initialize=initialize, forward_type=forward_type, channel_first=channel_first,
-        )
-        # only used to run previous version
-        if forward_type in ["v0", "v0seq"]:
-            self.__initv0__(seq=("seq" in forward_type), **kwargs)
-            return
-        elif forward_type.startswith("xv"):
-            self.__initxv__(**kwargs)
-            return
-        else:
-            self.__initv2__(**kwargs)
-            return
-
+class SS2Dv0:
     # only used to run previous version
     def __initv0__(
         self,
@@ -327,6 +283,81 @@ class SS2D(nn.Module, mamba_init):
         self.out_proj = nn.Linear(d_inner, d_model, bias=bias, **factory_kwargs)
         self.dropout = nn.Dropout(dropout) if dropout > 0. else nn.Identity()
 
+    # only used to run previous version
+    def forwardv0(self, x: torch.Tensor, SelectiveScan = SelectiveScanMamba, seq=False, force_fp32=True, **kwargs):
+        x = self.in_proj(x)
+        x, z = x.chunk(2, dim=-1) # (b, h, w, d)
+        z = self.act(z)
+        x = x.permute(0, 3, 1, 2).contiguous()
+        x = self.conv2d(x) # (b, d, h, w)
+        x = self.act(x)
+        
+        def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True, nrows=1):
+            return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, False)
+
+        B, D, H, W = x.shape
+        D, N = self.A_logs.shape
+        K, D, R = self.dt_projs_weight.shape
+        L = H * W
+
+        x_hwwh = torch.stack([x.view(B, -1, L), torch.transpose(x, dim0=2, dim1=3).contiguous().view(B, -1, L)], dim=1).view(B, 2, -1, L)
+        xs = torch.cat([x_hwwh, torch.flip(x_hwwh, dims=[-1])], dim=1) # (b, k, d, l)
+
+        x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, self.x_proj_weight)
+        # x_dbl = x_dbl + self.x_proj_bias.view(1, K, -1, 1)
+        dts, Bs, Cs = torch.split(x_dbl, [R, N, N], dim=2)
+        dts = torch.einsum("b k r l, k d r -> b k d l", dts, self.dt_projs_weight)
+
+        xs = xs.view(B, -1, L) # (b, k * d, l)
+        dts = dts.contiguous().view(B, -1, L) # (b, k * d, l)
+        Bs = Bs.contiguous() # (b, k, d_state, l)
+        Cs = Cs.contiguous() # (b, k, d_state, l)
+        
+        As = -torch.exp(self.A_logs.float()) # (k * d, d_state)
+        Ds = self.Ds.float() # (k * d)
+        dt_projs_bias = self.dt_projs_bias.float().view(-1) # (k * d)
+
+        # assert len(xs.shape) == 3 and len(dts.shape) == 3 and len(Bs.shape) == 4 and len(Cs.shape) == 4
+        # assert len(As.shape) == 2 and len(Ds.shape) == 1 and len(dt_projs_bias.shape) == 1
+        to_fp32 = lambda *args: (_a.to(torch.float32) for _a in args)
+        
+        if force_fp32:
+            xs, dts, Bs, Cs = to_fp32(xs, dts, Bs, Cs)
+
+        if seq:
+            out_y = []
+            for i in range(4):
+                yi = selective_scan(
+                    xs.view(B, K, -1, L)[:, i], dts.view(B, K, -1, L)[:, i], 
+                    As.view(K, -1, N)[i], Bs[:, i].unsqueeze(1), Cs[:, i].unsqueeze(1), Ds.view(K, -1)[i],
+                    delta_bias=dt_projs_bias.view(K, -1)[i],
+                    delta_softplus=True,
+                ).view(B, -1, L)
+                out_y.append(yi)
+            out_y = torch.stack(out_y, dim=1)
+        else:
+            out_y = selective_scan(
+                xs, dts, 
+                As, Bs, Cs, Ds,
+                delta_bias=dt_projs_bias,
+                delta_softplus=True,
+            ).view(B, K, -1, L)
+        assert out_y.dtype == torch.float
+
+        inv_y = torch.flip(out_y[:, 2:4], dims=[-1]).view(B, 2, -1, L)
+        wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
+        invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
+        y = out_y[:, 0] + inv_y[:, 0] + wh_y + invwh_y
+        
+        y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
+        y = self.out_norm(y).view(B, H, W, -1)
+
+        y = y * z
+        out = self.dropout(self.out_proj(y))
+        return out
+
+
+class SS2Dv2:
     def __initv2__(
         self,
         # basic dims ===========
@@ -482,282 +513,6 @@ class SS2D(nn.Module, mamba_init):
             self.A_logs = nn.Parameter(torch.zeros((k_group * d_inner, d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
             self.dt_projs_weight = nn.Parameter(0.1 * torch.rand((k_group, d_inner, dt_rank)))
             self.dt_projs_bias = nn.Parameter(0.1 * torch.rand((k_group, d_inner)))
-
-    def __initxv__(
-        self,
-        # basic dims ===========
-        d_model=96,
-        d_state=16,
-        ssm_ratio=2.0,
-        dt_rank="auto",
-        act_layer=nn.SiLU,
-        # dwconv ===============
-        d_conv=3, # < 2 means no conv 
-        conv_bias=True,
-        # ======================
-        dropout=0.0,
-        bias=False,
-        # dt init ==============
-        dt_min=0.001,
-        dt_max=0.1,
-        dt_init="random",
-        dt_scale=1.0,
-        dt_init_floor=1e-4,
-        initialize="v0",
-        # ======================
-        forward_type="v2",
-        channel_first=False,
-        # ======================
-        **kwargs,
-    ):
-        factory_kwargs = {"device": None, "dtype": None}
-        super().__init__()
-        d_inner = int(ssm_ratio * d_model)
-        dt_rank = math.ceil(d_model / 16) if dt_rank == "auto" else dt_rank
-        self.d_conv = d_conv
-        self.channel_first = channel_first
-        self.d_state = d_state
-        self.dt_rank = dt_rank
-        self.d_inner = d_inner
-        Linear = Linear2d if channel_first else nn.Linear
-        self.forward = self.forwardxv
-
-        # tags for forward_type ==============================
-        def checkpostfix(tag, value):
-            ret = value[-len(tag):] == tag
-            if ret:
-                value = value[:-len(tag)]
-            return ret, value
-
-        self.disable_force32, forward_type = checkpostfix("no32", forward_type)
-
-        # softmax | sigmoid | dwconv | norm ===========================
-        self.out_norm_shape = "v1"
-        if forward_type[-len("none"):] == "none":
-            forward_type = forward_type[:-len("none")]
-            self.out_norm = nn.Identity()
-        elif forward_type[-len("dwconv3"):] == "dwconv3":
-            forward_type = forward_type[:-len("dwconv3")]
-            self.out_norm = nn.Conv2d(d_inner, d_inner, kernel_size=3, padding=1, groups=d_inner, bias=False)
-        elif forward_type[-len("softmax"):] == "softmax":
-            forward_type = forward_type[:-len("softmax")]
-            class SoftmaxSpatial(nn.Softmax):
-                def forward(self, x: torch.Tensor):
-                    B, C, H, W = x.shape
-                    return super().forward(x.view(B, C, -1)).view(B, C, H, W)
-            self.out_norm = SoftmaxSpatial(dim=-1)
-        elif forward_type[-len("sigmoid"):] == "sigmoid":
-            forward_type = forward_type[:-len("sigmoid")]
-            self.out_norm = nn.Sigmoid()
-        elif channel_first:
-            self.out_norm = LayerNorm2d(d_inner)
-        else:
-            self.out_norm_shape = "v0"
-            self.out_norm = nn.LayerNorm(d_inner)
-
-        k_group = 4
-        # in proj =======================================
-        self.out_act: nn.Module = nn.Identity()
-        # 0309 -> 0319 needs to be rerun...
-        if False:
-            # change Conv2d to Linear2d Next
-            if forward_type.startswith("xv1"):
-                self.in_proj = nn.Conv2d(d_model, d_inner + dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
-
-            if forward_type.startswith("xv2"):
-                self.in_proj = nn.Conv2d(d_model, d_inner + d_inner + 8 * d_state, 1, bias=bias, **factory_kwargs)
-                self.forward = partial(self.forwardxv, mode="xv2")
-                del self.dt_projs_weight
-
-            if forward_type.startswith("xv3"):
-                self.forward = partial(self.forwardxv, mode="xv3")
-                self.in_proj = nn.Conv2d(d_model, d_inner + 4 * dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
-
-            if forward_type.startswith("xv4"):
-                self.forward = partial(self.forwardxv, mode="xv3")
-                self.in_proj = nn.Conv2d(d_model, d_inner + 4 * dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
-                self.out_act = nn.GELU()
-
-            if forward_type.startswith("xv5"):
-                self.in_proj = nn.Conv2d(d_model, d_inner + d_inner + 8 * d_state, 1, bias=bias, **factory_kwargs)
-                self.forward = partial(self.forwardxv, mode="xv2")
-                del self.dt_projs_weight
-                self.out_act = nn.GELU()
-
-            if forward_type.startswith("xv6"):
-                self.forward = partial(self.forwardxv, mode="xv1")
-                self.in_proj = nn.Conv2d(d_model, d_inner + dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
-                self.out_act = nn.GELU()
-
-            # to see if Linear2d and nn.Conv2d differ, as they will be inited differ
-            if forward_type.startswith("xv61"):
-                self.forward = partial(self.forwardxv, mode="xv1")
-                self.in_proj = Linear2d(d_model, d_inner + dt_rank + 8 * d_state, bias=bias, **factory_kwargs)
-                self.out_act = nn.GELU()
-            
-            if forward_type.startswith("xv7"):
-                self.forward = partial(self.forwardxv, mode="xv1", omul=True)
-                self.in_proj = Linear2d(d_model, d_inner + dt_rank + 8 * d_state, bias=bias, **factory_kwargs)
-                self.out_act = nn.GELU()
-            
-        if True:
-            self.ocov2, forward_type = checkpostfix("ocov2", forward_type)
-            self.ocov, forward_type = checkpostfix("ocov", forward_type)
-            self.omul, forward_type = checkpostfix("mul", forward_type)
-            if self.ocov2:
-                self.f_ocov2 = nn.Identity()
-            if self.ocov:
-                self.f_ocov = nn.Identity()
-            if self.omul:
-                self.f_omul = nn.Identity()
-            oact, forward_type = checkpostfix("act", forward_type)
-            self.out_act = nn.GELU() if oact else nn.Identity()
-
-            if forward_type.startswith("xv1a"):
-                self.forward = partial(self.forwardxv, mode="xv1a")
-                self.in_proj = Linear2d(d_model, d_inner + dt_rank + 8 * d_state, bias=bias, **factory_kwargs)
-
-            if forward_type.startswith("xv2a"):
-                self.forward = partial(self.forwardxv, mode="xv2a")
-                self.in_proj = Linear2d(d_model, d_inner + d_inner + 8 * d_state,bias=bias, **factory_kwargs)
-
-            if forward_type.startswith("xv3a"):
-                self.forward = partial(self.forwardxv, mode="xv3a")
-                self.in_proj = Linear2d(d_model, d_inner + 4 * dt_rank + 8 * d_state,bias=bias, **factory_kwargs)
-
-        # conv =======================================
-        if d_conv > 1:
-            cact, forward_type = checkpostfix("ca", forward_type)
-            self.act: nn.Module = act_layer() if cact else nn.Identity()
-
-            if self.ocov2 or (not self.ocov):
-                self.conv2d = nn.Conv2d(
-                    in_channels=d_model,
-                    out_channels=d_model,
-                    groups=d_model,
-                    bias=conv_bias,
-                    kernel_size=d_conv,
-                    padding=(d_conv - 1) // 2,
-                    **factory_kwargs,
-                )
-                
-            if self.ocov2 or self.ocov:
-                self.oconv2d = nn.Conv2d(
-                    in_channels=d_inner,
-                    out_channels=d_inner,
-                    groups=d_inner,
-                    bias=conv_bias,
-                    kernel_size=d_conv,
-                    padding=(d_conv - 1) // 2,
-                    **factory_kwargs,
-                )    
-
-
-        # out proj =======================================
-        self.out_proj = Linear(d_inner, d_model, bias=bias, **factory_kwargs)
-        self.dropout = nn.Dropout(dropout) if dropout > 0. else nn.Identity()
-
-        if initialize in ["v0"]:
-            # dt proj ============================
-            self.dt_projs = [
-                self.dt_init(dt_rank, d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs)
-                for _ in range(k_group)
-            ]
-            self.dt_projs_weight = nn.Parameter(torch.stack([t.weight for t in self.dt_projs], dim=0)) # (K, inner, rank)
-            self.dt_projs_bias = nn.Parameter(torch.stack([t.bias for t in self.dt_projs], dim=0)) # (K, inner)
-            del self.dt_projs
-            
-            # A, D =======================================
-            self.A_logs = self.A_log_init(d_state, d_inner, copies=k_group, merge=True) # (K * D, N)
-            self.Ds = self.D_init(d_inner, copies=k_group, merge=True) # (K * D)
-        elif initialize in ["v1"]:
-            # simple init dt_projs, A_logs, Ds
-            self.Ds = nn.Parameter(torch.ones((k_group * d_inner)))
-            self.A_logs = nn.Parameter(torch.randn((k_group * d_inner, d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
-            self.dt_projs_weight = nn.Parameter(torch.randn((k_group, d_inner, dt_rank)))
-            self.dt_projs_bias = nn.Parameter(torch.randn((k_group, d_inner))) 
-        elif initialize in ["v2"]:
-            # simple init dt_projs, A_logs, Ds
-            self.Ds = nn.Parameter(torch.ones((k_group * d_inner)))
-            self.A_logs = nn.Parameter(torch.zeros((k_group * d_inner, d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
-            self.dt_projs_weight = nn.Parameter(0.1 * torch.rand((k_group, d_inner, dt_rank)))
-            self.dt_projs_bias = nn.Parameter(0.1 * torch.rand((k_group, d_inner)))
-
-        if forward_type.startswith("xv2"):
-            del self.dt_projs_weight
-
-    # only used to run previous version
-    def forwardv0(self, x: torch.Tensor, SelectiveScan = SelectiveScanMamba, seq=False, force_fp32=True, **kwargs):
-        x = self.in_proj(x)
-        x, z = x.chunk(2, dim=-1) # (b, h, w, d)
-        z = self.act(z)
-        x = x.permute(0, 3, 1, 2).contiguous()
-        x = self.conv2d(x) # (b, d, h, w)
-        x = self.act(x)
-        
-        def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True, nrows=1):
-            return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, False)
-
-        B, D, H, W = x.shape
-        D, N = self.A_logs.shape
-        K, D, R = self.dt_projs_weight.shape
-        L = H * W
-
-        x_hwwh = torch.stack([x.view(B, -1, L), torch.transpose(x, dim0=2, dim1=3).contiguous().view(B, -1, L)], dim=1).view(B, 2, -1, L)
-        xs = torch.cat([x_hwwh, torch.flip(x_hwwh, dims=[-1])], dim=1) # (b, k, d, l)
-
-        x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, self.x_proj_weight)
-        # x_dbl = x_dbl + self.x_proj_bias.view(1, K, -1, 1)
-        dts, Bs, Cs = torch.split(x_dbl, [R, N, N], dim=2)
-        dts = torch.einsum("b k r l, k d r -> b k d l", dts, self.dt_projs_weight)
-
-        xs = xs.view(B, -1, L) # (b, k * d, l)
-        dts = dts.contiguous().view(B, -1, L) # (b, k * d, l)
-        Bs = Bs.contiguous() # (b, k, d_state, l)
-        Cs = Cs.contiguous() # (b, k, d_state, l)
-        
-        As = -torch.exp(self.A_logs.float()) # (k * d, d_state)
-        Ds = self.Ds.float() # (k * d)
-        dt_projs_bias = self.dt_projs_bias.float().view(-1) # (k * d)
-
-        # assert len(xs.shape) == 3 and len(dts.shape) == 3 and len(Bs.shape) == 4 and len(Cs.shape) == 4
-        # assert len(As.shape) == 2 and len(Ds.shape) == 1 and len(dt_projs_bias.shape) == 1
-        to_fp32 = lambda *args: (_a.to(torch.float32) for _a in args)
-        
-        if force_fp32:
-            xs, dts, Bs, Cs = to_fp32(xs, dts, Bs, Cs)
-
-        if seq:
-            out_y = []
-            for i in range(4):
-                yi = selective_scan(
-                    xs.view(B, K, -1, L)[:, i], dts.view(B, K, -1, L)[:, i], 
-                    As.view(K, -1, N)[i], Bs[:, i].unsqueeze(1), Cs[:, i].unsqueeze(1), Ds.view(K, -1)[i],
-                    delta_bias=dt_projs_bias.view(K, -1)[i],
-                    delta_softplus=True,
-                ).view(B, -1, L)
-                out_y.append(yi)
-            out_y = torch.stack(out_y, dim=1)
-        else:
-            out_y = selective_scan(
-                xs, dts, 
-                As, Bs, Cs, Ds,
-                delta_bias=dt_projs_bias,
-                delta_softplus=True,
-            ).view(B, K, -1, L)
-        assert out_y.dtype == torch.float
-
-        inv_y = torch.flip(out_y[:, 2:4], dims=[-1]).view(B, 2, -1, L)
-        wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
-        invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
-        y = out_y[:, 0] + inv_y[:, 0] + wh_y + invwh_y
-        
-        y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
-        y = self.out_norm(y).view(B, H, W, -1)
-
-        y = y * z
-        out = self.dropout(self.out_proj(y))
-        return out
 
     # cascade2d
     def forward_corev1(
@@ -1056,6 +811,255 @@ class SS2D(nn.Module, mamba_init):
             y = y * z
         out = self.dropout(self.out_proj(y))
         return out
+
+
+class SS2D(nn.Module, mamba_init, SS2Dv0, SS2Dv2):
+    def __init__(
+        self,
+        # basic dims ===========
+        d_model=96,
+        d_state=16,
+        ssm_ratio=2.0,
+        dt_rank="auto",
+        act_layer=nn.SiLU,
+        # dwconv ===============
+        d_conv=3, # < 2 means no conv 
+        conv_bias=True,
+        # ======================
+        dropout=0.0,
+        bias=False,
+        # dt init ==============
+        dt_min=0.001,
+        dt_max=0.1,
+        dt_init="random",
+        dt_scale=1.0,
+        dt_init_floor=1e-4,
+        initialize="v0",
+        # ======================
+        forward_type="v2",
+        channel_first=False,
+        # ======================
+        **kwargs,
+    ):
+        kwargs.update(
+            d_model=d_model, d_state=d_state, ssm_ratio=ssm_ratio, dt_rank=dt_rank,
+            act_layer=act_layer, d_conv=d_conv, conv_bias=conv_bias, dropout=dropout, bias=bias,
+            dt_min=dt_min, dt_max=dt_max, dt_init=dt_init, dt_scale=dt_scale, dt_init_floor=dt_init_floor,
+            initialize=initialize, forward_type=forward_type, channel_first=channel_first,
+        )
+        # only used to run previous version
+        if forward_type in ["v0", "v0seq"]:
+            self.__initv0__(seq=("seq" in forward_type), **kwargs)
+            return
+        elif forward_type.startswith("xv"):
+            self.__initxv__(**kwargs)
+            return
+        else:
+            self.__initv2__(**kwargs)
+            return
+
+    def __initxv__(
+        self,
+        # basic dims ===========
+        d_model=96,
+        d_state=16,
+        ssm_ratio=2.0,
+        dt_rank="auto",
+        act_layer=nn.SiLU,
+        # dwconv ===============
+        d_conv=3, # < 2 means no conv 
+        conv_bias=True,
+        # ======================
+        dropout=0.0,
+        bias=False,
+        # dt init ==============
+        dt_min=0.001,
+        dt_max=0.1,
+        dt_init="random",
+        dt_scale=1.0,
+        dt_init_floor=1e-4,
+        initialize="v0",
+        # ======================
+        forward_type="v2",
+        channel_first=False,
+        # ======================
+        **kwargs,
+    ):
+        factory_kwargs = {"device": None, "dtype": None}
+        super().__init__()
+        d_inner = int(ssm_ratio * d_model)
+        dt_rank = math.ceil(d_model / 16) if dt_rank == "auto" else dt_rank
+        self.d_conv = d_conv
+        self.channel_first = channel_first
+        self.d_state = d_state
+        self.dt_rank = dt_rank
+        self.d_inner = d_inner
+        Linear = Linear2d if channel_first else nn.Linear
+        self.forward = self.forwardxv
+
+        # tags for forward_type ==============================
+        def checkpostfix(tag, value):
+            ret = value[-len(tag):] == tag
+            if ret:
+                value = value[:-len(tag)]
+            return ret, value
+
+        self.disable_force32, forward_type = checkpostfix("no32", forward_type)
+
+        # softmax | sigmoid | dwconv | norm ===========================
+        self.out_norm_shape = "v1"
+        if forward_type[-len("none"):] == "none":
+            forward_type = forward_type[:-len("none")]
+            self.out_norm = nn.Identity()
+        elif forward_type[-len("dwconv3"):] == "dwconv3":
+            forward_type = forward_type[:-len("dwconv3")]
+            self.out_norm = nn.Conv2d(d_inner, d_inner, kernel_size=3, padding=1, groups=d_inner, bias=False)
+        elif forward_type[-len("softmax"):] == "softmax":
+            forward_type = forward_type[:-len("softmax")]
+            class SoftmaxSpatial(nn.Softmax):
+                def forward(self, x: torch.Tensor):
+                    B, C, H, W = x.shape
+                    return super().forward(x.view(B, C, -1)).view(B, C, H, W)
+            self.out_norm = SoftmaxSpatial(dim=-1)
+        elif forward_type[-len("sigmoid"):] == "sigmoid":
+            forward_type = forward_type[:-len("sigmoid")]
+            self.out_norm = nn.Sigmoid()
+        elif channel_first:
+            self.out_norm = LayerNorm2d(d_inner)
+        else:
+            self.out_norm_shape = "v0"
+            self.out_norm = nn.LayerNorm(d_inner)
+
+        k_group = 4
+        # in proj =======================================
+        self.out_act: nn.Module = nn.Identity()
+        # 0309 -> 0319 needs to be rerun...
+        if False:
+            # change Conv2d to Linear2d Next
+            if forward_type.startswith("xv1"):
+                self.in_proj = nn.Conv2d(d_model, d_inner + dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
+
+            if forward_type.startswith("xv2"):
+                self.in_proj = nn.Conv2d(d_model, d_inner + d_inner + 8 * d_state, 1, bias=bias, **factory_kwargs)
+                self.forward = partial(self.forwardxv, mode="xv2")
+                del self.dt_projs_weight
+
+            if forward_type.startswith("xv3"):
+                self.forward = partial(self.forwardxv, mode="xv3")
+                self.in_proj = nn.Conv2d(d_model, d_inner + 4 * dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
+
+            if forward_type.startswith("xv4"):
+                self.forward = partial(self.forwardxv, mode="xv3")
+                self.in_proj = nn.Conv2d(d_model, d_inner + 4 * dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
+                self.out_act = nn.GELU()
+
+            if forward_type.startswith("xv5"):
+                self.in_proj = nn.Conv2d(d_model, d_inner + d_inner + 8 * d_state, 1, bias=bias, **factory_kwargs)
+                self.forward = partial(self.forwardxv, mode="xv2")
+                del self.dt_projs_weight
+                self.out_act = nn.GELU()
+
+            if forward_type.startswith("xv6"):
+                self.forward = partial(self.forwardxv, mode="xv1")
+                self.in_proj = nn.Conv2d(d_model, d_inner + dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
+                self.out_act = nn.GELU()
+
+            # to see if Linear2d and nn.Conv2d differ, as they will be inited differ
+            if forward_type.startswith("xv61"):
+                self.forward = partial(self.forwardxv, mode="xv1")
+                self.in_proj = Linear2d(d_model, d_inner + dt_rank + 8 * d_state, bias=bias, **factory_kwargs)
+                self.out_act = nn.GELU()
+            
+            if forward_type.startswith("xv7"):
+                self.forward = partial(self.forwardxv, mode="xv1", omul=True)
+                self.in_proj = Linear2d(d_model, d_inner + dt_rank + 8 * d_state, bias=bias, **factory_kwargs)
+                self.out_act = nn.GELU()
+            
+        if True:
+            self.ocov2, forward_type = checkpostfix("ocov2", forward_type)
+            self.ocov, forward_type = checkpostfix("ocov", forward_type)
+            self.omul, forward_type = checkpostfix("mul", forward_type)
+            if self.ocov2:
+                self.f_ocov2 = nn.Identity()
+            if self.ocov:
+                self.f_ocov = nn.Identity()
+            if self.omul:
+                self.f_omul = nn.Identity()
+            oact, forward_type = checkpostfix("act", forward_type)
+            self.out_act = nn.GELU() if oact else nn.Identity()
+
+            if forward_type.startswith("xv1a"):
+                self.forward = partial(self.forwardxv, mode="xv1a")
+                self.in_proj = Linear2d(d_model, d_inner + dt_rank + 8 * d_state, bias=bias, **factory_kwargs)
+
+            if forward_type.startswith("xv2a"):
+                self.forward = partial(self.forwardxv, mode="xv2a")
+                self.in_proj = Linear2d(d_model, d_inner + d_inner + 8 * d_state,bias=bias, **factory_kwargs)
+
+            if forward_type.startswith("xv3a"):
+                self.forward = partial(self.forwardxv, mode="xv3a")
+                self.in_proj = Linear2d(d_model, d_inner + 4 * dt_rank + 8 * d_state,bias=bias, **factory_kwargs)
+
+        # conv =======================================
+        if d_conv > 1:
+            cact, forward_type = checkpostfix("ca", forward_type)
+            self.act: nn.Module = act_layer() if cact else nn.Identity()
+
+            if self.ocov2 or (not self.ocov):
+                self.conv2d = nn.Conv2d(
+                    in_channels=d_model,
+                    out_channels=d_model,
+                    groups=d_model,
+                    bias=conv_bias,
+                    kernel_size=d_conv,
+                    padding=(d_conv - 1) // 2,
+                    **factory_kwargs,
+                )
+                
+            if self.ocov2 or self.ocov:
+                self.oconv2d = nn.Conv2d(
+                    in_channels=d_inner,
+                    out_channels=d_inner,
+                    groups=d_inner,
+                    bias=conv_bias,
+                    kernel_size=d_conv,
+                    padding=(d_conv - 1) // 2,
+                    **factory_kwargs,
+                )    
+
+
+        # out proj =======================================
+        self.out_proj = Linear(d_inner, d_model, bias=bias, **factory_kwargs)
+        self.dropout = nn.Dropout(dropout) if dropout > 0. else nn.Identity()
+
+        if initialize in ["v0"]:
+            # dt proj ============================
+            self.dt_projs = [
+                self.dt_init(dt_rank, d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs)
+                for _ in range(k_group)
+            ]
+            self.dt_projs_weight = nn.Parameter(torch.stack([t.weight for t in self.dt_projs], dim=0)) # (K, inner, rank)
+            self.dt_projs_bias = nn.Parameter(torch.stack([t.bias for t in self.dt_projs], dim=0)) # (K, inner)
+            del self.dt_projs
+            
+            # A, D =======================================
+            self.A_logs = self.A_log_init(d_state, d_inner, copies=k_group, merge=True) # (K * D, N)
+            self.Ds = self.D_init(d_inner, copies=k_group, merge=True) # (K * D)
+        elif initialize in ["v1"]:
+            # simple init dt_projs, A_logs, Ds
+            self.Ds = nn.Parameter(torch.ones((k_group * d_inner)))
+            self.A_logs = nn.Parameter(torch.randn((k_group * d_inner, d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
+            self.dt_projs_weight = nn.Parameter(torch.randn((k_group, d_inner, dt_rank)))
+            self.dt_projs_bias = nn.Parameter(torch.randn((k_group, d_inner))) 
+        elif initialize in ["v2"]:
+            # simple init dt_projs, A_logs, Ds
+            self.Ds = nn.Parameter(torch.ones((k_group * d_inner)))
+            self.A_logs = nn.Parameter(torch.zeros((k_group * d_inner, d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
+            self.dt_projs_weight = nn.Parameter(0.1 * torch.rand((k_group, d_inner, dt_rank)))
+            self.dt_projs_bias = nn.Parameter(0.1 * torch.rand((k_group, d_inner)))
+
+        if forward_type.startswith("xv2"):
+            del self.dt_projs_weight
 
     def forwardxv(self, x: torch.Tensor, mode="xv1a", omul=False, **kwargs):
         B, C, H, W = x.shape
