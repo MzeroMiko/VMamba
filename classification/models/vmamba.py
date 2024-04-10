@@ -625,7 +625,8 @@ class SS2D(nn.Module, mamba_init):
 
         # conv =======================================
         if d_conv > 1:
-            self.act: nn.Module = act_layer()
+            cact, forward_type = checkpostfix("ca", forward_type)
+            self.act: nn.Module = act_layer() if cact else nn.Identity()
 
             if self.ocov2 or (not self.ocov):
                 self.conv2d = nn.Conv2d(
@@ -638,7 +639,6 @@ class SS2D(nn.Module, mamba_init):
                     **factory_kwargs,
                 )
                 
-
             if self.ocov2 or self.ocov:
                 self.oconv2d = nn.Conv2d(
                     in_channels=d_inner,
@@ -650,7 +650,6 @@ class SS2D(nn.Module, mamba_init):
                     **factory_kwargs,
                 )    
 
-                            
 
         # out proj =======================================
         self.out_proj = Linear(d_inner, d_model, bias=bias, **factory_kwargs)
