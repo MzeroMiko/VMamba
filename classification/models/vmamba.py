@@ -1049,9 +1049,10 @@ class SS2Dv3:
         if not self.channel_first:
             x = x.permute(0, 3, 1, 2).contiguous()
 
-        if (self.d_conv > 1) and (not self.ocov):
+        if (self.d_conv > 1) and (not self.ocov) and (not self.ocov2):
             x = self.conv2d(x) # (b, d, h, w)
             x = self.act(x)
+
         x = self.in_proj(x)
         if (self.d_conv > 1) and (self.ocov2):
             x = self.conv2d(x) # (b, d, h, w)
