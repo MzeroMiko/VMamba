@@ -946,22 +946,42 @@ class SS2Dv3:
 
             if forward_type.startswith("xv1a"):
                 self.forward = partial(self.forwardxv, mode="xv1a")
-                self.in_proj = Linear2d(d_model, d_inner + dt_rank + 8 * d_state, bias=bias, **factory_kwargs)
-
-            if forward_type.startswith("xv2a"):
+                d_inner_all = d_inner + dt_rank + 8 * d_state
+            elif forward_type.startswith("xv2a"):
                 self.forward = partial(self.forwardxv, mode="xv2a")
-                self.in_proj = Linear2d(d_model, d_inner + d_inner + 8 * d_state,bias=bias, **factory_kwargs)
-
-            if forward_type.startswith("xv3a"):
+                d_inner_all = d_inner + d_inner + 8 * d_state
+            elif forward_type.startswith("xv3a"):
                 self.forward = partial(self.forwardxv, mode="xv3a")
-                self.in_proj = Linear2d(d_model, d_inner + 4 * dt_rank + 8 * d_state,bias=bias, **factory_kwargs)
+                d_inner_all = d_inner + 4 * dt_rank + 8 * d_state
+            
+            self.in_proj = Linear2d(d_model, d_inner_all, bias=bias, **factory_kwargs)
 
         # conv =======================================
         if d_conv > 1:
             cact, forward_type = checkpostfix("ca", forward_type)
             self.act: nn.Module = act_layer() if cact else nn.Identity()
-
-            if self.ocov2 or (not self.ocov):
+                
+            if self.ocov:
+                self.oconv2d = nn.Conv2d(
+                    in_channels=d_inner,
+                    out_channels=d_inner,
+                    groups=d_inner,
+                    bias=conv_bias,
+                    kernel_size=d_conv,
+                    padding=(d_conv - 1) // 2,
+                    **factory_kwargs,
+                )
+            elif self.ocov2:
+                self.conv2d = nn.Conv2d(
+                    in_channels=d_inner_all,
+                    out_channels=d_inner_all,
+                    groups=d_inner_all,
+                    bias=conv_bias,
+                    kernel_size=d_conv,
+                    padding=(d_conv - 1) // 2,
+                    **factory_kwargs,
+                )
+            else:
                 self.conv2d = nn.Conv2d(
                     in_channels=d_model,
                     out_channels=d_model,
@@ -971,18 +991,6 @@ class SS2Dv3:
                     padding=(d_conv - 1) // 2,
                     **factory_kwargs,
                 )
-                
-            if self.ocov2 or self.ocov:
-                self.oconv2d = nn.Conv2d(
-                    in_channels=d_inner,
-                    out_channels=d_inner,
-                    groups=d_inner,
-                    bias=conv_bias,
-                    kernel_size=d_conv,
-                    padding=(d_conv - 1) // 2,
-                    **factory_kwargs,
-                )    
-
 
         # out proj =======================================
         self.out_proj = Linear(d_inner, d_model, bias=bias, **factory_kwargs)
@@ -1045,6 +1053,8 @@ class SS2Dv3:
             x = self.conv2d(x) # (b, d, h, w)
             x = self.act(x)
         x = self.in_proj(x)
+        if (self.d_conv > 1) and (self.ocov2):
+            x = self.conv2d(x) # (b, d, h, w)
 
         if mode in ["xv1", "xv2", "xv3", "xv7"]:
             print(f"ERROR: MODE {mode} will be deleted in the future, use {mode}a instead.")
@@ -1142,7 +1152,7 @@ class SS2Dv3:
         y = self.out_act(y)
         if self.omul:
             y = y * (_us.permute(0, 2, 3, 1) if not self.channel_first else _us)
-        elif self.ocov or self.ocov2:
+        elif self.ocov:
             y = y + self.act(self.oconv2d(_us))
 
         out = self.dropout(self.out_proj(y))
