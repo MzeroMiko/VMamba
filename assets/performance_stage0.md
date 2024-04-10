@@ -1,4 +1,4 @@
-# Main Results correponding to [arXiv 2401.10166](https://arxiv.org/abs/2401.10166)
+# Main Results correponding to [arXiv 2401.10166v1](https://arxiv.org/abs/2401.10166v1)
 
 ### **Classification on ImageNet-1K**
 

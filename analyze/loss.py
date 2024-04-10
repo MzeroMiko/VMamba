@@ -571,7 +571,7 @@ def main_vssm1():
         # ti0223 = f"{logpath}/vssm_tiny_224_0223.log",
         # ti0225 = f"{logpath}/vssm_tiny_224_0225.log",
         # ti0229 = f"{logpath}/vssm_tiny_224_0229.log",
-        # ti0230 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm1_tiny_0230/log_rank0.txt",
+        ti0230 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm1_tiny_0230/log_rank0.txt",
         # ti0309 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm1_tiny_0309/log_rank0.txt",
         # ti0310 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm1_tiny_0310/log_rank0.txt",
         # ti0311 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm1_tiny_0311/log_rank0.txt",
