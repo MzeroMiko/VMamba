@@ -890,17 +890,11 @@ class SS2Dv3:
         self.out_act: nn.Module = nn.Identity()
 
         if True:
-            self.ocov2, forward_type = checkpostfix("_ocov2", forward_type)
-            self.ocov, forward_type = checkpostfix("_ocov", forward_type)
             self.omul, forward_type = checkpostfix("_mul", forward_type)
-            if self.ocov2:
-                self.f_ocov2 = nn.Identity()
-            if self.ocov:
-                self.f_ocov = nn.Identity()
             if self.omul:
                 self.f_omul = nn.Identity()
-            oact, forward_type = checkpostfix("_act", forward_type)
-            self.out_act = nn.GELU() if oact else nn.Identity()
+            self.oact, forward_type = checkpostfix("_act", forward_type)
+            self.out_act = nn.GELU() if self.oact else nn.Identity()
 
             if forward_type.startswith("xv1a"):
                 self.forward = partial(self.forwardxv, mode="xv1a")
@@ -916,10 +910,14 @@ class SS2Dv3:
 
         # conv =======================================
         if d_conv > 1:
-            cact, forward_type = checkpostfix("ca", forward_type)
+            cact, forward_type = checkpostfix("_ca", forward_type)
             self.act: nn.Module = act_layer() if cact else nn.Identity()
                 
+            self.ocov2, forward_type = checkpostfix("_ocov2", forward_type)
+            self.ocov, forward_type = checkpostfix("_ocov", forward_type)
+            self.cpos, forward_type = checkpostfix("_cpos", forward_type)
             if self.ocov:
+                self.f_ocov = nn.Identity()
                 self.oconv2d = nn.Conv2d(
                     in_channels=d_inner,
                     out_channels=d_inner,
@@ -930,6 +928,7 @@ class SS2Dv3:
                     **factory_kwargs,
                 )
             elif self.ocov2:
+                self.f_ocov2 = nn.Identity()
                 self.conv2d = nn.Conv2d(
                     in_channels=d_inner_all,
                     out_channels=d_inner_all,
@@ -983,7 +982,7 @@ class SS2Dv3:
         if forward_type.startswith("xv2"):
             del self.dt_projs_weight
 
-    def forwardxv(self, x: torch.Tensor, mode="xv1a", omul=False, **kwargs):
+    def forwardxv(self, x: torch.Tensor, mode="xv1a", **kwargs):
         B, C, H, W = x.shape
         if not self.channel_first:
             B, H, W, C = x.shape
@@ -1010,8 +1009,11 @@ class SS2Dv3:
         if (self.d_conv > 1) and (not self.ocov) and (not self.ocov2):
             x = self.conv2d(x) # (b, d, h, w)
             x = self.act(x)
+        elif (self.d_conv > 1) and (self.cpos):
+            x = x + self.conv2d(x) # (b, d, h, w)
 
         x = self.in_proj(x)
+        
         if (self.d_conv > 1) and (self.ocov2):
             x = self.conv2d(x) # (b, d, h, w)
 
