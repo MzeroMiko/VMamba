@@ -21,7 +21,7 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 * [**acknowledgment**](#acknowledgment)
 
 ## :white_check_mark: Updates
-* **` April. 11th, 2024`**: Update: we have released [arXiv 2401.10166v2](https://arxiv.org/abs/2401.10166v2), which contains lots of updates we made related to VMambav2!
+* **` April. 10th, 2024`**: Update: we have released [arXiv 2401.10166v2](https://arxiv.org/abs/2401.10166v2), which contains lots of updates we made related to VMambav2!
  
 * **` March. 20th, 2024`**: Update: we have released the `configs/logs/checkpoints` for `classification/detection/segmentation` of VMambav2. We'are still working on VMambav3! 
 
