@@ -9,7 +9,7 @@ MODEL:
     SSM_DT_RANK: "auto"
     SSM_RATIO: 1.0
     SSM_CONV: -1
-    SSM_FORWARDTYPE: "v05noz"
+    SSM_FORWARDTYPE: "v05_noz"
     MLP_RATIO: 4.0
     DOWNSAMPLE: "v3"
     PATCHEMBED: "v2"

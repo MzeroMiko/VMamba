@@ -205,6 +205,7 @@ class mamba_init:
         return D
 
 
+# support v0, v0seq
 class SS2Dv0:
     # only used to run previous version
     def __initv0__(
@@ -357,6 +358,7 @@ class SS2Dv0:
         return out
 
 
+# support v01-v05, v3noz, v2, ...
 class SS2Dv2:
     def __initv2__(
         self,
@@ -401,28 +403,28 @@ class SS2Dv2:
                 value = value[:-len(tag)]
             return ret, value
 
-        self.disable_force32, forward_type = checkpostfix("no32", forward_type)
-        self.oact, forward_type = checkpostfix("oact", forward_type)
-        self.disable_z, forward_type = checkpostfix("noz", forward_type)
-        self.disable_z_act, forward_type = checkpostfix("nozact", forward_type)
+        self.disable_force32, forward_type = checkpostfix("_no32", forward_type)
+        self.oact, forward_type = checkpostfix("_oact", forward_type)
+        self.disable_z, forward_type = checkpostfix("_noz", forward_type)
+        self.disable_z_act, forward_type = checkpostfix("_nozact", forward_type)
+        self.out_norm_none, forward_type = checkpostfix("_onnone", forward_type)
+        self.out_norm_dwconv3, forward_type = checkpostfix("_ondwconv3", forward_type)
+        self.out_norm_softmax, forward_type = checkpostfix("_onsoftmax", forward_type)
+        self.out_norm_sigmoid, forward_type = checkpostfix("_onsigmoid", forward_type)
 
-        # softmax | sigmoid | dwconv | norm ===========================
         self.out_norm_shape = "v1"
-        if forward_type[-len("none"):] == "none":
-            forward_type = forward_type[:-len("none")]
+        if self.out_norm_none:
             self.out_norm = nn.Identity()
-        elif forward_type[-len("dwconv3"):] == "dwconv3":
-            forward_type = forward_type[:-len("dwconv3")]
+        elif self.out_norm_dwconv3:
             self.out_norm = nn.Conv2d(d_inner, d_inner, kernel_size=3, padding=1, groups=d_inner, bias=False)
-        elif forward_type[-len("softmax"):] == "softmax":
+        elif self.out_norm_softmax:
             forward_type = forward_type[:-len("softmax")]
             class SoftmaxSpatial(nn.Softmax):
                 def forward(self, x: torch.Tensor):
                     B, C, H, W = x.shape
                     return super().forward(x.view(B, C, -1)).view(B, C, H, W)
             self.out_norm = SoftmaxSpatial(dim=-1)
-        elif forward_type[-len("sigmoid"):] == "sigmoid":
-            forward_type = forward_type[:-len("sigmoid")]
+        elif self.out_norm_sigmoid:
             self.out_norm = nn.Sigmoid()
         elif channel_first:
             self.out_norm = LayerNorm2d(d_inner)
@@ -669,8 +671,6 @@ class SS2Dv2:
 
         return (y.to(x.dtype) if to_dtype else y)
 
-    # Note: we did not use csm_triton in and before vssm1_0230, we used pytorch version !
-    # Note: we did not use no_einsum in and before vssm1_0230, we used einsum version !    
     def forward_corev2(
         self,
         x: torch.Tensor=None, 
@@ -860,25 +860,24 @@ class SS2Dv3:
                 value = value[:-len(tag)]
             return ret, value
 
-        self.disable_force32, forward_type = checkpostfix("no32", forward_type)
+        self.out_norm_none, forward_type = checkpostfix("_onnone", forward_type)
+        self.out_norm_dwconv3, forward_type = checkpostfix("_ondwconv3", forward_type)
+        self.out_norm_softmax, forward_type = checkpostfix("_onsoftmax", forward_type)
+        self.out_norm_sigmoid, forward_type = checkpostfix("_onsigmoid", forward_type)
 
-        # softmax | sigmoid | dwconv | norm ===========================
         self.out_norm_shape = "v1"
-        if forward_type[-len("none"):] == "none":
-            forward_type = forward_type[:-len("none")]
+        if self.out_norm_none:
             self.out_norm = nn.Identity()
-        elif forward_type[-len("dwconv3"):] == "dwconv3":
-            forward_type = forward_type[:-len("dwconv3")]
+        elif self.out_norm_dwconv3:
             self.out_norm = nn.Conv2d(d_inner, d_inner, kernel_size=3, padding=1, groups=d_inner, bias=False)
-        elif forward_type[-len("softmax"):] == "softmax":
+        elif self.out_norm_softmax:
             forward_type = forward_type[:-len("softmax")]
             class SoftmaxSpatial(nn.Softmax):
                 def forward(self, x: torch.Tensor):
                     B, C, H, W = x.shape
                     return super().forward(x.view(B, C, -1)).view(B, C, H, W)
             self.out_norm = SoftmaxSpatial(dim=-1)
-        elif forward_type[-len("sigmoid"):] == "sigmoid":
-            forward_type = forward_type[:-len("sigmoid")]
+        elif self.out_norm_sigmoid:
             self.out_norm = nn.Sigmoid()
         elif channel_first:
             self.out_norm = LayerNorm2d(d_inner)
@@ -889,59 +888,18 @@ class SS2Dv3:
         k_group = 4
         # in proj =======================================
         self.out_act: nn.Module = nn.Identity()
-        # 0309 -> 0319 needs to be rerun...
-        if False:
-            # change Conv2d to Linear2d Next
-            if forward_type.startswith("xv1"):
-                self.in_proj = nn.Conv2d(d_model, d_inner + dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
 
-            if forward_type.startswith("xv2"):
-                self.in_proj = nn.Conv2d(d_model, d_inner + d_inner + 8 * d_state, 1, bias=bias, **factory_kwargs)
-                self.forward = partial(self.forwardxv, mode="xv2")
-                del self.dt_projs_weight
-
-            if forward_type.startswith("xv3"):
-                self.forward = partial(self.forwardxv, mode="xv3")
-                self.in_proj = nn.Conv2d(d_model, d_inner + 4 * dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
-
-            if forward_type.startswith("xv4"):
-                self.forward = partial(self.forwardxv, mode="xv3")
-                self.in_proj = nn.Conv2d(d_model, d_inner + 4 * dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
-                self.out_act = nn.GELU()
-
-            if forward_type.startswith("xv5"):
-                self.in_proj = nn.Conv2d(d_model, d_inner + d_inner + 8 * d_state, 1, bias=bias, **factory_kwargs)
-                self.forward = partial(self.forwardxv, mode="xv2")
-                del self.dt_projs_weight
-                self.out_act = nn.GELU()
-
-            if forward_type.startswith("xv6"):
-                self.forward = partial(self.forwardxv, mode="xv1")
-                self.in_proj = nn.Conv2d(d_model, d_inner + dt_rank + 8 * d_state, 1, bias=bias, **factory_kwargs)
-                self.out_act = nn.GELU()
-
-            # to see if Linear2d and nn.Conv2d differ, as they will be inited differ
-            if forward_type.startswith("xv61"):
-                self.forward = partial(self.forwardxv, mode="xv1")
-                self.in_proj = Linear2d(d_model, d_inner + dt_rank + 8 * d_state, bias=bias, **factory_kwargs)
-                self.out_act = nn.GELU()
-            
-            if forward_type.startswith("xv7"):
-                self.forward = partial(self.forwardxv, mode="xv1", omul=True)
-                self.in_proj = Linear2d(d_model, d_inner + dt_rank + 8 * d_state, bias=bias, **factory_kwargs)
-                self.out_act = nn.GELU()
-            
         if True:
-            self.ocov2, forward_type = checkpostfix("ocov2", forward_type)
-            self.ocov, forward_type = checkpostfix("ocov", forward_type)
-            self.omul, forward_type = checkpostfix("mul", forward_type)
+            self.ocov2, forward_type = checkpostfix("_ocov2", forward_type)
+            self.ocov, forward_type = checkpostfix("_ocov", forward_type)
+            self.omul, forward_type = checkpostfix("_mul", forward_type)
             if self.ocov2:
                 self.f_ocov2 = nn.Identity()
             if self.ocov:
                 self.f_ocov = nn.Identity()
             if self.omul:
                 self.f_omul = nn.Identity()
-            oact, forward_type = checkpostfix("act", forward_type)
+            oact, forward_type = checkpostfix("_act", forward_type)
             self.out_act = nn.GELU() if oact else nn.Identity()
 
             if forward_type.startswith("xv1a"):
@@ -1059,23 +1017,6 @@ class SS2Dv3:
 
         if mode in ["xv1", "xv2", "xv3", "xv7"]:
             print(f"ERROR: MODE {mode} will be deleted in the future, use {mode}a instead.")
-
-        if mode in ["xv1"]:
-            _us, dts, Bs, Cs = x.split([self.d_inner, self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
-            us = CrossScanTriton.apply(_us.contiguous()).view(B, -1, L)
-            dts = CrossScanTriton.apply(dts.contiguous()).view(B, -1, L)
-            dts = F.conv1d(dts, dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K).contiguous().view(B, -1, L)
-        elif mode in ["xv2"]:
-            _us, dts, Bs, Cs = x.split([self.d_inner, self.d_inner, 4 * self.d_state, 4 * self.d_state], dim=1)
-            us = CrossScanTriton.apply(_us.contiguous()).view(B, -1, L)
-            dts = CrossScanTriton.apply(dts).contiguous().view(B, -1, L)
-        elif mode in ["xv3"]:
-            _us, dts, Bs, Cs = x.split([self.d_inner, 4 * self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
-            us = CrossScanTriton.apply(_us.contiguous()).view(B, -1, L)
-            dts = CrossScanTriton1b1.apply(dts.contiguous().view(B, K, -1, H, W))
-            dts = F.conv1d(dts.view(B, -1, L), dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K).contiguous().view(B, -1, L)
-        else:
-            ...
 
         if mode in ["xv1a"]:
             us, dts, Bs, Cs = x.split([self.d_inner, self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)

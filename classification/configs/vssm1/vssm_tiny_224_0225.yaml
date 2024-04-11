@@ -10,7 +10,7 @@ MODEL:
     SSM_RATIO: 2.0
     SSM_CONV: 3
     SSM_CONV_BIAS: false
-    SSM_FORWARDTYPE: "v2dwconv3"
+    SSM_FORWARDTYPE: "v2_ondwconv3"
     MLP_RATIO: 4.0
     DOWNSAMPLE: "v3"
     PATCHEMBED: "v2"

@@ -10,7 +10,7 @@ MODEL:
     SSM_RATIO: 1.6
     SSM_CONV: 3
     SSM_CONV_BIAS: false
-    SSM_FORWARDTYPE: "xv2noz"
+    SSM_FORWARDTYPE: "xv2_noz"
     MLP_RATIO: 4.0
     DOWNSAMPLE: "v3"
     PATCHEMBED: "v2"
