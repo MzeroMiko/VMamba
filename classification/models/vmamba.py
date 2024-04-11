@@ -452,7 +452,7 @@ class SS2Dv2:
             ),
             v052dc=partial(self.forward_corev1, force_fp32=False, SelectiveScan=SelectiveScanOflex, no_einsum=True),
             # ===============================
-            v1=partial(self.forward_corev2, force_fp32=True, SelectiveScan=SelectiveScanOflex),
+            # v1=partial(self.forward_corev2, force_fp32=True, SelectiveScan=SelectiveScanOflex),
             v2=partial(self.forward_corev2, force_fp32=(not self.disable_force32), SelectiveScan=SelectiveScanCore),
             v3=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex),
             v4=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, no_einsum=True, CrossScan=CrossScanTriton, CrossMerge=CrossMergeTriton),
