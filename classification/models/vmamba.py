@@ -391,6 +391,7 @@ class SS2Dv2:
         dt_rank = math.ceil(d_model / 16) if dt_rank == "auto" else dt_rank
         self.d_conv = d_conv
         self.channel_first = channel_first
+        self.with_dconv = d_conv > 1
         Linear = Linear2d if channel_first else nn.Linear
         self.forward = self.forwardv2
 
@@ -464,7 +465,7 @@ class SS2Dv2:
         self.act: nn.Module = act_layer()
         
         # conv =======================================
-        if d_conv > 1:
+        if self.with_dconv:
             self.conv2d = nn.Conv2d(
                 in_channels=d_inner,
                 out_channels=d_inner,
@@ -709,19 +710,16 @@ class SS2Dv2:
         return (y.to(x.dtype) if to_dtype else y)
 
     def forwardv2(self, x: torch.Tensor, **kwargs):
-        with_dconv = (self.d_conv > 1)
         x = self.in_proj(x)
         if not self.disable_z:
             x, z = x.chunk(2, dim=(1 if self.channel_first else -1)) # (b, h, w, d)
             if not self.disable_z_act:
                 z = self.act(z)
-        
         if not self.channel_first:
             x = x.permute(0, 3, 1, 2).contiguous()
-        if with_dconv:
+        if self.with_dconv:
             x = self.conv2d(x) # (b, d, h, w)
         x = self.act(x)
-        
         y = self.forward_core(x)
         y = self.out_act(y)
         if not self.disable_z:
