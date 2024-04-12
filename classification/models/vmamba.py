@@ -442,13 +442,13 @@ class SS2Dv2:
             ),
             v32d=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, CrossScan=CrossScan_Ab_2direction, CrossMerge=CrossMerge_Ab_2direction,
             ),
-            v32dc=partial(self.forward_corev1, force_fp32=False, SelectiveScan=SelectiveScanOflex),
+            v32dc=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, cascade2d=True),
             # ===============================
             v051d=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, no_einsum=True, CrossScan=getCSM(1)[0], CrossMerge=getCSM(1)[1],
             ),
             v052d=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, no_einsum=True, CrossScan=getCSM(2)[0], CrossMerge=getCSM(2)[1],
             ),
-            v052dc=partial(self.forward_corev1, force_fp32=False, SelectiveScan=SelectiveScanOflex, no_einsum=True),
+            v052dc=partial(self.forward_corev2, force_fp32=False, SelectiveScan=SelectiveScanOflex, no_einsum=True, cascade2d=True),
             # ===============================
             # v1=partial(self.forward_corev2, force_fp32=True, SelectiveScan=SelectiveScanOflex),
             v2=partial(self.forward_corev2, force_fp32=(not self.disable_force32), SelectiveScan=SelectiveScanCore),
@@ -514,159 +514,6 @@ class SS2Dv2:
             self.dt_projs_weight = nn.Parameter(0.1 * torch.rand((k_group, d_inner, dt_rank)))
             self.dt_projs_bias = nn.Parameter(0.1 * torch.rand((k_group, d_inner)))
 
-    # cascade2d
-    def forward_corev1(
-        self,
-        x: torch.Tensor=None, 
-        x_proj_weight: torch.Tensor=None,
-        x_proj_bias: torch.Tensor=None,
-        dt_projs_weight: torch.Tensor=None,
-        dt_projs_bias: torch.Tensor=None,
-        A_logs: torch.Tensor=None,
-        Ds: torch.Tensor=None,
-        delta_softplus = True,
-        out_norm: torch.nn.Module=None,
-        out_norm_shape="v0",
-        channel_first=False,
-        # ==============================
-        to_dtype=True, # True: final out to dtype
-        force_fp32=False, # True: input fp32
-        # ==============================
-        nrows = -1, # for SelectiveScanNRow; 0: auto; -1: disable;
-        backnrows = -1, # for SelectiveScanNRow; 0: auto; -1: disable;
-        ssoflex=True, # True: out fp32 in SSOflex; else, SSOflex is the same as SSCore
-        # ==============================
-        SelectiveScan=None,
-        no_einsum=False, # replace einsum with linear or conv1d to raise throughput
-        **kwargs,
-    ):
-        x_proj_weight = self.x_proj_weight
-        dt_projs_weight = self.dt_projs_weight
-        dt_projs_bias = self.dt_projs_bias
-        A_logs = self.A_logs
-        Ds = self.Ds
-        out_norm = getattr(self, "out_norm", None)
-        out_norm_shape = getattr(self, "out_norm_shape", "v0")
-        channel_first = self.channel_first
-
-        # out_norm: whatever fits (B, L, C); LayerNorm; Sigmoid; Softmax(dim=1);...
-
-        B, D, H, W = x.shape
-        D, N = A_logs.shape
-        K, D, R = dt_projs_weight.shape
-        L = H * W
-
-        if nrows == 0:
-            if D % 4 == 0:
-                nrows = 4
-            elif D % 3 == 0:
-                nrows = 3
-            elif D % 2 == 0:
-                nrows = 2
-            else:
-                nrows = 1
-            
-        if backnrows == 0:
-            if D % 4 == 0:
-                backnrows = 4
-            elif D % 3 == 0:
-                backnrows = 3
-            elif D % 2 == 0:
-                backnrows = 2
-            else:
-                backnrows = 1
-
-        def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True):
-            return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, backnrows, ssoflex)
-        
-        def scan_rowcol(
-            x: torch.Tensor, 
-            proj_weight: torch.Tensor, 
-            proj_bias: torch.Tensor, 
-            dt_weight: torch.Tensor, 
-            dt_bias: torch.Tensor, # (2*c)
-            _As: torch.Tensor, # As = -torch.exp(A_logs.to(torch.float))[:2,] # (2*c, d_state)
-            _Ds: torch.Tensor,
-            width = True,
-        ):
-            # x: (B, D, H, W)
-            # proj_weight: (2 * D, (R+N+N))
-            XB, XD, XH, XW = x.shape
-            if width:
-                _B, _D, _L = XB * XH, XD, XW
-                xs = x.permute(0, 2, 1, 3).contiguous()
-            else:
-                _B, _D, _L = XB * XW, XD, XH
-                xs = x.permute(0, 3, 1, 2).contiguous()
-            xs = torch.stack([xs, xs.flip(dims=[-1])], dim=2) # (B, H, 2, D, W)
-            if no_einsum:
-                x_dbl = F.conv1d(xs.view(_B, -1, _L), proj_weight.view(-1, _D, 1), bias=(proj_bias.view(-1) if proj_bias is not None else None), groups=2)
-                dts, Bs, Cs = torch.split(x_dbl.view(_B, 2, -1, _L), [R, N, N], dim=2)
-                dts = F.conv1d(dts.contiguous().view(_B, -1, _L), dt_weight.view(2 * _D, -1, 1), groups=2)
-            else:
-                x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, proj_weight)
-                if x_proj_bias is not None:
-                    x_dbl = x_dbl + x_proj_bias.view(1, 2, -1, 1)
-                dts, Bs, Cs = torch.split(x_dbl, [R, N, N], dim=2)
-                dts = torch.einsum("b k r l, k d r -> b k d l", dts, dt_weight)
-
-            xs = xs.view(_B, -1, _L)
-            dts = dts.contiguous().view(_B, -1, _L)
-            As = _As.view(-1, N).to(torch.float)
-            Bs = Bs.contiguous().view(_B, 2, N, _L)
-            Cs = Cs.contiguous().view(_B, 2, N, _L)
-            Ds = _Ds.view(-1)
-            delta_bias = dt_bias.view(-1).to(torch.float)
-
-            if force_fp32:
-                xs = xs.to(torch.float)
-            dts = dts.to(xs.dtype)
-            Bs = Bs.to(xs.dtype)
-            Cs = Cs.to(xs.dtype)
-
-            ys: torch.Tensor = selective_scan(
-                xs, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus
-            ).view(_B, 2, -1, _L)
-            return ys
-        
-        As = -torch.exp(A_logs.to(torch.float)).view(4, -1, N)
-        y_row = scan_rowcol(
-            x,
-            proj_weight = x_proj_weight.view(4, -1, D)[:2].contiguous(), 
-            proj_bias = (x_proj_bias.view(4, -1)[:2].contiguous() if x_proj_bias is not None else None),
-            dt_weight = dt_projs_weight.view(4, D, -1)[:2].contiguous(),
-            dt_bias = (dt_projs_bias.view(4, -1)[:2].contiguous() if dt_projs_bias is not None else None),
-            _As = As[:2].contiguous().view(-1, N),
-            _Ds = Ds.view(4, -1)[:2].contiguous().view(-1),
-            width=True,
-        ).view(B, H, 2, -1, W).sum(dim=2).permute(0, 2, 1, 3)
-        y_col = scan_rowcol(
-            y_row,
-            proj_weight = x_proj_weight.view(4, -1, D)[2:].contiguous().to(y_row.dtype), 
-            proj_bias = (x_proj_bias.view(4, -1)[2:].contiguous().to(y_row.dtype) if x_proj_bias is not None else None),
-            dt_weight = dt_projs_weight.view(4, D, -1)[2:].contiguous().to(y_row.dtype),
-            dt_bias = (dt_projs_bias.view(4, -1)[2:].contiguous().to(y_row.dtype) if dt_projs_bias is not None else None),
-            _As = As[2:].contiguous().view(-1, N),
-            _Ds = Ds.view(4, -1)[2:].contiguous().view(-1),
-            width=False,
-        ).view(B, W, 2, -1, H).sum(dim=2).permute(0, 2, 3, 1)
-        y = y_col
-        
-        y = y.view(B, -1, H, W)
-        if channel_first:
-            if out_norm_shape in ["v1"]:
-                y = out_norm(y)
-            else:
-                y = out_norm(y.permute(0, 2, 3, 1)).permute(0, 3, 1, 2)
-        else:
-            if out_norm_shape in ["v1"]: # (B, C, H, W)
-                y = out_norm(y).permute(0, 2, 3, 1) # (B, H, W, C)
-            else: # (B, L, C)
-                y = y.view(B, -1, H * W).transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
-                y = out_norm(y).view(B, H, W, -1)
-
-        return (y.to(x.dtype) if to_dtype else y)
-
     def forward_corev2(
         self,
         x: torch.Tensor=None, 
@@ -692,6 +539,8 @@ class SS2Dv2:
         CrossScan=CrossScan,
         CrossMerge=CrossMerge,
         no_einsum=False, # replace einsum with linear or conv1d to raise throughput
+        # ==============================
+        cascade2d=False,
         **kwargs,
     ):
         x_proj_weight = self.x_proj_weight
@@ -734,41 +583,115 @@ class SS2Dv2:
         def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True):
             return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, backnrows, ssoflex)
         
-        xs = CrossScan.apply(x)
-        if no_einsum:
-            x_dbl = F.conv1d(xs.view(B, -1, L), x_proj_weight.view(-1, D, 1), bias=(x_proj_bias.view(-1) if x_proj_bias is not None else None), groups=K)
-            dts, Bs, Cs = torch.split(x_dbl.view(B, K, -1, L), [R, N, N], dim=2)
-            dts = F.conv1d(dts.contiguous().view(B, -1, L), dt_projs_weight.view(K * D, -1, 1), groups=K)
+        if cascade2d:
+            def scan_rowcol(
+                x: torch.Tensor, 
+                proj_weight: torch.Tensor, 
+                proj_bias: torch.Tensor, 
+                dt_weight: torch.Tensor, 
+                dt_bias: torch.Tensor, # (2*c)
+                _As: torch.Tensor, # As = -torch.exp(A_logs.to(torch.float))[:2,] # (2*c, d_state)
+                _Ds: torch.Tensor,
+                width = True,
+            ):
+                # x: (B, D, H, W)
+                # proj_weight: (2 * D, (R+N+N))
+                XB, XD, XH, XW = x.shape
+                if width:
+                    _B, _D, _L = XB * XH, XD, XW
+                    xs = x.permute(0, 2, 1, 3).contiguous()
+                else:
+                    _B, _D, _L = XB * XW, XD, XH
+                    xs = x.permute(0, 3, 1, 2).contiguous()
+                xs = torch.stack([xs, xs.flip(dims=[-1])], dim=2) # (B, H, 2, D, W)
+                if no_einsum:
+                    x_dbl = F.conv1d(xs.view(_B, -1, _L), proj_weight.view(-1, _D, 1), bias=(proj_bias.view(-1) if proj_bias is not None else None), groups=2)
+                    dts, Bs, Cs = torch.split(x_dbl.view(_B, 2, -1, _L), [R, N, N], dim=2)
+                    dts = F.conv1d(dts.contiguous().view(_B, -1, _L), dt_weight.view(2 * _D, -1, 1), groups=2)
+                else:
+                    x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, proj_weight)
+                    if x_proj_bias is not None:
+                        x_dbl = x_dbl + x_proj_bias.view(1, 2, -1, 1)
+                    dts, Bs, Cs = torch.split(x_dbl, [R, N, N], dim=2)
+                    dts = torch.einsum("b k r l, k d r -> b k d l", dts, dt_weight)
+
+                xs = xs.view(_B, -1, _L)
+                dts = dts.contiguous().view(_B, -1, _L)
+                As = _As.view(-1, N).to(torch.float)
+                Bs = Bs.contiguous().view(_B, 2, N, _L)
+                Cs = Cs.contiguous().view(_B, 2, N, _L)
+                Ds = _Ds.view(-1)
+                delta_bias = dt_bias.view(-1).to(torch.float)
+
+                if force_fp32:
+                    xs = xs.to(torch.float)
+                dts = dts.to(xs.dtype)
+                Bs = Bs.to(xs.dtype)
+                Cs = Cs.to(xs.dtype)
+
+                ys: torch.Tensor = selective_scan(
+                    xs, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus
+                ).view(_B, 2, -1, _L)
+                return ys
+            
+            As = -torch.exp(A_logs.to(torch.float)).view(4, -1, N)
+            y_row = scan_rowcol(
+                x,
+                proj_weight = x_proj_weight.view(4, -1, D)[:2].contiguous(), 
+                proj_bias = (x_proj_bias.view(4, -1)[:2].contiguous() if x_proj_bias is not None else None),
+                dt_weight = dt_projs_weight.view(4, D, -1)[:2].contiguous(),
+                dt_bias = (dt_projs_bias.view(4, -1)[:2].contiguous() if dt_projs_bias is not None else None),
+                _As = As[:2].contiguous().view(-1, N),
+                _Ds = Ds.view(4, -1)[:2].contiguous().view(-1),
+                width=True,
+            ).view(B, H, 2, -1, W).sum(dim=2).permute(0, 2, 1, 3)
+            y_col = scan_rowcol(
+                y_row,
+                proj_weight = x_proj_weight.view(4, -1, D)[2:].contiguous().to(y_row.dtype), 
+                proj_bias = (x_proj_bias.view(4, -1)[2:].contiguous().to(y_row.dtype) if x_proj_bias is not None else None),
+                dt_weight = dt_projs_weight.view(4, D, -1)[2:].contiguous().to(y_row.dtype),
+                dt_bias = (dt_projs_bias.view(4, -1)[2:].contiguous().to(y_row.dtype) if dt_projs_bias is not None else None),
+                _As = As[2:].contiguous().view(-1, N),
+                _Ds = Ds.view(4, -1)[2:].contiguous().view(-1),
+                width=False,
+            ).view(B, W, 2, -1, H).sum(dim=2).permute(0, 2, 3, 1)
+            y = y_col
         else:
-            x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, x_proj_weight)
-            if x_proj_bias is not None:
-                x_dbl = x_dbl + x_proj_bias.view(1, K, -1, 1)
-            dts, Bs, Cs = torch.split(x_dbl, [R, N, N], dim=2)
-            dts = torch.einsum("b k r l, k d r -> b k d l", dts, dt_projs_weight)
+            xs = CrossScan.apply(x)
+            if no_einsum:
+                x_dbl = F.conv1d(xs.view(B, -1, L), x_proj_weight.view(-1, D, 1), bias=(x_proj_bias.view(-1) if x_proj_bias is not None else None), groups=K)
+                dts, Bs, Cs = torch.split(x_dbl.view(B, K, -1, L), [R, N, N], dim=2)
+                dts = F.conv1d(dts.contiguous().view(B, -1, L), dt_projs_weight.view(K * D, -1, 1), groups=K)
+            else:
+                x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, x_proj_weight)
+                if x_proj_bias is not None:
+                    x_dbl = x_dbl + x_proj_bias.view(1, K, -1, 1)
+                dts, Bs, Cs = torch.split(x_dbl, [R, N, N], dim=2)
+                dts = torch.einsum("b k r l, k d r -> b k d l", dts, dt_projs_weight)
 
-        xs = xs.view(B, -1, L)
-        dts = dts.contiguous().view(B, -1, L)
-        As = -torch.exp(A_logs.to(torch.float)) # (k * c, d_state)
-        Bs = Bs.contiguous().view(B, K, N, L)
-        Cs = Cs.contiguous().view(B, K, N, L)
-        Ds = Ds.to(torch.float) # (K * c)
-        delta_bias = dt_projs_bias.view(-1).to(torch.float)
+            xs = xs.view(B, -1, L)
+            dts = dts.contiguous().view(B, -1, L)
+            As = -torch.exp(A_logs.to(torch.float)) # (k * c, d_state)
+            Bs = Bs.contiguous().view(B, K, N, L)
+            Cs = Cs.contiguous().view(B, K, N, L)
+            Ds = Ds.to(torch.float) # (K * c)
+            delta_bias = dt_projs_bias.view(-1).to(torch.float)
 
-        if force_fp32:
-            xs, dts, Bs, Cs = to_fp32(xs, dts, Bs, Cs)
+            if force_fp32:
+                xs, dts, Bs, Cs = to_fp32(xs, dts, Bs, Cs)
 
-        ys: torch.Tensor = selective_scan(
-            xs, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus
-        ).view(B, K, -1, H, W)
-        
-        y: torch.Tensor = CrossMerge.apply(ys)
+            ys: torch.Tensor = selective_scan(
+                xs, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus
+            ).view(B, K, -1, H, W)
+            
+            y: torch.Tensor = CrossMerge.apply(ys)
 
-        if getattr(self, "__DEBUG__", False):
-            setattr(self, "__data__", dict(
-                A_logs=A_logs, Bs=Bs, Cs=Cs, Ds=Ds,
-                us=xs, dts=dts, delta_bias=delta_bias,
-                ys=ys, y=y,
-            ))
+            if getattr(self, "__DEBUG__", False):
+                setattr(self, "__data__", dict(
+                    A_logs=A_logs, Bs=Bs, Cs=Cs, Ds=Ds,
+                    us=xs, dts=dts, delta_bias=delta_bias,
+                    ys=ys, y=y,
+                ))
 
         y = y.view(B, -1, H, W)
         if channel_first:
