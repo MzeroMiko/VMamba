@@ -205,7 +205,7 @@ class mamba_init:
         return D
 
 
-# support v0, v0seq
+# support: v0, v0seq
 class SS2Dv0:
     def __initv0__(
         self,
@@ -356,7 +356,7 @@ class SS2Dv0:
         return out
 
 
-# support v01-v05, v3noz, v2, ...
+# support: v01-v05; v051d,v052d,v052dc; | history support: v3noz, v2, ...
 class SS2Dv2:
     def __initv2__(
         self,
@@ -765,6 +765,8 @@ class SS2Dv3:
         self.d_state = d_state
         self.dt_rank = dt_rank
         self.d_inner = d_inner
+        k_group = 4
+        self.with_dconv = d_conv > 1
         Linear = Linear2d if channel_first else nn.Linear
         self.forward = self.forwardxv
 
@@ -800,7 +802,6 @@ class SS2Dv3:
             self.out_norm_shape = "v0"
             self.out_norm = nn.LayerNorm(d_inner)
 
-        k_group = 4
         # in proj =======================================
         self.out_act: nn.Module = nn.Identity()
 
@@ -824,7 +825,7 @@ class SS2Dv3:
             self.in_proj = Linear2d(d_model, d_inner_all, bias=bias, **factory_kwargs)
 
         # conv =======================================
-        if d_conv > 1:
+        if self.with_dconv:
             cact, forward_type = checkpostfix("_ca", forward_type)
             self.act: nn.Module = act_layer() if cact else nn.Identity()
                 
@@ -921,15 +922,15 @@ class SS2Dv3:
         if not self.channel_first:
             x = x.permute(0, 3, 1, 2).contiguous()
 
-        if (self.d_conv > 1) and (not self.ocov) and (not self.ocov2):
+        if self.with_dconv and (not self.ocov) and (not self.ocov2):
             x = self.conv2d(x) # (b, d, h, w)
             x = self.act(x)
-        elif (self.d_conv > 1) and (self.cpos):
+        if self.with_dconv and self.cpos:
             x = x + self.conv2d(x) # (b, d, h, w)
 
         x = self.in_proj(x)
         
-        if (self.d_conv > 1) and (self.ocov2):
+        if self.with_dconv and self.ocov2:
             x = self.conv2d(x) # (b, d, h, w)
 
         if mode in ["xv1", "xv2", "xv3", "xv7"]:
