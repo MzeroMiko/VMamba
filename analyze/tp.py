@@ -297,12 +297,17 @@ def main01():
     
     # new test
     if True:
+        t0230v1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
         tacv1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        tacv16 = partial(_model.VSSM, dims=96, depths=[2,2,6,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.8, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        tscv16 = partial(_model.VSSM, dims=96, depths=[2,2,16,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.8, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        tbcv16 = partial(_model.VSSM, dims=128, depths=[2,2,16,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.8, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
+        tacv16 = partial(_model.VSSM, dims=96, depths=[2,2,6,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
+        tacv16 = partial(_model.VSSM, dims=96, depths=[2,2,6,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
+        tscv16 = partial(_model.VSSM, dims=96, depths=[2,2,16,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
+        tbcv16 = partial(_model.VSSM, dims=128, depths=[2,2,16,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
         print("vmamba test ================================", flush=True)
-        for config in [tacv16, tbcv16, tscv16, tacv1, ]:
+        for config in [
+            # t0230v1, 
+            tacv16, tbcv16, tscv16, 
+        ]:
             testall(config(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True)
         breakpoint()
 
