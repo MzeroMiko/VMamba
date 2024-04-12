@@ -308,8 +308,8 @@ def main01():
         for config in [
             # t0230v1, 
             # tacv16, 
-            tacv161, 
             tacv161l, 
+            tacv161, 
             tbcv16, tscv16, 
         ]:
             testall(config(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True)

@@ -807,24 +807,23 @@ class SS2Dv3:
         # in proj =======================================
         self.out_act: nn.Module = nn.Identity()
 
-        if True:
-            self.omul, forward_type = checkpostfix("_mul", forward_type)
-            if self.omul:
-                self.f_omul = nn.Identity()
-            self.oact, forward_type = checkpostfix("_act", forward_type)
-            self.out_act = nn.GELU() if self.oact else nn.Identity()
+        self.omul, forward_type = checkpostfix("_mul", forward_type)
+        if self.omul:
+            self.f_omul = nn.Identity()
+        self.oact, forward_type = checkpostfix("_act", forward_type)
+        self.out_act = nn.GELU() if self.oact else nn.Identity()
 
-            if forward_type.startswith("xv1a"):
-                self.forward = partial(self.forwardxv, mode="xv1a")
-                d_inner_all = d_inner + dt_rank + 8 * d_state
-            elif forward_type.startswith("xv2a"):
-                self.forward = partial(self.forwardxv, mode="xv2a")
-                d_inner_all = d_inner + d_inner + 8 * d_state
-            elif forward_type.startswith("xv3a"):
-                self.forward = partial(self.forwardxv, mode="xv3a")
-                d_inner_all = d_inner + 4 * dt_rank + 8 * d_state
+        if forward_type.startswith("xv1a"):
+            self.forward = partial(self.forwardxv, mode="xv1a")
+            d_inner_all = d_inner + dt_rank + 8 * d_state
+        elif forward_type.startswith("xv2a"):
+            self.forward = partial(self.forwardxv, mode="xv2a")
+            d_inner_all = d_inner + d_inner + 8 * d_state
+        elif forward_type.startswith("xv3a"):
+            self.forward = partial(self.forwardxv, mode="xv3a")
+            d_inner_all = d_inner + 4 * dt_rank + 8 * d_state
             
-            self.in_proj = Linear(d_model, d_inner_all, bias=bias, **factory_kwargs)
+        self.in_proj = Linear(d_model, d_inner_all, bias=bias, **factory_kwargs)
 
         # conv =======================================
         if self.with_dconv:
@@ -921,9 +920,6 @@ class SS2Dv3:
         def selective_scan(u, delta, A, B, C, D, delta_bias, delta_softplus):
             return SelectiveScanOflex.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, 1, 1, True)
 
-        if not self.channel_first:
-            x = x.permute(0, 3, 1, 2).contiguous()
-
         if self.with_dconv and (not self.ocov) and (not self.ocov2):
             x = self.conv2d(x) # (b, d, h, w)
             x = self.act(x)
@@ -935,12 +931,13 @@ class SS2Dv3:
         if self.with_dconv and self.ocov2:
             x = self.conv2d(x) # (b, d, h, w)
 
+        cut_dim = 1 if self.channel_first else -1
         if mode in ["xv1a"]:
-            us, dts, Bs, Cs = x.split([self.d_inner, self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
+            us, dts, Bs, Cs = x.split([self.d_inner, self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=cut_dim)
         elif mode in ["xv2a"]:
-            us, dts, Bs, Cs = x.split([self.d_inner, self.d_inner, 4 * self.d_state, 4 * self.d_state], dim=1)
+            us, dts, Bs, Cs = x.split([self.d_inner, self.d_inner, 4 * self.d_state, 4 * self.d_state], dim=cut_dim)
         elif mode in ["xv3a"]:
-            us, dts, Bs, Cs = x.split([self.d_inner, 4 * self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
+            us, dts, Bs, Cs = x.split([self.d_inner, 4 * self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=cut_dim)
         else:
             raise NotImplementedError
 
@@ -965,7 +962,6 @@ class SS2Dv3:
         else:
             Bs, Cs = Bs.view(B, H, W, 4, -1), Cs.view(B, H, W, 4, -1)
             us = CrossScanTritonF.apply(us.contiguous(), self.channel_first).view(B, -1, L)
-            dts = CrossScanTritonF.apply(dts.contiguous(), self.channel_first).view(B, 4, -1, L)
             Bs = CrossScanTriton1b1F.apply(Bs.contiguous(), self.channel_first).view(B, 4, -1, L)
             Cs = CrossScanTriton1b1F.apply(Cs.contiguous(), self.channel_first).view(B, 4, -1, L)
 
@@ -1018,7 +1014,7 @@ class SS2Dv3:
         y = self.out_act(y)
         if self.omul:
             y = y * _us
-            
+
         if self.with_dconv and self.ocov:
             y = y + self.act(self.oconv2d(_us))
 
