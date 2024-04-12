@@ -22,12 +22,14 @@ torch.backends.cudnn.deterministic = True
 
 try:
     from .csm_triton import CrossScanTriton, CrossMergeTriton, CrossScanTriton1b1, getCSM
+    from .csm_triton import CrossScanTritonF, CrossMergeTritonF, CrossScanTriton1b1F
     from .csms6s import CrossScan, CrossMerge
     from .csms6s import CrossScan_Ab_1direction, CrossMerge_Ab_1direction, CrossScan_Ab_2direction, CrossMerge_Ab_2direction
     from .csms6s import SelectiveScanMamba, SelectiveScanCore, SelectiveScanOflex
     from .csms6s import flops_selective_scan_fn, flops_selective_scan_ref, selective_scan_flop_jit
 except:
     from csm_triton import CrossScanTriton, CrossMergeTriton, CrossScanTriton1b1, getCSM
+    from csm_triton import CrossScanTritonF, CrossMergeTritonF, CrossScanTriton1b1F
     from csms6s import CrossScan, CrossMerge
     from csms6s import CrossScan_Ab_1direction, CrossMerge_Ab_1direction, CrossScan_Ab_2direction, CrossMerge_Ab_2direction
     from csms6s import SelectiveScanMamba, SelectiveScanCore, SelectiveScanOflex
@@ -822,7 +824,7 @@ class SS2Dv3:
                 self.forward = partial(self.forwardxv, mode="xv3a")
                 d_inner_all = d_inner + 4 * dt_rank + 8 * d_state
             
-            self.in_proj = Linear2d(d_model, d_inner_all, bias=bias, **factory_kwargs)
+            self.in_proj = Linear(d_model, d_inner_all, bias=bias, **factory_kwargs)
 
         # conv =======================================
         if self.with_dconv:
@@ -933,49 +935,52 @@ class SS2Dv3:
         if self.with_dconv and self.ocov2:
             x = self.conv2d(x) # (b, d, h, w)
 
-        if mode in ["xv1", "xv2", "xv3", "xv7"]:
-            print(f"ERROR: MODE {mode} will be deleted in the future, use {mode}a instead.")
-
         if mode in ["xv1a"]:
             us, dts, Bs, Cs = x.split([self.d_inner, self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
-            _us = us
-            us = CrossScanTriton.apply(us.contiguous()).view(B, 4, -1, L)
-            dts = CrossScanTriton.apply(dts.contiguous()).view(B, 4, -1, L)
-            Bs = CrossScanTriton1b1.apply(Bs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
-            Cs = CrossScanTriton1b1.apply(Cs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
-            dts = F.conv1d(dts.contiguous().view(B, -1, L), dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
-            us, dts = us.contiguous().view(B, -1, L), dts
-            _us = us.view(B, K, -1, H, W)[:, 0, :, :, :]
         elif mode in ["xv2a"]:
             us, dts, Bs, Cs = x.split([self.d_inner, self.d_inner, 4 * self.d_state, 4 * self.d_state], dim=1)
-            _us = us
-            us = CrossScanTriton.apply(us.contiguous()).view(B, 4, -1, L)
-            dts = CrossScanTriton.apply(dts.contiguous()).view(B, 4, -1, L)
-            Bs = CrossScanTriton1b1.apply(Bs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
-            Cs = CrossScanTriton1b1.apply(Cs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
-            us, dts = us.contiguous().view(B, -1, L), dts.contiguous().view(B, -1, L)
         elif mode in ["xv3a"]:
-            # us, dtBCs = x.split([self.d_inner, 4 * self.dt_rank + 4 * self.d_state + 4 * self.d_state], dim=1)
-            # _us = us
-            # us = CrossScanTriton.apply(us.contiguous()).view(B, 4, -1, L)
-            # dtBCs = CrossScanTriton1b1.apply(dtBCs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
-            # dts, Bs, Cs = dtBCs.split([self.dt_rank, self.d_state, self.d_state], dim=2)
-            # dts = F.conv1d(dts.contiguous().view(B, -1, L), dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
-            # us, dts = us.contiguous().view(B, -1, L), dts
-            
             us, dts, Bs, Cs = x.split([self.d_inner, 4 * self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=1)
-            _us = us
-            us = CrossScanTriton.apply(us.contiguous()).view(B, 4, -1, L)
-            dts = CrossScanTriton1b1.apply(dts.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
-            Bs = CrossScanTriton1b1.apply(Bs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
-            Cs = CrossScanTriton1b1.apply(Cs.view(B, 4, -1, H, W).contiguous()).view(B, 4, -1, L)
-            dts = F.conv1d(dts.contiguous().view(B, -1, L), dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
-            us, dts = us.contiguous().view(B, -1, L), dts
-        else: 
-            ...
+        else:
+            raise NotImplementedError
 
-        Bs, Cs = Bs.view(B, K, -1, L).contiguous(), Cs.view(B, K, -1, L).contiguous()
-    
+        _us = us
+        if self.channel_first:
+            Bs, Cs = Bs.view(B, 4, -1, H, W), Cs.view(B, 4, -1, H, W)
+            us = CrossScanTriton.apply(us.contiguous()).view(B, -1, L)
+            Bs = CrossScanTriton1b1.apply(Bs.contiguous()).view(B, 4, -1, L)
+            Cs = CrossScanTriton1b1.apply(Cs.contiguous()).view(B, 4, -1, L)
+
+            if mode in ["xv1a"]:
+                dts = CrossScanTriton.apply(dts.contiguous()).view(B, -1, L)
+                dts = F.conv1d(dts, dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
+            elif mode in ["xv2a"]:
+                dts = CrossScanTriton.apply(dts.contiguous()).view(B, -1, L)
+            elif mode in ["xv3a"]:
+                dts = dts.view(B, 4, -1, H, W)
+                dts = CrossScanTriton1b1.apply(dts.contiguous()).view(B, -1, L)
+                dts = F.conv1d(dts, dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
+            else:
+                raise NotImplementedError
+        else:
+            Bs, Cs = Bs.view(B, H, W, 4, -1), Cs.view(B, H, W, 4, -1)
+            us = CrossScanTritonF.apply(us.contiguous(), self.channel_first).view(B, -1, L)
+            dts = CrossScanTritonF.apply(dts.contiguous(), self.channel_first).view(B, 4, -1, L)
+            Bs = CrossScanTriton1b1F.apply(Bs.contiguous(), self.channel_first).view(B, 4, -1, L)
+            Cs = CrossScanTriton1b1F.apply(Cs.contiguous(), self.channel_first).view(B, 4, -1, L)
+
+            if mode in ["xv1a"]:
+                dts = CrossScanTritonF.apply(dts.contiguous(), self.channel_first).view(B, -1, L)
+                dts = F.conv1d(dts, dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
+            elif mode in ["xv2a"]:
+                dts = CrossScanTritonF.apply(dts.contiguous(), self.channel_first).view(B, -1, L)
+            elif mode in ["xv3a"]:
+                dts = dts.view(B, H, W, 4, -1)
+                dts = CrossScanTriton1b1F.apply(dts.contiguous(), self.channel_first).view(B, -1, L)
+                dts = F.conv1d(dts, dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
+            else:
+                raise NotImplementedError
+
         As = -torch.exp(A_logs.to(torch.float)) # (k * c, d_state)
         Ds = Ds.to(torch.float) # (K * c)
         delta_bias = dt_projs_bias.view(-1).to(torch.float) # (K * c)
@@ -987,9 +992,13 @@ class SS2Dv3:
             us, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus
         ).view(B, K, -1, H, W)
             
-        y: torch.Tensor = CrossMergeTriton.apply(ys)
-        y = y.view(B, -1, H, W)
-
+        if self.channel_first:    
+            y: torch.Tensor = CrossMergeTriton.apply(ys)
+            y = y.view(B, -1, H, W)
+        else:
+            y: torch.Tensor = CrossMergeTritonF.apply(ys, self.channel_first)
+            y = y.view(B, H, W, -1)
+        
         if getattr(self, "__DEBUG__", False):
             setattr(self, "__data__", dict(
                 A_logs=A_logs, Bs=Bs, Cs=Cs, Ds=Ds,

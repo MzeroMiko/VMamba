@@ -315,7 +315,6 @@ class CHECKS:
         print(x)
         print(cross_scan_1b1(x))
 
-
     def check_einsum():
         B, D, L, R, K = 128, 192, 56 * 56, 12, 4
         o = torch.randn((B, K * D, L)).cuda()
