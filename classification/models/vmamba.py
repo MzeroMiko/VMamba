@@ -997,10 +997,6 @@ class SS2Dv3:
                 ys=ys, y=y,
             ))
 
-        # originally:
-        # y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
-        # y = out_norm(y).view(B, H, W, -1)
-
         if (not self.channel_first) or (out_norm_shape in ["v0"]):
             y = out_norm(y.permute(0, 2, 3, 1))
             if self.channel_first:
@@ -1012,7 +1008,7 @@ class SS2Dv3:
         y = self.out_act(y)
         if self.omul:
             y = y * (_us.permute(0, 2, 3, 1) if not self.channel_first else _us)
-        if (self.d_conv > 1) and self.ocov:
+        if self.with_dconv and self.ocov:
             y = y + self.act(self.oconv2d(_us))
 
         out = self.dropout(self.out_proj(y))
