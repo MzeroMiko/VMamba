@@ -207,7 +207,6 @@ class mamba_init:
 
 # support v0, v0seq
 class SS2Dv0:
-    # only used to run previous version
     def __initv0__(
         self,
         # basic dims ===========
@@ -284,7 +283,6 @@ class SS2Dv0:
         self.out_proj = nn.Linear(d_inner, d_model, bias=bias, **factory_kwargs)
         self.dropout = nn.Dropout(dropout) if dropout > 0. else nn.Identity()
 
-    # only used to run previous version
     def forwardv0(self, x: torch.Tensor, SelectiveScan = SelectiveScanMamba, seq=False, force_fp32=True, **kwargs):
         x = self.in_proj(x)
         x, z = x.chunk(2, dim=-1) # (b, h, w, d)
@@ -653,21 +651,19 @@ class SS2Dv2:
             width=False,
         ).view(B, W, 2, -1, H).sum(dim=2).permute(0, 2, 3, 1)
         y = y_col
-
+        
+        y = y.view(B, -1, H, W)
         if channel_first:
-            y = y.view(B, -1, H, W)
             if out_norm_shape in ["v1"]:
                 y = out_norm(y)
             else:
-                y = out_norm(y.permute(0, 2, 3, 1))
-                y = y.permute(0, 3, 1, 2)
-            return (y.to(x.dtype) if to_dtype else y)
-
-        if out_norm_shape in ["v1"]: # (B, C, H, W)
-            y = out_norm(y.view(B, -1, H, W)).permute(0, 2, 3, 1) # (B, H, W, C)
-        else: # (B, L, C)
-            y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
-            y = out_norm(y).view(B, H, W, -1)
+                y = out_norm(y.permute(0, 2, 3, 1)).permute(0, 3, 1, 2)
+        else:
+            if out_norm_shape in ["v1"]: # (B, C, H, W)
+                y = out_norm(y).permute(0, 2, 3, 1) # (B, H, W, C)
+            else: # (B, L, C)
+                y = y.view(B, -1, H * W).transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
+                y = out_norm(y).view(B, H, W, -1)
 
         return (y.to(x.dtype) if to_dtype else y)
 
@@ -774,20 +770,18 @@ class SS2Dv2:
                 ys=ys, y=y,
             ))
 
+        y = y.view(B, -1, H, W)
         if channel_first:
-            y = y.view(B, -1, H, W)
             if out_norm_shape in ["v1"]:
                 y = out_norm(y)
             else:
-                y = out_norm(y.permute(0, 2, 3, 1))
-                y = y.permute(0, 3, 1, 2)
-            return (y.to(x.dtype) if to_dtype else y)
-
-        if out_norm_shape in ["v1"]: # (B, C, H, W)
-            y = out_norm(y.view(B, -1, H, W)).permute(0, 2, 3, 1) # (B, H, W, C)
-        else: # (B, L, C)
-            y = y.transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
-            y = out_norm(y).view(B, H, W, -1)
+                y = out_norm(y.permute(0, 2, 3, 1)).permute(0, 3, 1, 2)
+        else:
+            if out_norm_shape in ["v1"]: # (B, C, H, W)
+                y = out_norm(y).permute(0, 2, 3, 1) # (B, H, W, C)
+            else: # (B, L, C)
+                y = y.view(B, -1, H * W).transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
+                y = out_norm(y).view(B, H, W, -1)
 
         return (y.to(x.dtype) if to_dtype else y)
 
