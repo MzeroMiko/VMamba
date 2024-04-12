@@ -1096,7 +1096,7 @@ class SS2Dv3:
         y = self.out_act(y)
         if self.omul:
             y = y * (_us.permute(0, 2, 3, 1) if not self.channel_first else _us)
-        elif self.ocov:
+        if (self.d_conv > 1) and self.ocov:
             y = y + self.act(self.oconv2d(_us))
 
         out = self.dropout(self.out_proj(y))
