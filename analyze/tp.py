@@ -308,7 +308,7 @@ def main01():
         for config in [
             # t0230v1, 
             # tacv16, 
-            tacv161l, 
+            # tacv161l, 
             tacv161, 
             tbcv16, tscv16, 
         ]:

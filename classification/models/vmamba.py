@@ -812,19 +812,20 @@ class SS2Dv3:
             self.f_omul = nn.Identity()
         self.oact, forward_type = checkpostfix("_act", forward_type)
         self.out_act = nn.GELU() if self.oact else nn.Identity()
-
-        if forward_type.startswith("xv1a"):
-            self.forward = partial(self.forwardxv, mode="xv1a")
-            d_inner_all = d_inner + dt_rank + 8 * d_state
-        elif forward_type.startswith("xv2a"):
-            self.forward = partial(self.forwardxv, mode="xv2a")
-            d_inner_all = d_inner + d_inner + 8 * d_state
-        elif forward_type.startswith("xv3a"):
-            self.forward = partial(self.forwardxv, mode="xv3a")
-            d_inner_all = d_inner + 4 * dt_rank + 8 * d_state
             
-        self.in_proj = Linear(d_model, d_inner_all, bias=bias, **factory_kwargs)
+        mode = "xv1a"
+        if forward_type.startswith("xv1a"):
+            mode="xv1a"
+        elif forward_type.startswith("xv2a"):
+            mode="xv2a"
+        elif forward_type.startswith("xv3a"):
+            mode="xv3a"
 
+        self.forward = partial(self.forwardxv, mode=mode)
+        self.dts_dim = dict(xv1a=self.dt_rank, xv2a=self.d_inner, xv3a=4 * self.dt_rank)[mode]
+        d_inner_all = d_inner + self.dts_dim + 8 * d_state
+        self.in_proj = Linear(d_model, d_inner_all, bias=bias, **factory_kwargs)
+        
         # conv =======================================
         if self.with_dconv:
             cact, forward_type = checkpostfix("_ca", forward_type)
@@ -931,15 +932,7 @@ class SS2Dv3:
         if self.with_dconv and self.ocov2:
             x = self.conv2d(x) # (b, d, h, w)
 
-        cut_dim = 1 if self.channel_first else -1
-        if mode in ["xv1a"]:
-            us, dts, Bs, Cs = x.split([self.d_inner, self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=cut_dim)
-        elif mode in ["xv2a"]:
-            us, dts, Bs, Cs = x.split([self.d_inner, self.d_inner, 4 * self.d_state, 4 * self.d_state], dim=cut_dim)
-        elif mode in ["xv3a"]:
-            us, dts, Bs, Cs = x.split([self.d_inner, 4 * self.dt_rank, 4 * self.d_state, 4 * self.d_state], dim=cut_dim)
-        else:
-            raise NotImplementedError
+        us, dts, Bs, Cs = x.split([self.d_inner, self.dts_dim, 4 * self.d_state, 4 * self.d_state], dim=(1 if self.channel_first else -1))
 
         _us = us
         if self.channel_first:
@@ -948,34 +941,31 @@ class SS2Dv3:
             Bs = CrossScanTriton1b1.apply(Bs.contiguous()).view(B, 4, -1, L)
             Cs = CrossScanTriton1b1.apply(Cs.contiguous()).view(B, 4, -1, L)
 
-            if mode in ["xv1a"]:
+            if self.dts_dim == self.dt_rank:
                 dts = CrossScanTriton.apply(dts.contiguous()).view(B, -1, L)
                 dts = F.conv1d(dts, dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
-            elif mode in ["xv2a"]:
+            elif self.dts_dim == self.d_inner:
                 dts = CrossScanTriton.apply(dts.contiguous()).view(B, -1, L)
-            elif mode in ["xv3a"]:
+            elif self.dts_dim == 4 * self.dt_rank:
                 dts = dts.view(B, 4, -1, H, W)
                 dts = CrossScanTriton1b1.apply(dts.contiguous()).view(B, -1, L)
                 dts = F.conv1d(dts, dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
-            else:
-                raise NotImplementedError
+
         else:
             Bs, Cs = Bs.view(B, H, W, 4, -1), Cs.view(B, H, W, 4, -1)
             us = CrossScanTritonF.apply(us.contiguous(), self.channel_first).view(B, -1, L)
             Bs = CrossScanTriton1b1F.apply(Bs.contiguous(), self.channel_first).view(B, 4, -1, L)
             Cs = CrossScanTriton1b1F.apply(Cs.contiguous(), self.channel_first).view(B, 4, -1, L)
 
-            if mode in ["xv1a"]:
+            if self.dts_dim == self.dt_rank:
                 dts = CrossScanTritonF.apply(dts.contiguous(), self.channel_first).view(B, -1, L)
                 dts = F.conv1d(dts, dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
-            elif mode in ["xv2a"]:
+            elif self.dts_dim == self.d_inner:
                 dts = CrossScanTritonF.apply(dts.contiguous(), self.channel_first).view(B, -1, L)
-            elif mode in ["xv3a"]:
+            elif self.dts_dim == 4 * self.dt_rank:
                 dts = dts.view(B, H, W, 4, -1)
                 dts = CrossScanTriton1b1F.apply(dts.contiguous(), self.channel_first).view(B, -1, L)
                 dts = F.conv1d(dts, dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
-            else:
-                raise NotImplementedError
 
         As = -torch.exp(A_logs.to(torch.float)) # (k * c, d_state)
         Ds = Ds.to(torch.float) # (K * c)
