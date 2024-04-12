@@ -995,9 +995,17 @@ class SS2Dv3:
         if self.channel_first:    
             y: torch.Tensor = CrossMergeTriton.apply(ys)
             y = y.view(B, -1, H, W)
+            if out_norm_shape in ["v0"]:
+                y = out_norm(y.permute(0, 2, 3, 1)).permute(0, 3, 1, 2)
+            else:
+                y = out_norm(y)
         else:
             y: torch.Tensor = CrossMergeTritonF.apply(ys, self.channel_first)
             y = y.view(B, H, W, -1)
+            if out_norm_shape not in ["v0"]:
+                y = out_norm(y.permute(0, 3, 1, 2)).permute(0, 2, 3, 1)
+            else:
+                y = out_norm(y)
         
         if getattr(self, "__DEBUG__", False):
             setattr(self, "__data__", dict(
@@ -1006,17 +1014,11 @@ class SS2Dv3:
                 ys=ys, y=y,
             ))
 
-        if (not self.channel_first) or (out_norm_shape in ["v0"]):
-            y = out_norm(y.permute(0, 2, 3, 1))
-            if self.channel_first:
-                y = y.permute(0, 3, 1, 2)
-        else:
-            y = out_norm(y)
-
         y = (y.to(x.dtype) if to_dtype else y)
         y = self.out_act(y)
         if self.omul:
-            y = y * (_us.permute(0, 2, 3, 1) if not self.channel_first else _us)
+            y = y * _us
+            
         if self.with_dconv and self.ocov:
             y = y + self.act(self.oconv2d(_us))
 
