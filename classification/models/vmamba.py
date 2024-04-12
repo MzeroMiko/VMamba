@@ -981,14 +981,14 @@ class SS2Dv3:
         if self.channel_first:    
             y: torch.Tensor = CrossMergeTriton.apply(ys)
             y = y.view(B, -1, H, W)
-            if out_norm_shape in ["v0"]:
+            if out_norm_shape == "v0":
                 y = out_norm(y.permute(0, 2, 3, 1)).permute(0, 3, 1, 2)
             else:
                 y = out_norm(y)
         else:
             y: torch.Tensor = CrossMergeTritonF.apply(ys, self.channel_first)
             y = y.view(B, H, W, -1)
-            if out_norm_shape not in ["v0"]:
+            if out_norm_shape == "v1":
                 y = out_norm(y.permute(0, 3, 1, 2)).permute(0, 2, 3, 1)
             else:
                 y = out_norm(y)
