@@ -1,3 +1,5 @@
+# if you are using py37, add this line to functools.py
+# cached_property = lambda func: property(lru_cache()(func))
 
 # triton cross scan, 2x speed than pytorch implementation =========================
 import torch

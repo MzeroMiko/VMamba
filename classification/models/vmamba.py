@@ -734,7 +734,6 @@ class SS2Dv2:
 
 # support: xv1a,xv2a,xv3a; 
 # postfix: _cpos;_ocov;_ocov2;_ca;_act;_mul;_onsigmoid,_onsoftmax,_ondwconv3,_onnone;
-# history support: v2,v3;v31d,v32d,v32dc;
 class SS2Dv3:
     def __initxv__(
         self,
