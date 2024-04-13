@@ -297,22 +297,30 @@ def main01():
     
     # new test
     if True:
-        t0230v1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        tacv1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        tacv16 = partial(_model.VSSM, dims=96, depths=[2,2,6,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.8, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        tacv161 = partial(_model.VSSM, dims=96, depths=[2,2,6,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        tacv161l = partial(_model.VSSM, dims=96, depths=[2,2,6,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln")
+        t0230v1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") #4.8577420799999995 Params:  30705832 1283
+        
+        tacv1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # 4.683430656 Params:  29722024 1383
+        tacv1l = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln") # 4.683430656 Params:  29722024 930
+        
+        tacv16 = partial(_model.VSSM, dims=96, depths=[2,2,6,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.8, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # 4.883653476 Params:  30605560 1323
+        tacv161 = partial(_model.VSSM, dims=96, depths=[2,2,6,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # 5.054632703999999 Params:  31591720 1315
+        tacv162 = partial(_model.VSSM, dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # 4.815518976 Params:  29742760 1700
+        tacv163 = partial(_model.VSSM, dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=5, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # 4.855032575999999 Params:  29877544 1618
+
         tscv16 = partial(_model.VSSM, dims=96, depths=[2,2,16,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
         tbcv16 = partial(_model.VSSM, dims=128, depths=[2,2,16,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
         print("vmamba test ================================", flush=True)
         for config in [
             # t0230v1, 
-            # tacv16, 
-            tacv161l, 
+            # tacv1, 
+            # tacv1l, 
+            tacv16, 
             tacv161, 
+            tacv162, 
+            tacv163, 
             tbcv16, tscv16, 
         ]:
-            testall(config(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True)
+            testall(config(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True, inference_only=True)
         breakpoint()
 
     if False:
