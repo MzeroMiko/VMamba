@@ -810,14 +810,11 @@ class SS2Dv3:
             self.out_norm = nn.LayerNorm(d_inner)
 
         # in proj =======================================
-        self.out_act: nn.Module = nn.Identity()
-
         self.omul, forward_type = checkpostfix("_mul", forward_type)
-        if self.omul:
-            self.f_omul = nn.Identity()
         self.oact, forward_type = checkpostfix("_act", forward_type)
+        self.f_omul = nn.Identity() if self.omul else None
         self.out_act = nn.GELU() if self.oact else nn.Identity()
-            
+
         mode = forward_type[:4]
         assert mode in ["xv1a", "xv2a", "xv3a"]
 
@@ -911,7 +908,7 @@ class SS2Dv3:
         dt_projs_bias = self.dt_projs_bias
         force_fp32 = False
         delta_softplus = True
-        out_norm_shape = getattr(self, "out_norm_shape", "v0")
+        out_norm_shape = self.out_norm_shape
         out_norm = self.out_norm
         to_dtype = True
         Ds = self.Ds
