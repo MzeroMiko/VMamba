@@ -358,7 +358,9 @@ class SS2Dv0:
         return out
 
 
-# support: v01-v05; v051d,v052d,v052dc; | history support: v3noz, v2, ...
+# support: v01-v05; v051d,v052d,v052dc; 
+# postfix: _onsigmoid,_onsoftmax,_ondwconv3,_onnone;_nozact,_noz;_oact;_no32;
+# history support: v2,v3;v31d,v32d,v32dc;
 class SS2Dv2:
     def __initv2__(
         self,
@@ -730,6 +732,9 @@ class SS2Dv2:
         return out
 
 
+# support: xv1a,xv2a,xv3a; 
+# postfix: _cpos;_ocov;_ocov2;_ca;_act;_mul;_onsigmoid,_onsoftmax,_ondwconv3,_onnone;
+# history support: v2,v3;v31d,v32d,v32dc;
 class SS2Dv3:
     def __initxv__(
         self,
@@ -813,13 +818,8 @@ class SS2Dv3:
         self.oact, forward_type = checkpostfix("_act", forward_type)
         self.out_act = nn.GELU() if self.oact else nn.Identity()
             
-        mode = "xv1a"
-        if forward_type.startswith("xv1a"):
-            mode="xv1a"
-        elif forward_type.startswith("xv2a"):
-            mode="xv2a"
-        elif forward_type.startswith("xv3a"):
-            mode="xv3a"
+        mode = forward_type[:4]
+        assert mode in ["xv1a", "xv2a", "xv3a"]
 
         self.forward = partial(self.forwardxv, mode=mode)
         self.dts_dim = dict(xv1a=self.dt_rank, xv2a=self.d_inner, xv3a=4 * self.dt_rank)[mode]
@@ -900,7 +900,7 @@ class SS2Dv3:
         if forward_type.startswith("xv2"):
             del self.dt_projs_weight
 
-    def forwardxv(self, x: torch.Tensor, mode="xv1a", **kwargs):
+    def forwardxv(self, x: torch.Tensor, **kwargs):
         B, C, H, W = x.shape
         if not self.channel_first:
             B, H, W, C = x.shape
