@@ -619,6 +619,8 @@ def main_vssm1():
         # tiacv1_6 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_6/log_rank0.txt",
         tiacv1_62 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_62/log_rank0.txt",
         tiacv1_63 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_63/log_rank0.txt",
+        tiacv1_64 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_64/log_rank0.txt",
+        tiacv1_62_0415 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_62_0415/log_rank0.txt",
     )
     
     for name, file in files.items():
@@ -643,4 +645,4 @@ if __name__ == "__main__":
     # main_vssmd()
     # main_heat()
     main_vssm1()
-
+    

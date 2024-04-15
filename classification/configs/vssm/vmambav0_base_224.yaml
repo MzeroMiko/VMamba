@@ -14,5 +14,4 @@ MODEL:
     DOWNSAMPLE: "v1"
     PATCHEMBED: "v1"
     
-    # SSM_FORWARDTYPE: "v0" # if you want exactly the same
 
