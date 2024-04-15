@@ -83,14 +83,16 @@ inspiration from the recently introduced state space model and propose the Visua
 
 
 ## Main Results
+:book: 
+***Attention: The configs/logs/checkpoints of `Classification on ImageNet-1K`, `Object Detection on COCO`, `Semantic Segmentation on ADE20K` listed below corresponds to VMambav2[`arXiv 2401.10166v2`](https://arxiv.org/abs/2401.10166v2), which is also named `V9` in section `Accelerating VMamba`. ***
 
 :book:
 ***Attention: The configs/logs/checkpoints of `Classification on ImageNet-1K`, `Object Detection on COCO`, `Semantic Segmentation on ADE20K` corresponding to [`arXiv 2401.10166v1`](https://arxiv.org/abs/2401.10166v1) has been moved [`here`](assets/performance_stage0.md).***
 
-:book: 
-***The checkpoints of some of the models listed below will be released in weeks!***
+<!-- :book: 
+***The checkpoints of some of the models listed below will be released in weeks!*** -->
 
-### **Classification on ImageNet-1K with nightly builds**
+### **Classification on ImageNet-1K with VMambav2**
 
 | name | pretrain | resolution |acc@1 | #params | FLOPs | configs/logs/ckpts | best epoch | use ema | GPU Mem | time/epoch |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |:---: |:---: |
@@ -100,9 +102,6 @@ inspiration from the recently introduced state space model and propose the Visua
 | Swin-T | ImageNet-1K | 224x224 | 81.2 | 28M | 4.5G | -- | -- | -- | -- | -- |
 | Swin-S | ImageNet-1K | 224x224 | 83.2 | 50M | 8.7G | -- | -- | -- | -- | -- |
 | Swin-B | ImageNet-1K | 224x224 | 83.5 | 88M | 15.4G | -- | -- | -- | -- | -- |
-| VMamba-T(0220) | ImageNet-1K | 224x224 | 82.5 | 32M | 5G | [config](classification/configs/vssm1/vssm_tiny_224_0220.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240220/vssmtiny_dp02_e258_ema.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240220/vssmtiny_dp02_ckpt_epoch_258.pth) | 258 | true | 25036M | 8.53min |
-| VMamba-T(0229) | ImageNet-1K | 224x224 | 82.4 | 29M | 4.5G | [config](classification/configs/vssm1/vssm_tiny_224_0229.yaml)/-- | 262 | true | 22454M | 8.28min |
-| VMamba-T(0229flex) | ImageNet-1K | 224x224 | 82.3 | 29M | 4.5G | [config](classification/configs/vssm1/vssm_tiny_224_0229flex.yaml)/-- | 282 | true | 17292M | 7.77min |
 | VMamba-T(0230) | ImageNet-1K | 224x224 | 82.5 | 30M | 4.8G | [config](classification/configs/vssm1/vssm_tiny_224_0229flex.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240316/vssm_tiny_0230.txt)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240316/vssm_tiny_0230_ckpt_epoch_262.pth) | 262 | true | 18234M | 8.12min |
 | VMamba-S | ImageNet-1K | 224x224 | 83.6 | 50M | 8.7G | [config](classification/configs/vssm1/vssm_small_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240316/vssm_small_0229.txt)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240316/vssm_small_0229_ckpt_epoch_222.pth) | 222 | true | 27634M | 11.86min |
 | VMamba-B | ImageNet-1K | 224x224 | 83.9 | 89M | 15.4G | [config](classification/configs/vssm1/vssm_base_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240316/vssm_base_0229.txt)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240316/vssm_base_0229_ckpt_epoch_237.pth) | 237 | true | 37122M | 15.08min |
@@ -113,7 +112,7 @@ inspiration from the recently introduced state space model and propose the Visua
 
 * *we now calculate FLOPs with the algrithm @albertgu [provides](https://github.com/state-spaces/mamba/issues/110), which will be bigger than previous calculation (which is based on the `selective_scan_ref` function, and ignores the hardware-aware algrithm).*
 
-### **Object Detection on COCO with nightly builds**
+### **Object Detection on COCO with VMambav2**
   
 | Backbone | #params | FLOPs | Detector | box mAP | mask mAP | configs/logs/ckpts | best epoch |
 | :---: | :---: | :---: | :---: | :---: | :---: |:---: |:---: |
@@ -134,7 +133,7 @@ inspiration from the recently introduced state space model and propose the Visua
 
 * *we now calculate FLOPs with the algrithm @albertgu [provides](https://github.com/state-spaces/mamba/issues/110), which will be bigger than previous calculation (which is based on the `selective_scan_ref` function, and ignores the hardware-aware algrithm).*
 
-### **Semantic Segmentation on ADE20K with nightly builds**
+### **Semantic Segmentation on ADE20K with VMambav2**
 
 | Backbone | Input|  #params | FLOPs | Segmentor | mIoU(SS) | mIoU(MS) | configs/logs/logs(ms)/ckpts | best iter |
 | :---: | :---: | :---: | :---: | :---: | :---: |:---: |:---: |:---: |
