@@ -788,7 +788,9 @@ class SS2Dv3:
         # conv =======================================
         if self.with_dconv:
             cact, forward_type = checkpostfix("_ca", forward_type)
+            cact1, forward_type = checkpostfix("_ca1", forward_type)
             self.act: nn.Module = act_layer() if cact else nn.Identity()
+            self.act: nn.Module = nn.GELU() if cact1 else self.act
                 
             self.ocov2, forward_type = checkpostfix("_ocov2", forward_type)
             self.ocov, forward_type = checkpostfix("_ocov", forward_type)

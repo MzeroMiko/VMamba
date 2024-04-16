@@ -1,6 +1,6 @@
 MODEL:
   TYPE: vssm
-  NAME: vssm_tiny_acv1_64
+  NAME: vssm_tiny_acv1_65
   DROP_PATH_RATE: 0.2
   VSSM:
     EMBED_DIM: 96
@@ -10,7 +10,7 @@ MODEL:
     SSM_RATIO: 1.0
     SSM_CONV: 3
     SSM_CONV_BIAS: false
-    SSM_FORWARDTYPE: "xv1a"
+    SSM_FORWARDTYPE: "xv1a_ca1"
     MLP_RATIO: 4.0
     DOWNSAMPLE: "v3"
     PATCHEMBED: "v2"
