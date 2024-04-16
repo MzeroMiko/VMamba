@@ -156,7 +156,7 @@ def linefit(xaxis, yaxis, fit_range=None, out_range=None):
 def draw_fig(data: list, xlim=(0, 301), ylim=(68, 84), xstep=None,ystep=None, save_path="./show.jpg"):
     assert isinstance(data[0], dict)
     from matplotlib import pyplot as plot
-    fig, ax = plot.subplots(dpi=300, figsize=(24, 8))
+    fig, ax = plot.subplots(dpi=400, figsize=(24, 8))
     for d in data:
         length = min(len(d['x']), len(d['y']))
         x_axis = d['x'][:length]
@@ -620,7 +620,9 @@ def main_vssm1():
         tiacv1_62 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_62/log_rank0.txt",
         tiacv1_63 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_63/log_rank0.txt",
         tiacv1_64 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_64/log_rank0.txt",
-        tiacv1_62_0415 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_62_0415/log_rank0.txt",
+        # tiacv1_62_0415 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_62_0415/log_rank0.txt",
+        tiacv1_65 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_65/log_rank0.txt",
+        tiacv1_68 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_68/log_rank0.txt",
     )
     
     for name, file in files.items():

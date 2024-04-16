@@ -11,6 +11,7 @@ MODEL:
     SSM_CONV: 3
     SSM_CONV_BIAS: false
     SSM_INIT: "v2"
+    SSM_FORWARDTYPE: "v2"  
     MLP_RATIO: 4.0
     DOWNSAMPLE: "v3"
     PATCHEMBED: "v2"
