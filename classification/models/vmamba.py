@@ -148,6 +148,18 @@ class gMlp(nn.Module):
         return x
 
 
+class SoftmaxSpatial(nn.Softmax):
+    def forward(self, x: torch.Tensor):
+        if self.dim == -1:
+            B, C, H, W = x.shape
+            return super().forward(x.view(B, C, -1)).view(B, C, H, W)
+        elif self.dim == 1:
+            B, H, W, C = x.shape
+            return super().forward(x.view(B, -1, C)).view(B, H, W, C)
+        else:
+            raise NotImplementedError
+
+
 # =====================================================
 class mamba_init:
     @staticmethod
@@ -415,25 +427,21 @@ class SS2Dv2:
         self.out_norm_softmax, forward_type = checkpostfix("_onsoftmax", forward_type)
         self.out_norm_sigmoid, forward_type = checkpostfix("_onsigmoid", forward_type)
 
-        self.out_norm_shape = "v1"
         if self.out_norm_none:
             self.out_norm = nn.Identity()
         elif self.out_norm_dwconv3:
-            self.out_norm = nn.Conv2d(d_inner, d_inner, kernel_size=3, padding=1, groups=d_inner, bias=False)
+            self.out_norm = nn.Sequential(
+                (nn.Identity() if channel_first else Permute(0, 3, 1, 2)),
+                nn.Conv2d(d_inner, d_inner, kernel_size=3, padding=1, groups=d_inner, bias=False),
+                (nn.Identity() if channel_first else Permute(0, 2, 3, 1)),
+            )
         elif self.out_norm_softmax:
-            forward_type = forward_type[:-len("softmax")]
-            class SoftmaxSpatial(nn.Softmax):
-                def forward(self, x: torch.Tensor):
-                    B, C, H, W = x.shape
-                    return super().forward(x.view(B, C, -1)).view(B, C, H, W)
-            self.out_norm = SoftmaxSpatial(dim=-1)
+            self.out_norm = SoftmaxSpatial(dim=(-1 if channel_first else 1))
         elif self.out_norm_sigmoid:
             self.out_norm = nn.Sigmoid()
-        elif channel_first:
-            self.out_norm = LayerNorm2d(d_inner)
         else:
-            self.out_norm_shape = "v0"
-            self.out_norm = nn.LayerNorm(d_inner)
+            LayerNorm = LayerNorm2d if channel_first else nn.LayerNorm
+            self.out_norm = LayerNorm(d_inner)
 
         # forward_type debug =======================================
         FORWARD_TYPES = dict(
@@ -530,7 +538,6 @@ class SS2Dv2:
         Ds: torch.Tensor=None,
         delta_softplus = True,
         out_norm: torch.nn.Module=None,
-        out_norm_shape="v0",
         channel_first=False,
         # ==============================
         to_dtype=True, # True: final out to dtype
@@ -554,11 +561,8 @@ class SS2Dv2:
         A_logs = self.A_logs
         Ds = self.Ds
         out_norm = getattr(self, "out_norm", None)
-        out_norm_shape = getattr(self, "out_norm_shape", "v0")
         channel_first = self.channel_first
         to_fp32 = lambda *args: (_a.to(torch.float32) for _a in args)
-
-        # out_norm: whatever fits (B, L, C); LayerNorm; Sigmoid; Softmax(dim=1);...
 
         B, D, H, W = x.shape
         D, N = A_logs.shape
@@ -699,17 +703,9 @@ class SS2Dv2:
                 ))
 
         y = y.view(B, -1, H, W)
-        if channel_first:
-            if out_norm_shape in ["v1"]:
-                y = out_norm(y)
-            else:
-                y = out_norm(y.permute(0, 2, 3, 1)).permute(0, 3, 1, 2)
-        else:
-            if out_norm_shape in ["v1"]: # (B, C, H, W)
-                y = out_norm(y).permute(0, 2, 3, 1) # (B, H, W, C)
-            else: # (B, L, C)
-                y = y.view(B, -1, H * W).transpose(dim0=1, dim1=2).contiguous() # (B, L, C)
-                y = out_norm(y).view(B, H, W, -1)
+        if not channel_first:
+            y = y.view(B, -1, H * W).transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1) # (B, L, C)
+        y = out_norm(y)
 
         return (y.to(x.dtype) if to_dtype else y)
 
@@ -788,25 +784,21 @@ class SS2Dv3:
         self.out_norm_softmax, forward_type = checkpostfix("_onsoftmax", forward_type)
         self.out_norm_sigmoid, forward_type = checkpostfix("_onsigmoid", forward_type)
 
-        self.out_norm_shape = "v1"
         if self.out_norm_none:
             self.out_norm = nn.Identity()
         elif self.out_norm_dwconv3:
-            self.out_norm = nn.Conv2d(d_inner, d_inner, kernel_size=3, padding=1, groups=d_inner, bias=False)
+            self.out_norm = nn.Sequential(
+                (nn.Identity() if channel_first else Permute(0, 3, 1, 2)),
+                nn.Conv2d(d_inner, d_inner, kernel_size=3, padding=1, groups=d_inner, bias=False),
+                (nn.Identity() if channel_first else Permute(0, 2, 3, 1)),
+            )
         elif self.out_norm_softmax:
-            forward_type = forward_type[:-len("softmax")]
-            class SoftmaxSpatial(nn.Softmax):
-                def forward(self, x: torch.Tensor):
-                    B, C, H, W = x.shape
-                    return super().forward(x.view(B, C, -1)).view(B, C, H, W)
-            self.out_norm = SoftmaxSpatial(dim=-1)
+            self.out_norm = SoftmaxSpatial(dim=(-1 if channel_first else 1))
         elif self.out_norm_sigmoid:
             self.out_norm = nn.Sigmoid()
-        elif channel_first:
-            self.out_norm = LayerNorm2d(d_inner)
         else:
-            self.out_norm_shape = "v0"
-            self.out_norm = nn.LayerNorm(d_inner)
+            LayerNorm = LayerNorm2d if channel_first else nn.LayerNorm
+            self.out_norm = LayerNorm(d_inner)
 
         # in proj =======================================
         self.omul, forward_type = checkpostfix("_mul", forward_type)
@@ -907,7 +899,6 @@ class SS2Dv3:
         dt_projs_bias = self.dt_projs_bias
         force_fp32 = False
         delta_softplus = True
-        out_norm_shape = self.out_norm_shape
         out_norm = self.out_norm
         to_dtype = True
         Ds = self.Ds
@@ -976,18 +967,10 @@ class SS2Dv3:
             
         if self.channel_first:    
             y: torch.Tensor = CrossMergeTriton.apply(ys)
-            y = y.view(B, -1, H, W)
-            if out_norm_shape == "v0":
-                y = out_norm(y.permute(0, 2, 3, 1)).permute(0, 3, 1, 2)
-            else:
-                y = out_norm(y)
+            y = out_norm(y.view(B, -1, H, W))
         else:
             y: torch.Tensor = CrossMergeTritonF.apply(ys, self.channel_first)
-            y = y.view(B, H, W, -1)
-            if out_norm_shape == "v1":
-                y = out_norm(y.permute(0, 3, 1, 2)).permute(0, 2, 3, 1)
-            else:
-                y = out_norm(y)
+            y = out_norm(y.view(B, H, W, -1))
         
         if getattr(self, "__DEBUG__", False):
             setattr(self, "__data__", dict(
