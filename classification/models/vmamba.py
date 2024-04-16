@@ -534,11 +534,9 @@ class SS2Dv2:
         to_dtype=True, # True: final out to dtype
         force_fp32=False, # True: input fp32
         # ==============================
-        nrows = -1, # for SelectiveScanNRow; 0: auto; -1: disable;
-        backnrows = -1, # for SelectiveScanNRow; 0: auto; -1: disable;
         ssoflex=True, # True: out fp32 in SSOflex; else, SSOflex is the same as SSCore
         # ==============================
-        SelectiveScan=None,
+        SelectiveScan=SelectiveScanOflex,
         CrossScan=CrossScan,
         CrossMerge=CrossMerge,
         no_einsum=False, # replace einsum with linear or conv1d to raise throughput
@@ -562,28 +560,8 @@ class SS2Dv2:
         K, D, R = dt_projs_weight.shape
         L = H * W
 
-        if nrows == 0:
-            if D % 4 == 0:
-                nrows = 4
-            elif D % 3 == 0:
-                nrows = 3
-            elif D % 2 == 0:
-                nrows = 2
-            else:
-                nrows = 1
-            
-        if backnrows == 0:
-            if D % 4 == 0:
-                backnrows = 4
-            elif D % 3 == 0:
-                backnrows = 3
-            elif D % 2 == 0:
-                backnrows = 2
-            else:
-                backnrows = 1
-
         def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True):
-            return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, nrows, backnrows, ssoflex)
+            return SelectiveScan.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, -1, -1, ssoflex)
         
         if cascade2d:
             def scan_rowcol(
