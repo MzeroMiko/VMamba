@@ -530,15 +530,6 @@ class SS2Dv2:
     def forward_corev2(
         self,
         x: torch.Tensor=None, 
-        x_proj_weight: torch.Tensor=None,
-        x_proj_bias: torch.Tensor=None,
-        dt_projs_weight: torch.Tensor=None,
-        dt_projs_bias: torch.Tensor=None,
-        A_logs: torch.Tensor=None,
-        Ds: torch.Tensor=None,
-        delta_softplus = True,
-        out_norm: torch.nn.Module=None,
-        channel_first=False,
         # ==============================
         to_dtype=True, # True: final out to dtype
         force_fp32=False, # True: input fp32
@@ -556,10 +547,12 @@ class SS2Dv2:
         **kwargs,
     ):
         x_proj_weight = self.x_proj_weight
+        x_proj_bias = getattr(self, "x_proj_bias", None)
         dt_projs_weight = self.dt_projs_weight
         dt_projs_bias = self.dt_projs_bias
         A_logs = self.A_logs
         Ds = self.Ds
+        delta_softplus = True
         out_norm = getattr(self, "out_norm", None)
         channel_first = self.channel_first
         to_fp32 = lambda *args: (_a.to(torch.float32) for _a in args)
@@ -966,11 +959,10 @@ class SS2Dv3:
         ).view(B, K, -1, H, W)
             
         if self.channel_first:    
-            y: torch.Tensor = CrossMergeTriton.apply(ys)
-            y = out_norm(y.view(B, -1, H, W))
+            y: torch.Tensor = CrossMergeTriton.apply(ys).view(B, -1, H, W)
         else:
-            y: torch.Tensor = CrossMergeTritonF.apply(ys, self.channel_first)
-            y = out_norm(y.view(B, H, W, -1))
+            y: torch.Tensor = CrossMergeTritonF.apply(ys, self.channel_first).view(B, H, W, -1)
+        y = out_norm(y)
         
         if getattr(self, "__DEBUG__", False):
             setattr(self, "__data__", dict(
