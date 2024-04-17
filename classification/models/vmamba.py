@@ -700,7 +700,7 @@ class SS2Dv2:
 
 
 # support: xv1a,xv2a,xv3a; 
-# postfix: _cpos;_ocov;_ocov2;_ca;_act;_mul;_onsigmoid,_onsoftmax,_ondwconv3,_onnone;
+# postfix: _cpos;_ocov;_ocov2;_ca,_ca1;_act;_mul;_onsigmoid,_onsoftmax,_ondwconv3,_onnone;
 class SS2Dv3:
     def __initxv__(
         self,
@@ -709,7 +709,6 @@ class SS2Dv3:
         d_state=16,
         ssm_ratio=2.0,
         dt_rank="auto",
-        act_layer=nn.SiLU,
         # dwconv ===============
         d_conv=3, # < 2 means no conv 
         conv_bias=True,
@@ -793,8 +792,8 @@ class SS2Dv3:
         if self.with_dconv:
             cact, forward_type = checkpostfix("_ca", forward_type)
             cact1, forward_type = checkpostfix("_ca1", forward_type)
-            self.cact: nn.Module = act_layer() if cact else nn.Identity()
-            self.cact: nn.Module = nn.GELU() if cact1 else self.cact
+            self.cact = nn.SiLU() if cact else nn.Identity()
+            self.cact = nn.GELU() if cact1 else self.cact
                 
             self.oconv2, forward_type = checkpostfix("_ocov2", forward_type)
             self.oconv, forward_type = checkpostfix("_ocov", forward_type)
@@ -836,7 +835,7 @@ class SS2Dv3:
 
         # out proj =======================================
         self.out_proj = Linear(d_inner, d_model, bias=bias, **factory_kwargs)
-        self.dropout = nn.Dropout(dropout) if dropout > 0. else nn.Identity()
+        self.dropout = nn.Dropout(dropout) if dropout > 0.0 else nn.Identity()
 
         if initialize in ["v0"]:
             # dt proj ============================
