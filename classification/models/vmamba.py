@@ -792,8 +792,8 @@ class SS2Dv3:
         if self.with_dconv:
             cact, forward_type = checkpostfix("_ca", forward_type)
             cact1, forward_type = checkpostfix("_ca1", forward_type)
-            self.act: nn.Module = act_layer() if cact else nn.Identity()
-            self.act: nn.Module = nn.GELU() if cact1 else self.act
+            self.cact: nn.Module = act_layer() if cact else nn.Identity()
+            self.cact: nn.Module = nn.GELU() if cact1 else self.cact
                 
             self.oconv2, forward_type = checkpostfix("_ocov2", forward_type)
             self.oconv, forward_type = checkpostfix("_ocov", forward_type)
@@ -887,8 +887,7 @@ class SS2Dv3:
             return SelectiveScanOflex.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, 1, 1, True)
 
         if self.iconv:
-            x = self.conv2d(x) # (b, d, h, w)
-            x = self.act(x)
+            x = self.cact(self.conv2d(x)) # (b, d, h, w
         elif self.cpos:
             x = x + self.conv2d(x) # (b, d, h, w)
 
@@ -957,12 +956,14 @@ class SS2Dv3:
             ))
 
         y = (y.to(x.dtype) if to_dtype else y)
+        
         y = self.out_act(y)
+        
         if self.omul:
             y = y * _us
 
         if self.oconv:
-            y = y + self.act(self.oconv2d(_us))
+            y = y + self.cact(self.oconv2d(_us))
 
         out = self.dropout(self.out_proj(y))
         return out
