@@ -244,17 +244,14 @@ For more information about detection and segmentation tasks, please refer to the
 
 ### Analysis Tools
 
-VMamba includes tools for analyzing the effective receptive field, FLOPs, loss, and scaling behavior of the models. Use the following commands to perform analysis:
+VMamba includes tools for visualizing mamba "attention" and effective receptive field. Use the following commands to perform analysis:
 
 ```bash
+# Visualize Mamba "Attention"
+CUDA_VISIBLE_DEVICES=0 python analyze/attnmap.py
+
 # Analyze the effective receptive field
-CUDA_VISIBLE_DEVICES=0 python analyze/get_erf.py > analyze/show/erf/get_erf.log 2>&1
-
-# Analyze loss
-CUDA_VISIBLE_DEVICES=0 python analyze/get_loss.py
-
-# Further analysis on scaling behavior
-python analyze/scaleup_show.py
+CUDA_VISIBLE_DEVICES=0 python analyze/erf.py
 
 ```
 
