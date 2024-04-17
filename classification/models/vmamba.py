@@ -422,22 +422,22 @@ class SS2Dv2:
         self.oact, forward_type = checkpostfix("_oact", forward_type)
         self.disable_z, forward_type = checkpostfix("_noz", forward_type)
         self.disable_z_act, forward_type = checkpostfix("_nozact", forward_type)
-        self.out_norm_none, forward_type = checkpostfix("_onnone", forward_type)
-        self.out_norm_dwconv3, forward_type = checkpostfix("_ondwconv3", forward_type)
-        self.out_norm_softmax, forward_type = checkpostfix("_onsoftmax", forward_type)
-        self.out_norm_sigmoid, forward_type = checkpostfix("_onsigmoid", forward_type)
+        out_norm_none, forward_type = checkpostfix("_onnone", forward_type)
+        out_norm_dwconv3, forward_type = checkpostfix("_ondwconv3", forward_type)
+        out_norm_softmax, forward_type = checkpostfix("_onsoftmax", forward_type)
+        out_norm_sigmoid, forward_type = checkpostfix("_onsigmoid", forward_type)
 
-        if self.out_norm_none:
+        if out_norm_none:
             self.out_norm = nn.Identity()
-        elif self.out_norm_dwconv3:
+        elif out_norm_dwconv3:
             self.out_norm = nn.Sequential(
                 (nn.Identity() if channel_first else Permute(0, 3, 1, 2)),
                 nn.Conv2d(d_inner, d_inner, kernel_size=3, padding=1, groups=d_inner, bias=False),
                 (nn.Identity() if channel_first else Permute(0, 2, 3, 1)),
             )
-        elif self.out_norm_softmax:
+        elif out_norm_softmax:
             self.out_norm = SoftmaxSpatial(dim=(-1 if channel_first else 1))
-        elif self.out_norm_sigmoid:
+        elif out_norm_sigmoid:
             self.out_norm = nn.Sigmoid()
         else:
             LayerNorm = LayerNorm2d if channel_first else nn.LayerNorm
@@ -750,22 +750,22 @@ class SS2Dv3:
                 value = value[:-len(tag)]
             return ret, value
 
-        self.out_norm_none, forward_type = checkpostfix("_onnone", forward_type)
-        self.out_norm_dwconv3, forward_type = checkpostfix("_ondwconv3", forward_type)
-        self.out_norm_softmax, forward_type = checkpostfix("_onsoftmax", forward_type)
-        self.out_norm_sigmoid, forward_type = checkpostfix("_onsigmoid", forward_type)
+        out_norm_none, forward_type = checkpostfix("_onnone", forward_type)
+        out_norm_dwconv3, forward_type = checkpostfix("_ondwconv3", forward_type)
+        out_norm_softmax, forward_type = checkpostfix("_onsoftmax", forward_type)
+        out_norm_sigmoid, forward_type = checkpostfix("_onsigmoid", forward_type)
 
-        if self.out_norm_none:
+        if out_norm_none:
             self.out_norm = nn.Identity()
-        elif self.out_norm_dwconv3:
+        elif out_norm_dwconv3:
             self.out_norm = nn.Sequential(
                 (nn.Identity() if channel_first else Permute(0, 3, 1, 2)),
                 nn.Conv2d(d_inner, d_inner, kernel_size=3, padding=1, groups=d_inner, bias=False),
                 (nn.Identity() if channel_first else Permute(0, 2, 3, 1)),
             )
-        elif self.out_norm_softmax:
+        elif out_norm_softmax:
             self.out_norm = SoftmaxSpatial(dim=(-1 if channel_first else 1))
-        elif self.out_norm_sigmoid:
+        elif out_norm_sigmoid:
             self.out_norm = nn.Sigmoid()
         else:
             LayerNorm = LayerNorm2d if channel_first else nn.LayerNorm
