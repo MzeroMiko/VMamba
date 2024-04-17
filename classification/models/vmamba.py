@@ -786,16 +786,20 @@ class SS2Dv3:
         self.in_proj = Linear(d_model, d_inner_all, bias=bias, **factory_kwargs)
         
         # conv =======================================
+        self.cpos = False
+        self.iconv = False
+        self.oconv = False
         if self.with_dconv:
             cact, forward_type = checkpostfix("_ca", forward_type)
             cact1, forward_type = checkpostfix("_ca1", forward_type)
             self.act: nn.Module = act_layer() if cact else nn.Identity()
             self.act: nn.Module = nn.GELU() if cact1 else self.act
                 
-            self.ocov2, forward_type = checkpostfix("_ocov2", forward_type)
-            self.ocov, forward_type = checkpostfix("_ocov", forward_type)
+            self.oconv2, forward_type = checkpostfix("_ocov2", forward_type)
+            self.oconv, forward_type = checkpostfix("_ocov", forward_type)
             self.cpos, forward_type = checkpostfix("_cpos", forward_type)
-            if self.ocov:
+
+            if self.oconv:
                 self.f_ocov = nn.Identity()
                 self.oconv2d = nn.Conv2d(
                     in_channels=d_inner,
@@ -806,7 +810,7 @@ class SS2Dv3:
                     padding=(d_conv - 1) // 2,
                     **factory_kwargs,
                 )
-            elif self.ocov2:
+            elif self.oconv2:
                 self.f_ocov2 = nn.Identity()
                 self.conv2d = nn.Conv2d(
                     in_channels=d_inner_all,
@@ -818,6 +822,7 @@ class SS2Dv3:
                     **factory_kwargs,
                 )
             else:
+                self.iconv = True
                 self.conv2d = nn.Conv2d(
                     in_channels=d_model,
                     out_channels=d_model,
@@ -881,15 +886,15 @@ class SS2Dv3:
         def selective_scan(u, delta, A, B, C, D, delta_bias, delta_softplus):
             return SelectiveScanOflex.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, 1, 1, True)
 
-        if self.with_dconv and (not self.ocov) and (not self.ocov2):
+        if self.iconv:
             x = self.conv2d(x) # (b, d, h, w)
             x = self.act(x)
-        if self.with_dconv and self.cpos:
+        elif self.cpos:
             x = x + self.conv2d(x) # (b, d, h, w)
 
         x = self.in_proj(x)
         
-        if self.with_dconv and self.ocov2:
+        if self.with_dconv and self.oconv2:
             x = self.conv2d(x) # (b, d, h, w)
 
         us, dts, Bs, Cs = x.split([self.d_inner, self.dts_dim, 4 * self.d_state, 4 * self.d_state], dim=(1 if self.channel_first else -1))
@@ -956,7 +961,7 @@ class SS2Dv3:
         if self.omul:
             y = y * _us
 
-        if self.with_dconv and self.ocov:
+        if self.oconv:
             y = y + self.act(self.oconv2d(_us))
 
         out = self.dropout(self.out_proj(y))
