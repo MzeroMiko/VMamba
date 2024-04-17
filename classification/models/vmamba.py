@@ -163,8 +163,8 @@ class SoftmaxSpatial(nn.Softmax):
 # =====================================================
 class mamba_init:
     @staticmethod
-    def dt_init(dt_rank, d_inner, dt_scale=1.0, dt_init="random", dt_min=0.001, dt_max=0.1, dt_init_floor=1e-4, **factory_kwargs):
-        dt_proj = nn.Linear(dt_rank, d_inner, bias=True, **factory_kwargs)
+    def dt_init(dt_rank, d_inner, dt_scale=1.0, dt_init="random", dt_min=0.001, dt_max=0.1, dt_init_floor=1e-4):
+        dt_proj = nn.Linear(dt_rank, d_inner, bias=True)
 
         # Initialize special dt projection to preserve variance at initialization
         dt_init_std = dt_rank**-0.5 * dt_scale
@@ -177,7 +177,7 @@ class mamba_init:
 
         # Initialize dt bias so that F.softplus(dt_bias) is between dt_min and dt_max
         dt = torch.exp(
-            torch.rand(d_inner, **factory_kwargs) * (math.log(dt_max) - math.log(dt_min))
+            torch.rand(d_inner) * (math.log(dt_max) - math.log(dt_min))
             + math.log(dt_min)
         ).clamp(min=dt_init_floor)
         # Inverse of softplus: https://github.com/pytorch/pytorch/issues/72759
@@ -259,7 +259,7 @@ class SS2Dv0:
             self.forward = partial(self.forwardv0, force_fp32=False)
 
         # in proj ============================
-        self.in_proj = nn.Linear(d_model, d_inner * 2, bias=bias, **factory_kwargs)
+        self.in_proj = nn.Linear(d_model, d_inner * 2, bias=bias)
         self.act: nn.Module = act_layer()
         self.conv2d = nn.Conv2d(
             in_channels=d_inner,
@@ -273,7 +273,7 @@ class SS2Dv0:
 
         # x proj ============================
         self.x_proj = [
-            nn.Linear(d_inner, (dt_rank + d_state * 2), bias=False, **factory_kwargs)
+            nn.Linear(d_inner, (dt_rank + d_state * 2), bias=False)
             for _ in range(k_group)
         ]
         self.x_proj_weight = nn.Parameter(torch.stack([t.weight for t in self.x_proj], dim=0)) # (K, N, inner)
@@ -281,7 +281,7 @@ class SS2Dv0:
 
         # dt proj ============================
         self.dt_projs = [
-            self.dt_init(dt_rank, d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs)
+            self.dt_init(dt_rank, d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor)
             for _ in range(k_group)
         ]
         self.dt_projs_weight = nn.Parameter(torch.stack([t.weight for t in self.dt_projs], dim=0)) # (K, inner, rank)
@@ -294,7 +294,7 @@ class SS2Dv0:
 
         # out proj =======================================
         self.out_norm = nn.LayerNorm(d_inner)
-        self.out_proj = nn.Linear(d_inner, d_model, bias=bias, **factory_kwargs)
+        self.out_proj = nn.Linear(d_inner, d_model, bias=bias)
         self.dropout = nn.Dropout(dropout) if dropout > 0. else nn.Identity()
 
     def forwardv0(self, x: torch.Tensor, SelectiveScan = SelectiveScanMamba, seq=False, force_fp32=True, **kwargs):
@@ -473,7 +473,7 @@ class SS2Dv2:
 
         # in proj =======================================
         d_proj = d_inner if self.disable_z else (d_inner * 2)
-        self.in_proj = Linear(d_model, d_proj, bias=bias, **factory_kwargs)
+        self.in_proj = Linear(d_model, d_proj, bias=bias)
         self.act: nn.Module = act_layer()
         
         # conv =======================================
@@ -490,7 +490,7 @@ class SS2Dv2:
 
         # x proj ============================
         self.x_proj = [
-            nn.Linear(d_inner, (dt_rank + d_state * 2), bias=False, **factory_kwargs)
+            nn.Linear(d_inner, (dt_rank + d_state * 2), bias=False)
             for _ in range(k_group)
         ]
         self.x_proj_weight = nn.Parameter(torch.stack([t.weight for t in self.x_proj], dim=0)) # (K, N, inner)
@@ -498,13 +498,13 @@ class SS2Dv2:
         
         # out proj =======================================
         self.out_act = nn.GELU() if self.oact else nn.Identity()
-        self.out_proj = Linear(d_inner, d_model, bias=bias, **factory_kwargs)
+        self.out_proj = Linear(d_inner, d_model, bias=bias)
         self.dropout = nn.Dropout(dropout) if dropout > 0. else nn.Identity()
 
         if initialize in ["v0"]:
             # dt proj ============================
             self.dt_projs = [
-                self.dt_init(dt_rank, d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs)
+                self.dt_init(dt_rank, d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor)
                 for _ in range(k_group)
             ]
             self.dt_projs_weight = nn.Parameter(torch.stack([t.weight for t in self.dt_projs], dim=0)) # (K, inner, rank)
@@ -782,7 +782,7 @@ class SS2Dv3:
         self.forward = partial(self.forwardxv, mode=mode)
         self.dts_dim = dict(xv1a=self.dt_rank, xv2a=self.d_inner, xv3a=4 * self.dt_rank)[mode]
         d_inner_all = d_inner + self.dts_dim + 8 * d_state
-        self.in_proj = Linear(d_model, d_inner_all, bias=bias, **factory_kwargs)
+        self.in_proj = Linear(d_model, d_inner_all, bias=bias)
         
         # conv =======================================
         self.cpos = False
@@ -809,7 +809,6 @@ class SS2Dv3:
                     bias=conv_bias,
                     kernel_size=d_conv,
                     padding=(d_conv - 1) // 2,
-                    **factory_kwargs,
                 )
             if self.oconv2:
                 self.f_ocov2 = nn.Identity()
@@ -820,7 +819,6 @@ class SS2Dv3:
                     bias=conv_bias,
                     kernel_size=d_conv,
                     padding=(d_conv - 1) // 2,
-                    **factory_kwargs,
                 )
             if self.iconv:
                 self.conv2d = nn.Conv2d(
@@ -830,17 +828,16 @@ class SS2Dv3:
                     bias=conv_bias,
                     kernel_size=d_conv,
                     padding=(d_conv - 1) // 2,
-                    **factory_kwargs,
                 )
 
         # out proj =======================================
-        self.out_proj = Linear(d_inner, d_model, bias=bias, **factory_kwargs)
+        self.out_proj = Linear(d_inner, d_model, bias=bias)
         self.dropout = nn.Dropout(dropout) if dropout > 0.0 else nn.Identity()
 
         if initialize in ["v0"]:
             # dt proj ============================
             self.dt_projs = [
-                self.dt_init(dt_rank, d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, **factory_kwargs)
+                self.dt_init(dt_rank, d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor)
                 for _ in range(k_group)
             ]
             self.dt_projs_weight = nn.Parameter(torch.stack([t.weight for t in self.dt_projs], dim=0)) # (K, inner, rank)
