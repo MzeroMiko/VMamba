@@ -789,6 +789,7 @@ class SS2Dv3:
         self.cpos = False
         self.iconv = False
         self.oconv = False
+        self.oconv2 = False
         if self.with_dconv:
             cact, forward_type = checkpostfix("_ca", forward_type)
             cact1, forward_type = checkpostfix("_ca1", forward_type)
@@ -798,6 +799,7 @@ class SS2Dv3:
             self.oconv2, forward_type = checkpostfix("_ocov2", forward_type)
             self.oconv, forward_type = checkpostfix("_ocov", forward_type)
             self.cpos, forward_type = checkpostfix("_cpos", forward_type)
+            self.iconv = (not self.oconv) and (not self.oconv2)
 
             if self.oconv:
                 self.f_ocov = nn.Identity()
@@ -810,7 +812,7 @@ class SS2Dv3:
                     padding=(d_conv - 1) // 2,
                     **factory_kwargs,
                 )
-            elif self.oconv2:
+            if self.oconv2:
                 self.f_ocov2 = nn.Identity()
                 self.conv2d = nn.Conv2d(
                     in_channels=d_inner_all,
@@ -821,8 +823,7 @@ class SS2Dv3:
                     padding=(d_conv - 1) // 2,
                     **factory_kwargs,
                 )
-            else:
-                self.iconv = True
+            if self.iconv:
                 self.conv2d = nn.Conv2d(
                     in_channels=d_model,
                     out_channels=d_model,
@@ -894,7 +895,7 @@ class SS2Dv3:
 
         x = self.in_proj(x)
         
-        if self.with_dconv and self.oconv2:
+        if self.oconv2:
             x = self.conv2d(x) # (b, d, h, w)
 
         us, dts, Bs, Cs = x.split([self.d_inner, self.dts_dim, 4 * self.d_state, 4 * self.d_state], dim=(1 if self.channel_first else -1))
