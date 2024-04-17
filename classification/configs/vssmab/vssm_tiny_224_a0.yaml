@@ -1,6 +1,6 @@
 MODEL:
   TYPE: vssm
-  NAME: vssm_tiny
+  NAME: vssm_tiny_v0
   DROP_PATH_RATE: 0.2
   VSSM:
     EMBED_DIM: 96
@@ -12,4 +12,3 @@ MODEL:
     MLP_RATIO: 0.0
     DOWNSAMPLE: "v1"
     PATCHEMBED: "v1"
-    # SSM_FORWARDTYPE: "v0" # if you want exactly the same
