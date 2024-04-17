@@ -885,7 +885,7 @@ class SS2Dv3:
             return SelectiveScanOflex.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, 1, 1, True)
 
         if self.iconv:
-            x = self.cact(self.conv2d(x)) # (b, d, h, w
+            x = self.cact(self.conv2d(x)) # (b, d, h, w)
         elif self.cpos:
             x = x + self.conv2d(x) # (b, d, h, w)
 
