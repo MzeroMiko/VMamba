@@ -1,10 +1,10 @@
 MODEL:
   TYPE: vssm
-  NAME: vssm_base_ahv1
+  NAME: vssm_base_ahv3
   DROP_PATH_RATE: 0.2
   VSSM:
     EMBED_DIM: 128
-    DEPTHS: [ 2, 2, 15, 2 ]
+    DEPTHS: [ 2, 2, 20, 2 ]
     SSM_D_STATE: 1
     SSM_DT_RANK: "auto"
     SSM_RATIO: 1.0

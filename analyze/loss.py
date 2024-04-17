@@ -571,7 +571,7 @@ def main_vssm1():
         # ti0223 = f"{logpath}/vssm_tiny_224_0223.log",
         # ti0225 = f"{logpath}/vssm_tiny_224_0225.log",
         # ti0229 = f"{logpath}/vssm_tiny_224_0229.log",
-        ti0230 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm1_tiny_0230/log_rank0.txt",
+        # ti0230 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm1_tiny_0230/log_rank0.txt",
         # ti0309 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm1_tiny_0309/log_rank0.txt",
         # ti0310 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm1_tiny_0310/log_rank0.txt",
         # ti0311 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm1_tiny_0311/log_rank0.txt",
@@ -621,8 +621,9 @@ def main_vssm1():
         # tiacv1_63 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_63/log_rank0.txt",
         # tiacv1_64 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_64/log_rank0.txt",
         # tiacv1_62_0415 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_62_0415/log_rank0.txt",
-        tiacv1_65 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_65/log_rank0.txt",
-        tiacv1_68 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_68/log_rank0.txt",
+        # tiacv1_65 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_65/log_rank0.txt",
+        tiahv3 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_68/log_rank0.txt",
+        tiahv1 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_ahv1/log_rank0.txt",
     )
     
     for name, file in files.items():
