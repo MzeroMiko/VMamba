@@ -865,6 +865,7 @@ class SS2Dv3:
 
         if forward_type.startswith("xv2"):
             del self.dt_projs_weight
+            self.dt_projs_weight = None
 
     def forwardxv(self, x: torch.Tensor, **kwargs):
         B, C, H, W = x.shape
@@ -872,7 +873,7 @@ class SS2Dv3:
             B, H, W, C = x.shape
         L = H * W
         K = 4
-        dt_projs_weight = getattr(self, "dt_projs_weight", None)
+        dt_projs_weight = self.dt_projs_weight
         A_logs = self.A_logs
         dt_projs_bias = self.dt_projs_bias
         force_fp32 = False
