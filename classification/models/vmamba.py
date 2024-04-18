@@ -728,7 +728,6 @@ class SS2Dv3:
         # ======================
         **kwargs,
     ):
-        factory_kwargs = {"device": None, "dtype": None}
         super().__init__()
         d_inner = int(ssm_ratio * d_model)
         dt_rank = math.ceil(d_model / 16) if dt_rank == "auto" else dt_rank
