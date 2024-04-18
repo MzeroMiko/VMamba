@@ -405,7 +405,6 @@ class SS2Dv2:
         super().__init__()
         d_inner = int(ssm_ratio * d_model)
         dt_rank = math.ceil(d_model / 16) if dt_rank == "auto" else dt_rank
-        self.d_conv = d_conv
         self.channel_first = channel_first
         self.with_dconv = d_conv > 1
         Linear = Linear2d if channel_first else nn.Linear
@@ -731,7 +730,6 @@ class SS2Dv3:
         super().__init__()
         d_inner = int(ssm_ratio * d_model)
         dt_rank = math.ceil(d_model / 16) if dt_rank == "auto" else dt_rank
-        self.d_conv = d_conv
         self.channel_first = channel_first
         self.d_state = d_state
         self.dt_rank = dt_rank
@@ -1001,13 +999,10 @@ class SS2D(nn.Module, mamba_init, SS2Dv0, SS2Dv2, SS2Dv3):
         )
         if forward_type in ["v0", "v0seq"]:
             self.__initv0__(seq=("seq" in forward_type), **kwargs)
-            return
         elif forward_type.startswith("xv"):
             self.__initxv__(**kwargs)
-            return
         else:
             self.__initv2__(**kwargs)
-            return
 
 
 # =====================================================
