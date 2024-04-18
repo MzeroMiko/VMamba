@@ -799,8 +799,16 @@ class SS2Dv3:
             self.cpos, forward_type = checkpostfix("_cpos", forward_type)
             self.iconv = (not self.oconv) and (not self.oconv2)
 
+            if self.iconv:
+                self.conv2d = nn.Conv2d(
+                    in_channels=d_model,
+                    out_channels=d_model,
+                    groups=d_model,
+                    bias=conv_bias,
+                    kernel_size=d_conv,
+                    padding=(d_conv - 1) // 2,
+                )
             if self.oconv:
-                self.f_ocov = nn.Identity()
                 self.oconv2d = nn.Conv2d(
                     in_channels=d_inner,
                     out_channels=d_inner,
@@ -810,20 +818,10 @@ class SS2Dv3:
                     padding=(d_conv - 1) // 2,
                 )
             if self.oconv2:
-                self.f_ocov2 = nn.Identity()
                 self.conv2d = nn.Conv2d(
                     in_channels=d_inner_all,
                     out_channels=d_inner_all,
                     groups=d_inner_all,
-                    bias=conv_bias,
-                    kernel_size=d_conv,
-                    padding=(d_conv - 1) // 2,
-                )
-            if self.iconv:
-                self.conv2d = nn.Conv2d(
-                    in_channels=d_model,
-                    out_channels=d_model,
-                    groups=d_model,
                     bias=conv_bias,
                     kernel_size=d_conv,
                     padding=(d_conv - 1) // 2,
@@ -858,17 +856,17 @@ class SS2Dv3:
             self.A_logs = nn.Parameter(torch.zeros((k_group * d_inner, d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
             self.dt_projs_weight = nn.Parameter(0.1 * torch.rand((k_group, d_inner, dt_rank)))
             self.dt_projs_bias = nn.Parameter(0.1 * torch.rand((k_group, d_inner)))
+        else:
+            raise NotImplementedError
+
 
         if forward_type.startswith("xv2"):
             del self.dt_projs_weight
             self.dt_projs_weight = None
 
     def forwardxv(self, x: torch.Tensor, **kwargs):
-        B, C, H, W = x.shape
-        if not self.channel_first:
-            B, H, W, C = x.shape
+        B, (H, W) = x.shape[0], (x.shape[2:4] if self.channel_first else x.shape[1:3])
         L = H * W
-        K = 4
         dt_projs_weight = self.dt_projs_weight
         A_logs = self.A_logs
         dt_projs_bias = self.dt_projs_bias
@@ -904,13 +902,13 @@ class SS2Dv3:
 
             if self.dts_dim == self.dt_rank:
                 dts = CrossScanTriton.apply(dts.contiguous()).view(B, -1, L)
-                dts = F.conv1d(dts, dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
+                dts = F.conv1d(dts, dt_projs_weight.view(4 * self.d_inner, self.dt_rank, 1), None, groups=4)
             elif self.dts_dim == self.d_inner:
                 dts = CrossScanTriton.apply(dts.contiguous()).view(B, -1, L)
             elif self.dts_dim == 4 * self.dt_rank:
                 dts = dts.view(B, 4, -1, H, W)
                 dts = CrossScanTriton1b1.apply(dts.contiguous()).view(B, -1, L)
-                dts = F.conv1d(dts, dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
+                dts = F.conv1d(dts, dt_projs_weight.view(4 * self.d_inner, self.dt_rank, 1), None, groups=4)
 
         else:
             Bs, Cs = Bs.view(B, H, W, 4, -1), Cs.view(B, H, W, 4, -1)
@@ -920,13 +918,13 @@ class SS2Dv3:
 
             if self.dts_dim == self.dt_rank:
                 dts = CrossScanTritonF.apply(dts.contiguous(), self.channel_first).view(B, -1, L)
-                dts = F.conv1d(dts, dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
+                dts = F.conv1d(dts, dt_projs_weight.view(4 * self.d_inner, self.dt_rank, 1), None, groups=4)
             elif self.dts_dim == self.d_inner:
                 dts = CrossScanTritonF.apply(dts.contiguous(), self.channel_first).view(B, -1, L)
             elif self.dts_dim == 4 * self.dt_rank:
                 dts = dts.view(B, H, W, 4, -1)
                 dts = CrossScanTriton1b1F.apply(dts.contiguous(), self.channel_first).view(B, -1, L)
-                dts = F.conv1d(dts, dt_projs_weight.view(K * self.d_inner, self.dt_rank, 1), None, groups=K)
+                dts = F.conv1d(dts, dt_projs_weight.view(4 * self.d_inner, self.dt_rank, 1), None, groups=4)
 
         As = -torch.exp(A_logs.to(torch.float)) # (k * c, d_state)
         Ds = Ds.to(torch.float) # (K * c)
@@ -937,7 +935,7 @@ class SS2Dv3:
 
         ys: torch.Tensor = selective_scan(
             us, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus
-        ).view(B, K, -1, H, W)
+        ).view(B, 4, -1, H, W)
             
         if self.channel_first:    
             y: torch.Tensor = CrossMergeTriton.apply(ys).view(B, -1, H, W)
