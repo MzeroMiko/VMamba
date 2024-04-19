@@ -176,6 +176,212 @@ def draw_fig(data: list, xlim=(0, 301), ylim=(68, 84), xstep=None,ystep=None, sa
     plot.savefig(save_path)
 
 
+def readlog_classification(logfile):
+    _logs = open(logfile).readlines()
+
+    MAX_SEARCH = 300
+    _epochs, _accs, _emaaccs = [], [], []
+    for i in range(0, len(_logs)):
+        _lr = _logs[i]
+        if "INFO" in _lr and f"ckpt_epoch_" in _lr and f".pth saved !!!\n" in _lr:
+            epoch = int(_lr.split("ckpt_epoch_")[1].split(".pth")[0])
+            _acc, _emaacc = -1, -1
+            for j in range(i + 1, min(i + MAX_SEARCH, len(_logs))):
+                if f"INFO Max accuracy:" in _logs[j]:
+                    assert "INFO Accuracy of the network" in _logs[j-1]
+                    assert "INFO  * Acc@1" in _logs[j-2]
+                    _acc = float(_logs[j-2].split("INFO  * Acc@1")[1].strip().split(" ")[0].strip())
+                if f"INFO Max accuracy ema:" in _logs[j]:
+                    assert "INFO Accuracy of the network" in _logs[j-1]
+                    assert "INFO  * Acc@1" in _logs[j-2]
+                    _emaacc = float(_logs[j-2].split("INFO  * Acc@1")[1].strip().split(" ")[0].strip())
+                if f"INFO Train:" in _logs[j]:
+                    break
+            _epochs.append(epoch)
+            _accs.append(_acc)
+            _emaaccs.append(_emaacc)
+    
+    _max_acc = np.array(_accs).max() if len(_accs) > 0 else -1
+    _max_acc_idx = np.flatnonzero(np.array(_accs)  == _max_acc)
+    _max_emaacc = np.array(_emaaccs).max() if len(_emaaccs) > 0 else -1
+    _max_emaacc_idx = np.flatnonzero(np.array(_emaaccs)  == _max_emaacc)
+
+    _mkidx = np.union1d(_max_acc_idx, _max_emaacc_idx)
+    _final_epoch = max(_epochs)
+    print(f"\033[4;32mmax acc ema: {_max_emaacc}, {[_epochs[i] for i in _max_emaacc_idx]}; max acc: {_max_acc}, {[_epochs[i] for i in _max_acc_idx]}; final ckpt: {_final_epoch}; \033[0m")
+    _ckpts = [f"ckpt_epoch_{e}.pth" for e in set([_final_epoch, *[_epochs[i] for i in _mkidx]]) if e != -1]
+
+    return _ckpts
+
+
+def readlog_mmdetection(logfile):
+    _logs = open(logfile).readlines()
+
+    _coco_bbox_mAPs, _coco_segm_mAPs, _epochs, _keylogs = [], [], [], []
+    for i, _l in enumerate(_logs):
+        if ("Epoch(val)" in _l) and (" eta: 0:" not in _l):
+            epoch = int(_l.split("Epoch(val) [")[1].split("][")[0].strip())
+            _epochs.append(epoch)
+            if "coco/bbox_mAP" in _l:
+                _coco_bbox_mAPs.append(float(_l.split(" coco/bbox_mAP: ")[1].strip().split(" ")[0].strip()))
+            if "coco/segm_mAP" in _l:
+                _coco_segm_mAPs.append(float(_l.split(" coco/segm_mAP: ")[1].strip().split(" ")[0].strip()))
+            _keylogs.append(_l.strip("\n"))
+    
+    _max_coco_bbox_mAP = np.array(_coco_bbox_mAPs).max() if len(_coco_bbox_mAPs) > 0 else -1
+    _max_bbox_idx = np.flatnonzero(_coco_bbox_mAPs == _max_coco_bbox_mAP)
+    _max_coco_segm_mAP = np.array(_coco_segm_mAPs).max() if len(_coco_segm_mAPs) > 0 else -1
+    _max_segm_idx = np.flatnonzero(_coco_segm_mAPs == _max_coco_segm_mAP)
+
+    _mkidx = np.union1d(_max_bbox_idx, _max_segm_idx)
+    _mkepochs = [_epochs[i] for i in _mkidx]
+    _mklogs = [_keylogs[i] for i in _mkidx]
+    _final_epoch = max(_epochs)
+
+    print(f"\033[4;32mbboxmAP: {_max_coco_bbox_mAP}; segmmAP: {_max_coco_segm_mAP}; _mkepochs: {_mkepochs}; final epoch: {_final_epoch}; \033[0m")
+    print(_mklogs, logfile)
+    _ckpts = [f"epoch_{e}.pth" for e in set([_final_epoch, *_mkepochs]) if e != -1]
+
+    return _ckpts
+
+
+def readlog_mmsegmentation(logfile):
+    _logs = open(logfile).readlines()
+
+    _mious, _iters, _keylogs = [], [], []
+    for i, _l in enumerate(_logs):
+        if ("INFO - Iter(val) [" in _l) and (" eta: 0:" not in _l):
+            _iter = None
+            for j in range(i, -1000, -1):
+                if "Saving checkpoint at" in _logs[j]:
+                    _iter = int(_logs[j].split("Saving checkpoint at ")[1].strip().split(" ")[0].strip())
+                    break
+            assert isinstance(_iter, int), "ERROR: can not find iter"
+            _iters.append(_iter)
+            _mious.append(float(_l.split(" mIoU:")[1].strip().split(" ")[0].strip()))
+            _keylogs.append(_l.strip("\n"))
+
+    _max_miou = np.array(_mious).max() if len(_mious) > 0 else -1
+    _max_miou_idx = np.flatnonzero(_mious == _max_miou)
+
+    _mkidx = _max_miou_idx
+    _mkiters = [_iters[i] for i in _mkidx]
+    _mklogs = [_keylogs[i] for i in _mkidx]
+    _final_iter = max(_iters)
+
+    print(f"\033[4;32mmiou: {_max_miou}; _mkiters: {_mkiters}; final iter: {_final_iter}; \033[0m")
+    print(_mklogs, logfile)
+    _ckpts = [f"iter_{e}.pth" for e in set([_final_iter, *_mkiters]) if e != -1]
+
+    return _ckpts
+
+
+def cpclassification(src, name, dstpath="", fake_copy=False, update=False, onlylog=False):
+    dst = os.path.join(dstpath, name)
+    os.makedirs(dst, exist_ok=True)
+    print(f"\033[4;32m{name} =======================================\033[0m")
+
+    for file in ["config.json", "log_rank0.txt"]:
+        if os.path.exists(os.path.join(dst, file)):
+            print(f"WARNING: file [{os.path.join(dst, file)}] exist already")
+            if not update:
+                continue
+        _s = os.path.join(src, file)
+        assert os.path.exists(_s) and os.path.exists(dst) and os.path.isdir(dst)
+        print(f"copy from [{_s}] to [{dst}]")
+        if not fake_copy:
+            shutil.copy(_s, dst)
+
+    _ckpts = readlog_classification(os.path.join(os.path.abspath(dst), "log_rank0.txt"))
+
+    if not onlylog:
+        for file in _ckpts:
+            _s = os.path.join(src, file)
+            assert os.path.exists(_s)
+            if os.path.exists(os.path.join(dst, file)):
+                print(f"WARNING: file [{os.path.join(dst, file)}] exist already")
+            else:
+                assert os.path.exists(dst) and os.path.isdir(dst)
+                print(f"copy from [{_s}] to [{dst}]")
+                if not fake_copy:
+                    shutil.copy(_s, dst)
+
+
+def puremodel(ickptfile=".", opath=".", key="model", convert_key="model", name="vssmtmp"):
+    ckptname = os.path.basename(ickptfile)
+    ilogfile = os.path.join(os.path.dirname(ickptfile), "log_rank0.txt")
+    opath = os.path.join(opath, name)
+    ockptfile = os.path.join(opath, f"{name}_{ckptname}")
+    ologfile = os.path.join(opath, f"{name}.txt")
+    os.makedirs(opath, exist_ok=True)
+    
+    print(f"{name} =======================================")
+    _ckpts = readlog_classification(ilogfile)
+    
+    _ckpt = torch.load(open(ickptfile, "rb"), map_location=torch.device("cpu"))
+    if key not in _ckpt.keys():
+        raise KeyError(f"key {key} not in ckpt.keys: {_ckpt.keys()}")
+    _ockpt = {convert_key: _ckpt[key]}
+    if os.path.exists(ockptfile):
+        print(f"WARNING file {ockptfile} exists.")
+    else:
+        torch.save(_ockpt, open(ockptfile, "wb"))
+        print(f"{ockptfile} saved...")
+
+    assert os.path.exists(ilogfile), f"log file {ilogfile} not found"
+    if os.path.exists(ologfile):
+        print(f"WARNING file {ologfile} exists.")
+    else:
+        shutil.copy(ilogfile, ologfile)
+        print(f"{ologfile} saved...")
+
+
+def puremodelmmdet(ilogfile, opath=".", fake_copy=False, mode="coco"):
+    ilogfile = os.path.abspath(ilogfile)
+    ilogfiledir = os.path.dirname(ilogfile)
+    ipath = os.path.dirname(ilogfiledir)
+    name = os.path.basename(ipath)
+    configfile = os.path.join(ipath, f"{name}.py")
+    assert os.path.exists(configfile), f"can not process directory: {os.listdir(ipath)}"
+    dst = os.path.join(opath, name)
+    ologfile = os.path.join(dst, f"{name}.log")
+    os.makedirs(dst, exist_ok=True)
+    print(f"\033[4;32m{name} =======================================\033[0m")
+
+    for _s in [ilogfiledir, configfile]:
+        _o = os.path.join(dst, os.path.basename(_s))
+        if os.path.exists(_o):
+            print(f"WARNING: file [{_o}] exist already")
+        else:
+            assert os.path.exists(dst) and os.path.isdir(dst)
+            print(f"copy from [{_s}] to [{dst}]")
+            if not fake_copy:
+                shutil.copytree(_s, _o) if os.path.isdir(_s) else shutil.copy(_s, dst)
+
+    assert os.path.exists(ilogfile), f"log file {ilogfile} not found"
+    if os.path.exists(ologfile):
+        print(f"WARNING file {ologfile} exists.")
+    else:
+        shutil.copy(ilogfile, ologfile)
+        print(f"{ologfile} saved...")
+
+    if mode in ["coco"]:
+        _ckpts = readlog_mmdetection(ilogfile)
+    elif mode in ["ade20k"]:
+        _ckpts = readlog_mmsegmentation(ilogfile)
+    
+    for _s in _ckpts:
+        ickptfile = os.path.join(ipath, _s)
+        ockptfile = os.path.join(dst, f"{name}_{_s}")
+        _ckpt = torch.load(open(ickptfile, "rb"), map_location=torch.device("cpu"))
+        _ockpt = {"meta": _ckpt["meta"], "state_dict": _ckpt["state_dict"]}
+        if os.path.exists(ockptfile):
+            print(f"WARNING file {ockptfile} exists.")
+        else:
+            torch.save(_ockpt, open(ockptfile, "wb"))
+            print(f"{ockptfile} saved...")
+
+
 def main_vssm_():
     logpath = os.path.join(os.path.dirname(__file__), "../../logs")
     showpath = os.path.join(os.path.dirname(__file__), "./show/log")
