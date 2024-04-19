@@ -9,6 +9,7 @@ import torch.nn as nn
 from timm.utils import AverageMeter
 from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 
+
 class visualize:
     @staticmethod
     def get_colormap(name):
@@ -20,7 +21,7 @@ class visualize:
             return mpl.cm.get_cmap(name)
 
     @staticmethod
-    def visualize_attnmap(attnmap, savefig="1.jpg", figsize=(18, 16), cmap=None, sticks=True, dpi=400, fontsize=35, linewidth=2, **kwargs):
+    def visualize_attnmap(attnmap, savefig="", figsize=(18, 16), cmap=None, sticks=True, dpi=400, fontsize=35, linewidth=2, **kwargs):
         import matplotlib.pyplot as plt
         if isinstance(attnmap, torch.Tensor):
             attnmap = attnmap.detach().cpu().numpy()
@@ -33,11 +34,14 @@ class visualize:
             ax.set_yticks([])
             ax.set_xticks([])
         cbar = ax.figure.colorbar(im, ax=ax)
-        plt.savefig(savefig)
+        if savefig == "":
+            plt.show()
+        else:
+            plt.savefig(savefig)
         plt.close()
 
     @staticmethod
-    def visualize_attnmaps(attnmaps, savefig="2.jpg", figsize=(18, 16), rows=1, cmap=None, dpi=400, fontsize=35, linewidth=2, **kwargs):
+    def visualize_attnmaps(attnmaps, savefig="", figsize=(18, 16), rows=1, cmap=None, dpi=400, fontsize=35, linewidth=2, **kwargs):
         # attnmaps: [(map, title), (map, title),...]
         import math
         import matplotlib.pyplot as plt
@@ -64,7 +68,10 @@ class visualize:
                 print(title, "max", np.max(image), "min", np.min(image), end=" | ")
             print("")
         axs[0, 0].figure.colorbar(im, ax=axs)
-        plt.savefig(savefig)
+        if savefig == "":
+            plt.show()
+        else:
+            plt.savefig(savefig)
         plt.close()
         print("")
 
@@ -100,7 +107,7 @@ class visualize:
         return ax, mesh
 
     @classmethod
-    def visualize_snsmap(cls, attnmap, savefig="1.jpg", figsize=(18, 16), cmap=None, sticks=True, dpi=80, fontsize=35, linewidth=2, **kwargs):
+    def visualize_snsmap(cls, attnmap, savefig="", figsize=(18, 16), cmap=None, sticks=True, dpi=80, fontsize=35, linewidth=2, **kwargs):
         import matplotlib.pyplot as plt
         if isinstance(attnmap, torch.Tensor):
             attnmap = attnmap.detach().cpu().numpy()
@@ -111,11 +118,14 @@ class visualize:
                 center=0, annot=False, ax=ax, cbar=False, annot_kws={"size": 24}, fmt='.2f')
         cb = ax.figure.colorbar(mesh, ax=ax)
         cb.outline.set_linewidth(0)
-        plt.savefig(savefig)
+        if savefig == "":
+            plt.show()
+        else:
+            plt.savefig(savefig)
         plt.close()
 
     @classmethod
-    def visualize_snsmaps(cls, attnmaps, savefig="2.jpg", figsize=(18, 16), rows=1, cmap=None, sticks=True, dpi=80, fontsize=35, linewidth=2, **kwargs):
+    def visualize_snsmaps(cls, attnmaps, savefig="", figsize=(18, 16), rows=1, cmap=None, sticks=True, dpi=80, fontsize=35, linewidth=2, **kwargs):
         # attnmaps: [(map, title), (map, title),...]
         import math
         import matplotlib.pyplot as plt
@@ -142,7 +152,10 @@ class visualize:
                 axs[i, j].set_title(title)
         cb = axs[0, 0].figure.colorbar(im, ax=axs)
         cb.outline.set_linewidth(0)
-        plt.savefig(savefig)
+        if savefig == "":
+            plt.show()
+        else:
+            plt.savefig(savefig)
         plt.close()
 
 

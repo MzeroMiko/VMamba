@@ -56,6 +56,7 @@ visualize_attnmaps = visualize.visualize_attnmaps
 
 
 def get_dataloader(batch_size=64, root="./val", img_size=224, sequential=True):
+    from torch.utils.data import SequentialSampler, DistributedSampler, DataLoader
     size = int((256 / 224) * img_size)
     transform = transforms.Compose([
         transforms.Resize(size, interpolation=transforms.InterpolationMode.BICUBIC),
@@ -66,11 +67,11 @@ def get_dataloader(batch_size=64, root="./val", img_size=224, sequential=True):
 
     dataset = datasets.ImageFolder(root, transform=transform)
     if sequential:
-        sampler = torch.utils.data.SequentialSampler(dataset)
+        sampler = SequentialSampler(dataset)
     else:
-        sampler = torch.utils.data.DistributedSampler(dataset)
+        sampler = DistributedSampler(dataset)
     
-    data_loader = torch.utils.data.DataLoader(
+    data_loader = DataLoader(
         dataset, sampler=sampler,
         batch_size=batch_size,
         shuffle=False,
@@ -240,13 +241,12 @@ def main():
         ssm_dt_rank="auto",
         ssm_conv=3,
         ssm_conv_bias=False,
-        forward_type="v3noz",
+        forward_type="v05_noz",
         mlp_ratio=4.0,
         # norm_layer="ln2d",
         downsample_version="v3",
         patchembed_version="v2",
     ).cuda().eval()
-    # vssm.load_state_dict(torch.load(open("/home/LiuYue/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230/vssm1_tiny_0230_ckpt_epoch_262.pth", "rb"), map_location="cpu")["model"])
     vssm.load_state_dict(convert_state_dict(torch.load(open("/home/LiuYue/Workspace/PylanceAware/ckpts/publish/vssm1/detection/mask_rcnn_vssm_fpn_coco_tiny/mask_rcnn_vssm_fpn_coco_tiny_epoch_12.pth", "rb"), map_location="cpu")["state_dict"]), strict=False)
     vssm, ss2ds = add_hook(vssm)
     showpath = os.path.join(this_path, "show")
