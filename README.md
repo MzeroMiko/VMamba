@@ -244,7 +244,7 @@ For more information about detection and segmentation tasks, please refer to the
 
 ### Analysis Tools
 
-VMamba includes tools for visualizing mamba "attention" and effective receptive field. Use the following commands to perform analysis:
+VMamba includes tools for visualizing mamba "attention" and effective receptive field, analysing throughput and train-throughput. Use the following commands to perform analysis:
 
 ```bash
 # Visualize Mamba "Attention"
@@ -253,7 +253,11 @@ CUDA_VISIBLE_DEVICES=0 python analyze/attnmap.py
 # Analyze the effective receptive field
 CUDA_VISIBLE_DEVICES=0 python analyze/erf.py
 
+# Analyze the throughput and train throughput
+CUDA_VISIBLE_DEVICES=0 python analyze/tp.py
+
 ```
+
 
 ## Star History
 
