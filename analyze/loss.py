@@ -624,6 +624,7 @@ def main_vssm1():
         # tiacv1_65 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_65/log_rank0.txt",
         tiahv3 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_acv1_68/log_rank0.txt",
         tiahv1 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_ahv1/log_rank0.txt",
+        tiahv3_0418 = f"/home/LiuYue/Workspace/PylanceAware/ckpts/private/classification/vssm1/vssm_tiny_ahv3_0418/log_rank0.txt",
     )
     
     for name, file in files.items():

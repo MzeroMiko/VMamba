@@ -1,7 +1,7 @@
 MODEL:
   TYPE: vssm
-  NAME: vssm_tiny_ahv3_0418
-  DROP_PATH_RATE: 0.25
+  NAME: vssm_tiny_ahv3_0420
+  DROP_PATH_RATE: 0.15
   VSSM:
     EMBED_DIM: 96
     DEPTHS: [ 2, 2, 8, 2 ]
