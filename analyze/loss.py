@@ -176,8 +176,6 @@ def draw_fig(data: list, xlim=(0, 301), ylim=(68, 84), xstep=None,ystep=None, sa
     plot.savefig(save_path)
 
 
-# =====================================
-
 def main_vssm_():
     logpath = os.path.join(os.path.dirname(__file__), "../../logs")
     showpath = os.path.join(os.path.dirname(__file__), "./show/log")
@@ -329,141 +327,6 @@ def main_vssm_():
         ], xlim=(10, 300), ylim=(2,5), save_path=f"{showpath}/loss_vssmd.jpg")
 
 
-def main_heat_():
-    logpath = os.path.join(os.path.dirname(__file__), "../../logs")
-    showpath = os.path.join(os.path.dirname(__file__), "./show/log")
-    
-    # baseline ===
-    swin_tiny = f"{logpath}/swin_tiny_224_b16x64_300e_imagenet_20210616_090925.json"
-    swin_small = f"{logpath}/swin_small_224_b16x64_300e_imagenet_20210615_110219.json"
-    swin_base = f"{logpath}/swin_base_224_b16x64_300e_imagenet_20210616_190742.json"
-    convnext_baseline = f"{logpath}/convnext_modelarts-job-68076d57-44e0-4fa8-afac-cea5b1ef12f2-worker-0.log"
-
-    heat_mini = "/home/LiuYue/Workspace/Visualize/output/heat_mini/rank0.log"
-    heat_tiny = "/home/LiuYue/Workspace/Visualize/output/heat_tiny/default/log_rank0.txt"
-    heat_base = "/home/LiuYue/Workspace/Visualize/output/heat_base/rank0.log"
-
-    # =====================================================================
-    x, accs, emaaccs = get_acc_mmpretrain(swin_tiny)
-    lx, losses, avglosses = get_loss_mmpretrain(swin_tiny)
-    swin_tiny = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
-
-    x, accs, emaaccs = get_acc_mmpretrain(swin_small)
-    lx, losses, avglosses = get_loss_mmpretrain(swin_small)
-    swin_small = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
-
-    x, accs, emaaccs = get_acc_mmpretrain(swin_base)
-    lx, losses, avglosses = get_loss_mmpretrain(swin_base)
-    swin_base = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
-
-    x, accs, emaaccs = get_acc_convnext(convnext_baseline)
-    lx, losses, avglosses = get_loss_convnext(convnext_baseline)
-    convnext_baseline = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
-
-    x, accs, emaaccs = get_acc_swin(heat_mini, split_ema=True)
-    lx, losses, avglosses = get_loss_swin(heat_mini, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
-    heat_mini = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
-
-    x, accs, emaaccs = get_acc_swin(heat_tiny, split_ema=True)
-    lx, losses, avglosses = get_loss_swin(heat_tiny, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
-    heat_tiny = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
-
-    x, accs, emaaccs = get_acc_swin(heat_base, split_ema=True)
-    lx, losses, avglosses = get_loss_swin(heat_base, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
-    heat_base = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
-
-    if True:
-        draw_fig(data=[
-            dict(x=swin_tiny['xaxis'], y=swin_tiny['accs']['acc1'], label="swin_tiny"),
-            dict(x=swin_small['xaxis'], y=swin_small['accs']['acc1'], label="swin_small"),
-            dict(x=swin_base['xaxis'], y=swin_base['accs']['acc1'], label="swin_base"),
-            dict(x=heat_mini['xaxis'], y=heat_mini['accs']['acc1'], label="heat_mini"),
-            dict(x=heat_tiny['xaxis'], y=heat_tiny['accs']['acc1'], label="heat_tiny"),
-            dict(x=heat_base['xaxis'], y=heat_base['accs']['acc1'], label="heat_base"),
-            # ======================================================================
-            dict(x=heat_mini['xaxis'], y=heat_mini['emaaccs']['acc1'], label="heat_mini_ema"),
-            dict(x=heat_tiny['xaxis'], y=heat_tiny['emaaccs']['acc1'], label="heat_tiny_ema"),
-            dict(x=heat_base['xaxis'], y=heat_base['emaaccs']['acc1'], label="heat_base_ema"),
-            # ======================================================================
-        ], xlim=(30, 300), ylim=(60, 80), xstep=5, ystep=0.5, save_path=f"{showpath}/acc_heat.jpg")
-
-    if True:
-        draw_fig(data=[
-            dict(x=swin_tiny['loss_xaxis'], y=swin_tiny['avglosses'], label="swin_tiny"),
-            dict(x=swin_small['loss_xaxis'], y=swin_small['avglosses'], label="swin_small"),
-            dict(x=swin_base['loss_xaxis'], y=swin_base['avglosses'], label="swin_base"),
-            # ======================================================================
-            dict(x=heat_mini['loss_xaxis'], y=heat_mini['avglosses'], label="heat_mini"),
-            dict(x=heat_tiny['loss_xaxis'], y=heat_tiny['avglosses'], label="heat_tiny"),
-            dict(x=heat_base['loss_xaxis'], y=heat_base['avglosses'], label="heat_base"),
-            # ======================================================================
-        ], xlim=(10, 300), ylim=(2,5), save_path=f"{showpath}/loss_heat.jpg")
-
-
-def main_heatwzz():
-    logpath = os.path.join(os.path.dirname(__file__), "../../logs")
-    showpath = os.path.join(os.path.dirname(__file__), "./show/log")
-    
-    # baseline ===
-    swin_tiny = f"{logpath}/swin_tiny_224_b16x64_300e_imagenet_20210616_090925.json"
-    swin_small = f"{logpath}/swin_small_224_b16x64_300e_imagenet_20210615_110219.json"
-    swin_base = f"{logpath}/swin_base_224_b16x64_300e_imagenet_20210616_190742.json"
-    convnext_baseline = f"{logpath}/convnext_modelarts-job-68076d57-44e0-4fa8-afac-cea5b1ef12f2-worker-0.log"
-
-    heat_base_d005 = "/home/LiuYue/Workspace/Visualize/output/wzz/vit_heat_noshift_base_224_14layers_clipgrad5.0.txt"
-    heat_base_d01 = "/home/LiuYue/Workspace/Visualize/output/wzz/vit_heat_noshift_base_224_14layers_dp0.1.txt"
-
-    # =====================================================================
-    x, accs, emaaccs = get_acc_mmpretrain(swin_tiny)
-    lx, losses, avglosses = get_loss_mmpretrain(swin_tiny)
-    swin_tiny = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
-
-    x, accs, emaaccs = get_acc_mmpretrain(swin_small)
-    lx, losses, avglosses = get_loss_mmpretrain(swin_small)
-    swin_small = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
-
-    x, accs, emaaccs = get_acc_mmpretrain(swin_base)
-    lx, losses, avglosses = get_loss_mmpretrain(swin_base)
-    swin_base = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
-
-    x, accs, emaaccs = get_acc_convnext(convnext_baseline)
-    lx, losses, avglosses = get_loss_convnext(convnext_baseline)
-    convnext_baseline = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
-
-    x, accs, emaaccs = get_acc_swin(heat_base_d005, split_ema=False)
-    lx, losses, avglosses = get_loss_swin(heat_base_d005, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
-    heat_base_d005 = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
-
-    x, accs, emaaccs = get_acc_swin(heat_base_d01, split_ema=False)
-    lx, losses, avglosses = get_loss_swin(heat_base_d01, x1e=torch.tensor(list(range(0, 1251, 10))).view(1, -1) / 1251, scale=1)
-    heat_base_d01 = dict(xaxis=x, accs=accs, emaaccs=emaaccs, loss_xaxis=lx, losses=losses, avglosses=avglosses)
-
-    fit_heatbase = linefit(heat_base_d005['xaxis'], heat_base_d005['accs']['acc1'], fit_range=[100, 300], out_range=[60, 300])
-
-    if True:
-        draw_fig(data=[
-            dict(x=swin_tiny['xaxis'], y=swin_tiny['accs']['acc1'], label="swin_tiny"),
-            dict(x=swin_small['xaxis'], y=swin_small['accs']['acc1'], label="swin_small"),
-            dict(x=swin_base['xaxis'], y=swin_base['accs']['acc1'], label="swin_base"),
-            dict(x=heat_base_d005['xaxis'], y=heat_base_d005['accs']['acc1'], label="heat_base_d005"),
-            dict(x=heat_base_d01['xaxis'], y=heat_base_d01['accs']['acc1'], label="heat_base_d01"),
-            dict(x=fit_heatbase[0], y=fit_heatbase[1], label="fit_heatbase"),
-            # ======================================================================
-        ], xlim=(30, 300), ylim=(60, 85), xstep=5, ystep=0.5, save_path=f"{showpath}/acc_heatwzz.jpg")
-
-    if True:
-        draw_fig(data=[
-            dict(x=swin_tiny['loss_xaxis'], y=swin_tiny['avglosses'], label="swin_tiny"),
-            dict(x=swin_small['loss_xaxis'], y=swin_small['avglosses'], label="swin_small"),
-            dict(x=swin_base['loss_xaxis'], y=swin_base['avglosses'], label="swin_base"),
-            # ======================================================================
-            dict(x=heat_base_d005['loss_xaxis'], y=heat_base_d005['avglosses'], label="heat_base_d005"),
-            dict(x=heat_base_d01['loss_xaxis'], y=heat_base_d01['avglosses'], label="heat_base_d01"),
-            # ======================================================================
-        ], xlim=(10, 300), ylim=(2,5), save_path=f"{showpath}/loss_heatwzz.jpg")
-
-
-# =====================================
 def main_vssm():
     results = {}
     showpath = os.path.join(os.path.dirname(__file__), "./show/vssm1tifig")
@@ -488,6 +351,5 @@ def main_vssm():
 
 
 if __name__ == "__main__":
-    ...
     main_vssm()
     
