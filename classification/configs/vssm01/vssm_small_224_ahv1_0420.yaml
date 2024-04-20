@@ -1,6 +1,6 @@
 MODEL:
   TYPE: vssm
-  NAME: vssm_small_ahv1
+  NAME: vssm_small_ahv1_0420
   DROP_PATH_RATE: 0.25
   VSSM:
     EMBED_DIM: 96
