@@ -7,6 +7,7 @@ from torch import Tensor
 from torch.nn.modules import Module
 from functools import partial
 from typing import Callable, Tuple, Union, Tuple, Union, Any
+from collections import defaultdict
 
 HOME = os.environ["HOME"].rstrip("/")
 
@@ -46,6 +47,7 @@ supported_ops={
     "prim::PythonOp.SelectiveScanCore": selective_scan_flop_jit, # latter
     "prim::PythonOp.SelectiveScan": selective_scan_flop_jit, # latter
 }
+
 
 def mmengine_flop_count(model: nn.Module = None, input_shape = (3, 224, 224), show_table=False, show_arch=False, _get_model_complexity_info=False):
     from mmengine.analysis.print_helper import is_tuple_of, FlopAnalyzer, ActivationAnalyzer, parameter_count, _format_size, complexity_stats_table, complexity_stats_str
@@ -213,6 +215,33 @@ def fvcore_flop_count(model: nn.Module, inputs=None, input_shape=(3, 224, 224), 
     return params, flops
 
 
+def check_operations(model: nn.Module, inputs=None, input_shape=(3, 224, 224)):
+    from fvcore.nn.jit_analysis import _get_scoped_trace_graph, _named_modules_with_dup, Counter, JitModelAnalysis
+    
+    if inputs is None:
+        assert input_shape is not None
+        if len(input_shape) == 1:
+            input_shape = (1, 3, input_shape[0], input_shape[0])
+        elif len(input_shape) == 2:
+            input_shape = (1, 3, *input_shape)
+        elif len(input_shape) == 3:
+            input_shape = (1, *input_shape)
+        else:
+            assert len(input_shape) == 4
+
+        inputs = (torch.randn(input_shape).to(next(model.parameters()).device),)
+
+
+    model.eval()
+
+    flop_counter = JitModelAnalysis(model, inputs)
+    flop_counter._ignored_ops = set()
+    flop_counter._op_handles = dict()
+    assert flop_counter.total() == 0 # make sure no operations supported
+    print(flop_counter.unsupported_ops(), flush=True)
+    print(f"supported ops {flop_counter._op_handles}; ignore ops {flop_counter._ignored_ops};", flush=True)
+
+
 def check_mmengine_equals_fvcore():
     model = VSSM().cuda()
     mmengine_flop_count(model)
@@ -319,7 +348,7 @@ def main0():
     # vssm taav1: install selective_scan
     if "vssmaav1" in modes:
         print("vssm taav1 ================================", flush=True)
-        taav1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
+        taav1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
         for size in [224, 384, 512, 640, 768, 1024]:
             _count(taav1, size)
     
@@ -403,9 +432,16 @@ def main0():
         sys.path = sys.path[1:]
 
 
+def main_check_ops():
+    _model = import_abspy("vmamba", f"{os.path.dirname(__file__)}/../classification/models")
+    taav1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
+    check_operations(taav1().cuda())    
+
     
 if __name__ == '__main__':
     # check_mmengine_equals_fvcore()
+    # main_check_ops()
+    # breakpoint()
     main0()
     breakpoint()
     if False:
