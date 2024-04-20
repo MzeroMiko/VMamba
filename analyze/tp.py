@@ -13,7 +13,7 @@ from fvcore.nn import FlopCountAnalysis, flop_count_str, flop_count, parameter_c
 
 HOME = os.environ["HOME"].rstrip("/")
 
-# this mode will greatly inference the speed!
+# this mode will greatly influence the speed!
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True
 torch.backends.cudnn.deterministic = True
