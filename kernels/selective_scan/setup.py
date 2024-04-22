@@ -48,21 +48,23 @@ def get_ext():
 
     # Check, if CUDA11 is installed for compute capability 8.0
     multi_threads = True
+    gencode_sm90 = False
     if CUDA_HOME is not None:
         _, bare_metal_version = get_cuda_bare_metal_version(CUDA_HOME)
         print("CUDA version: ", bare_metal_version, flush=True)
+        if bare_metal_version >= Version("11.8"):
+            gencode_sm90 = True
         if bare_metal_version < Version("11.6"):
             warnings.warn("CUDA version ealier than 11.6 may leads to performance mismatch.")
         if bare_metal_version < Version("11.2"):
             multi_threads = False
             
-    cc_flag.append("-gencode")
-    cc_flag.append("arch=compute_70,code=sm_70")
-    cc_flag.append("-gencode")
-    cc_flag.append("arch=compute_80,code=sm_80")
-    if (CUDA_HOME is not None) and (bare_metal_version >= Version("11.8")):
-        cc_flag.append("-gencode")
-        cc_flag.append("arch=compute_90,code=sm_90")
+    cc_flag.extend(["-gencode", "arch=compute_70,code=sm_70"])
+    cc_flag.extend(["-gencode", "arch=compute_80,code=sm_80"])
+    if gencode_sm90:
+        cc_flag.extend(["-gencode", "arch=compute_90,code=sm_90"])
+    if multi_threads:
+        cc_flag.extend(["--threads", "4"])
 
     # HACK: The compiler flag -D_GLIBCXX_USE_CXX11_ABI is set to be the same as
     # torch._C._GLIBCXX_USE_CXX11_ABI
@@ -128,7 +130,6 @@ def get_ext():
                             "-lineinfo",
                         ]
                         + cc_flag
-                        + (["--threads", "4"] if multi_threads else []),
             },
             include_dirs=[Path(this_dir) / "csrc" / "selective_scan"],
         )
