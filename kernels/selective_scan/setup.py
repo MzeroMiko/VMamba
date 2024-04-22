@@ -47,14 +47,14 @@ def get_ext():
     print("\n\nCUDA_HOME = {}\n\n".format(CUDA_HOME))
 
     # Check, if CUDA11 is installed for compute capability 8.0
+    multi_threads = True
     if CUDA_HOME is not None:
         _, bare_metal_version = get_cuda_bare_metal_version(CUDA_HOME)
-        # if bare_metal_version < Version("11.6"):
-        #     raise RuntimeError(
-        #         f"package is only supported on CUDA 11.6 and above.  "
-        #         "Note: make sure nvcc has a supported version by running nvcc -V."
-        #     )
-
+        if bare_metal_version < Version("11.6"):
+            warnings.warn("CUDA version ealier than 11.6 may leads to performance mismatch.")
+        if bare_metal_version < Version("11.2"):
+            multi_threads = False
+            
     cc_flag.append("-gencode")
     cc_flag.append("arch=compute_70,code=sm_70")
     cc_flag.append("-gencode")
@@ -127,7 +127,7 @@ def get_ext():
                             "-lineinfo",
                         ]
                         + cc_flag
-                        + ["--threads", "4"],
+                        + (["--threads", "4"] if multi_threads else []),
             },
             include_dirs=[Path(this_dir) / "csrc" / "selective_scan"],
         )
