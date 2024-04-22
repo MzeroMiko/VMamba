@@ -50,6 +50,7 @@ def get_ext():
     multi_threads = True
     if CUDA_HOME is not None:
         _, bare_metal_version = get_cuda_bare_metal_version(CUDA_HOME)
+        print("CUDA version: ", bare_metal_version, flush=True)
         if bare_metal_version < Version("11.6"):
             warnings.warn("CUDA version ealier than 11.6 may leads to performance mismatch.")
         if bare_metal_version < Version("11.2"):
