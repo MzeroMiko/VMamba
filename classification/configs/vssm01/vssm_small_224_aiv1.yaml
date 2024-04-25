@@ -10,7 +10,7 @@ MODEL:
     SSM_RATIO: 1.0
     SSM_CONV: -1
     SSM_CONV_BIAS: false
-    SSM_FORWARDTYPE: "xv1a_ondwconv3"
+    SSM_FORWARDTYPE: "xv1a_oncnorm"
     MLP_RATIO: 4.0
     DOWNSAMPLE: "v3"
     PATCHEMBED: "v2"
