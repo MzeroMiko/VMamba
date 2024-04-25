@@ -1,7 +1,7 @@
 MODEL:
   TYPE: vssm
-  NAME: vssm_base_aiv1
-  DROP_PATH_RATE: 0.5
+  NAME: vssm_base_aiv1_dp06
+  DROP_PATH_RATE: 0.6
   VSSM:
     EMBED_DIM: 128
     DEPTHS: [ 2, 2, 20, 2 ]
