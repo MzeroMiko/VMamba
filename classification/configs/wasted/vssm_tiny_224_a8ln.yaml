@@ -1,6 +1,6 @@
 MODEL:
   TYPE: vssm
-  NAME: vssm_tiny_a8
+  NAME: vssm_tiny_a8ln
   DROP_PATH_RATE: 0.2
   VSSM:
     EMBED_DIM: 96
@@ -13,4 +13,4 @@ MODEL:
     MLP_RATIO: 4.0
     DOWNSAMPLE: "v3"
     PATCHEMBED: "v2"
-    NORM_LAYER: "ln2d"
+    NORM_LAYER: "ln"
