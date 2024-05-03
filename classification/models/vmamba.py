@@ -1132,6 +1132,9 @@ class VSSM(nn.Module):
         downsample_version: str = "v2", # "v1", "v2", "v3"
         patchembed_version: str = "v1", # "v1", "v2"
         use_checkpoint=False,  
+        # =========================
+        posembed=False,
+        imgsize=224,
         **kwargs,
     ):
         super().__init__()
@@ -1160,6 +1163,8 @@ class VSSM(nn.Module):
         norm_layer: nn.Module = _NORMLAYERS.get(norm_layer.lower(), None)
         ssm_act_layer: nn.Module = _ACTLAYERS.get(ssm_act_layer.lower(), None)
         mlp_act_layer: nn.Module = _ACTLAYERS.get(mlp_act_layer.lower(), None)
+
+        self.pos_embed = self._pos_embed(dims[0], patch_size, imgsize) if posembed else None
 
         _make_patch_embed = dict(
             v1=self._make_patch_embed, 
@@ -1217,6 +1222,13 @@ class VSSM(nn.Module):
 
         self.apply(self._init_weights)
 
+    @staticmethod
+    def _pos_embed(embed_dims, patch_size, img_size):
+        patch_height, patch_width = (img_size // patch_size, img_size // patch_size)
+        pos_embed = nn.Parameter(torch.zeros(1, embed_dims, patch_height, patch_width))
+        trunc_normal_(pos_embed, std=0.02)
+        return pos_embed
+
     def _init_weights(self, m: nn.Module):
         if isinstance(m, nn.Linear):
             trunc_normal_(m.weight, std=.02)
@@ -1227,14 +1239,14 @@ class VSSM(nn.Module):
             nn.init.constant_(m.weight, 1.0)
 
     # used in building optimizer
-    # @torch.jit.ignore
-    # def no_weight_decay(self):
-    #     return {}
+    @torch.jit.ignore
+    def no_weight_decay(self):
+        return {"pos_embed"}
 
     # used in building optimizer
-    # @torch.jit.ignore
-    # def no_weight_decay_keywords(self):
-    #     return {}
+    @torch.jit.ignore
+    def no_weight_decay_keywords(self):
+        return {}
 
     @staticmethod
     def _make_patch_embed(in_chans=3, embed_dim=96, patch_size=4, patch_norm=True, norm_layer=nn.LayerNorm, channel_first=False):
@@ -1339,6 +1351,9 @@ class VSSM(nn.Module):
 
     def forward(self, x: torch.Tensor):
         x = self.patch_embed(x)
+        if self.pos_embed is not None:
+            pos_embed = self.pos_embed.permute(0, 2, 3, 1) if not self.channel_first else self.pos_embed
+            x = x + pos_embed
         for layer in self.layers:
             x = layer(x)
         x = self.classifier(x)
@@ -1396,6 +1411,10 @@ class VSSM(nn.Module):
                         new_k = prefix + dst + k[len(key):]
                         state_dict[new_k] = state_dict[k]
                         state_dict.pop(k)
+
+        if check_name("pos_embed", strict=True):
+            srcEmb: torch.Tensor = state_dict[prefix + "pos_embed"]
+            state_dict[prefix + "pos_embed"] = F.interpolate(srcEmb.float(), size=self.pos_embed.shape[2:4], align_corners=False, mode="bicubic").to(srcEmb.device)
 
         change_name("patch_embed.proj", "patch_embed.0")
         change_name("patch_embed.norm", "patch_embed.2")

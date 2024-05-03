@@ -295,31 +295,86 @@ def main01():
 
     _model = import_abspy("vmamba", f"{os.path.dirname(__file__)}/../classification/models")
     
-    # new test
     if True:
         t0230v1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") #4.8577420799999995 Params:  30705832 1269
-        s0230v1 = partial(_model.VSSM, dims=96, depths=[2,2,15,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") #GFlops:  8.71577472 Params:  50147752 826
-        b0230v1 = partial(_model.VSSM, dims=128, depths=[2,2,15,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") #GFlops:  15.358944256000001 Params:  88557800 606
         tv2v2 = partial(_model.VSSM, dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")  # GFlops:  4.905609984 Params:  30249064  1603
+        s0230v1 = partial(_model.VSSM, dims=96, depths=[2,2,15,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") #GFlops:  8.71577472 Params:  50147752 826
         sv2v2 = partial(_model.VSSM, dims=96, depths=[2,2,20,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  8.612211455999999 Params:  49012840  1049
+        b0230v1 = partial(_model.VSSM, dims=128, depths=[2,2,15,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") #GFlops:  15.358944256000001 Params:  88557800 606
         bv2v2 = partial(_model.VSSM, dims=128, depths=[2,2,20,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  15.220859904 Params:  86614504 774
+
+        if False:
+            print("vmamba test ================================", flush=True)
+            for config in [
+                t0230v1, s0230v1, b0230v1, 
+                tv2v2, sv2v2, bv2v2, 
+            ]:
+                testall(config(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True, inference_only=True)
+
+    if False:
+        abt_sratio_2_5 = t0230v1
+        abt_sratio_15_5 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.5, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  4.418350848 Params:  28131976 1485
+        abt_sratio_1_5 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  3.978959616 Params:  25558120 1857
+        abt_sratio_1_8 = tv2v2
         
+        print("vmamba test ================================", flush=True)
+        for config in [
+            abt_sratio_2_5, abt_sratio_15_5, abt_sratio_1_5, abt_sratio_1_8,
+        ]:
+            testall(config(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True, inference_only=True)
+
+    if False:
         abt_dstate_1 = t0230v1
-        abt_dstate_2 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=2, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  4.976960255999999 Params:  30802600 1205
-        abt_dstate_4 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=4, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  5.215396607999999 Params:  30996136 1084
-        abt_dstate_8 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=8, ssm_dt_rank="auto", ssm_ratio=1.5, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  5.044246272 Params:  28640008 1084
+        abt_dstate_2 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=2, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  4.976960255999999 Params:  30802600 1198
+        abt_dstate_4 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=4, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  5.215396607999999 Params:  30996136 1081
+        abt_dstate_8 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=8, ssm_dt_rank="auto", ssm_ratio=1.5, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  5.044246272 Params:  28640008 1079
         abt_dstate_16 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  4.8730959359999995 Params:  26283880 1094
+        print("vmamba test ================================", flush=True)
+        for config in [
+            abt_dstate_1, abt_dstate_2, abt_dstate_4, 
+            abt_dstate_8, abt_dstate_16,
+        ]:
+            testall(config(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True, inference_only=True)
+
+    if False:
+        abt_mratio_4_8 = tv2v2 # GFlops:  4.905609984 Params:  30249064  1603
+        abt_mratio_3_8 = partial(_model.VSSM, dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.5, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=3.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  4.6511423999999995 Params:  28485640 1340
+        abt_mratio_2_8 = partial(_model.VSSM, dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.5, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=2.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  4.9514457599999995 Params:  2986688 1015
 
         print("vmamba test ================================", flush=True)
         for config in [
-            # t0230v1, s0230v1, b0230v1, 
-            # tv2v2, sv2v2, bv2v2, 
-            # abt_dstate_1, abt_dstate_2, abt_dstate_4, 
-            abt_dstate_8, abt_dstate_16,
-
+            abt_mratio_4_8, abt_mratio_3_8, abt_mratio_2_8
         ]:
             testall(config(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True, inference_only=True)
-        breakpoint()
+
+    if False:
+        abt_csm = tv2v2
+        abt_ab1d = partial(_model.VSSM, dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v051d_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  4.905609984 Params:  30249064 1601
+        abt_ab2d = partial(_model.VSSM, dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v052d_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  4.905609984 Params:  30249064 1600
+        abt_ab2dc = partial(_model.VSSM, dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v052dc_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  4.905609984 Params:  30249064 1059
+
+        print("vmamba test ================================", flush=True)
+        for config in [
+            abt_csm, abt_ab1d, abt_ab2d, abt_ab2dc
+        ]:
+            testall(config(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True, inference_only=True)
+
+    if True:
+        abt_cv_3_false = tv2v2
+        abt_cv_3_true = partial(_model.VSSM, dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=3, ssm_conv_bias=True, forward_type="v051d_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  4.905609984 Params:  30254248 1574
+        abt_cv_none = partial(_model.VSSM, dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=-1, ssm_conv_bias=True, forward_type="v051d_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  4.891385088 Params:  30202408 1615
+        abt_cv_pos = partial(_model.VSSM, dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=-1, ssm_conv_bias=True, forward_type="v051d_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d",  posembed=True) # GFlops:  4.891385088 Params:  30503464 1605
+
+        print("vmamba test ================================", flush=True)
+        for config in [
+            abt_cv_3_false, abt_cv_3_true, abt_cv_none, abt_cv_pos
+        ]:
+            testall(config(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True, inference_only=True)
+       
+    breakpoint()
+
+    if True:
+        ...
 
     if False:
         tv0 = partial(_model.VSSM, dims=96, depths=[2,2,9,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v0", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1")

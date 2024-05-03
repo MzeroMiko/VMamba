@@ -48,6 +48,9 @@ def build_vssm_model(config, is_pretrain=False):
             patchembed_version=config.MODEL.VSSM.PATCHEMBED,
             gmlp=config.MODEL.VSSM.GMLP,
             use_checkpoint=config.TRAIN.USE_CHECKPOINT,
+            # ===================
+            posembed=config.MODEL.VSSM.POSEMBED,
+            imgsize=config.DATA.IMG_SIZE,
         )
         return model
 
