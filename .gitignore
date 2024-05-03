@@ -21,6 +21,7 @@ analyze/show
 cross_selective_scan
 classification/models/pscan.py
 classification/configs/heat
+classification/configs/vssmab
 classification/models/heat
 classification/models/heat.py
 classification/models/vim.py
