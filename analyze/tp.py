@@ -359,7 +359,7 @@ def main01():
         ]:
             testall(config(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True, inference_only=True)
 
-    if True:
+    if False:
         abt_cv_3_false = tv2v2
         abt_cv_3_true = partial(_model.VSSM, dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=3, ssm_conv_bias=True, forward_type="v051d_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  4.905609984 Params:  30254248 1574
         abt_cv_none = partial(_model.VSSM, dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=-1, ssm_conv_bias=True, forward_type="v051d_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  4.891385088 Params:  30202408 1615
@@ -370,7 +370,20 @@ def main01():
             abt_cv_3_false, abt_cv_3_true, abt_cv_none, abt_cv_pos
         ]:
             testall(config(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True, inference_only=True)
+
+    if True:
+        abt_onorm_ln = tv2v2
+        abt_onrom_softmax = partial(_model.VSSM, dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=3, ssm_conv_bias=True, forward_type="v051d_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  4.905609984 Params:  30254248 1574
+        abt_onorm_dwconv = partial(_model.VSSM, dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=-1, ssm_conv_bias=True, forward_type="v051d_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  4.891385088 Params:  30202408 1615
+        abt_onorm_oncn = partial(_model.VSSM, dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=-1, ssm_conv_bias=True, forward_type="v051d_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d",  posembed=True) # GFlops:  4.891385088 Params:  30503464 1605
+
+        print("vmamba test ================================", flush=True)
+        for config in [
+            abt_cv_3_false, abt_cv_3_true, abt_cv_none, abt_cv_pos
+        ]:
+            testall(config(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True, inference_only=True)
        
+
     breakpoint()
 
     if True:

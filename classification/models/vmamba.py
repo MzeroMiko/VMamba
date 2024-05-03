@@ -408,6 +408,7 @@ class SS2Dv2:
         self.channel_first = channel_first
         self.with_dconv = d_conv > 1
         Linear = Linear2d if channel_first else nn.Linear
+        LayerNorm = LayerNorm2d if channel_first else nn.LayerNorm
         self.forward = self.forwardv2
 
         # tags for forward_type ==============================
@@ -423,11 +424,19 @@ class SS2Dv2:
         self.disable_z_act, forward_type = checkpostfix("_nozact", forward_type)
         out_norm_none, forward_type = checkpostfix("_onnone", forward_type)
         out_norm_dwconv3, forward_type = checkpostfix("_ondwconv3", forward_type)
+        out_norm_cnorm, forward_type = checkpostfix("_oncnorm", forward_type)
         out_norm_softmax, forward_type = checkpostfix("_onsoftmax", forward_type)
         out_norm_sigmoid, forward_type = checkpostfix("_onsigmoid", forward_type)
 
         if out_norm_none:
             self.out_norm = nn.Identity()
+        elif out_norm_cnorm:
+            self.out_norm = nn.Sequential(
+                LayerNorm(d_inner),
+                (nn.Identity() if channel_first else Permute(0, 3, 1, 2)),
+                nn.Conv2d(d_inner, d_inner, kernel_size=3, padding=1, groups=d_inner, bias=False),
+                (nn.Identity() if channel_first else Permute(0, 2, 3, 1)),
+            )
         elif out_norm_dwconv3:
             self.out_norm = nn.Sequential(
                 (nn.Identity() if channel_first else Permute(0, 3, 1, 2)),
@@ -439,7 +448,6 @@ class SS2Dv2:
         elif out_norm_sigmoid:
             self.out_norm = nn.Sigmoid()
         else:
-            LayerNorm = LayerNorm2d if channel_first else nn.LayerNorm
             self.out_norm = LayerNorm(d_inner)
 
         # forward_type debug =======================================
