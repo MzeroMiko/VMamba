@@ -12,6 +12,7 @@ from torchvision.models.vision_transformer import EncoderBlock
 from fvcore.nn import FlopCountAnalysis, flop_count_str, flop_count, parameter_count
 
 HOME = os.environ["HOME"].rstrip("/")
+basicpath = os.path.abspath("../VMamba/analyze").rstrip("/")
 
 # this mode will greatly influence the speed!
 torch.backends.cudnn.enabled = True
@@ -28,7 +29,6 @@ def import_abspy(name="models", path="classification/"):
     module = importlib.import_module(name)
     sys.path.pop(0)
     return module
-
 
 
 def get_dataloader(batch_size=64, root="./val", img_size=224, sequential=True):
@@ -160,10 +160,12 @@ def testall(model, dataloader, data_path, img_size=224, _batch_size=128, with_fl
             batch_size = batch_size // 2
             print(f"batch_size {batch_size}", flush=True)
 
+
 def get_variable_name(variable, loc=locals()):
     for k,v in loc.items():
         if loc[k] is variable:
             return k
+
 
 def main0():
     parser = argparse.ArgumentParser()
@@ -191,16 +193,16 @@ def main0():
         sys.path.insert(0, specpath)
         import timm; assert timm.__version__ == "0.5.4"
         import structured_kernels
-        model = import_abspy("vit_all", os.path.join(os.path.dirname(__file__), "./convnexts4nd"))
+        model = import_abspy("vit_all", f"{basicpath}/convnexts4nd")
         testall(model.vit_base_s4nd(), dataloader, args.data_path, args.size, args.batch_size)
-        model = import_abspy("convnext_timm", os.path.join(os.path.dirname(__file__), "./convnexts4nd"))
+        model = import_abspy("convnext_timm", f"{basicpath}/convnexts4nd")
         testall(model.convnext_tiny_s4nd(), dataloader, args.data_path, args.size, args.batch_size)
         sys.path = sys.path[1:]
 
     # vim: install mamba_ssm
     if "vim" in modes:
         print("vim ================================", flush=True)
-        specpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{HOME}/OTHERS/Vim/mamba-1p1p1")
+        specpath = f"{HOME}/OTHERS/Vim/mamba-1p1p1"
         sys.path.insert(0, specpath)
         import mamba_ssm
         model = import_abspy("models_mamba", f"{HOME}/OTHERS/Vim/vim")
@@ -209,7 +211,7 @@ def main0():
 
     # deit
     if "deit" in modes:
-        _build = import_abspy("models", f"{os.path.dirname(__file__)}/../classification")
+        _build = import_abspy("models", f"{basicpath}/../classification")
         build_mmpretrain_models = _build.build_mmpretrain_models
         print("deit ================================", flush=True)
         tiny = partial(build_mmpretrain_models, cfg="deit_small", ckpt=False, only_backbone=False, with_norm=True,)
@@ -278,150 +280,6 @@ def main0():
         sys.path = sys.path[1:]
 
 
-def main01():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--batch-size', type=int, default=128, help="batch size for single GPU")
-    parser.add_argument('--data-path', type=str, required=True, help='path to dataset')
-    parser.add_argument('--size', type=int, default=224, help='path to dataset')
-    args = parser.parse_args()
-
-    logging.basicConfig(level=logging.INFO)
-
-    dataloader = get_dataloader(
-        batch_size=args.batch_size, 
-        root=os.path.join(os.path.abspath(args.data_path), "val"),
-        img_size=args.size,
-    )
-
-    _model = import_abspy("vmamba", f"{os.path.dirname(__file__)}/../classification/models")
-  
-    breakpoint()
-
-    if True:
-        ...
-
-    if False:
-        tv0 = partial(_model.VSSM, dims=96, depths=[2,2,9,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v0", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1")
-        sv0 = partial(_model.VSSM, dims=96, depths=[2,2,27,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v0", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1")
-        bv0 = partial(_model.VSSM, dims=128, depths=[2,2,27,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v0", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1")
-
-        ta6 = partial(_model.VSSM, dims=96, depths=[2,2,9,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v05", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1", norm_layer="ln2d")
-        sa6 = partial(_model.VSSM, dims=96, depths=[2,2,27,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v05", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1", norm_layer="ln2d")
-        ba6 = partial(_model.VSSM, dims=128, depths=[2,2,27,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v05", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1", norm_layer="ln2d")
-
-        print("vmamba v0 ================================", flush=True)
-        for config in [tv0, sv0, bv0, ta6, sa6, ba6]:
-            testall(config(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True)
-
-    if False:
-        t0230 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v3_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2")
-        s0229 = partial(_model.VSSM, dims=96, depths=[2,2,15,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v3_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2")
-        b0229 = partial(_model.VSSM, dims=128, depths=[2,2,15,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v3_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2")
-        
-        t0230v1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        s0229v1 = partial(_model.VSSM, dims=96, depths=[2,2,15,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        b0229v1 = partial(_model.VSSM, dims=128, depths=[2,2,15,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        
-        print("vmamba v2 ================================", flush=True)
-        for config in [t0230, s0229, b0229, t0230v1, s0229v1, b0229v1]:
-            testall(config(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True)
-
-    if False:
-        print("v01-v05 ================================", flush=True)
-        ta1 = partial(_model.VSSM, dims=96, depths=[2,2,9,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v01", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1")
-        ta2 = partial(_model.VSSM, dims=96, depths=[2,2,9,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v02", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1")
-        ta3 = partial(_model.VSSM, dims=96, depths=[2,2,9,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v03", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1")
-        ta4 = partial(_model.VSSM, dims=96, depths=[2,2,9,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v04", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1")
-        ta5 = partial(_model.VSSM, dims=96, depths=[2,2,9,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v05", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1")
-        ta6 = partial(_model.VSSM, dims=96, depths=[2,2,9,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v05", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1", norm_layer="ln2d")
-
-        print("vmamba v01-v05 ================================", flush=True)
-        for config in [tv0, sv0, bv0, ta6, sa6, ba6]:
-            testall(config(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True)
-
-    if False:
-        t0230v1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        t0230v1ab1d = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v051d_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        t0230v1ab2d = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v052d_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        t0230v1ab2dc = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v052dc_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        print("vmamba scans ================================", flush=True)
-        for config in [t0230v1, t0230v1ab1d, t0230v1ab2d, t0230v1ab2dc]:
-            testall(config(), dataloader, args.data_path, args.size, args.batch_size, with_flops=True)
-
-    if False:
-        print("? ================================", flush=True)
-        ta7 = partial(_model.VSSM, dims=96, depths=[2,2,2,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1,  forward_type="v05", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        ta8 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=-1,  forward_type="v05", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        ta8d = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=0.9, ssm_conv=-1,  forward_type="v05", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        ta9 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.6, ssm_conv=-1,  forward_type="v05", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        ta9v1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=2, ssm_dt_rank="auto", ssm_ratio=1.6, ssm_conv=-1,  forward_type="v05", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        ta9v2 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=4, ssm_dt_rank="auto", ssm_ratio=1.6, ssm_conv=-1,  forward_type="v05", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        ta9v3 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=8, ssm_dt_rank="auto", ssm_ratio=1.6, ssm_conv=-1,  forward_type="v05", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        
-        taa = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1,  forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        taav1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        taav2 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=True, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        
-        tabv1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv1a", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        tabv2 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv2a", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        tabv3 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv3a", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        tabv4 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.6, ssm_conv=-1, forward_type="xv2a", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        tacv1 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        tacv2 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv2a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        tacv3 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1, forward_type="xv3a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        tacv4 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.6, ssm_conv=-1, forward_type="xv2a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-
-
-        ta9d = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=-1,  forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        ta9a = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=-1,  forward_type="v05_noz_oact", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        taca = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=0.8, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        tacb = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=8, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=-1, forward_type="xv1a_act", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-
-
-        img_size = 224
-        import copy
-        from flops import fvcore_flop_count, supported_ops, selective_scan_flop_jit, flops_selective_scan_fn, flops_selective_scan_ref
-        
-        if False:
-            supported_ops_ref = copy.copy(supported_ops)
-            selective_scan_flop_jit = partial(selective_scan_flop_jit, flops_fn=flops_selective_scan_ref)
-            supported_ops_ref.update({
-                "prim::PythonOp.SelectiveScanFn": selective_scan_flop_jit, # latter
-                "prim::PythonOp.SelectiveScanMamba": selective_scan_flop_jit, # latter
-                "prim::PythonOp.SelectiveScanOflex": selective_scan_flop_jit, # latter
-                "prim::PythonOp.SelectiveScanCore": selective_scan_flop_jit, # latter
-                "prim::PythonOp.SelectiveScan": selective_scan_flop_jit, # latter
-            })
-            for n in [
-                tv0, sv0, bv0, 
-                ta1, ta2, ta3, ta4, ta5, ta6, 
-                sa6, ba6,
-                ta7, ta8d,
-                # ta8, ta9, ta9v1, ta9v2, ta9v3,
-                # taa, taav1, taav2, 
-                # t0230, s0229, b0229,
-                t0230v1, s0229v1, b0229v1,
-                ta8d, ta9d,
-            ]:
-                model = n().cuda().eval()
-                print(get_variable_name(n, locals()), "============")
-                out1 = fvcore_flop_count(model, input_shape=(3, img_size, img_size), show_arch=False, supported_ops=supported_ops_ref, verbose=False)
-                out2 = fvcore_flop_count(model, input_shape=(3, img_size, img_size), show_arch=False, supported_ops=supported_ops, verbose=False)
-                print(out1, out2)
-            breakpoint()
-
-
-        print("vmamba a7-a9v3 ================================", flush=True)
-        for config in [ta7, ta8, ta9, ta9v1, ta9v2, ta9v3]:
-            # break
-            testall(config(), dataloader, args.data_path, args.size, args.batch_size)
-
-        print("vmamba aa-acv4 ================================", flush=True)
-        for config in [taa, taav1, taav2, tabv1, tabv2, tabv3, tabv4, tacv1, tacv2, tacv3, tacv4]:
-            # break
-            testall(config(), dataloader, args.data_path, args.size, args.batch_size)
-
-
 def main1():
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch-size', type=int, default=32, help="batch size for single GPU")
@@ -434,7 +292,7 @@ def main1():
     modes = ["swin", "swinscale"]
     # modes = ["intern"]
 
-    _build = import_abspy("models", f"{os.path.dirname(__file__)}/../classification")
+    _build = import_abspy("models", f"{basicpath}/../classification")
     build_mmpretrain_models = _build.build_mmpretrain_models
 
     def test_size(config):
@@ -457,7 +315,7 @@ def main1():
     if "vssma6" in modes:
         print("vssm ta6 ================================", flush=True)
         import triton, mamba_ssm, selective_scan_cuda_oflex
-        _model = import_abspy("vmamba", f"{os.path.dirname(__file__)}/../classification/models")
+        _model = import_abspy("vmamba", f"{basicpath}/../classification/models")
         ta6 = partial(_model.VSSM, dims=96, depths=[2,2,9,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v05", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1", norm_layer="ln2d")
         test_size(ta6)
 
@@ -581,65 +439,8 @@ def main1():
         sys.path = sys.path[1:]
 
 
-def main2():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--batch-size', type=int, default=256, help="batch size for single GPU")
-    parser.add_argument('--data-path', type=str, required=True, help='path to dataset')
-    parser.add_argument('--size', type=int, default=224, help='path to dataset')
-    args = parser.parse_args()
-
-    logging.basicConfig(level=logging.INFO)
-
-    dataloader = get_dataloader(
-        batch_size=args.batch_size, 
-        root=os.path.join(os.path.abspath(args.data_path), "val"),
-        img_size=args.size,
-    )
-
-    # https://github.com/OpenGVLab/InternImage/blob/ac5ed37f92a6807d3ecc793dbf62e2bf0c960ef2/classification/export.py#L41
-    def speed_test(model, input):
-        from tqdm import tqdm
-        # warmup
-        for _ in tqdm(range(100)):
-            _ = model(input)
-
-        # speed test
-        torch.cuda.synchronize()
-        start = time.time()
-        for _ in tqdm(range(100)):
-            _ = model(input)
-        end = time.time()
-        th = 100 / (end - start)
-        print(f"using time: {end - start}, throughput {th}")        
-
-    # internimage: install classification/ops_dcnv3
-    if True:
-        print("intern ================================", flush=True)
-        specpath = f"{HOME}/OTHERS/InternImage/classification"
-        sys.path.insert(0, specpath)
-        import DCNv3
-        _model = import_abspy("intern_image", f"{HOME}/OTHERS/InternImage/classification/models/")
-        tiny = partial(_model.InternImage, core_op='DCNv3', channels=64, depths=[4, 4, 18, 4], groups=[4, 8, 16, 32], offset_scale=1.0, mlp_ratio=4.,)
-        small = partial(_model.InternImage, core_op='DCNv3', channels=80, depths=[4, 4, 21, 4], groups=[5, 10, 20, 40], layer_scale=1e-5, offset_scale=1.0, mlp_ratio=4., post_norm=True)
-        base = partial(_model.InternImage, core_op='DCNv3', channels=112, depths=[4, 4, 21, 4], groups=[7, 14, 28, 56], layer_scale=1e-5, offset_scale=1.0, mlp_ratio=4., post_norm=True)
-        
-        for config in [base]:
-            torch.cuda.empty_cache()
-            model = config().cuda().eval()
-            for idx, (images, _) in enumerate(dataloader):
-                images = images.cuda()
-                # images = images[0][None]
-                speed_test(model, images)
-                break
-        sys.path = sys.path[1:]
-
-
-
 if __name__ == "__main__":
-    main01()
     main0()
-    # main1()
-    main2()
 
 
     
