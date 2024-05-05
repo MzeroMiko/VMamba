@@ -20,6 +20,7 @@ model = dict(
         downsample_version="v3",
         patchembed_version="v2",
         drop_path_rate=0.6,
+        norm_layer="ln2d",
     ),
     neck=dict(in_channels=[128, 256, 512, 1024]),
 )
