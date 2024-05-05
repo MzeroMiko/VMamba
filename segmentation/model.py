@@ -37,17 +37,19 @@ class MM_VSSM(BaseModule, Backbone_VSSM):
 # ===============================================
 from typing import Union, Tuple, Any
 selective_scan_flop_jit: Callable = build.vmamba.selective_scan_flop_jit
+flops_selective_scan_fn: Callable = build.vmamba.flops_selective_scan_fn
+verbose = False
 
 supported_extra_ops={
     "aten::silu": None, # as relu is in _IGNORED_OPS
     "aten::neg": None, # as relu is in _IGNORED_OPS
     "aten::exp": None, # as relu is in _IGNORED_OPS
     "aten::flip": None, # as permute is in _IGNORED_OPS
-    "prim::PythonOp.SelectiveScanFn": selective_scan_flop_jit, # latter
-    "prim::PythonOp.SelectiveScan": selective_scan_flop_jit, # latter
-    "prim::PythonOp.SelectiveScanCore": selective_scan_flop_jit, # latter
-    "prim::PythonOp.SelectiveScanOflex": selective_scan_flop_jit, # latter
-    "prim::PythonOp.SelectiveScanMamba": selective_scan_flop_jit, # latter
+    "prim::PythonOp.SelectiveScanFn": partial(selective_scan_flop_jit, flops_fn=flops_selective_scan_fn, verbose=verbose),
+    "prim::PythonOp.SelectiveScan": partial(selective_scan_flop_jit, flops_fn=flops_selective_scan_fn, verbose=verbose),
+    "prim::PythonOp.SelectiveScanCore": partial(selective_scan_flop_jit, flops_fn=flops_selective_scan_fn, verbose=verbose),
+    "prim::PythonOp.SelectiveScanOflex": partial(selective_scan_flop_jit, flops_fn=flops_selective_scan_fn, verbose=verbose),
+    "prim::PythonOp.SelectiveScanMamba": partial(selective_scan_flop_jit, flops_fn=flops_selective_scan_fn, verbose=verbose),
 }
 
 
@@ -212,15 +214,24 @@ if __name__ == "__main__":
     this_path = os.path.dirname(os.path.abspath(__file__)).rstrip("/")
     mmdet_path = this_path + "/../detection"
     mmseg_path = this_path + "/../segmentation"
-    # mmdet_flops(f"{mmdet_path}/configs/vssm/mask_rcnn_vssm_fpn_coco_tiny.py") # 42.4M 285883020640.0
-    # mmdet_flops(f"{mmdet_path}/configs/vssm/mask_rcnn_vssm_fpn_coco_small.py") # 63.924M 400260276640.0
-    # mmdet_flops(f"{mmdet_path}/configs/vssm/mask_rcnn_vssm_fpn_coco_base.py") # 95.628M 539797328640.0
 
-    # mmseg_flops(f"{mmseg_path}/configs/vssm/upernet_vssm_4xb4-160k_ade20k-512x512_tiny.py") # Flops: 963853165152.0   Params: 54546956
-    # mmseg_flops(f"{mmseg_path}/configs/vssm/upernet_vssm_4xb4-160k_ade20k-512x512_small.py") #  Flops: 1080975662496.0  Params: 76070924
-    # mmseg_flops(f"{mmseg_path}/configs/vssm/upernet_vssm_4xb4-160k_ade20k-512x512_base.py") # Flops: 1225941913504.0  Params: 109765548
-    # mmseg_flops(f"{mmseg_path}/configs/vssm/upernet_vssm_4xb4-160k_ade20k-640x640_small.py", input_shape=(3, 640, 2560)) # Flops: 1689017528400.0  Params: 76070924
+    if False:
+        mmdet_flops(f"{mmdet_path}/configs/vssm/mask_rcnn_vssm_fpn_coco_tiny.py") # 42399696 285883020640.0
+        mmdet_flops(f"{mmdet_path}/configs/vssm/mask_rcnn_vssm_fpn_coco_small.py") # 63923664 400260276640.0
+        mmdet_flops(f"{mmdet_path}/configs/vssm/mask_rcnn_vssm_fpn_coco_base.py") # 95627632 539797328640.0
+        mmdet_flops(f"{mmdet_path}/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny.py") # 49755312 271163376640.0
+        mmdet_flops(f"{mmdet_path}/configs/vssm1/mask_rcnn_vssm_fpn_coco_small.py") # 69654000 348921840640.0
+        mmdet_flops(f"{mmdet_path}/configs/vssm1/mask_rcnn_vssm_fpn_coco_base.py") # 107931376 485492208640.0
 
+    if True:
+        mmseg_flops(f"{mmseg_path}/configs/vssm/upernet_vssm_4xb4-160k_ade20k-512x512_tiny.py") # Flops: 963853165152.0	Params: 54546956
+        mmseg_flops(f"{mmseg_path}/configs/vssm/upernet_vssm_4xb4-160k_ade20k-512x512_small.py") # Flops: 1080975662496.0	Params: 76070924
+        mmseg_flops(f"{mmseg_path}/configs/vssm/upernet_vssm_4xb4-160k_ade20k-512x512_base.py") # Flops: 1225941913504.0	Params: 109765548
+        mmseg_flops(f"{mmseg_path}/configs/vssm/upernet_vssm_4xb4-160k_ade20k-640x640_small.py", input_shape=(3, 640, 2560)) # Flops: 1689017528400.0	Params: 76070924	
+        mmseg_flops(f"{mmseg_path}/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_tiny.py") # Flops: 948780189696	Params: 61902572	
+        mmseg_flops(f"{mmseg_path}/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_small.py") # Flops: 1028404856832	Params: 81801260
+        mmseg_flops(f"{mmseg_path}/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_base.py") # Flops: 1170340890624	Params: 122069292
+        mmseg_flops(f"{mmseg_path}/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-640x640_small.py", input_shape=(3, 640, 2560)) # Flops: 1606871500800	Params: 81801260
 
 
 
