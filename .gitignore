@@ -39,3 +39,4 @@ kernels/selective_scan/ssmtriton.py
 test.sh
 classification/models/vmamba copy.py
 kernels/selective_scan/ssmjax.py
+classification/models/vheat_wzz.py
