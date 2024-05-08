@@ -1485,8 +1485,8 @@ class Backbone_VSSM(VSSM):
                 norm_layer = getattr(self, f'outnorm{i}')
                 out = norm_layer(o)
                 if not self.channel_first:
-                    out = out.permute(0, 3, 1, 2).contiguous()
-                outs.append(out)
+                    out = out.permute(0, 3, 1, 2)
+                outs.append(out.contiguous())
 
         if len(self.out_indices) == 0:
             return x
