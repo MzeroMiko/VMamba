@@ -18,6 +18,7 @@ log
 ckpt
 
 analyze/show
+analyze/features
 cross_selective_scan
 classification/models/pscan.py
 classification/configs/heat
