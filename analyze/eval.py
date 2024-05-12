@@ -541,14 +541,19 @@ def testperf(modes, batch_size=128, data_path="ImageNet_ILSVRC2012"):
 
 
 class DatasetList:
-    def __init__(self, batch_size=16, root="train/", img_size=224):
-        self.dataset = self.get_dataset(root, img_size)
-        self.num_data = int(len(self.dataset))
+    def __init__(self, batch_size=16, root="train/", img_size=224, weak_aug=False):
         self.batch_size = int(batch_size)
+        transform, transform_waug = self.get_transform(img_size)
+        self.transform = transform_waug if weak_aug else transform
+        self.dataset = datasets.ImageFolder(root, transform=self.transform)
+        
+        self.num_data = int(len(self.dataset))
         self.num_batches = math.ceil(self.num_data / self.batch_size)
+        print(f"weak aug: {weak_aug} =========================", flush=True)
+
 
     @staticmethod
-    def get_dataset(root="train/", img_size=224):
+    def get_transform(img_size=224):
         size = int((256 / 224) * img_size)
         transform = transforms.Compose([
             transforms.Resize(size, interpolation=transforms.InterpolationMode.BICUBIC),
@@ -556,8 +561,13 @@ class DatasetList:
             transforms.ToTensor(),
             transforms.Normalize(IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD),
         ])
-        dataset = datasets.ImageFolder(root, transform=transform)
-        return dataset
+        transform_waug = transforms.Compose([
+            transforms.RandomResizedCrop(img_size, interpolation=transforms.InterpolationMode.BICUBIC),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize(IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD),
+        ])
+        return transform, transform_waug
 
     def __len__(self):
         return self.num_batches
@@ -584,18 +594,21 @@ def extract_feature(
     data_path="ImageNet_ILSVRC2012", 
     amp_disable=False, 
     dims=dict(),  # dict(name=dim)
-    outdir=os.path.join(basicpath, "./features/model/"),
+    outdir=os.path.join(HOME, "ckpts/feats/unmerge/"),
     ranges=[0, 1000],
+    train=True,
+    aug=False,
 ):
-    datasetlist = DatasetList(batch_size, root=os.path.join(data_path, "./train"), img_size=img_size)
+    root = os.path.join(data_path, "./train") if train else os.path.join(data_path, "./val")
+    datasetlist = DatasetList(batch_size, root=root, img_size=img_size, weak_aug=aug)
 
     ranges = list(ranges)
     if ranges[1] <= 0:
         ranges[1] = len(datasetlist)
     ranges[1] = min(ranges[1], len(datasetlist))
-    assert len(ranges) == 2 and ranges[1] > ranges[0]
+    assert len(ranges) == 2 and ranges[1] > ranges[0], f"{ranges}"
     outbatches = ranges[1] - ranges[0]
-    outdir = os.path.join(outdir, f"sz{img_size}_bs{batch_size}_range{ranges[0]}_{ranges[1]}")
+    outdir = os.path.join(outdir, f"sz{img_size}_bs{batch_size}_range{ranges[0]}_{ranges[1]}" + ("" if train else "_val"))
     os.makedirs(outdir, exist_ok=True)
     backbones = {
         name: torch.nn.parallel.DistributedDataParallel(model.cuda().eval())
@@ -627,7 +640,26 @@ def extract_feature(
         torch.save(all_targets, open(os.path.join(outdir, na), "wb"))
 
 
-def _extract_feature(data_path="ImageNet_ILSVRC2012", start=0, end=200, img_size=224, batch_size=16):
+def merge_feats(features=[], targets=[], length=1281167, save="/tmp/1.pth"):
+    feats = [torch.load(open(f, "rb")) for f in features]
+    tgts = [torch.load(open(f, "rb")) for f in targets]
+    for i, (f, t) in enumerate(zip(feats, tgts)):
+        assert f.shape[0:2] == t.shape[0:2], breakpoint()
+    assert sum([t.shape[0] for t in tgts]) * tgts[0].shape[1] >= length
+    print(features, targets, flush=True)
+    feats = torch.cat(feats, dim=0).view(-1, feats[0].shape[-1])
+    tgts = torch.cat(tgts, dim=0).view(-1)
+    assert (feats[length:] == feats[length]).all() # input 0, models output same
+    assert (feats[length] != feats[length - 1]).any()
+    assert (tgts[length:] == -1).all()
+    assert (tgts[:length] != -1).all()
+    feats = feats[:length]
+    tgts = tgts[:length]
+    os.makedirs(os.path.dirname(save), exist_ok=True)
+    torch.save(dict(features=feats, targets=tgts), open(save, "wb"))
+
+
+def _extract_feature(data_path="ImageNet_ILSVRC2012", start=0, end=200, step=-1, img_size=224, batch_size=16, train=True, aug=False):
     _build = import_abspy("models", f"{os.path.dirname(__file__)}/../classification")
     build_mmpretrain_models = _build.build_mmpretrain_models
 
@@ -838,34 +870,46 @@ def _extract_feature(data_path="ImageNet_ILSVRC2012", start=0, end=200, img_size
             model.cuda().eval()
             interntiny = model
 
-        extract_feature(
-            backbones=dict(
-                vmambav2tiny = vmambav2tiny,
-                convnexttiny = convnexttiny,
-                swintiny = swintiny,
-                interntiny = interntiny,
-                vmambav0tiny = vmambav0tiny,
-                vmambav2l5tiny = vmambav2l5tiny,
-                deitsmall = deitsmall,
-                hivittiny = hivittiny,
-                resnet50 = resnet50,
-            ), 
-            dims=dict(
-                vmambav2tiny = 768,
-                convnexttiny = 768,
-                swintiny = 768,
-                interntiny = 768,
-                vmambav0tiny = 768,
-                vmambav2l5tiny = 768,
-                deitsmall = 384,
-                hivittiny = 384,
-                resnet50 = 2048,
-            ),
-            batch_size=batch_size,
-            img_size=img_size,
-            data_path=data_path,
-            ranges=(start, end),
-        )
+        if step > 0:
+            starts = list(range(start, end, step))
+            ends = [s + step for s in starts]
+            assert ends[-1] >= end
+            ends[-1] = end
+            print(f"multiple ranges: {starts} {ends} ==============", flush=True)
+        else:
+            starts, ends = [start], [end]
+
+        for s, e in zip(starts, ends):
+            extract_feature(
+                backbones=dict(
+                    vmambav2tiny = vmambav2tiny,
+                    convnexttiny = convnexttiny,
+                    swintiny = swintiny,
+                    interntiny = interntiny,
+                    vmambav0tiny = vmambav0tiny,
+                    vmambav2l5tiny = vmambav2l5tiny,
+                    deitsmall = deitsmall,
+                    hivittiny = hivittiny,
+                    resnet50 = resnet50,
+                ), 
+                dims=dict(
+                    vmambav2tiny = 768,
+                    convnexttiny = 768,
+                    swintiny = 768,
+                    interntiny = 768,
+                    vmambav0tiny = 768,
+                    vmambav2l5tiny = 768,
+                    deitsmall = 384,
+                    hivittiny = 384,
+                    resnet50 = 2048,
+                ),
+                batch_size=batch_size,
+                img_size=img_size,
+                data_path=data_path,
+                ranges=(s, e),
+                train=train,
+                aug=aug,
+            )
 
 
 def main():
@@ -876,9 +920,14 @@ def main():
     parser.add_argument('--func', type=str, default="", help='function')
     parser.add_argument('--start', type=int, default=0, help='start range')
     parser.add_argument('--end', type=int, default=200, help='end range')
+    parser.add_argument('--step', type=int, default=-1, help='step range')
     parser.add_argument('--size', type=int, default=224, help='image size')
     parser.add_argument('--batch_size', type=int, default=16, help='batch_size')
+    parser.add_argument('--val', action="store_true", help='...')
+    parser.add_argument('--aug', action="store_true", help='...')
     args = parser.parse_args()
+    print(args, flush=True)
+    # breakpoint()
     
     modes = ["vssma6", "vssmaav1", "convnext", "resnet", "deit", "swin", "swinscale", "hivit", "intern"]
     if args.mode != "":
@@ -889,7 +938,7 @@ def main():
     elif args.func == "perf":
         testperf(modes)
     elif args.func == "feats":
-        _extract_feature(args.data_path, args.start, args.end, args.size, args.batch_size)
+        _extract_feature(args.data_path, args.start, args.end, args.step, args.size, args.batch_size, (not args.val), args.aug)
     else:
         raise NotImplementedError
 
@@ -921,4 +970,4 @@ if __name__ == "__main__":
     run_code_dist_one(main)
 
 
-# CUDA_VISIBLE_DEVICES=0 python /home/LiuYue/Workspace/PylanceAware/VMamba/analyze/eval.py --func feats --start 0 --end 0 --size 224 --batch_size 128                                
+# CUDA_VISIBLE_DEVICES=0 python /home/LiuYue/Workspace/PylanceAware/VMamba/analyze/eval.py --func feats --start 0 --end 0 --size 224 --batch_size 128 \                               

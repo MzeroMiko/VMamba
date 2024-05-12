@@ -1,111 +1,45 @@
-#!/usr/bin/env python
-# Copyright (c) Meta Platforms, Inc. and affiliates.
-# https://github.com/facebookresearch/moco/blob/main/main_lincls.py
-
-
-
-
-
 import argparse
-import builtins
 import os
-import random
-import shutil
 import time
-import warnings
-
+import random
+from collections import OrderedDict
+import numpy as np
 import torch
-import torch.backends.cudnn as cudnn
-import torch.distributed as dist
-import torch.multiprocessing as mp
 import torch.nn as nn
-import torch.nn.parallel
+import torch.distributed as dist
 import torch.optim
 import torch.utils.data
-import torch.utils.data.distributed
-import torchvision.datasets as datasets
-import torchvision.models as models
-import torchvision.transforms as transforms
 from timm.utils import accuracy, AverageMeter
-from timm.data.constants import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
+import logging
+logger = logging
 
 
 def parse_options():
     parser = argparse.ArgumentParser(description="PyTorch ImageNet Training")
-    parser.add_argument(
-        "--epochs", default=30, type=int, metavar="N", help="number of total epochs to run"
-    )
-    parser.add_argument(
-        "-b",
-        "--batch-size",
-        default=256,
-        type=int,
-        metavar="N",
-        help="mini-batch size (default: 256), this is the total "
-        "batch size of all GPUs on the current node when "
-        "using Data Parallel or Distributed Data Parallel",
-    )
-    parser.add_argument(
-        "--lr",
-        "--learning-rate",
-        default=30.0,
-        type=float,
-        metavar="LR",
-        help="initial learning rate",
-        dest="lr",
-    )
-    parser.add_argument("--momentum", default=0.9, type=float, metavar="M", help="momentum")
-    parser.add_argument(
-        "--wd",
-        "--weight-decay",
-        default=0.0,
-        type=float,
-        metavar="W",
-        help="weight decay (default: 0.)",
-        dest="weight_decay",
-    )
-    parser.add_argument(
-        "-p",
-        "--print-freq",
-        default=10,
-        type=int,
-        metavar="N",
-        help="print frequency (default: 10)",
-    )
-    parser.add_argument(
-        "--resume",
-        default="",
-        type=str,
-        metavar="PATH",
-        help="path to latest checkpoint (default: none)",
-    )
-    parser.add_argument(
-        "-e",
-        "--evaluate",
-        dest="evaluate",
-        action="store_true",
-        help="evaluate model on validation set",
-    )
-    parser.add_argument(
-        "--seed", default=None, type=int, help="seed for initializing training. "
-    )
-    parser.add_argument(
-        "--pretrained", default="", type=str, help="path to moco pretrained checkpoint"
-    )
+    parser.add_argument("--epochs", default=30, type=int)
+    parser.add_argument("-b", "--batch-size", default=4096, type=int, dest="batch_size")
+    parser.add_argument("--lr", "--learning-rate", default=30.0, type=float, dest="lr")
+    parser.add_argument("--momentum", default=0.9, type=float, help="momentum")
+    parser.add_argument("--wd", "--weight-decay", default=0.0, type=float, dest="weight_decay")
+    parser.add_argument("--reinit", action="store_true")
+    parser.add_argument("-e", "--evaluate", action="store_true", dest="evaluate")
+    parser.add_argument("--seed", default=0, type=int)
+    parser.add_argument("--size", default=224, type=int, help="img size")
+    parser.add_argument("--name", default="vmambav2tiny", type=str, help="model name")
     args = parser.parse_args()
-
     print(args)
     return args
 
 
-def get_feats_train_dataloader(features=[], targets=[], length=1281167, dim=768, batch_size=128, distributed=False, train=True):
-    assert len(features) == len(targets)
-    feats = torch.zeros((length, dim))
-    tgts = torch.zeros((length))
+def get_feats_train_dataloader(features, length=1281167,batch_size=128, distributed=False):
+    feats = torch.load(open(features, "rb"))
+    feats, tgts = feats["features"], feats["targets"].long()
+    assert feats.shape[0] == length
+    assert tgts.shape[0] == length
 
     class fds(torch.utils.data.Dataset):
-        def __init__(self):
-            super().__init__()
+        def __len__(self):
+            return length
         
         def __getitem__(self, index):
             return feats[index], tgts[index]
@@ -126,14 +60,15 @@ def get_feats_train_dataloader(features=[], targets=[], length=1281167, dim=768,
     return data_loader_train
 
 
-def get_feats_eval_dataloader(features=[], targets=[], length=50000, dim=768, batch_size=128):
-    assert len(features) == len(targets)
-    feats = torch.zeros((length, dim))
-    tgts = torch.zeros((length))
-
+def get_feats_eval_dataloader(features, length=50000, batch_size=128):
+    feats = torch.load(open(features, "rb"))
+    feats, tgts = feats["features"], feats["targets"].long()
+    assert feats.shape[0] == length
+    assert tgts.shape[0] == length
+    
     class fds(torch.utils.data.Dataset):
-        def __init__(self):
-            super().__init__()
+        def __len__(self):
+            return length
         
         def __getitem__(self, index):
             return feats[index], tgts[index]
@@ -151,178 +86,231 @@ def get_feats_eval_dataloader(features=[], targets=[], length=50000, dim=768, ba
     return data_loader_val
 
 
-
-
-def validate(val_loader, model, criterion, args):
-    batch_time = AverageMeter("Time", ":6.3f")
-    losses = AverageMeter("Loss", ":.4e")
-    top1 = AverageMeter("Acc@1", ":6.2f")
-    top5 = AverageMeter("Acc@5", ":6.2f")
-    progress = ProgressMeter(
-        len(val_loader), [batch_time, losses, top1, top5], prefix="Test: "
-    )
-
-    # switch to evaluate mode
+# WARNING!!!  acc score would be inaccurate if num_procs > 1, as sampler always pads the dataset
+# copied from https://github.com/microsoft/Swin-Transformer/blob/main/main.py
+@torch.no_grad()
+def validate(data_loader, model, AMP_ENABLE=True):
+    criterion = torch.nn.CrossEntropyLoss()
     model.eval()
 
-    with torch.no_grad():
-        end = time.time()
-        for i, (images, target) in enumerate(val_loader):
-            images = images.cuda(non_blocking=True)
-            target = target.cuda(non_blocking=True)
+    batch_time = AverageMeter()
+    loss_meter = AverageMeter()
+    acc1_meter = AverageMeter()
+    acc5_meter = AverageMeter()
 
-            # compute output
+    end = time.time()
+    for idx, (images, target) in enumerate(data_loader):
+        images = images.cuda(non_blocking=True)
+        target = target.cuda(non_blocking=True)
+
+        # compute output
+        with torch.cuda.amp.autocast(enabled=AMP_ENABLE):
             output = model(images)
-            loss = criterion(output, target)
 
-            # measure accuracy and record loss
-            acc1, acc5 = accuracy(output, target, topk=(1, 5))
-            losses.update(loss.item(), images.size(0))
-            top1.update(acc1[0], images.size(0))
-            top5.update(acc5[0], images.size(0))
+        # measure accuracy and record loss
+        loss = criterion(output, target)
+        acc1, acc5 = accuracy(output, target, topk=(1, 5))
 
-            # measure elapsed time
-            batch_time.update(time.time() - end)
-            end = time.time()
+        loss_meter.update(loss.item(), target.size(0))
+        acc1_meter.update(acc1.item(), target.size(0))
+        acc5_meter.update(acc5.item(), target.size(0))
 
-            if i % args.print_freq == 0:
-                progress.display(i)
-
-        # TODO: this should also be done with the ProgressMeter
-        print(
-            " * Acc@1 {top1.avg:.3f} Acc@5 {top5.avg:.3f}".format(top1=top1, top5=top5)
-        )
-
-    return top1.avg
+        # measure elapsed time
+        batch_time.update(time.time() - end)
+        end = time.time()
+        
+    print(f'* Loss {loss_meter.avg:.4f} Acc@1 {acc1_meter.avg:.3f} Acc@5 {acc5_meter.avg:.3f}', flush=True)
+    return acc1_meter.avg, acc5_meter.avg, loss_meter.avg
 
 
-class AverageMeter:
-    """Computes and stores the average and current value"""
+def train(model, args, features_train, features_val, seed=0, state_dict=None, reinit=False, outdir="/tmp", val=False):
+    batch_size = args.batch_size
+    
+    assert isinstance(model, torch.nn.Linear)
+    # model = torch.nn.Linear(args.dim, args.num_classes, bias=True)
 
-    def __init__(self, name, fmt=":f"):
-        self.name = name
-        self.fmt = fmt
-        self.reset()
+    train_loader = get_feats_train_dataloader(features_train, batch_size=batch_size, length=1281167)
+    val_loader = get_feats_eval_dataloader(features_val, batch_size=batch_size, length=50000)
 
-    def reset(self):
-        self.val = 0
-        self.avg = 0
-        self.sum = 0
-        self.count = 0
-
-    def update(self, val, n=1):
-        self.val = val
-        self.sum += val * n
-        self.count += n
-        self.avg = self.sum / self.count
-
-    def __str__(self):
-        fmtstr = "{name} {val" + self.fmt + "} ({avg" + self.fmt + "})"
-        return fmtstr.format(**self.__dict__)
-
-
-class ProgressMeter:
-    def __init__(self, num_batches, meters, prefix=""):
-        self.batch_fmtstr = self._get_batch_fmtstr(num_batches)
-        self.meters = meters
-        self.prefix = prefix
-
-    def display(self, batch):
-        entries = [self.prefix + self.batch_fmtstr.format(batch)]
-        entries += [str(meter) for meter in self.meters]
-        print("\t".join(entries))
-
-    def _get_batch_fmtstr(self, num_batches):
-        num_digits = len(str(num_batches // 1))
-        fmt = "{:" + str(num_digits) + "d}"
-        return "[" + fmt + "/" + fmt.format(num_batches) + "]"
-
-
-def accuracy(output, target, topk=(1,)):
-    """Computes the accuracy over the k top predictions for the specified values of k"""
-    with torch.no_grad():
-        maxk = max(topk)
-        batch_size = target.size(0)
-
-        _, pred = output.topk(maxk, 1, True, True)
-        pred = pred.t()
-        correct = pred.eq(target.view(1, -1).expand_as(pred))
-
-        res = []
-        for k in topk:
-            correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
-            res.append(correct_k.mul_(100.0 / batch_size))
-        return res
-
-def main(args, outdir="."):
-    model = nn.Linear(args.dim, args.num_classes, bias=True)
-
-    model.weight.data.normal_(mean=0.0, std=0.01)
-    model.bias.data.zero_()
-
-    criterion = nn.CrossEntropyLoss().cuda()
+    model = torch.nn.Sequential(OrderedDict(fc = model,)).cuda()
+    criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(
         model.parameters(), 
         args.lr, 
         momentum=args.momentum, 
         weight_decay=args.weight_decay
     )
+    # optimizer = torch.optim.AdamW(model.parameters(), args.lr)
+    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs * len(train_loader), eta_min=0)
 
-    train_loader = get_feats_train_dataloader()
-    val_loader = get_feats_eval_dataloader()
+    if state_dict is not None:
+        model.fc.load_state_dict(state_dict)
+        validate(val_loader, model)
+    
+    if seed is not None:
+        assert isinstance(seed, int)
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
+        torch.backends.cudnn.benchmark = True
+
+    if reinit:
+        model.fc.weight.data.normal_(mean=0.0, std=0.01)
+        model.fc.bias.data.zero_()
+        validate(val_loader, model)
+    
+    if val:
+        return
 
     for epoch in range(0, args.epochs):
-        batch_time = AverageMeter("Time", ":6.3f")
-        data_time = AverageMeter("Data", ":6.3f")
-        losses = AverageMeter("Loss", ":.4e")
-        top1 = AverageMeter("Acc@1", ":6.3f")
-        top5 = AverageMeter("Acc@5", ":6.3f")
-        progress = ProgressMeter(
-            len(train_loader),
-            [batch_time, data_time, losses, top1, top5],
-            prefix="Epoch: [{}]".format(epoch),
-        )
-
-        end = time.time()
-        for i, (images, target) in enumerate(train_loader):
-            # measure data loading time
-            data_time.update(time.time() - end)
+        loss_meter = AverageMeter()
+        acc1_meter = AverageMeter()
+        acc5_meter = AverageMeter()
+        model.train()
+        for idx, (images, target) in enumerate(train_loader):
             images = images.cuda(non_blocking=True)
             target = target.cuda(non_blocking=True)
-
-            # compute output
             output = model(images)
             loss = criterion(output, target)
-
-            # measure accuracy and record loss
             acc1, acc5 = accuracy(output, target, topk=(1, 5))
-            losses.update(loss.item(), images.size(0))
-            top1.update(acc1[0], images.size(0))
-            top5.update(acc5[0], images.size(0))
-
-            # compute gradient and do SGD step
+            loss_meter.update(loss.item(), images.size(0))
+            acc1_meter.update(acc1.item(), images.size(0))
+            acc5_meter.update(acc5.item(), images.size(0))
+            
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+            lr_scheduler.step()
 
-            # measure elapsed time
-            batch_time.update(time.time() - end)
-            end = time.time()
+        print(
+            f'Train[{epoch}/{args.epochs} : {len(train_loader)}]: '
+            f'Loss {loss_meter.avg:.4f} '
+            f'Acc@1 {acc1_meter.avg:.3f} '
+            f'Acc@5 {acc5_meter.avg:.3f} ', flush=True)
 
-            if i % args.print_freq == 0:
-                progress.display(i)
+        validate(val_loader, model)
 
-        validate(val_loader, model, criterion, args)
-
-        torch.save({
-            "epoch": epoch + 1,
-            "state_dict": model.state_dict(),
-            "optimizer": optimizer.state_dict(),
-        }, os.path.join(outdir, f"ckpt_epoch_{epoch}.pth"))
+    torch.save({
+        "epoch": args.epochs,
+        "state_dict": model.state_dict(),
+    }, os.path.join(outdir, f"ckpt_epoch_{args.epochs}.pth"))
 
 
 if __name__ == "__main__":
-    main()
+    args = parse_options()
+
+    vmambav2tiny = dict(
+        name = "vmambav2tiny",
+        model = nn.Linear(768, 1000, bias=True),
+        ckpt = "/home/LiuYue/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230s/vssm1_tiny_0230s_ckpt_epoch_264.pth",
+        state_dict = lambda sd: {
+            "weight": sd["model"]["classifier.head.weight"],
+            "bias": sd["model"]["classifier.head.bias"],
+        } 
+    )
+
+    vmambav2l5tiny = dict(
+        name = "vmambav2l5tiny",
+        model = nn.Linear(768, 1000, bias=True),
+        ckpt = "/home/LiuYue/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230/vssm1_tiny_0230_ckpt_epoch_262.pth",
+        state_dict = lambda sd: {
+            "weight": sd["model"]["classifier.head.weight"],
+            "bias": sd["model"]["classifier.head.bias"],
+        } 
+    )
+
+    vmambav0tiny = dict(
+        name = "vmambav0tiny",
+        model = nn.Linear(768, 1000, bias=True),
+        ckpt = "/home/LiuYue/Workspace/PylanceAware/ckpts/publish/vssm/classification/vssmtiny/vssmtiny_dp01_ckpt_epoch_292.pth",
+        state_dict = lambda sd: {
+            "weight": sd["model"]["head.weight"],
+            "bias": sd["model"]["head.bias"],
+        } 
+    )
+
+    resnet50 = dict(
+        name = "resnet50",
+        model = nn.Linear(2048, 1000, bias=True),
+        ckpt = "/home/LiuYue/.cache/torch/hub/checkpoints/resnet50_8xb32_in1k_20210831-ea4938fc.pth",
+        state_dict = lambda sd: {
+            "weight": sd["state_dict"]["head.fc.weight"],
+            "bias": sd["state_dict"]["head.fc.bias"],
+        } 
+    )
+
+    deitsmall = dict(
+        name = "deitsmall",
+        model = nn.Linear(384, 1000, bias=True),
+        ckpt = "/home/LiuYue/.cache/torch/hub/checkpoints/deit-small_pt-4xb256_in1k_20220218-9425b9bb.pth",
+        state_dict = lambda sd: {
+            "weight": sd["state_dict"]["head.layers.head.weight"],
+            "bias": sd["state_dict"]["head.layers.head.bias"],
+        } 
+    )
+
+    convnexttiny = dict(
+        name = "convnexttiny",
+        model = nn.Linear(768, 1000, bias=True),
+        ckpt = "/home/LiuYue/Workspace/PylanceAware/ckpts/others/convnext_tiny_1k_224_ema.pth",
+        state_dict = lambda sd: {
+            "weight": sd["model"]["head.weight"],
+            "bias": sd["model"]["head.bias"],
+        } 
+    )
+
+    swintiny = dict(
+        name = "swintiny",
+        model = nn.Linear(768, 1000, bias=True),
+        ckpt = "/home/LiuYue/.cache/torch/hub/checkpoints/swin_tiny_224_b16x64_300e_imagenet_20210616_090925-66df6be6.pth",
+        state_dict = lambda sd: {
+            "weight": sd["state_dict"]["head.fc.weight"],
+            "bias": sd["state_dict"]["head.fc.bias"],
+        } 
+    )
+
+    hivittiny = dict(
+        name = "hivittiny",
+        model = nn.Linear(384, 1000, bias=True),
+        ckpt = "/home/LiuYue/Workspace/PylanceAware/ckpts/others/hivit-tiny-p16_8xb128_in1k/epoch_295.pth",
+        state_dict = lambda sd: {
+            "weight": sd["state_dict"]["head.fc.weight"],
+            "bias": sd["state_dict"]["head.fc.bias"],
+        } 
+    )
+
+    interntiny = dict(
+        name = "interntiny",
+        model = nn.Linear(768, 1000, bias=True),
+        ckpt = "/home/LiuYue/Workspace/PylanceAware/ckpts/others/internimage_t_1k_224.pth",
+        state_dict = lambda sd: {
+            "weight": sd["model"]["head.weight"],
+            "bias": sd["model"]["head.bias"],
+        } 
+    )
+
+    names = {}
+    for col in [vmambav2tiny, vmambav2l5tiny, vmambav0tiny, swintiny, convnexttiny, hivittiny, deitsmall, resnet50, interntiny]:
+        names.update({col["name"]: col})
+        size = 224
+        model = col["model"]
+        feature_train = f"/home/LiuYue/ckpts/feats/merge{size}/{col['name']}_sz{size}_train.pth"
+        feature_val = f"/home/LiuYue/ckpts/feats/merge{size}/{col['name']}_sz{size}_val.pth"
+        state_dict = col["state_dict"](torch.load(col["ckpt"], map_location=torch.device("cpu")))
+
+    size = args.size
+    col = names[args.name]
+    model = col["model"]
+    feature_train = f"/home/LiuYue/ckpts/feats/merge{size}/{col['name']}_sz{size}_train.pth"
+    feature_val = f"/home/LiuYue/ckpts/feats/merge{size}/{col['name']}_sz{size}_val.pth"
+    state_dict = col["state_dict"](torch.load(col["ckpt"], map_location=torch.device("cpu")))
+    train(
+        model=model, args=args, features_train=feature_train, features_val=feature_val,
+        state_dict=state_dict, 
+        reinit=args.reinit,
+        val=args.evaluate
+    )
 
 
 

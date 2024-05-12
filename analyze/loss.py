@@ -241,6 +241,17 @@ def readlog_mmdetection(logfile):
     _final_epoch = max(_epochs)
 
     print(f"\033[4;32mbboxmAP: {_max_coco_bbox_mAP}; segmmAP: {_max_coco_segm_mAP}; _mkepochs: {_mkepochs}; final epoch: {_final_epoch}; \033[0m")
+    for l in _mklogs:
+        perfs = " ".join([
+            l.split("Epoch(val) ")[1].split(" ")[0],
+            l.split("coco/bbox_mAP: ")[1].split(" ")[0],
+            l.split("coco/bbox_mAP_50: ")[1].split(" ")[0],
+            l.split("coco/bbox_mAP_75: ")[1].split(" ")[0],
+            l.split("coco/segm_mAP: ")[1].split(" ")[0],
+            l.split("coco/segm_mAP_50: ")[1].split(" ")[0],
+            l.split("coco/segm_mAP_75: ")[1].split(" ")[0],
+        ])
+        print(f"\033[4;32m{perfs} \033[0m")
     print(_mklogs, logfile)
     _ckpts = [f"epoch_{e}.pth" for e in set([_final_epoch, *_mkepochs]) if e != -1]
 
@@ -289,7 +300,8 @@ def cpclassification(src, name, dstpath="", fake_copy=False, update=False, onlyl
             if not update:
                 continue
         _s = os.path.join(src, file)
-        assert os.path.exists(_s) and os.path.exists(dst) and os.path.isdir(dst)
+        assert os.path.exists(dst) and os.path.isdir(dst)
+        assert os.path.exists(_s), f"Not found: {_s}"
         print(f"copy from [{_s}] to [{dst}]")
         if not fake_copy:
             shutil.copy(_s, dst)
