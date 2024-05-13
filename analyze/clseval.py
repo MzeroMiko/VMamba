@@ -89,7 +89,7 @@ def get_feats_eval_dataloader(features, length=50000, batch_size=128):
 # WARNING!!!  acc score would be inaccurate if num_procs > 1, as sampler always pads the dataset
 # copied from https://github.com/microsoft/Swin-Transformer/blob/main/main.py
 @torch.no_grad()
-def validate(data_loader, model, AMP_ENABLE=True):
+def validate(data_loader, model, AMP_ENABLE=True, verbose=True):
     criterion = torch.nn.CrossEntropyLoss()
     model.eval()
 
@@ -118,13 +118,15 @@ def validate(data_loader, model, AMP_ENABLE=True):
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
-        
-    print(f'* Loss {loss_meter.avg:.4f} Acc@1 {acc1_meter.avg:.3f} Acc@5 {acc5_meter.avg:.3f}', flush=True)
+
+    if verbose: 
+        print(f'* Loss {loss_meter.avg:.4f} Acc@1 {acc1_meter.avg:.3f} Acc@5 {acc5_meter.avg:.3f}', flush=True)
     return acc1_meter.avg, acc5_meter.avg, loss_meter.avg
 
 
-def train(model, args, features_train, features_val, seed=0, state_dict=None, reinit=False, outdir="/tmp", val=False):
+def train(model, args, features_train, features_val, seed=0, state_dict=None, reinit=False, outdir="/tmp", val=False, lr=0.05, verbose=True):
     batch_size = args.batch_size
+    print(args, dict(model=model, lr=lr, verbose=verbose, seed=seed, reinit=reinit), flush=True)
     
     assert isinstance(model, torch.nn.Linear)
     # model = torch.nn.Linear(args.dim, args.num_classes, bias=True)
@@ -136,11 +138,11 @@ def train(model, args, features_train, features_val, seed=0, state_dict=None, re
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(
         model.parameters(), 
-        args.lr, 
+        lr, 
         momentum=args.momentum, 
         weight_decay=args.weight_decay
     )
-    # optimizer = torch.optim.AdamW(model.parameters(), args.lr)
+    # optimizer = torch.optim.AdamW(model.parameters(), lr)
     lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=args.epochs * len(train_loader), eta_min=0)
 
     if state_dict is not None:
@@ -158,11 +160,12 @@ def train(model, args, features_train, features_val, seed=0, state_dict=None, re
     if reinit:
         model.fc.weight.data.normal_(mean=0.0, std=0.01)
         model.fc.bias.data.zero_()
-        validate(val_loader, model)
+        validate(val_loader, model, verbose=True)
     
     if val:
         return
 
+    maxacc1 = [0, 0, 0, 0]
     for epoch in range(0, args.epochs):
         loss_meter = AverageMeter()
         acc1_meter = AverageMeter()
@@ -183,13 +186,17 @@ def train(model, args, features_train, features_val, seed=0, state_dict=None, re
             optimizer.step()
             lr_scheduler.step()
 
-        print(
-            f'Train[{epoch}/{args.epochs} : {len(train_loader)}]: '
-            f'Loss {loss_meter.avg:.4f} '
-            f'Acc@1 {acc1_meter.avg:.3f} '
-            f'Acc@5 {acc5_meter.avg:.3f} ', flush=True)
+        if verbose:
+            print(
+                f'Train[{epoch}/{args.epochs} : {len(train_loader)}]: '
+                f'Loss {loss_meter.avg:.4f} '
+                f'Acc@1 {acc1_meter.avg:.3f} '
+                f'Acc@5 {acc5_meter.avg:.3f} ', flush=True)
 
-        validate(val_loader, model)
+        acc1, acc5, loss = validate(val_loader, model, verbose=verbose)
+        if acc1 > maxacc1[0]:
+            maxacc1 = [acc1, acc5, loss, epoch]
+    print(f"max acc: {maxacc1[0:2]}, loss: {maxacc1[2]}, epoch {maxacc1[3]}", flush=True)
 
     torch.save({
         "epoch": args.epochs,
@@ -299,18 +306,35 @@ if __name__ == "__main__":
         feature_val = f"/home/LiuYue/ckpts/feats/merge{size}/{col['name']}_sz{size}_val.pth"
         state_dict = col["state_dict"](torch.load(col["ckpt"], map_location=torch.device("cpu")))
 
-    size = args.size
-    col = names[args.name]
-    model = col["model"]
-    feature_train = f"/home/LiuYue/ckpts/feats/merge{size}/{col['name']}_sz{size}_train.pth"
-    feature_val = f"/home/LiuYue/ckpts/feats/merge{size}/{col['name']}_sz{size}_val.pth"
-    state_dict = col["state_dict"](torch.load(col["ckpt"], map_location=torch.device("cpu")))
-    train(
-        model=model, args=args, features_train=feature_train, features_val=feature_val,
-        state_dict=state_dict, 
-        reinit=args.reinit,
-        val=args.evaluate
-    )
+    if args.name == "all":
+        for col in [vmambav2tiny, vmambav2l5tiny, vmambav0tiny, swintiny, convnexttiny, hivittiny, deitsmall, resnet50, interntiny]:
+            for size, lr in zip([224, 384, 512, 640, 768, 1024], [0.05, 0.05, 0.2, 0.5, 0.5, 0.5]):
+                model = col["model"]
+                feature_train = f"/home/LiuYue/ckpts/feats/merge{size}/{col['name']}_sz{size}_train.pth"
+                feature_val = f"/home/LiuYue/ckpts/feats/merge{size}/{col['name']}_sz{size}_val.pth"
+                state_dict = col["state_dict"](torch.load(col["ckpt"], map_location=torch.device("cpu")))
+                train(
+                    model=model, args=args, features_train=feature_train, features_val=feature_val,
+                    state_dict=state_dict, 
+                    reinit=args.reinit,
+                    val=args.evaluate,
+                    lr=lr,
+                    verbose=False,
+                )
+    else:
+        size = args.size
+        col = names[args.name]
+        model = col["model"]
+        feature_train = f"/home/LiuYue/ckpts/feats/merge{size}/{col['name']}_sz{size}_train.pth"
+        feature_val = f"/home/LiuYue/ckpts/feats/merge{size}/{col['name']}_sz{size}_val.pth"
+        state_dict = col["state_dict"](torch.load(col["ckpt"], map_location=torch.device("cpu")))
+        train(
+            model=model, args=args, features_train=feature_train, features_val=feature_val,
+            state_dict=state_dict, 
+            reinit=args.reinit,
+            val=args.evaluate,
+            lr = args.lr,
+        )
 
 
 
