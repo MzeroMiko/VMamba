@@ -10,6 +10,8 @@ from torchvision import datasets, transforms
 from timm.data import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 from torchvision.models.vision_transformer import EncoderBlock
 from fvcore.nn import FlopCountAnalysis, flop_count_str, flop_count, parameter_count
+from utils import import_abspy, get_val_dataloader, testfwdbwd, throughput, throughputamp
+
 
 HOME = os.environ["HOME"].rstrip("/")
 basicpath = os.path.abspath("../VMamba/analyze").rstrip("/")
@@ -19,119 +21,6 @@ torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True
 torch.backends.cudnn.deterministic = True
 
-
-def import_abspy(name="models", path="classification/"):
-    import sys
-    import importlib
-    path = os.path.abspath(path)
-    assert os.path.isdir(path)
-    sys.path.insert(0, path)
-    module = importlib.import_module(name)
-    sys.path.pop(0)
-    return module
-
-
-def get_dataloader(batch_size=64, root="./val", img_size=224, sequential=True):
-    size = int((256 / 224) * img_size)
-    transform = transforms.Compose([
-        transforms.Resize(size, interpolation=transforms.InterpolationMode.BICUBIC),
-        transforms.CenterCrop((img_size, img_size)),
-        transforms.ToTensor(),
-        transforms.Normalize(IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD),
-    ])
-
-    dataset = datasets.ImageFolder(root, transform=transform)
-    if sequential:
-        sampler = torch.utils.data.SequentialSampler(dataset)
-    else:
-        sampler = torch.utils.data.DistributedSampler(dataset)
-    
-    data_loader = torch.utils.data.DataLoader(
-        dataset, sampler=sampler,
-        batch_size=batch_size,
-        shuffle=False,
-        num_workers=0,
-        pin_memory=True,
-        drop_last=False
-    )
-    return data_loader
-
-
-# default no amp in testing tp
-@torch.no_grad()
-def throughput(data_loader, model, logger):
-    model.eval()
-
-    for idx, (images, _) in enumerate(data_loader):
-        images = images.cuda(non_blocking=True)
-        batch_size = images.shape[0]
-        for i in range(50):
-            model(images)
-        torch.cuda.synchronize()
-        logger.info(f"throughput averaged with 30 times")
-        torch.cuda.reset_peak_memory_stats()
-        tic1 = time.time()
-        for i in range(30):
-            model(images)
-        torch.cuda.synchronize()
-        tic2 = time.time()
-        logger.info(f"batch_size {batch_size} throughput {30 * batch_size / (tic2 - tic1)}")
-        logger.info(f"batch_size {batch_size} mem cost {torch.cuda.max_memory_allocated() / 1024 / 1024} MB")
-        return
-
-
-@torch.no_grad()
-def throughputamp(data_loader, model, logger):
-    model.eval()
-
-    for idx, (images, _) in enumerate(data_loader):
-        images = images.cuda(non_blocking=True)
-        batch_size = images.shape[0]
-        for i in range(50):
-            with torch.cuda.amp.autocast():
-                model(images)
-        torch.cuda.synchronize()
-        logger.info(f"throughput averaged with 30 times")
-        torch.cuda.reset_peak_memory_stats()
-        tic1 = time.time()
-        for i in range(30):
-            with torch.cuda.amp.autocast():
-                model(images)
-        torch.cuda.synchronize()
-        tic2 = time.time()
-        logger.info(f"batch_size {batch_size} throughput {30 * batch_size / (tic2 - tic1)}")
-        logger.info(f"batch_size {batch_size} mem cost {torch.cuda.max_memory_allocated() / 1024 / 1024} MB")
-        return
-
-
-def testfwdbwd(data_loader, model, logger, amp=True):
-    model.train()
-    criterion = torch.nn.CrossEntropyLoss()
-
-    for idx, (images, targets) in enumerate(data_loader):
-        images = images.cuda(non_blocking=True)
-        targets = targets.cuda(non_blocking=True)
-        batch_size = images.shape[0]
-        for i in range(50):
-            with torch.cuda.amp.autocast(enabled=amp):
-                out = model(images)
-                loss = criterion(out, targets)
-                loss.backward()
-        torch.cuda.synchronize()
-        logger.info(f"testfwdbwd averaged with 30 times")
-        torch.cuda.reset_peak_memory_stats()
-        tic1 = time.time()
-        for i in range(30):
-            with torch.cuda.amp.autocast(enabled=amp):
-                out = model(images)
-                loss = criterion(out, targets)
-                loss.backward()
-        torch.cuda.synchronize()
-        tic2 = time.time()
-        logger.info(f"batch_size {batch_size} testfwdbwd {30 * batch_size / (tic2 - tic1)}")
-        logger.info(f"batch_size {batch_size} mem cost {torch.cuda.max_memory_allocated() / 1024 / 1024} MB")
-        return
-    
 
 def testall(model, dataloader, data_path, img_size=224, _batch_size=128, with_flops=False, inference_only=False):
     torch.cuda.empty_cache()
@@ -148,7 +37,7 @@ def testall(model, dataloader, data_path, img_size=224, _batch_size=128, with_fl
     batch_size = _batch_size
     while (not PASS) and (batch_size > 0):
         try:
-            _dataloader = get_dataloader(
+            _dataloader = get_val_dataloader(
                 batch_size=batch_size, 
                 root=os.path.join(os.path.abspath(data_path), "val"),
                 img_size=img_size,
@@ -180,7 +69,7 @@ def main0():
 
     logging.basicConfig(level=logging.INFO)
 
-    dataloader = get_dataloader(
+    dataloader = get_val_dataloader(
         batch_size=args.batch_size, 
         root=os.path.join(os.path.abspath(args.data_path), "val"),
         img_size=args.size,
@@ -298,7 +187,7 @@ def main1():
     def test_size(config):
         for size in [224, 384, 512, 640, 768, 1024]:
             print(f"testing size {size}...")
-            dataloader = get_dataloader(
+            dataloader = get_val_dataloader(
                 batch_size=args.batch_size, 
                 root=os.path.join(os.path.abspath(args.data_path), "val"),
                 img_size=size,
@@ -382,7 +271,7 @@ def main1():
             model["backbone"].update({"window_size": 7, "img_size": size})
             tiny = build_classifier(model)
             print(f"testing size {size}...")
-            dataloader = get_dataloader(
+            dataloader = get_val_dataloader(
                 batch_size=args.batch_size, 
                 root=os.path.join(os.path.abspath(args.data_path), "val"),
                 img_size=size,
@@ -420,7 +309,7 @@ def main1():
             model["backbone"].update({"window_size": int(size // 32), "img_size": size})
             tiny = build_classifier(model)
             print(f"testing size {size}...")
-            dataloader = get_dataloader(
+            dataloader = get_val_dataloader(
                 batch_size=args.batch_size, 
                 root=os.path.join(os.path.abspath(args.data_path), "val"),
                 img_size=size,

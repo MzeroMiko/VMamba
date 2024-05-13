@@ -680,7 +680,7 @@ class SS2Dv2:
                 setattr(self, "__data__", dict(
                     A_logs=A_logs, Bs=Bs, Cs=Cs, Ds=Ds,
                     us=xs, dts=dts, delta_bias=delta_bias,
-                    ys=ys, y=y,
+                    ys=ys, y=y, H=H, W=W,
                 ))
 
         y = y.view(B, -1, H, W)
@@ -707,7 +707,6 @@ class SS2Dv2:
             y = y * z
         out = self.dropout(self.out_proj(y))
         return out
-
 
 # support: xv1a,xv2a,xv3a; 
 # postfix: _cpos;_ocov;_ocov2;_ca,_ca1;_act;_mul;_onsigmoid,_onsoftmax,_ondwconv3,_onnone;

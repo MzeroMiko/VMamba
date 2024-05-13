@@ -36,18 +36,6 @@ CrossScanTriton1b1: nn.Module = vmamba.CrossScanTriton1b1
 this_path = os.path.dirname(os.path.abspath(__file__))
 
 
-
-def denormalize(image: torch.Tensor, mean=(0.5, 0.5, 0.5), std=(0.25, 0.25, 0.25)):
-    if len(image.shape) == 2:
-        image = (image.cpu() * 255).to(torch.uint8).numpy()
-    elif len(image.shape) == 3:
-        C, H, W = image.shape
-        image = image.cpu() * torch.tensor(std).view(-1, 1, 1) + torch.tensor(mean).view(-1, 1, 1)
-        image = (image.permute(1, 2, 0) * 255).to(torch.uint8).numpy()
-    image = Image.fromarray(image)
-    return image
-
-
 def visual_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, with_ws=False, with_dt=False, only_ws=False, ratio=1, tag="bcs", H=56, W=56, front_point=(0.5, 0.5), front_back=(0.7, 0.8), showpath=os.path.join(this_path, "show")):
     kwargs = dict(with_ws=with_ws, with_dt=with_dt, only_ws=only_ws, ratio=ratio)
     visualize_attnmap(
@@ -162,9 +150,9 @@ def main_vssm():
             out = vssm(img[None].cuda())
         print(out.argmax().item(), label, img.shape)
         os.makedirs(f"{showpath}/{idx}_{posx}_{posy}", exist_ok=True)
-        denormalize(img).save(f"{showpath}/{idx}_{posx}_{posy}/imori.jpg")
         deimg = img.cpu() * torch.tensor([0.25, 0.25, 0.25]).view(-1, 1, 1) + torch.tensor([0.5, 0.5, 0.5]).view(-1, 1, 1)
         deimg = deimg.permute(1, 2, 0).cpu()
+        Image.fromarray((deimg * 255).to(torch.uint8).numpy()).save(f"{showpath}/{idx}_{posx}_{posy}/imori.jpg")
 
         for m0 in ["a0", "a1", "a2", "a3", "all", "nall"]:
             for m1 in ["CB", "CwBw", "ww"]:
@@ -269,9 +257,9 @@ def main_deit(det_model=False):
             deit_small_baseline(img[None].cuda())
 
         os.makedirs(f"{showpath}/{idx}_{posx}_{posy}", exist_ok=True)
-        denormalize(img).save(f"{showpath}/{idx}_{posx}_{posy}/imori.jpg")
         deimg = img.cpu() * torch.tensor([0.25, 0.25, 0.25]).view(-1, 1, 1) + torch.tensor([0.5, 0.5, 0.5]).view(-1, 1, 1)
         deimg = deimg.permute(1, 2, 0).cpu()
+        Image.fromarray((deimg * 255).to(torch.uint8).numpy()).save(f"{showpath}/{idx}_{posx}_{posy}/imori.jpg")
 
         for m0 in ["attn"]:
             for m1 in ["attn"]:

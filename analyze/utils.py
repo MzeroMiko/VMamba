@@ -62,6 +62,109 @@ def show_mask_on_image(img: torch.Tensor, mask: torch.Tensor, mask_norm=True):
     return np.uint8(255 * cam)
 
 
+def get_val_dataloader(batch_size=64, root="./val", img_size=224, sequential=True):
+    import torch.utils.data
+    size = int((256 / 224) * img_size)
+    transform = transforms.Compose([
+        transforms.Resize(size, interpolation=transforms.InterpolationMode.BICUBIC),
+        transforms.CenterCrop((img_size, img_size)),
+        transforms.ToTensor(),
+        transforms.Normalize(IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD),
+    ])
+
+    dataset = datasets.ImageFolder(root, transform=transform)
+    if sequential:
+        sampler = torch.utils.data.SequentialSampler(dataset)
+    else:
+        sampler = torch.utils.data.DistributedSampler(dataset)
+    
+    data_loader = torch.utils.data.DataLoader(
+        dataset, sampler=sampler,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=0,
+        pin_memory=True,
+        drop_last=False
+    )
+    return data_loader
+
+
+# default no amp in testing tp
+@torch.no_grad()
+def throughput(data_loader, model, logger):
+    model.eval()
+
+    for idx, (images, _) in enumerate(data_loader):
+        images = images.cuda(non_blocking=True)
+        batch_size = images.shape[0]
+        for i in range(50):
+            model(images)
+        torch.cuda.synchronize()
+        logger.info(f"throughput averaged with 30 times")
+        torch.cuda.reset_peak_memory_stats()
+        tic1 = time.time()
+        for i in range(30):
+            model(images)
+        torch.cuda.synchronize()
+        tic2 = time.time()
+        logger.info(f"batch_size {batch_size} throughput {30 * batch_size / (tic2 - tic1)}")
+        logger.info(f"batch_size {batch_size} mem cost {torch.cuda.max_memory_allocated() / 1024 / 1024} MB")
+        return
+
+
+@torch.no_grad()
+def throughputamp(data_loader, model, logger):
+    model.eval()
+
+    for idx, (images, _) in enumerate(data_loader):
+        images = images.cuda(non_blocking=True)
+        batch_size = images.shape[0]
+        for i in range(50):
+            with torch.cuda.amp.autocast():
+                model(images)
+        torch.cuda.synchronize()
+        logger.info(f"throughput averaged with 30 times")
+        torch.cuda.reset_peak_memory_stats()
+        tic1 = time.time()
+        for i in range(30):
+            with torch.cuda.amp.autocast():
+                model(images)
+        torch.cuda.synchronize()
+        tic2 = time.time()
+        logger.info(f"batch_size {batch_size} throughput {30 * batch_size / (tic2 - tic1)}")
+        logger.info(f"batch_size {batch_size} mem cost {torch.cuda.max_memory_allocated() / 1024 / 1024} MB")
+        return
+
+
+def testfwdbwd(data_loader, model, logger, amp=True):
+    model.train()
+    criterion = torch.nn.CrossEntropyLoss()
+
+    for idx, (images, targets) in enumerate(data_loader):
+        images = images.cuda(non_blocking=True)
+        targets = targets.cuda(non_blocking=True)
+        batch_size = images.shape[0]
+        for i in range(50):
+            with torch.cuda.amp.autocast(enabled=amp):
+                out = model(images)
+                loss = criterion(out, targets)
+                loss.backward()
+        torch.cuda.synchronize()
+        logger.info(f"testfwdbwd averaged with 30 times")
+        torch.cuda.reset_peak_memory_stats()
+        tic1 = time.time()
+        for i in range(30):
+            with torch.cuda.amp.autocast(enabled=amp):
+                out = model(images)
+                loss = criterion(out, targets)
+                loss.backward()
+        torch.cuda.synchronize()
+        tic2 = time.time()
+        logger.info(f"batch_size {batch_size} testfwdbwd {30 * batch_size / (tic2 - tic1)}")
+        logger.info(f"batch_size {batch_size} mem cost {torch.cuda.max_memory_allocated() / 1024 / 1024} MB")
+        return
+    
+
 class visualize:
     @staticmethod
     def get_colormap(name):
@@ -277,10 +380,24 @@ class EffectiveReceiptiveField:
 
 class AttnMamba:
     @staticmethod
+    def convert_state_dict_from_mmdet(state_dict):
+        new_state_dict = OrderedDict()
+        for k in state_dict:
+            if k.startswith("backbone."):
+                new_state_dict[k[len("backbone."):]] = state_dict[k]
+        return new_state_dict
+
+    @staticmethod
+    def checkpostfix(tag, value):
+        ret = value[-len(tag):] == tag
+        if ret:
+            value = value[:-len(tag)]
+        return ret, value
+
+    @staticmethod
     @torch.no_grad()
-    def attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, mode="CB", ret="all", absnorm=0, scale=1, verbose=False):
+    def attnmap_mamba(regs, mode="CB", ret="all", absnorm=0, scale=1, verbose=False, device=None):
         printlog = print if verbose else lambda *args, **kwargs: None
-        printlog(As.shape, Bs.shape, Cs.shape, Ds.shape, us.shape, dts.shape, delta_bias.shape)
         print(f"attn for mode={mode}, ret={ret}, absnorm={absnorm}, scale={scale}", flush=True)
 
         _norm = lambda x: x
@@ -289,10 +406,18 @@ class AttnMamba:
         elif absnorm == 2:
             _norm = lambda x: (x.abs() / x.abs().max())
 
+        As, Bs, Cs, Ds = -torch.exp(regs["A_logs"].to(torch.float32)), regs["Bs"], regs["Cs"], regs["Ds"]
+        us, dts, delta_bias = regs["us"], regs["dts"], regs["delta_bias"]
+        ys, oy = regs["ys"], regs["y"]
+        H, W = regs["H"], regs["W"]
+        printlog(As.shape, Bs.shape, Cs.shape, Ds.shape, us.shape, dts.shape, delta_bias.shape)
         B, G, N, L = Bs.shape
         GD, N = As.shape
         D = GD // G
         H, W = int(math.sqrt(L)), int(math.sqrt(L))
+        if device is not None:
+            As, Bs, Cs, Ds, us, dts, delta_bias, ys, oy = As.to(device), Bs.to(device), Cs.to(device), Ds.to(device), us.to(device), dts.to(device), delta_bias.to(device), ys.to(device), oy.to(device)
+
         mask = torch.tril(dts.new_ones((L, L)))
         dts = torch.nn.functional.softplus(dts + delta_bias[:, None]).view(B, G, D, L)
         dw_logs = As.view(G, D, N)[None, :, :, None] * dts[:,:,:,None,:] # (B, G, D, N, L)
@@ -354,37 +479,7 @@ class AttnMamba:
         else:
             raise NotImplementedError(f"{ret} is not allowed")
         attn = (scale * attn).clamp(max=attn.max())
-        return attn[0]
-
-    @staticmethod
-    def convert_state_dict_from_mmdet(state_dict):
-        new_state_dict = OrderedDict()
-        for k in state_dict:
-            if k.startswith("backbone."):
-                new_state_dict[k[len("backbone."):]] = state_dict[k]
-        return new_state_dict
-
-    @staticmethod
-    def checkpostfix(tag, value):
-        ret = value[-len(tag):] == tag
-        if ret:
-            value = value[:-len(tag)]
-        return ret, value
-
-    @staticmethod
-    def getdata(regs, device=None):
-        As, Bs, Cs, Ds = -torch.exp(regs["A_logs"].to(torch.float32)), regs["Bs"], regs["Cs"], regs["Ds"]
-        us, dts, delta_bias = regs["us"], regs["dts"], regs["delta_bias"]
-        ys, oy = regs["ys"], regs["y"]
-        print(As.shape, Bs.shape, Cs.shape, Ds.shape, us.shape, dts.shape, delta_bias.shape)
-        B, G, N, L = Bs.shape
-        GD, N = As.shape
-        D = GD // G
-        H, W = int(math.sqrt(L)), int(math.sqrt(L))
-        if device is not None:
-            As, Bs, Cs, Ds, us, dts, delta_bias, ys, oy = As.to(device), Bs.to(device), Cs.to(device), Ds.to(device), us.to(device), dts.to(device), delta_bias.to(device), ys.to(device), oy.to(device)
-
-        return As, Bs, Cs, Ds, us, dts, delta_bias, ys, oy, B, G, N, D, H, W, L
+        return attn[0], H, W
 
     @classmethod
     @torch.no_grad()
@@ -397,24 +492,23 @@ class AttnMamba:
         absnorm = 2 if tag else absnorm
         tag, mode = cls.checkpostfix("_norm", mode)
         absnorm = 1 if tag else absnorm
-        print(mode1, absnorm)
 
         if raw_attn:
-            As, Bs, Cs, Ds, us, dts, delta_bias, ys, oy, B, G, N, D, H, W, L = cls.getdata(getattr(ss2ds[stage][block_id], "__data__"), device=device)
-            attn = cls.attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, mode=mode1, ret=mode, absnorm=absnorm, verbose=verbose, scale=scale)
+            regs = getattr(ss2ds[stage][block_id], "__data__")
+            attn, H, W = cls.attnmap_mamba(regs, mode=mode1, ret=mode, absnorm=absnorm, verbose=verbose, scale=scale)
             return attn
 
-        As, Bs, Cs, Ds, us, dts, delta_bias, ys, oy, B, G, N, D, H, W, L = cls.getdata(getattr(ss2ds[stage][0], "__data__"), device=device)
-        allrolattn = torch.eye(L)
+        allrolattn = None
         for k in range(len(ss2ds[stage])):
-            As, Bs, Cs, Ds, us, dts, delta_bias, ys, oy, B, G, N, D, H, W, L = cls.getdata(getattr(ss2ds[stage][k], "__data__"), device=device)
-            attn = cls.attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, mode=mode1, ret=mode, absnorm=absnorm, verbose=verbose, scale=scale)
+            regs = getattr(ss2ds[stage][k], "__data__")
+            attn, H, W = cls.attnmap_mamba(regs, mode=mode1, ret=mode, absnorm=absnorm, verbose=verbose, scale=scale)
+            L = H * W
             assert attn.shape == (L, L)
             assert attn.max() <= 1
             assert attn.min() >= 0
             rolattn = 0.5 * (attn.cpu() + torch.eye(L))
             rolattn = rolattn / rolattn.sum(-1)
-            allrolattn = rolattn @ allrolattn
+            allrolattn = (rolattn @ allrolattn) if allrolattn is not None else rolattn
         return allrolattn
         
 
