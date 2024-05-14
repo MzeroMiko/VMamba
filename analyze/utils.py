@@ -545,7 +545,7 @@ class Throughput:
             return
 
     @classmethod    
-    def testall(cls, model, dataloader, data_path, img_size=224, _batch_size=128, with_flops=True, inference_only=False):
+    def testall(cls, model, dataloader=None, data_path="", img_size=224, _batch_size=128, with_flops=True, inference_only=False):
         from fvcore.nn import parameter_count
         torch.cuda.empty_cache()
         model.cuda().eval()
@@ -555,6 +555,12 @@ class Throughput:
             except Exception as e:
                 print("ERROR:", e, flush=True)
         print(parameter_count(model)[""], sum(p.numel() for p in model.parameters() if p.requires_grad), flush=True)
+        if dataloader is None:
+            dataloader = get_val_dataloader(
+                batch_size=batch_size, 
+                root=os.path.join(os.path.abspath(data_path), "val"),
+                img_size=img_size,
+            )
         cls.throughput(data_loader=dataloader, model=model, logger=logging)
         if inference_only:
             return
@@ -573,6 +579,7 @@ class Throughput:
             except:
                 batch_size = batch_size // 2
                 print(f"batch_size {batch_size}", flush=True)
+
 
 
 # used for extract features
