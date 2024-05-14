@@ -12,6 +12,7 @@ import torch.utils.data
 from timm.utils import accuracy, AverageMeter
 import logging
 logger = logging
+HOME = os.environ["HOME"].rstrip("/")
 
 
 def parse_options():
@@ -210,7 +211,7 @@ if __name__ == "__main__":
     vmambav2tiny = dict(
         name = "vmambav2tiny",
         model = nn.Linear(768, 1000, bias=True),
-        ckpt = "/home/LiuYue/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230s/vssm1_tiny_0230s_ckpt_epoch_264.pth",
+        ckpt = "{HOME}/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230s/vssm1_tiny_0230s_ckpt_epoch_264.pth",
         state_dict = lambda sd: {
             "weight": sd["model"]["classifier.head.weight"],
             "bias": sd["model"]["classifier.head.bias"],
@@ -220,7 +221,7 @@ if __name__ == "__main__":
     vmambav2l5tiny = dict(
         name = "vmambav2l5tiny",
         model = nn.Linear(768, 1000, bias=True),
-        ckpt = "/home/LiuYue/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230/vssm1_tiny_0230_ckpt_epoch_262.pth",
+        ckpt = "{HOME}/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230/vssm1_tiny_0230_ckpt_epoch_262.pth",
         state_dict = lambda sd: {
             "weight": sd["model"]["classifier.head.weight"],
             "bias": sd["model"]["classifier.head.bias"],
@@ -230,7 +231,7 @@ if __name__ == "__main__":
     vmambav0tiny = dict(
         name = "vmambav0tiny",
         model = nn.Linear(768, 1000, bias=True),
-        ckpt = "/home/LiuYue/Workspace/PylanceAware/ckpts/publish/vssm/classification/vssmtiny/vssmtiny_dp01_ckpt_epoch_292.pth",
+        ckpt = "{HOME}/Workspace/PylanceAware/ckpts/publish/vssm/classification/vssmtiny/vssmtiny_dp01_ckpt_epoch_292.pth",
         state_dict = lambda sd: {
             "weight": sd["model"]["head.weight"],
             "bias": sd["model"]["head.bias"],
@@ -240,7 +241,7 @@ if __name__ == "__main__":
     resnet50 = dict(
         name = "resnet50",
         model = nn.Linear(2048, 1000, bias=True),
-        ckpt = "/home/LiuYue/.cache/torch/hub/checkpoints/resnet50_8xb32_in1k_20210831-ea4938fc.pth",
+        ckpt = "{HOME}/.cache/torch/hub/checkpoints/resnet50_8xb32_in1k_20210831-ea4938fc.pth",
         state_dict = lambda sd: {
             "weight": sd["state_dict"]["head.fc.weight"],
             "bias": sd["state_dict"]["head.fc.bias"],
@@ -250,7 +251,7 @@ if __name__ == "__main__":
     deitsmall = dict(
         name = "deitsmall",
         model = nn.Linear(384, 1000, bias=True),
-        ckpt = "/home/LiuYue/.cache/torch/hub/checkpoints/deit-small_pt-4xb256_in1k_20220218-9425b9bb.pth",
+        ckpt = "{HOME}/.cache/torch/hub/checkpoints/deit-small_pt-4xb256_in1k_20220218-9425b9bb.pth",
         state_dict = lambda sd: {
             "weight": sd["state_dict"]["head.layers.head.weight"],
             "bias": sd["state_dict"]["head.layers.head.bias"],
@@ -260,7 +261,7 @@ if __name__ == "__main__":
     convnexttiny = dict(
         name = "convnexttiny",
         model = nn.Linear(768, 1000, bias=True),
-        ckpt = "/home/LiuYue/Workspace/PylanceAware/ckpts/others/convnext_tiny_1k_224_ema.pth",
+        ckpt = "{HOME}/packs/ckpts/convnext_tiny_1k_224_ema.pth",
         state_dict = lambda sd: {
             "weight": sd["model"]["head.weight"],
             "bias": sd["model"]["head.bias"],
@@ -270,7 +271,7 @@ if __name__ == "__main__":
     swintiny = dict(
         name = "swintiny",
         model = nn.Linear(768, 1000, bias=True),
-        ckpt = "/home/LiuYue/.cache/torch/hub/checkpoints/swin_tiny_224_b16x64_300e_imagenet_20210616_090925-66df6be6.pth",
+        ckpt = "{HOME}/.cache/torch/hub/checkpoints/swin_tiny_224_b16x64_300e_imagenet_20210616_090925-66df6be6.pth",
         state_dict = lambda sd: {
             "weight": sd["state_dict"]["head.fc.weight"],
             "bias": sd["state_dict"]["head.fc.bias"],
@@ -280,7 +281,7 @@ if __name__ == "__main__":
     hivittiny = dict(
         name = "hivittiny",
         model = nn.Linear(384, 1000, bias=True),
-        ckpt = "/home/LiuYue/Workspace/PylanceAware/ckpts/others/hivit-tiny-p16_8xb128_in1k/epoch_295.pth",
+        ckpt = "{HOME}/packs/ckpts/hivit-tiny-p16_8xb128_in1k/epoch_295.pth",
         state_dict = lambda sd: {
             "weight": sd["state_dict"]["head.fc.weight"],
             "bias": sd["state_dict"]["head.fc.bias"],
@@ -290,11 +291,21 @@ if __name__ == "__main__":
     interntiny = dict(
         name = "interntiny",
         model = nn.Linear(768, 1000, bias=True),
-        ckpt = "/home/LiuYue/Workspace/PylanceAware/ckpts/others/internimage_t_1k_224.pth",
+        ckpt = "{HOME}/packs/ckpts/internimage_t_1k_224.pth",
         state_dict = lambda sd: {
             "weight": sd["model"]["head.weight"],
             "bias": sd["model"]["head.bias"],
         } 
+    )
+
+    xcittiny = dict(
+        name = "xcittiny",
+        model = nn.Linear(384, 1000, bias=True),
+        ckpt = f"{HOME}/packs/ckpts/xcit_small_12_p16_224.pth",
+        state_dict = lambda sd: {
+            "weight": sd["model"]["head.weight"],
+            "bias": sd["model"]["head.bias"],
+        }  
     )
 
     names = {}
@@ -302,16 +313,16 @@ if __name__ == "__main__":
         names.update({col["name"]: col})
         size = 224
         model = col["model"]
-        feature_train = f"/home/LiuYue/ckpts/feats/merge{size}/{col['name']}_sz{size}_train.pth"
-        feature_val = f"/home/LiuYue/ckpts/feats/merge{size}/{col['name']}_sz{size}_val.pth"
+        feature_train = f"{HOME}/ckpts/feats/merge{size}/{col['name']}_sz{size}_train.pth"
+        feature_val = f"{HOME}/ckpts/feats/merge{size}/{col['name']}_sz{size}_val.pth"
         state_dict = col["state_dict"](torch.load(col["ckpt"], map_location=torch.device("cpu")))
 
     if args.name == "all":
         for col in [vmambav2tiny, vmambav2l5tiny, vmambav0tiny, swintiny, convnexttiny, hivittiny, deitsmall, resnet50, interntiny]:
-            for size, lr in zip([224, 384, 512, 640, 768, 1024], [0.05, 0.05, 0.2, 0.5, 0.5, 0.5]):
+            for size, lr in zip([224, 288, 384, 512, 640, 768, 1024], [0.05, 0.05, 0.05, 0.2, 0.5, 0.5, 0.5]):
                 model = col["model"]
-                feature_train = f"/home/LiuYue/ckpts/feats/merge{size}/{col['name']}_sz{size}_train.pth"
-                feature_val = f"/home/LiuYue/ckpts/feats/merge{size}/{col['name']}_sz{size}_val.pth"
+                feature_train = f"{HOME}/ckpts/feats/merge{size}/{col['name']}_sz{size}_train.pth"
+                feature_val = f"{HOME}/ckpts/feats/merge{size}/{col['name']}_sz{size}_val.pth"
                 state_dict = col["state_dict"](torch.load(col["ckpt"], map_location=torch.device("cpu")))
                 train(
                     model=model, args=args, features_train=feature_train, features_val=feature_val,
@@ -325,8 +336,8 @@ if __name__ == "__main__":
         size = args.size
         col = names[args.name]
         model = col["model"]
-        feature_train = f"/home/LiuYue/ckpts/feats/merge{size}/{col['name']}_sz{size}_train.pth"
-        feature_val = f"/home/LiuYue/ckpts/feats/merge{size}/{col['name']}_sz{size}_val.pth"
+        feature_train = f"{HOME}/ckpts/feats/merge{size}/{col['name']}_sz{size}_train.pth"
+        feature_val = f"{HOME}/ckpts/feats/merge{size}/{col['name']}_sz{size}_val.pth"
         state_dict = col["state_dict"](torch.load(col["ckpt"], map_location=torch.device("cpu")))
         train(
             model=model, args=args, features_train=feature_train, features_val=feature_val,
