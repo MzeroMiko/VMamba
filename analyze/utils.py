@@ -466,6 +466,7 @@ class AttnMamba:
         return allrolattn
         
 
+# used for test throughput
 class Throughput:
     # default no amp in testing tp
     # copied from swin_transformer
@@ -574,6 +575,7 @@ class Throughput:
                 print(f"batch_size {batch_size}", flush=True)
 
 
+# used for extract features
 class ExtractFeatures:
     @staticmethod
     def get_list_dataset(*args, **kwargs):
@@ -699,6 +701,7 @@ class ExtractFeatures:
         torch.save(dict(features=feats, targets=tgts), open(save, "wb"))
 
 
+# used for build models
 class BuildModels:
     @staticmethod
     def build_vheat(with_ckpt=False, remove_head=False, only_backbone=False, scale="small", size=224):
@@ -930,7 +933,7 @@ class BuildModels:
     @staticmethod
     def build_xcit(with_ckpt=False, remove_head=False, only_backbone=False, scale="tiny", size=224):
         print("xcit =================", flush=True)
-        xcit = import_abspy("xcit", f"{HOME}/Workspace/PylanceAware/ckpts/ckpts/")
+        xcit = import_abspy("xcit", f"{HOME}/packs/xcit/")
         model = dict(tiny=xcit.xcit_small_12_p16, small=xcit.xcit_small_24_p16, base=xcit.xcit_medium_24_p16)[scale]()
 
         if with_ckpt:
@@ -1431,6 +1434,7 @@ class BuildModels:
         breakpoint()
 
 
+# used for print flops
 class FLOPs:
     @staticmethod
     def register_supported_ops():
@@ -1693,6 +1697,9 @@ class FLOPs:
         
         cls.fvcore_flop_count(model, input_shape=input_shape)
 
+
+class Evals:
+    ...
 
 
 if __name__ == "__main__":
