@@ -491,6 +491,30 @@ class Throughput:
             return
 
     @staticmethod
+    @torch.no_grad()
+    def throughputamp(data_loader, model, logger=logging):
+        model.eval()
+
+        for idx, (images, _) in enumerate(data_loader):
+            images = images.cuda(non_blocking=True)
+            batch_size = images.shape[0]
+            for i in range(50):
+                with torch.cuda.amp.autocast():
+                    model(images)
+            torch.cuda.synchronize()
+            logger.info(f"throughput averaged with 30 times")
+            torch.cuda.reset_peak_memory_stats()
+            tic1 = time.time()
+            for i in range(30):
+                with torch.cuda.amp.autocast():
+                    model(images)
+            torch.cuda.synchronize()
+            tic2 = time.time()
+            logger.info(f"batch_size {batch_size} throughput {30 * batch_size / (tic2 - tic1)}")
+            logger.info(f"batch_size {batch_size} mem cost {torch.cuda.max_memory_allocated() / 1024 / 1024} MB")
+            return
+
+    @staticmethod
     def testfwdbwd(data_loader, model, logger, amp=True):
         model.cuda().train()
         criterion = torch.nn.CrossEntropyLoss()
@@ -518,7 +542,37 @@ class Throughput:
             logger.info(f"batch_size {batch_size} testfwdbwd {30 * batch_size / (tic2 - tic1)}")
             logger.info(f"batch_size {batch_size} mem cost {torch.cuda.max_memory_allocated() / 1024 / 1024} MB")
             return
-        
+
+    @classmethod    
+    def testall(cls, model, dataloader, data_path, img_size=224, _batch_size=128, with_flops=True, inference_only=False):
+        from fvcore.nn import parameter_count
+        torch.cuda.empty_cache()
+        model.cuda().eval()
+        if with_flops:
+            try:
+                FLOPs.fvcore_flop_count(model, input_shape=(3, img_size, img_size), show_arch=False)
+            except Exception as e:
+                print("ERROR:", e, flush=True)
+        print(parameter_count(model)[""], sum(p.numel() for p in model.parameters() if p.requires_grad), flush=True)
+        cls.throughput(data_loader=dataloader, model=model, logger=logging)
+        if inference_only:
+            return
+        PASS = False
+        batch_size = _batch_size
+        while (not PASS) and (batch_size > 0):
+            try:
+                _dataloader = get_val_dataloader(
+                    batch_size=batch_size, 
+                    root=os.path.join(os.path.abspath(data_path), "val"),
+                    img_size=img_size,
+                )
+                cls.testfwdbwd(data_loader=_dataloader, model=model, logger=logging)
+                cls.testfwdbwd(data_loader=_dataloader, model=model, logger=logging, amp=False)
+                PASS = True
+            except:
+                batch_size = batch_size // 2
+                print(f"batch_size {batch_size}", flush=True)
+
 
 class ExtractFeatures:
     @staticmethod
@@ -646,6 +700,54 @@ class ExtractFeatures:
 
 
 class BuildModels:
+    @staticmethod
+    def build_vheat(with_ckpt=False, remove_head=False, only_backbone=False, scale="small", size=224):
+        assert not with_ckpt 
+        assert not remove_head
+        assert not only_backbone
+        print("vim ================================", flush=True)
+        specpath = f"{HOME}/packs/Vim/mamba-1p1p1"
+        sys.path.insert(0, specpath)
+        import mamba_ssm
+        _model = import_abspy("models_mamba", f"{HOME}/packs/VHeat/")
+        model = _model.vim_small_patch16_224_bimambav2_final_pool_mean_abs_pos_embed_with_midclstok_div2
+        sys.path = sys.path[1:]
+        return model
+    
+    @staticmethod
+    def build_visionmamba(with_ckpt=False, remove_head=False, only_backbone=False, scale="small", size=224):
+        assert not with_ckpt 
+        assert not remove_head
+        assert not only_backbone
+        print("vim ================================", flush=True)
+        specpath = f"{HOME}/packs/Vim/mamba-1p1p1"
+        sys.path.insert(0, specpath)
+        import mamba_ssm
+        _model = import_abspy("models_mamba", f"{HOME}/packs/Vim/vim")
+        model = _model.vim_small_patch16_224_bimambav2_final_pool_mean_abs_pos_embed_with_midclstok_div2()
+        sys.path = sys.path[1:]
+        return model
+
+    @staticmethod
+    def build_s4nd(with_ckpt=False, remove_head=False, only_backbone=False, scale="ctiny", size=224):
+        assert not with_ckpt 
+        assert not remove_head
+        assert not only_backbone
+        assert scale in ["vitb", "ctiny"]
+        print("convnext-s4nd ================================", flush=True)
+        specpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "./convnexts4nd")
+        sys.path.insert(0, specpath)
+        import timm; assert timm.__version__ == "0.5.4"
+        import structured_kernels
+        model = import_abspy("vit_all", f"{os.path.dirname(__file__)}/convnexts4nd")
+        vitb = model.vit_base_s4nd
+        model = import_abspy("convnext_timm", f"{os.path.dirname(__file__)}/convnexts4nd")
+        ctiny = model.convnext_tiny_s4nd
+        sys.path = sys.path[1:]
+        model = dict(ctiny=ctiny, vitb=vitb)[scale]()
+        return model
+
+    @staticmethod
     def build_vmamba(with_ckpt=False, remove_head=False, only_backbone=False, scale="tv0", size=224, model=None, ckpt=None):
         print("vssm ================================", flush=True)
         _model = import_abspy("vmamba", f"{os.path.dirname(__file__)}/../classification/models")
@@ -712,15 +814,16 @@ class BuildModels:
         import swin_window_process
         _model = import_abspy("swin_transformer", f"{HOME}/packs/Swin-Transformer/models")
         # configs/swin/swin_tiny_patch4_window7_224.yaml
-        tiny = partial(_model.SwinTransformer, embed_dim=96, depths=[2,2,6,2], num_heads=[ 3, 6, 12, 24 ], fused_window_process=True)
+        tiny = partial(_model.SwinTransformer, embed_dim=96, depths=[2,2,6,2], num_heads=[ 3, 6, 12, 24 ], img_size=size, window_size=(size//32), fused_window_process=True)
         # configs/swin/swin_small_patch4_window7_224.yaml
-        small = partial(_model.SwinTransformer, embed_dim=96, depths=[2,2,18,2], num_heads=[ 3, 6, 12, 24 ], fused_window_process=True)
+        small = partial(_model.SwinTransformer, embed_dim=96, depths=[2,2,18,2], num_heads=[ 3, 6, 12, 24 ], img_size=size, window_size=(size//32), fused_window_process=True)
         # # configs/swin/swin_base_patch4_window7_224.yaml
-        base = partial(_model.SwinTransformer, embed_dim=128, depths=[2,2,18,2], num_heads=[ 4, 8, 16, 32 ], fused_window_process=True)
+        base = partial(_model.SwinTransformer, embed_dim=128, depths=[2,2,18,2], num_heads=[ 4, 8, 16, 32 ], img_size=size, window_size=(size//32), fused_window_process=True)
         sys.path = sys.path[1:]
         model = dict(tiny=tiny, small=small, base=base)[scale]()
 
         if with_ckpt:
+            assert size == 224, "only support size 224"
             assert scale == "tiny", "support tiny with ckpt only"
             ckpt = f"{HOME}/packs/ckpts/swin_tiny_patch4_window7_224.pth"
             model.load_state_dict(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))["model"])
@@ -776,11 +879,11 @@ class BuildModels:
         print("hivit [for testing throughput only] ================================", flush=True)
         sys.path.insert(0, "")
         _model = import_abspy("hivit", f"{HOME}/OTHERS/hivit/supervised/models/")
-        tiny = partial(_model.HiViT, patch_size=16, inner_patches=4, embed_dim=384, depths=[1, 1, 10], num_heads=6, stem_mlp_ratio=3., mlp_ratio=4., ape=True, rpe=True,)
-        small = partial(_model.HiViT, patch_size=16, inner_patches=4, embed_dim=384, depths=[2, 2, 20], num_heads=6, stem_mlp_ratio=3., mlp_ratio=4., ape=True, rpe=True,)
-        base = partial(_model.HiViT, patch_size=16, inner_patches=4, embed_dim=512, depths=[2, 2, 20], num_heads=8, stem_mlp_ratio=3., mlp_ratio=4., ape=True, rpe=True,)
+        tiny = partial(_model.HiViT, img_size=size, patch_size=16, inner_patches=4, embed_dim=384, depths=[1, 1, 10], num_heads=6, stem_mlp_ratio=3., mlp_ratio=4., ape=True, rpe=True,)
+        small = partial(_model.HiViT, img_size=size, patch_size=16, inner_patches=4, embed_dim=384, depths=[2, 2, 20], num_heads=6, stem_mlp_ratio=3., mlp_ratio=4., ape=True, rpe=True,)
+        base = partial(_model.HiViT, img_size=size, patch_size=16, inner_patches=4, embed_dim=512, depths=[2, 2, 20], num_heads=8, stem_mlp_ratio=3., mlp_ratio=4., ape=True, rpe=True,)
         sys.path = sys.path[1:]
-        model = dict(tiny=tiny, small=small, base=base)[scale]
+        model = dict(tiny=tiny, small=small, base=base)[scale]()
 
         if with_ckpt:
             assert NotImplementedError
