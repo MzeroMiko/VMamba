@@ -1,103 +1,17 @@
 import os
 from functools import partial
-from typing import Callable, Any
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from collections import OrderedDict
-import numpy as np
 from PIL import Image
-import math
 import torch
 import torch.nn as nn
-
 
 from utils import visualize, get_dataset, AttnMamba, import_abspy, show_mask_on_image
 visualize_attnmap = visualize.visualize_attnmap
 visualize_attnmaps = visualize.visualize_attnmaps
 attnmap_mamba = AttnMamba.attnmap_mamba
 
-
-vmamba = import_abspy(
-    "vmamba", 
-    os.path.join(os.path.dirname(os.path.abspath(__file__)), "../classification/models"),
-)
-VSSM: nn.Module = vmamba.VSSM
-SS2D: nn.Module = vmamba.SS2D
-VSSBlock: nn.Module = vmamba.VSSBlock
-Mlp: nn.Module = vmamba.Mlp
-gMlp: nn.Module = vmamba.gMlp
-DropPath: nn.Module = vmamba.DropPath
-SelectiveScanOflex: nn.Module = vmamba.SelectiveScanOflex
-CrossScanTriton: nn.Module = vmamba.CrossScanTriton
-CrossMergeTriton: nn.Module = vmamba.CrossMergeTriton
-CrossScanTriton1b1: nn.Module = vmamba.CrossScanTriton1b1
-
 this_path = os.path.dirname(os.path.abspath(__file__))
-
-
-def visual_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, with_ws=False, with_dt=False, only_ws=False, ratio=1, tag="bcs", H=56, W=56, front_point=(0.5, 0.5), front_back=(0.7, 0.8), showpath=os.path.join(this_path, "show")):
-    kwargs = dict(with_ws=with_ws, with_dt=with_dt, only_ws=only_ws, ratio=ratio)
-    visualize_attnmap(
-        attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="all", **kwargs),
-        savefig=f"{showpath}/{tag}_merge.jpg"
-    )
-    visualize_attnmap(torch.diag(attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="all", **kwargs)).view(H, W), savefig=f"{showpath}/{tag}_attn_diag.jpg") # self attention
-    # visualize_attnmap(attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="all", **kwargs)[int(front_point[0] * H * W + front_point[1] * W)].view(H, W), savefig=f"{showpath}/{tag}_attn_front.jpg") # front attention
-    # visualize_attnmap(attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="all", **kwargs)[int(front_back[0] * H * W + front_back[1] * W)].view(H, W), savefig=f"{showpath}/{tag}_attn_back.jpg") # back attention
-    visualize_attnmaps([
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="ao0", **kwargs), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="ao1", **kwargs), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="ao2", **kwargs), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="ao3", **kwargs), ""),
-        # (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a0", **kwargs), ""),
-        # (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a1", **kwargs), ""),
-        # (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a2", **kwargs), ""),
-        # (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a3", **kwargs), ""),
-    ], rows=1, savefig=f"{showpath}/{tag}_scan0.jpg", fontsize=60)    
-    visualize_attnmaps([
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="ao0", **kwargs), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="ao1", **kwargs), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="ao2", **kwargs), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="ao3", **kwargs), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a0", **kwargs), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a1", **kwargs), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a2", **kwargs), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a3", **kwargs), ""),
-    ], rows=2, savefig=f"{showpath}/{tag}_scan.jpg", fontsize=60)
-    visualize_attnmaps([
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a0", **kwargs)[0].view(H, W), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a0", **kwargs)[int(H * W / 3)].view(H, W), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a0", **kwargs)[int(H * W / 3 * 2)].view(H, W), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a0", **kwargs)[-1].view(H, W), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a1", **kwargs)[0].view(H, W), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a1", **kwargs)[int(H * W / 3)].view(H, W), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a1", **kwargs)[int(H * W / 3 * 2)].view(H, W), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a1", **kwargs)[-1].view(H, W), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a2", **kwargs)[0].view(H, W), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a2", **kwargs)[int(H * W / 3)].view(H, W), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a2", **kwargs)[int(H * W / 3 * 2)].view(H, W), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a2", **kwargs)[-1].view(H, W), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a3", **kwargs)[0].view(H, W), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a3", **kwargs)[int(H * W / 3)].view(H, W), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a3", **kwargs)[int(H * W / 3 * 2)].view(H, W), ""),
-        (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="a3", **kwargs)[-1].view(H, W), ""),
-        # (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="all", **kwargs)[0].view(H, W), ""),
-        # (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="all", **kwargs)[int(H * W / 3)].view(H, W), ""),
-        # (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="all", **kwargs)[int(H * W / 3 * 2)].view(H, W), ""),
-        # (attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, ret="all", **kwargs)[-1].view(H, W), ""),
-    ], rows=4, dpi=200, savefig=f"{showpath}/{tag}_scan_procedure.jpg", fontsize=100)
-
-
-def visual_mamba2(As, Bs, Cs, Ds, us, dts, delta_bias, with_ws=False, with_dt=False, only_ws=False, ratio=1, tag="bcs", H=56, W=56, front_point=(0.5, 0.5), front_back=(0.7, 0.8), showpath=os.path.join(this_path, "show"), imgori=None):
-    kwargs = dict(with_ws=with_ws, with_dt=with_dt, only_ws=only_ws, ratio=ratio)
-
-    results = [(imgori, "imgori")] if imgori is not None else []
-    for ret in ["a0", "a1", "a2", "a3", "all", "nall"]:
-        results.append((attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, **kwargs, ret=ret, absnorm=2)[15*28+15].view(H, W), f"pos15_15_activate_{ret}"))
-        if ret in ["nall"]:
-            results.append((torch.diag(attnmap_mamba(As, Bs, Cs, Ds, us, dts, delta_bias, bidx=0, **kwargs, ret=ret, absnorm=2)).view(H, W), f"dias_{ret}"))
-    visualize_attnmaps(results, f"{showpath}/1.jpg")
 
 
 def main_vssm():
@@ -105,6 +19,8 @@ def main_vssm():
     dataset = get_dataset(root='/media/Disk1/Dataset/MSCOCO2014/images/', img_size=512, ret="val2014", crop=False)
     # dataset = get_dataset(root='/media/Disk1/Dataset/ADEChallengeData2016/images/', img_size=448, ret="validation", crop=False)    
     
+    vmamba = import_abspy("vmamba", os.path.join(os.path.dirname(os.path.abspath(__file__)), "../classification/models"))
+    VSSM: nn.Module = vmamba.VSSM    
     vssm: nn.Module = VSSM(
         depths=[2, 2, 8, 2], 
         dims=[96, 192, 384, 768], 
@@ -175,7 +91,7 @@ def main_deit(det_model=False):
     attns = dict()
     deit_small_baseline = None
     if det_model:
-        from vit_adpter_baseline import deit_small_baseline, Attention, WindowedAttention
+        from ckpts.ckpts.vit_adpter_baseline import deit_small_baseline, Attention, WindowedAttention
         sd = torch.load("/home/LiuYue/Workspace/PylanceAware/ckpts/others/deit_small_patch16_224-cd65a155.pth", map_location=torch.device("cpu"))
         deit_small_baseline = deit_small_baseline().cuda()
         deit_small_baseline.load_state_dict(sd['model'], strict=False)
