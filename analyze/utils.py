@@ -708,13 +708,14 @@ class BuildModels:
         assert not with_ckpt 
         assert not remove_head
         assert not only_backbone
-        print("vim ================================", flush=True)
+        print("vheat ================================", flush=True)
         _model = import_abspy("vheat", f"{HOME}/packs/VHeat/classification/models")
-        VHEAT = _model.Heat_Throughput_Test_BCHW
-        tiny = partial(VHEAT, depths=[2, 2, 6, 2], dims=96, img_size=size)
-        small = partial(VHEAT, depths=[2, 2, 18, 2], dims=96, img_size=size)
-        base = partial(VHEAT, depths=[2, 2, 18, 2], dims=128, img_size=size)
+        VHEAT = _model.HeatM_V2_Stem_Noangle_Freqembed_Oldhead_Fast2_Torelease
+        tiny = partial(VHEAT, depths=[2, 2, 6, 2], dims=96, img_size=size, infer_mode=True)
+        small = partial(VHEAT, depths=[2, 2, 18, 2], dims=96, img_size=size, infer_mode=True)
+        base = partial(VHEAT, depths=[2, 2, 18, 2], dims=128, img_size=size, infer_mode=True)
         model = dict(tiny=tiny, small=small, base=base)[scale]()
+        model.infer_init()
 
         return model
     
@@ -882,7 +883,7 @@ class BuildModels:
     def build_hivit(with_ckpt=False, remove_head=False, only_backbone=False, scale="tiny", size=224):
         print("hivit [for testing throughput only] ================================", flush=True)
         sys.path.insert(0, "")
-        _model = import_abspy("hivit", f"{HOME}/OTHERS/hivit/supervised/models/")
+        _model = import_abspy("hivit", f"{HOME}/packs/hivit/supervised/models/")
         tiny = partial(_model.HiViT, img_size=size, patch_size=16, inner_patches=4, embed_dim=384, depths=[1, 1, 10], num_heads=6, stem_mlp_ratio=3., mlp_ratio=4., ape=True, rpe=True,)
         small = partial(_model.HiViT, img_size=size, patch_size=16, inner_patches=4, embed_dim=384, depths=[2, 2, 20], num_heads=6, stem_mlp_ratio=3., mlp_ratio=4., ape=True, rpe=True,)
         base = partial(_model.HiViT, img_size=size, patch_size=16, inner_patches=4, embed_dim=512, depths=[2, 2, 20], num_heads=8, stem_mlp_ratio=3., mlp_ratio=4., ape=True, rpe=True,)
