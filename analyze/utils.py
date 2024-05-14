@@ -946,7 +946,7 @@ class BuildModels:
 
         if with_ckpt:
             assert scale == "tiny", "only support tiny for ckpt"
-            ckpt = f"{HOME}/Workspace/PylanceAware/ckpts/ckpts/others/xcit_small_12_p16_224.pth"
+            ckpt = f"{HOME}/packs/ckpts/xcit_small_12_p16_224.pth"
             model.load_state_dict(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))["model"])
 
         if remove_head:
