@@ -706,12 +706,13 @@ class BuildModels:
         assert not remove_head
         assert not only_backbone
         print("vim ================================", flush=True)
-        specpath = f"{HOME}/packs/Vim/mamba-1p1p1"
-        sys.path.insert(0, specpath)
-        import mamba_ssm
-        _model = import_abspy("models_mamba", f"{HOME}/packs/VHeat/")
-        model = _model.vim_small_patch16_224_bimambav2_final_pool_mean_abs_pos_embed_with_midclstok_div2
-        sys.path = sys.path[1:]
+        _model = import_abspy("vheat", f"{HOME}/packs/VHeat/classification/models")
+        VHEAT = _model.Heat_Throughput_Test_BCHW
+        tiny = partial(VHEAT, depths=[2, 2, 6, 2], dims=96, img_size=size)
+        small = partial(VHEAT, depths=[2, 2, 18, 2], dims=96, img_size=size)
+        base = partial(VHEAT, depths=[2, 2, 18, 2], dims=128, img_size=size)
+        model = dict(tiny=tiny, small=small, base=base)[scale]()
+
         return model
     
     @staticmethod
