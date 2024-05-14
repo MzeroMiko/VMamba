@@ -152,7 +152,11 @@ def main_vssm():
         os.makedirs(f"{showpath}/{idx}_{posx}_{posy}", exist_ok=True)
         deimg = img.cpu() * torch.tensor([0.25, 0.25, 0.25]).view(-1, 1, 1) + torch.tensor([0.5, 0.5, 0.5]).view(-1, 1, 1)
         deimg = deimg.permute(1, 2, 0).cpu()
-        Image.fromarray((deimg * 255).to(torch.uint8).numpy()).save(f"{showpath}/{idx}_{posx}_{posy}/imori.jpg")
+        visualize.draw_image_grid(
+            Image.fromarray((deimg * 255).to(torch.uint8).numpy()),
+            [(posx * 512, posy * 512, 512 / 32, 512 / 32)]
+        ).save(f"{showpath}/{idx}_{posx}_{posy}/imori.jpg")
+        continue
 
         for m0 in ["a0", "a1", "a2", "a3", "all", "nall"]:
             for m1 in ["CB", "CwBw", "ww"]:
@@ -259,7 +263,11 @@ def main_deit(det_model=False):
         os.makedirs(f"{showpath}/{idx}_{posx}_{posy}", exist_ok=True)
         deimg = img.cpu() * torch.tensor([0.25, 0.25, 0.25]).view(-1, 1, 1) + torch.tensor([0.5, 0.5, 0.5]).view(-1, 1, 1)
         deimg = deimg.permute(1, 2, 0).cpu()
-        Image.fromarray((deimg * 255).to(torch.uint8).numpy()).save(f"{showpath}/{idx}_{posx}_{posy}/imori.jpg")
+        visualize.draw_image_grid(
+            Image.fromarray((deimg * 255).to(torch.uint8).numpy()),
+            [(posx * 512, posy * 512, 512 / 32, 512 / 32)]
+        ).save(f"{showpath}/{idx}_{posx}_{posy}/imori.jpg")
+        continue
 
         for m0 in ["attn"]:
             for m1 in ["attn"]:
@@ -273,6 +281,6 @@ def main_deit(det_model=False):
 
 
 if __name__ == "__main__":
-    # main_deit()
+    main_deit()
     main_vssm()
 

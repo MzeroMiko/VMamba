@@ -160,6 +160,7 @@ def _validate(
 
 
 def testscale(modes, batch_size=32, data_path="ImageNet_ILSVRC2012"):
+    sizes = [224, 384, 512, 640, 768, 1024]
     _build = import_abspy("models", f"{os.path.dirname(__file__)}/../classification")
     build_mmpretrain_models = _build.build_mmpretrain_models
 
@@ -168,11 +169,10 @@ def testscale(modes, batch_size=32, data_path="ImageNet_ILSVRC2012"):
         import triton, mamba_ssm, selective_scan_cuda_oflex
         _model = import_abspy("vmamba", f"{os.path.dirname(__file__)}/../classification/models")
         taav1 = partial(_model.VSSM, dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-        ckpt = "/home/LiuYue/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230/vssm1_tiny_0230_ckpt_epoch_262.pth"
         ckpt = "/home/LiuYue/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230s/vssm1_tiny_0230s_ckpt_epoch_264.pth"
         model = taav1().cuda().eval()
         model.load_state_dict(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))["model"])
-        for size in [224, 384, 512, 640, 768, 1024]:
+        for size in sizes:
             _validate(model, img_size=size, batch_size=batch_size, data_path=data_path)
 
     if "vssm0" in modes:
@@ -183,7 +183,7 @@ def testscale(modes, batch_size=32, data_path="ImageNet_ILSVRC2012"):
         ckpt = "/home/LiuYue/Workspace/PylanceAware/ckpts/publish/vssm/classification/vssmtiny/vssmtiny_dp01_ckpt_epoch_292.pth"
         model = ta6().cuda().eval()
         model.load_state_dict(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))["model"])
-        for size in [224, 384, 512, 640, 768, 1024]:
+        for size in sizes:
             _validate(model, img_size=size, batch_size=batch_size, data_path=data_path)
 
     if "resnet" in modes:
@@ -338,12 +338,19 @@ def testscale(modes, batch_size=32, data_path="ImageNet_ILSVRC2012"):
         _model = import_abspy("intern_image", f"{HOME}/OTHERS/InternImage/classification/models/")
         model = partial(_model.InternImage, core_op='DCNv3', channels=64, depths=[4, 4, 18, 4], groups=[4, 8, 16, 32], offset_scale=1.0, mlp_ratio=4.,)
         model = model()
-        ckpt ="/home/LiuYue/Workspace/PylanceAware/ckpts/others/internimage_t_1k_224.pth"
+        ckpt =f"{HOME}/Workspace/PylanceAware/ckpts/others/internimage_t_1k_224.pth"
         model.load_state_dict(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))["model"])
         for size in [224, 384, 512, 640, 768, 1024]:
             _validate(model, img_size=size, batch_size=batch_size, data_path=data_path)
         sys.path = sys.path[1:]
 
+    if "xcit" in modes:
+        xcit = import_abspy("xcit", f"{HOME}/Workspace/PylanceAware/ckpts/ckpts/")
+        model = xcit.xcit_small_12_p16()
+        ckpt =f"{HOME}/Workspace/PylanceAware/ckpts/ckpts/others/xcit_small_12_p16_224.pth"
+        model.load_state_dict(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))["model"])
+        for size in [224, 384, 512, 640, 768, 1024]:
+            _validate(model, img_size=size, batch_size=batch_size, data_path=data_path)
 
 def testperf(modes, batch_size=128, data_path="ImageNet_ILSVRC2012"):
     _build = import_abspy("models", f"{os.path.dirname(__file__)}/../classification")
@@ -538,6 +545,7 @@ def testperf(modes, batch_size=128, data_path="ImageNet_ILSVRC2012"):
         model.load_state_dict(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))["model"])
         _validate(model, img_size=224, batch_size=batch_size, data_path=data_path)
         sys.path = sys.path[1:]
+
 
 
 class DatasetList:
@@ -870,6 +878,18 @@ def _extract_feature(data_path="ImageNet_ILSVRC2012", start=0, end=200, step=-1,
             model.cuda().eval()
             interntiny = model
 
+        xcittiny = None
+        if True:
+            print("xcit ================================", flush=True)
+            _model = import_abspy("xcit", f"{HOME}/Workspace/PylanceAware/ckpts/ckpts/")
+            model = _model.xcit_small_12_p16()
+            ckpt =f"{HOME}/Workspace/PylanceAware/ckpts/ckpts/others/xcit_small_12_p16_224.pth"
+            model.load_state_dict(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))["model"])
+            print(model.head, flush=True) # 768
+            model.head = nn.Identity()
+            model.cuda().eval()
+            xcittiny = model
+
         if step > 0:
             starts = list(range(start, end, step))
             ends = [s + step for s in starts]
@@ -882,26 +902,28 @@ def _extract_feature(data_path="ImageNet_ILSVRC2012", start=0, end=200, step=-1,
         for s, e in zip(starts, ends):
             extract_feature(
                 backbones=dict(
-                    vmambav2tiny = vmambav2tiny,
-                    convnexttiny = convnexttiny,
-                    swintiny = swintiny,
-                    interntiny = interntiny,
-                    vmambav0tiny = vmambav0tiny,
-                    vmambav2l5tiny = vmambav2l5tiny,
-                    deitsmall = deitsmall,
-                    hivittiny = hivittiny,
-                    resnet50 = resnet50,
+                    # vmambav2tiny = vmambav2tiny,
+                    # convnexttiny = convnexttiny,
+                    # swintiny = swintiny,
+                    # interntiny = interntiny,
+                    # vmambav0tiny = vmambav0tiny,
+                    # vmambav2l5tiny = vmambav2l5tiny,
+                    # deitsmall = deitsmall,
+                    # hivittiny = hivittiny,
+                    # resnet50 = resnet50,
+                    xcittiny = xcittiny,
                 ), 
                 dims=dict(
-                    vmambav2tiny = 768,
-                    convnexttiny = 768,
-                    swintiny = 768,
-                    interntiny = 768,
-                    vmambav0tiny = 768,
-                    vmambav2l5tiny = 768,
-                    deitsmall = 384,
-                    hivittiny = 384,
-                    resnet50 = 2048,
+                    # vmambav2tiny = 768,
+                    # convnexttiny = 768,
+                    # swintiny = 768,
+                    # interntiny = 768,
+                    # vmambav0tiny = 768,
+                    # vmambav2l5tiny = 768,
+                    # deitsmall = 384,
+                    # hivittiny = 384,
+                    # resnet50 = 2048,
+                    xcittiny = 384,
                 ),
                 batch_size=batch_size,
                 img_size=img_size,
@@ -929,7 +951,7 @@ def main():
     print(args, flush=True)
     # breakpoint()
     
-    modes = ["vssma6", "vssmaav1", "convnext", "resnet", "deit", "swin", "swinscale", "hivit", "intern"]
+    modes = ["vssma6", "vssmaav1", "convnext", "resnet", "deit", "swin", "swinscale", "hivit", "intern", "xcit"]
     if args.mode != "":
         modes = [args.mode]
     

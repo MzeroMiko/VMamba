@@ -1,4 +1,5 @@
 import os
+import logging
 import sys
 import time
 import math
@@ -13,6 +14,8 @@ from torchvision import datasets, transforms
 from torch.utils.data import DataLoader, RandomSampler
 from collections import OrderedDict
 import cv2
+import PIL
+from PIL import Image
 
 
 def import_abspy(name="models", path="classification/"):
@@ -89,81 +92,7 @@ def get_val_dataloader(batch_size=64, root="./val", img_size=224, sequential=Tru
     return data_loader
 
 
-# default no amp in testing tp
-@torch.no_grad()
-def throughput(data_loader, model, logger):
-    model.eval()
 
-    for idx, (images, _) in enumerate(data_loader):
-        images = images.cuda(non_blocking=True)
-        batch_size = images.shape[0]
-        for i in range(50):
-            model(images)
-        torch.cuda.synchronize()
-        logger.info(f"throughput averaged with 30 times")
-        torch.cuda.reset_peak_memory_stats()
-        tic1 = time.time()
-        for i in range(30):
-            model(images)
-        torch.cuda.synchronize()
-        tic2 = time.time()
-        logger.info(f"batch_size {batch_size} throughput {30 * batch_size / (tic2 - tic1)}")
-        logger.info(f"batch_size {batch_size} mem cost {torch.cuda.max_memory_allocated() / 1024 / 1024} MB")
-        return
-
-
-@torch.no_grad()
-def throughputamp(data_loader, model, logger):
-    model.eval()
-
-    for idx, (images, _) in enumerate(data_loader):
-        images = images.cuda(non_blocking=True)
-        batch_size = images.shape[0]
-        for i in range(50):
-            with torch.cuda.amp.autocast():
-                model(images)
-        torch.cuda.synchronize()
-        logger.info(f"throughput averaged with 30 times")
-        torch.cuda.reset_peak_memory_stats()
-        tic1 = time.time()
-        for i in range(30):
-            with torch.cuda.amp.autocast():
-                model(images)
-        torch.cuda.synchronize()
-        tic2 = time.time()
-        logger.info(f"batch_size {batch_size} throughput {30 * batch_size / (tic2 - tic1)}")
-        logger.info(f"batch_size {batch_size} mem cost {torch.cuda.max_memory_allocated() / 1024 / 1024} MB")
-        return
-
-
-def testfwdbwd(data_loader, model, logger, amp=True):
-    model.train()
-    criterion = torch.nn.CrossEntropyLoss()
-
-    for idx, (images, targets) in enumerate(data_loader):
-        images = images.cuda(non_blocking=True)
-        targets = targets.cuda(non_blocking=True)
-        batch_size = images.shape[0]
-        for i in range(50):
-            with torch.cuda.amp.autocast(enabled=amp):
-                out = model(images)
-                loss = criterion(out, targets)
-                loss.backward()
-        torch.cuda.synchronize()
-        logger.info(f"testfwdbwd averaged with 30 times")
-        torch.cuda.reset_peak_memory_stats()
-        tic1 = time.time()
-        for i in range(30):
-            with torch.cuda.amp.autocast(enabled=amp):
-                out = model(images)
-                loss = criterion(out, targets)
-                loss.backward()
-        torch.cuda.synchronize()
-        tic2 = time.time()
-        logger.info(f"batch_size {batch_size} testfwdbwd {30 * batch_size / (tic2 - tic1)}")
-        logger.info(f"batch_size {batch_size} mem cost {torch.cuda.max_memory_allocated() / 1024 / 1024} MB")
-        return
-    
 
 class visualize:
     @staticmethod
@@ -176,7 +105,19 @@ class visualize:
             return mpl.cm.get_cmap(name)
 
     @staticmethod
-    def visualize_attnmap(attnmap, savefig="", figsize=(18, 16), cmap=None, sticks=True, dpi=400, fontsize=35, imgori=None, alpha=1.0, colorbar=True, **kwargs):
+    def draw_image_grid(image: Image, grid=[(0, 0, 1, 1)], **kwargs):
+        # grid[0]: (x,y,w,h)
+        default = dict(fill=None, outline='red', width=3)
+        default.update(kwargs)
+        assert isinstance(grid, list) and isinstance(grid[0], tuple) and len(grid[0]) == 4
+        from PIL import ImageDraw
+        a = ImageDraw.ImageDraw(image)
+        for g in grid:
+            a.rectangle([(g[0], g[1]), (g[0] + g[2], g[1] + g[3])], **default)
+        return image
+
+    @staticmethod
+    def visualize_attnmap(attnmap, savefig="", figsize=(18, 16), cmap=None, sticks=True, dpi=400, fontsize=35, colorbar=True, **kwargs):
         import matplotlib.pyplot as plt
         if isinstance(attnmap, torch.Tensor):
             attnmap = attnmap.detach().cpu().numpy()
@@ -185,9 +126,7 @@ class visualize:
         plt.rcParams["font.size"] = fontsize
         plt.figure(figsize=figsize, dpi=dpi, **kwargs)
         ax = plt.gca()
-        if imgori is not None:
-            im = ax.imshow(imgori)
-        im = ax.imshow(attnmap, cmap=cmap, alpha=alpha)
+        im = ax.imshow(attnmap, cmap=cmap)
         # ax.set_title(title)
         if not sticks:
             ax.set_axis_off()
@@ -318,6 +257,7 @@ class visualize:
         plt.close()
 
 
+#  used for visualizing effective receiptive field 
 class EffectiveReceiptiveField:
     @staticmethod
     def simpnorm(data):
@@ -351,7 +291,7 @@ class EffectiveReceiptiveField:
         return grad_map
 
     @classmethod
-    def get_input_grad_avg(cls, model: nn.Module, size=1024, data_path=".", num_images=50, norms=lambda x:x, mean=IMAGENET_DEFAULT_MEAN, std=IMAGENET_DEFAULT_STD):
+    def get_input_grad_avg(cls, model: nn.Module, size=1024, data_path="ImageNet", num_images=50, norms=lambda x:x, mean=IMAGENET_DEFAULT_MEAN, std=IMAGENET_DEFAULT_STD):
         import tqdm
         from torchvision import datasets, transforms
         from torch.utils.data import DataLoader, RandomSampler
@@ -378,6 +318,7 @@ class EffectiveReceiptiveField:
         return norms(meter.avg)
 
 
+# used for visualizing the attention of mamba
 class AttnMamba:
     @staticmethod
     def convert_state_dict_from_mmdet(state_dict):
@@ -512,4 +453,112 @@ class AttnMamba:
         return allrolattn
         
 
+class DatasetList:
+    def __init__(self, batch_size=16, root="train/", img_size=224, weak_aug=False):
+        self.batch_size = int(batch_size)
+        transform, transform_waug = self.get_transform(img_size)
+        self.transform = transform_waug if weak_aug else transform
+        self.dataset = datasets.ImageFolder(root, transform=self.transform)
+        
+        self.num_data = int(len(self.dataset))
+        self.num_batches = math.ceil(self.num_data / self.batch_size)
+        print(f"weak aug: {weak_aug} =========================", flush=True)
 
+
+    @staticmethod
+    def get_transform(img_size=224):
+        size = int((256 / 224) * img_size)
+        transform = transforms.Compose([
+            transforms.Resize(size, interpolation=transforms.InterpolationMode.BICUBIC),
+            transforms.CenterCrop((img_size, img_size)),
+            transforms.ToTensor(),
+            transforms.Normalize(IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD),
+        ])
+        transform_waug = transforms.Compose([
+            transforms.RandomResizedCrop(img_size, interpolation=transforms.InterpolationMode.BICUBIC),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize(IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD),
+        ])
+        return transform, transform_waug
+
+    def __len__(self):
+        return self.num_batches
+
+    def __getitem__(self, idx):
+        start = idx * self.batch_size
+        end = min(start + self.batch_size, self.num_data)
+        data = [self.dataset[i] for i in range(start, end)]
+        images = torch.stack([img for img, tgt in data])
+        targets = torch.stack([torch.tensor(tgt) for img, tgt in data])
+        if len(images) < self.batch_size:
+            _images = torch.zeros((self.batch_size, *data[0][0].shape))
+            _targets = -1 * torch.ones((self.batch_size,))
+            _images[:len(images)] = images
+            _targets[:len(images)] = targets
+            return _images, _targets
+        return images, targets
+
+
+class Throughput:
+    # default no amp in testing tp
+    # copied from swin_transformer
+    @staticmethod
+    @torch.no_grad()
+    def throughput(data_loader, model, logger=logging):
+        model.eval()
+        for idx, (images, _) in enumerate(data_loader):
+            images = images.cuda(non_blocking=True)
+            batch_size = images.shape[0]
+            for i in range(50):
+                model(images)
+            torch.cuda.synchronize()
+            logger.info(f"throughput averaged with 30 times")
+            torch.cuda.reset_peak_memory_stats()
+            tic1 = time.time()
+            for i in range(30):
+                model(images)
+            torch.cuda.synchronize()
+            tic2 = time.time()
+            logger.info(f"batch_size {batch_size} throughput {30 * batch_size / (tic2 - tic1)}")
+            logger.info(f"batch_size {batch_size} mem cost {torch.cuda.max_memory_allocated() / 1024 / 1024} MB")
+            return
+
+    @staticmethod
+    def testfwdbwd(data_loader, model, logger, amp=True):
+        model.cuda().train()
+        criterion = torch.nn.CrossEntropyLoss()
+
+        for idx, (images, targets) in enumerate(data_loader):
+            images = images.cuda(non_blocking=True)
+            targets = targets.cuda(non_blocking=True)
+            batch_size = images.shape[0]
+            for i in range(50):
+                with torch.cuda.amp.autocast(enabled=amp):
+                    out = model(images)
+                    loss = criterion(out, targets)
+                    loss.backward()
+            torch.cuda.synchronize()
+            logger.info(f"testfwdbwd averaged with 30 times")
+            torch.cuda.reset_peak_memory_stats()
+            tic1 = time.time()
+            for i in range(30):
+                with torch.cuda.amp.autocast(enabled=amp):
+                    out = model(images)
+                    loss = criterion(out, targets)
+                    loss.backward()
+            torch.cuda.synchronize()
+            tic2 = time.time()
+            logger.info(f"batch_size {batch_size} testfwdbwd {30 * batch_size / (tic2 - tic1)}")
+            logger.info(f"batch_size {batch_size} mem cost {torch.cuda.max_memory_allocated() / 1024 / 1024} MB")
+            return
+        
+
+class ExtractFeatures:
+    ...
+
+
+
+class BuildModels:
+    def build_vmamba():
+        ...
