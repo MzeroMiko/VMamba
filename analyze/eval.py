@@ -546,7 +546,7 @@ def testperf(modes, batch_size=128, data_path="ImageNet_ILSVRC2012"):
         _validate(model, img_size=224, batch_size=batch_size, data_path=data_path)
         sys.path = sys.path[1:]
 
-from utils import ExtractFeatures
+from utils import ExtractFeatures, BuildModels
 
 extract_feature = ExtractFeatures.extract_feature
 
@@ -554,6 +554,19 @@ extract_feature = ExtractFeatures.extract_feature
 def _extract_feature(data_path="ImageNet_ILSVRC2012", start=0, end=200, step=-1, img_size=224, batch_size=16, train=True, aug=False):
     _build = import_abspy("models", f"{os.path.dirname(__file__)}/../classification")
     build_mmpretrain_models = _build.build_mmpretrain_models
+
+    if False:
+        resnet50 = BuildModels.build_resnet_mmpretrain(with_ckpt=True, remove_head=True, scale="r50").cuda().eval()
+        deitsmall = BuildModels.build_deit_mmpretrain(with_ckpt=True, remove_head=True, scale="small").cuda().eval()
+        vmambav0tiny = BuildModels.build_vmamba(with_ckpt=True, remove_head=True, scale="tv0").cuda().eval()
+        vmambav2l5tiny = BuildModels.build_vmamba(with_ckpt=True, remove_head=True, scale="tv1").cuda().eval()
+        vmambav2tiny = BuildModels.build_vmamba(with_ckpt=True, remove_head=True, scale="tv2").cuda().eval()
+        convnexttiny = BuildModels.build_convnext(with_ckpt=True, remove_head=True, scale="tiny").cuda().eval()
+        swintiny = BuildModels.build_swin_mmpretrain(with_ckpt=True, remove_head=True, scale="tiny").cuda().eval()
+        hivittiny = BuildModels.build_hivit_mmpretrain(with_ckpt=True, remove_head=True, scale="tiny").cuda().eval()
+        interntiny = BuildModels.build_intern(with_ckpt=True, remove_head=True, scale="tiny").cuda().eval()
+        xcittiny = BuildModels.build_xcit(with_ckpt=True, remove_head=True, scale="tiny").cuda().eval()
+        breakpoint()
 
     if True:
         resnet50 = None
@@ -774,6 +787,7 @@ def _extract_feature(data_path="ImageNet_ILSVRC2012", start=0, end=200, step=-1,
             model.cuda().eval()
             xcittiny = model
 
+    if True:
         if step > 0:
             starts = list(range(start, end, step))
             ends = [s + step for s in starts]
