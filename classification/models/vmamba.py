@@ -634,7 +634,7 @@ class SS2Dv2:
                 _Ds = Ds.view(4, -1)[:2].contiguous().view(-1),
                 width=True,
             ).view(B, H, 2, -1, W).sum(dim=2).permute(0, 2, 1, 3) # (B,C,H,W)
-            # y_row = F.layer_norm(y_row.permute(0, 2, 3, 1), normalized_shape=(int(y_row.shape[1]),)).permute(0, 3, 1, 2).contiguous() # added0510 to avoid nan
+            y_row = F.layer_norm(y_row.permute(0, 2, 3, 1), normalized_shape=(int(y_row.shape[1]),)).permute(0, 3, 1, 2).contiguous() # added0510 to avoid nan
             y_col = scan_rowcol(
                 y_row,
                 proj_weight = x_proj_weight.view(4, -1, D)[2:].contiguous().to(y_row.dtype), 
