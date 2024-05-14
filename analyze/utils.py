@@ -557,7 +557,7 @@ class Throughput:
         print(parameter_count(model)[""], sum(p.numel() for p in model.parameters() if p.requires_grad), flush=True)
         if dataloader is None:
             dataloader = get_val_dataloader(
-                batch_size=batch_size, 
+                batch_size=_batch_size, 
                 root=os.path.join(os.path.abspath(data_path), "val"),
                 img_size=img_size,
             )
