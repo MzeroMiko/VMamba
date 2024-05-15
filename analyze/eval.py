@@ -555,20 +555,21 @@ def _extract_feature(data_path="ImageNet_ILSVRC2012", start=0, end=200, step=-1,
     _build = import_abspy("models", f"{os.path.dirname(__file__)}/../classification")
     build_mmpretrain_models = _build.build_mmpretrain_models
 
-    if False:
-        resnet50 = BuildModels.build_resnet_mmpretrain(with_ckpt=True, remove_head=True, scale="r50").cuda().eval()
-        deitsmall = BuildModels.build_deit_mmpretrain(with_ckpt=True, remove_head=True, scale="small").cuda().eval()
+    if True:
+        resnet50 = BuildModels.build_resnet_mmpretrain(with_ckpt=True, remove_head=True, scale="r50", size=img_size).cuda().eval()
+        deitsmall = BuildModels.build_deit_mmpretrain(with_ckpt=True, remove_head=True, scale="small", size=img_size).cuda().eval()
         vmambav0tiny = BuildModels.build_vmamba(with_ckpt=True, remove_head=True, scale="tv0").cuda().eval()
         vmambav2l5tiny = BuildModels.build_vmamba(with_ckpt=True, remove_head=True, scale="tv1").cuda().eval()
         vmambav2tiny = BuildModels.build_vmamba(with_ckpt=True, remove_head=True, scale="tv2").cuda().eval()
         convnexttiny = BuildModels.build_convnext(with_ckpt=True, remove_head=True, scale="tiny").cuda().eval()
-        swintiny = BuildModels.build_swin_mmpretrain(with_ckpt=True, remove_head=True, scale="tiny").cuda().eval()
-        hivittiny = BuildModels.build_hivit_mmpretrain(with_ckpt=True, remove_head=True, scale="tiny").cuda().eval()
+        swintiny = BuildModels.build_swin_mmpretrain(with_ckpt=True, remove_head=True, scale="tiny", size=img_size).cuda().eval()
+        hivittiny = BuildModels.build_hivit_mmpretrain(with_ckpt=True, remove_head=True, scale="tiny", size=img_size).cuda().eval()
         interntiny = BuildModels.build_intern(with_ckpt=True, remove_head=True, scale="tiny").cuda().eval()
-        xcittiny = BuildModels.build_xcit(with_ckpt=True, remove_head=True, scale="tiny").cuda().eval()
-        breakpoint()
+        xcittiny = BuildModels.build_xcit(with_ckpt=True, remove_head=True, scale="tiny", size=img_size).cuda().eval()
+        deitbase = BuildModels.build_deit_mmpretrain(with_ckpt=True, remove_head=True, scale="base", size=img_size).cuda().eval()
+        # breakpoint()
 
-    if True:
+    if False:
         resnet50 = None
         if True:
             print("resnet ================================", flush=True)
@@ -809,7 +810,8 @@ def _extract_feature(data_path="ImageNet_ILSVRC2012", start=0, end=200, step=-1,
                     # deitsmall = deitsmall,
                     # hivittiny = hivittiny,
                     # resnet50 = resnet50,
-                    xcittiny = xcittiny,
+                    # xcittiny = xcittiny,
+                    deitbase = deitbase,
                 ), 
                 dims=dict(
                     # vmambav2tiny = 768,
@@ -821,7 +823,8 @@ def _extract_feature(data_path="ImageNet_ILSVRC2012", start=0, end=200, step=-1,
                     # deitsmall = 384,
                     # hivittiny = 384,
                     # resnet50 = 2048,
-                    xcittiny = 384,
+                    # xcittiny = 384,
+                    deitbase = 768,
                 ),
                 batch_size=batch_size,
                 img_size=img_size,
