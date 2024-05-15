@@ -1662,14 +1662,22 @@ class FLOPs:
         #       'flops computation is correct.')
 
     @classmethod
-    def mmdet_flops(cls, config=None):
+    def mmdet_flops(cls, config=None, extra_config=None):
         from mmengine.config import Config
         from mmengine.runner import Runner
         import numpy as np
         import os
 
         cfg = Config.fromfile(config)
+        if "model" in cfg:
+            if "pretrained" in cfg["model"]:
+                cfg["model"].pop("pretrained")
+        if extra_config is not None:
+            new_cfg = Config.fromfile(extra_config)
+            new_cfg["model"] = cfg["model"]
+            cfg = new_cfg
         cfg["work_dir"] = "/tmp"
+        cfg["default_scope"] = "mmdet"
         runner = Runner.from_cfg(cfg)
         model = runner.model.cuda()
         get_model_complexity_info = cls.mmengine_flop_count(_get_model_complexity_info=True)
@@ -1700,6 +1708,7 @@ class FLOPs:
 
         cfg = Config.fromfile(config)
         cfg["work_dir"] = "/tmp"
+        cfg["default_scope"] = "mmseg"
         runner = Runner.from_cfg(cfg)
         model = runner.model.cuda()
         
