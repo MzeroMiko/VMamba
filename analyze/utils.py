@@ -1144,7 +1144,7 @@ class BuildModels:
             backbone=dict(
                 type='VisionTransformer',
                 arch='deit-small',
-                img_size=224,
+                img_size=size,
                 patch_size=16),
             neck=None,
             head=dict(
@@ -1168,7 +1168,7 @@ class BuildModels:
             backbone=dict(
                 type='VisionTransformer',
                 arch='deit-base',
-                img_size=224,
+                img_size=size,
                 patch_size=16,
                 drop_path_rate=0.1),
             neck=None,
