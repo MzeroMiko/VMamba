@@ -1020,7 +1020,7 @@ class BuildModels:
         model: ImageClassifier = build_classifier(model)
         if with_ckpt:
             assert scale == "tiny", "support tiny with ckpt only"
-            model.load_state_dict(CheckpointLoader.load_checkpoint(ckpt)['state_dict'])
+            model.load_state_dict(CheckpointLoader.load_checkpoint(ckpt)['state_dict'], strict=False)
 
         if remove_head:
             print(model.head.fc, flush=True) # 768
