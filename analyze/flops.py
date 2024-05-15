@@ -39,7 +39,7 @@ if __name__ == '__main__':
         segpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../segmentation/configs")
         detpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../detection/configs")
         mmdet_mmseg_vssm()
-        if False:
+        if True:
             FLOPs.mmseg_flops(config=f"{segpath}/upernet/upernet_r50_4xb4-160k_ade20k-512x512.py", input_shape=(3, 512, 2048)) # GFlops:  952.616667136 Params:  66516108
             FLOPs.mmseg_flops(config=f"{segpath}/upernet/upernet_r101_4xb4-160k_ade20k-512x512.py", input_shape=(3, 512, 2048)) # GFlops:  1030.4084234239997 Params:  85508236
             FLOPs.mmseg_flops(config=f"{segpath}/vit/vit_deit-s16_mln_upernet_8xb2-160k_ade20k-512x512.py", input_shape=(3, 512, 2048)) # GFlops:  1216.821829632 Params:  57994796
@@ -71,7 +71,8 @@ if __name__ == '__main__':
             FLOPs.mmdet_flops(config=f"{detpath}/vssm1/mask_rcnn_vssm_fpn_coco_small.py") # 69.654M 348921708640.0
             FLOPs.mmdet_flops(config=f"{detpath}/vssm1/mask_rcnn_vssm_fpn_coco_base.py") # 0.108G 485496108640.0
 
-        if True:
+        # xcit det
+        if False:
             lines = open(f"{HOME}/packs/xcit/detection/backbone/xcit.py").readlines()
             for i, l in enumerate(lines):
                 if "from mmcv.runner import load_checkpoint\n" in l:
@@ -88,6 +89,7 @@ if __name__ == '__main__':
             FLOPs.mmdet_flops(config=f"{HOME}/packs/xcit/detection/configs/xcit/mask_rcnn_xcit_small_24_p16_3x_coco.py", extra_config=f"{detpath}/mask_rcnn/mask-rcnn_r50-caffe_fpn_ms-poly-3x_coco.py") # 65.805M 373921776640.0
             FLOPs.mmdet_flops(config=f"{HOME}/packs/xcit/detection/configs/xcit/mask_rcnn_xcit_medium_24_p16_3x_coco.py", extra_config=f"{detpath}/mask_rcnn/mask-rcnn_r50-caffe_fpn_ms-poly-3x_coco.py") # 98.981M 1476021744640.0
         
+        # xcit seg
         if False:
             from mmengine.model import BaseModule
             lines = open(f"{HOME}/packs/xcit/semantic_segmentation/backbone/xcit.py").readlines()
