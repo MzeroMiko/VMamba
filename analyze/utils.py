@@ -1198,7 +1198,7 @@ class BuildModels:
         model = build_classifier(model)
 
         if with_ckpt:
-            model.load_state_dict(CheckpointLoader.load_checkpoint(ckpt)['state_dict'])
+            model.load_state_dict(CheckpointLoader.load_checkpoint(ckpt)['state_dict'], strict=False)
         if remove_head:
             print(model.head.layers.head, flush=True)
             model.head.layers.head = nn.Identity() # 384->1000
