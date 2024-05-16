@@ -567,226 +567,6 @@ def _extract_feature(data_path="ImageNet_ILSVRC2012", start=0, end=200, step=-1,
         interntiny = BuildModels.build_intern(with_ckpt=True, remove_head=True, scale="tiny").cuda().eval()
         xcittiny = BuildModels.build_xcit(with_ckpt=True, remove_head=True, scale="tiny", size=img_size).cuda().eval()
         deitbase = BuildModels.build_deit_mmpretrain(with_ckpt=True, remove_head=True, scale="base", size=img_size).cuda().eval()
-        # breakpoint()
-
-    if False:
-        resnet50 = None
-        if True:
-            print("resnet ================================", flush=True)
-            model = partial(build_mmpretrain_models, cfg="resnet50", ckpt=True, only_backbone=False, with_norm=True,)
-            model = model() 
-            print(model.head.fc, flush=True)
-            model.head.fc = nn.Identity() # 2048->1000
-            model.cuda().eval()
-            resnet50 = model
-        
-        deitsmall = None
-        if True:
-            print("deit small ================================", flush=True)
-            model = partial(build_mmpretrain_models, cfg="deit_small", ckpt=True, only_backbone=False, with_norm=True,)
-            model = model()
-            print(model.head.layers.head, flush=True)
-            model.head.layers.head = nn.Identity() # 384->1000
-            model.cuda().eval()
-            deitsmall = model
-
-        vmambav0tiny = None
-        if True:
-            print("vmambav0 ================================", flush=True)
-            _model = import_abspy("vmamba", f"{os.path.dirname(__file__)}/../classification/models")
-            model = partial(_model.VSSM, dims=96, depths=[2,2,9,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v05", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1", norm_layer="ln2d")
-            tckpt = "/home/LiuYue/Workspace/PylanceAware/ckpts/publish/vssm/classification/vssmtiny/vssmtiny_dp01_ckpt_epoch_292.pth"
-            model = model()
-            model.load_state_dict(torch.load(open(tckpt, "rb"), map_location=torch.device("cpu"))["model"])
-            print(model.classifier.head, flush=True)
-            model.classifier.head = nn.Identity() # 768->1000
-            model.cuda().eval()
-            vmambav0tiny = model
-
-        vmambav2l5tiny = None
-        if True:
-            print("vmambav2l5 ================================", flush=True)
-            model = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-            tckpt = "/home/LiuYue/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230/vssm1_tiny_0230_ckpt_epoch_262.pth"
-            model = model()
-            model.load_state_dict(torch.load(open(tckpt, "rb"), map_location=torch.device("cpu"))["model"])
-            print(model.classifier.head, flush=True)
-            model.classifier.head = nn.Identity() # 768->1000
-            model.cuda().eval()
-            vmambav2l5tiny = model
-
-        vmambav2tiny = None
-        if True:
-            print("vmambav2 ================================", flush=True)
-            import triton, mamba_ssm, selective_scan_cuda_oflex
-            _model = import_abspy("vmamba", f"{os.path.dirname(__file__)}/../classification/models")
-            model = partial(_model.VSSM, dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d")
-            tckpt = "/home/LiuYue/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230s/vssm1_tiny_0230s_ckpt_epoch_264.pth"
-            model = model()
-            model.load_state_dict(torch.load(open(tckpt, "rb"), map_location=torch.device("cpu"))["model"])
-            print(model.classifier.head, flush=True)
-            model.classifier.head = nn.Identity() # 768->1000
-            model.cuda().eval()
-            vmambav2tiny = model
-
-        convnexttiny = None
-        if True:
-            print("convnext ================================", flush=True)
-            _model = import_abspy("convnext", f"{HOME}/OTHERS/ConvNeXt/models")
-            model = _model.convnext_tiny()
-            ckpt ="/home/LiuYue/Workspace/PylanceAware/ckpts/others/convnext_tiny_1k_224_ema.pth"
-            model.load_state_dict(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))["model"])
-            print(model.head, flush=True)
-            model.head = nn.Identity() # 768
-            model.cuda().eval()
-            convnexttiny = model
-
-        swintiny = None
-        if True:
-            print("swin ================================", flush=True)
-            from mmengine.runner import CheckpointLoader
-            from mmpretrain.models import build_classifier, ImageClassifier, ConvNeXt, VisionTransformer, SwinTransformer
-            model = dict(
-                type='ImageClassifier',
-                backbone=dict(
-                    type='SwinTransformer', arch='tiny', img_size=224, drop_path_rate=0.2),
-                neck=dict(type='GlobalAveragePooling'),
-                head=dict(
-                    type='LinearClsHead',
-                    num_classes=1000,
-                    in_channels=768,
-                    init_cfg=None,  # suppress the default init_cfg of LinearClsHead.
-                    loss=dict(
-                        type='LabelSmoothLoss', label_smooth_val=0.1, mode='original'),
-                    cal_acc=False),
-                init_cfg=[
-                    dict(type='TruncNormal', layer='Linear', std=0.02, bias=0.),
-                    dict(type='Constant', layer='LayerNorm', val=1., bias=0.)
-                ],
-                train_cfg=dict(augments=[
-                    dict(type='Mixup', alpha=0.8),
-                    dict(type='CutMix', alpha=1.0)
-                ]),
-            )
-            ckpt="https://download.openmmlab.com/mmclassification/v0/swin-transformer/swin_tiny_224_b16x64_300e_imagenet_20210616_090925-66df6be6.pth"
-            model["backbone"].update({"window_size": int(img_size // 32)})
-            model = build_classifier(model)
-            model.load_state_dict(CheckpointLoader.load_checkpoint(ckpt)['state_dict'], strict=False)
-            print(model.head.fc, flush=True) # 768
-            model.head.fc = nn.Identity()
-            model.cuda().eval()
-            swintiny = model
-
-        hivittiny = None
-        if True:
-            from mmpretrain.models.builder import MODELS
-            from mmengine.runner import CheckpointLoader
-            from mmpretrain.models import build_classifier, ImageClassifier, HiViT, VisionTransformer, SwinTransformer
-            from mmpretrain.models.backbones.vision_transformer import resize_pos_embed, to_2tuple, np
-            
-            @MODELS.register_module()
-            class HiViTx(HiViT):
-                def __init__(self, *args,**kwargs):
-                    super().__init__(*args,**kwargs)
-                    self.num_extra_tokens = 0
-                    self.interpolate_mode = "bicubic"
-                    self.patch_embed.init_out_size = self.patch_embed.patches_resolution
-                    self._register_load_state_dict_pre_hook(self._prepare_abs_pos_embed)
-                    self._register_load_state_dict_pre_hook(
-                        self._prepare_relative_position_bias_table)
-
-                # copied from SwinTransformer, change absolute_pos_embed to pos_embed
-                def _prepare_abs_pos_embed(self, state_dict, prefix, *args, **kwargs):
-                    name = prefix + 'pos_embed'
-                    if name not in state_dict.keys():
-                        return
-
-                    ckpt_pos_embed_shape = state_dict[name].shape
-                    if self.pos_embed.shape != ckpt_pos_embed_shape:
-                        from mmengine.logging import MMLogger
-                        logger = MMLogger.get_current_instance()
-                        logger.info(
-                            'Resize the pos_embed shape from '
-                            f'{ckpt_pos_embed_shape} to {self.pos_embed.shape}.')
-
-                        ckpt_pos_embed_shape = to_2tuple(
-                            int(np.sqrt(ckpt_pos_embed_shape[1] - self.num_extra_tokens)))
-                        pos_embed_shape = self.patch_embed.init_out_size
-
-                        state_dict[name] = resize_pos_embed(state_dict[name],
-                                                            ckpt_pos_embed_shape,
-                                                            pos_embed_shape,
-                                                            self.interpolate_mode,
-                                                            self.num_extra_tokens)
-
-                def _prepare_relative_position_bias_table(self, state_dict, *args, **kwargs):
-                    del state_dict['backbone.relative_position_index']
-                    return SwinTransformer._prepare_relative_position_bias_table(self, state_dict, *args, **kwargs)
-
-            print("hivit ================================", flush=True)
-            model = dict(
-                backbone=dict(
-                    ape=True,
-                    arch='tiny',
-                    drop_path_rate=0.05,
-                    img_size=224,
-                    rpe=True,
-                    type='HiViTx'),
-                head=dict(
-                    cal_acc=False,
-                    in_channels=384,
-                    init_cfg=None,
-                    loss=dict(
-                        label_smooth_val=0.1, mode='original', type='LabelSmoothLoss'),
-                    num_classes=1000,
-                    type='LinearClsHead'),
-                init_cfg=[
-                    dict(bias=0.0, layer='Linear', std=0.02, type='TruncNormal'),
-                    dict(bias=0.0, layer='LayerNorm', type='Constant', val=1.0),
-                ],
-                neck=dict(type='GlobalAveragePooling'),
-                train_cfg=dict(augments=[
-                    dict(alpha=0.8, type='Mixup'),
-                    dict(alpha=1.0, type='CutMix'),
-                ]),
-                type='ImageClassifier')
-            ckpt="/home/LiuYue/Workspace/PylanceAware/ckpts/others/hivit-tiny-p16_8xb128_in1k/epoch_295.pth"
-            model["backbone"].update({"img_size": img_size})
-            model = build_classifier(model)
-            model.load_state_dict(CheckpointLoader.load_checkpoint(ckpt)['state_dict'], strict=False)
-            print(model.head.fc, flush=True) # 768
-            model.head.fc = nn.Identity()
-            model.cuda().eval()
-            hivittiny = model
-
-        interntiny = None
-        if True:
-            print("intern ================================", flush=True)
-            specpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{HOME}/OTHERS/InternImage/classification")
-            sys.path.insert(0, specpath)
-            import DCNv3
-            _model = import_abspy("intern_image", f"{HOME}/OTHERS/InternImage/classification/models/")
-            model = partial(_model.InternImage, core_op='DCNv3', channels=64, depths=[4, 4, 18, 4], groups=[4, 8, 16, 32], offset_scale=1.0, mlp_ratio=4.,)
-            model = model()
-            ckpt ="/home/LiuYue/Workspace/PylanceAware/ckpts/others/internimage_t_1k_224.pth"
-            model.load_state_dict(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))["model"])
-            sys.path = sys.path[1:]
-            print(model.head, flush=True) # 768
-            model.head = nn.Identity()
-            model.cuda().eval()
-            interntiny = model
-
-        xcittiny = None
-        if True:
-            print("xcit ================================", flush=True)
-            _model = import_abspy("xcit", f"{HOME}/Workspace/PylanceAware/ckpts/ckpts/")
-            model = _model.xcit_small_12_p16()
-            ckpt =f"{HOME}/Workspace/PylanceAware/ckpts/ckpts/others/xcit_small_12_p16_224.pth"
-            model.load_state_dict(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))["model"])
-            print(model.head, flush=True) # 768
-            model.head = nn.Identity()
-            model.cuda().eval()
-            xcittiny = model
 
     if True:
         if step > 0:
@@ -801,29 +581,29 @@ def _extract_feature(data_path="ImageNet_ILSVRC2012", start=0, end=200, step=-1,
         for s, e in zip(starts, ends):
             extract_feature(
                 backbones=dict(
-                    # vmambav2tiny = vmambav2tiny,
-                    # convnexttiny = convnexttiny,
-                    # swintiny = swintiny,
-                    # interntiny = interntiny,
-                    # vmambav0tiny = vmambav0tiny,
-                    # vmambav2l5tiny = vmambav2l5tiny,
-                    # deitsmall = deitsmall,
-                    # hivittiny = hivittiny,
-                    # resnet50 = resnet50,
-                    # xcittiny = xcittiny,
+                    vmambav2tiny = vmambav2tiny,
+                    convnexttiny = convnexttiny,
+                    swintiny = swintiny,
+                    interntiny = interntiny,
+                    vmambav0tiny = vmambav0tiny,
+                    vmambav2l5tiny = vmambav2l5tiny,
+                    deitsmall = deitsmall,
+                    hivittiny = hivittiny,
+                    resnet50 = resnet50,
+                    xcittiny = xcittiny,
                     deitbase = deitbase,
                 ), 
                 dims=dict(
-                    # vmambav2tiny = 768,
-                    # convnexttiny = 768,
-                    # swintiny = 768,
-                    # interntiny = 768,
-                    # vmambav0tiny = 768,
-                    # vmambav2l5tiny = 768,
-                    # deitsmall = 384,
-                    # hivittiny = 384,
-                    # resnet50 = 2048,
-                    # xcittiny = 384,
+                    vmambav2tiny = 768,
+                    convnexttiny = 768,
+                    swintiny = 768,
+                    interntiny = 768,
+                    vmambav0tiny = 768,
+                    vmambav2l5tiny = 768,
+                    deitsmall = 384,
+                    hivittiny = 384,
+                    resnet50 = 2048,
+                    xcittiny = 384,
                     deitbase = 768,
                 ),
                 batch_size=batch_size,
@@ -892,5 +672,3 @@ def run_code_dist_one(func):
 if __name__ == "__main__":
     run_code_dist_one(main)
 
-
-# CUDA_VISIBLE_DEVICES=0 python /home/LiuYue/Workspace/PylanceAware/VMamba/analyze/eval.py --func feats --start 0 --end 0 --size 224 --batch_size 128 \                               

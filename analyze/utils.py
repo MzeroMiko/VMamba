@@ -1133,7 +1133,7 @@ class BuildModels:
         return model
 
     @staticmethod
-    def build_deit_mmpretrain(with_ckpt=False, remove_head=False, only_backbone=False, scale="small", size=224):
+    def build_deit_mmpretrain(with_ckpt=False, remove_head=False, only_backbone=False, scale="small", size=224, test_flops=False):
         print("deit ================================", flush=True)
         from mmengine.runner import CheckpointLoader
         from mmpretrain.models import build_classifier, ImageClassifier, HiViT, VisionTransformer, SwinTransformer
@@ -1208,6 +1208,14 @@ class BuildModels:
                 x = self.backbone(x)[-1]
                 return x
             model.forward = partial(forward_backbone, model)
+        
+        if test_flops:
+            print("WARNING: this mode may make throughput lower, used to test flops only!", flush=True)
+            from mmpretrain.models.utils.attention import scaled_dot_product_attention_pyimpl
+            for layer in model.backbone.layers:
+                layer.attn.scaled_dot_product_attention = scaled_dot_product_attention_pyimpl
+        else:
+            print("WARNING: this mode will make flops lower, do not use this to test flops!", flush=True)
         return model
 
     @staticmethod
@@ -1462,6 +1470,7 @@ class FLOPs:
             "prim::PythonOp.SelectiveScanOflex": selective_scan_flop_jit, # latter
             "prim::PythonOp.SelectiveScanCore": selective_scan_flop_jit, # latter
             "prim::PythonOp.SelectiveScan": selective_scan_flop_jit, # latter
+            # "aten::scaled_dot_product_attention": ...
         }
         return supported_ops
 

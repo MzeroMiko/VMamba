@@ -26,7 +26,7 @@ def parse_options():
     parser.add_argument("-e", "--evaluate", action="store_true", dest="evaluate")
     parser.add_argument("--seed", default=0, type=int)
     parser.add_argument("--size", default=224, type=int, help="img size")
-    parser.add_argument("--name", default="vmambav2tiny", type=str, help="model name")
+    parser.add_argument("--name", default="all", type=str, help="model name")
     args = parser.parse_args()
     print(args)
     return args
@@ -211,7 +211,7 @@ if __name__ == "__main__":
     vmambav2tiny = dict(
         name = "vmambav2tiny",
         model = nn.Linear(768, 1000, bias=True),
-        ckpt = "{HOME}/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230s/vssm1_tiny_0230s_ckpt_epoch_264.pth",
+        ckpt = f"{HOME}/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230s/vssm1_tiny_0230s_ckpt_epoch_264.pth",
         state_dict = lambda sd: {
             "weight": sd["model"]["classifier.head.weight"],
             "bias": sd["model"]["classifier.head.bias"],
@@ -221,7 +221,7 @@ if __name__ == "__main__":
     vmambav2l5tiny = dict(
         name = "vmambav2l5tiny",
         model = nn.Linear(768, 1000, bias=True),
-        ckpt = "{HOME}/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230/vssm1_tiny_0230_ckpt_epoch_262.pth",
+        ckpt = f"{HOME}/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230/vssm1_tiny_0230_ckpt_epoch_262.pth",
         state_dict = lambda sd: {
             "weight": sd["model"]["classifier.head.weight"],
             "bias": sd["model"]["classifier.head.bias"],
@@ -231,7 +231,7 @@ if __name__ == "__main__":
     vmambav0tiny = dict(
         name = "vmambav0tiny",
         model = nn.Linear(768, 1000, bias=True),
-        ckpt = "{HOME}/Workspace/PylanceAware/ckpts/publish/vssm/classification/vssmtiny/vssmtiny_dp01_ckpt_epoch_292.pth",
+        ckpt = f"{HOME}/Workspace/PylanceAware/ckpts/publish/vssm/classification/vssmtiny/vssmtiny_dp01_ckpt_epoch_292.pth",
         state_dict = lambda sd: {
             "weight": sd["model"]["head.weight"],
             "bias": sd["model"]["head.bias"],
@@ -241,7 +241,7 @@ if __name__ == "__main__":
     resnet50 = dict(
         name = "resnet50",
         model = nn.Linear(2048, 1000, bias=True),
-        ckpt = "{HOME}/.cache/torch/hub/checkpoints/resnet50_8xb32_in1k_20210831-ea4938fc.pth",
+        ckpt = f"{HOME}/.cache/torch/hub/checkpoints/resnet50_8xb32_in1k_20210831-ea4938fc.pth",
         state_dict = lambda sd: {
             "weight": sd["state_dict"]["head.fc.weight"],
             "bias": sd["state_dict"]["head.fc.bias"],
@@ -251,7 +251,7 @@ if __name__ == "__main__":
     deitsmall = dict(
         name = "deitsmall",
         model = nn.Linear(384, 1000, bias=True),
-        ckpt = "{HOME}/.cache/torch/hub/checkpoints/deit-small_pt-4xb256_in1k_20220218-9425b9bb.pth",
+        ckpt = f"{HOME}/.cache/torch/hub/checkpoints/deit-small_pt-4xb256_in1k_20220218-9425b9bb.pth",
         state_dict = lambda sd: {
             "weight": sd["state_dict"]["head.layers.head.weight"],
             "bias": sd["state_dict"]["head.layers.head.bias"],
@@ -261,7 +261,7 @@ if __name__ == "__main__":
     convnexttiny = dict(
         name = "convnexttiny",
         model = nn.Linear(768, 1000, bias=True),
-        ckpt = "{HOME}/packs/ckpts/convnext_tiny_1k_224_ema.pth",
+        ckpt = f"{HOME}/packs/ckpts/convnext_tiny_1k_224_ema.pth",
         state_dict = lambda sd: {
             "weight": sd["model"]["head.weight"],
             "bias": sd["model"]["head.bias"],
@@ -271,7 +271,7 @@ if __name__ == "__main__":
     swintiny = dict(
         name = "swintiny",
         model = nn.Linear(768, 1000, bias=True),
-        ckpt = "{HOME}/.cache/torch/hub/checkpoints/swin_tiny_224_b16x64_300e_imagenet_20210616_090925-66df6be6.pth",
+        ckpt = f"{HOME}/.cache/torch/hub/checkpoints/swin_tiny_224_b16x64_300e_imagenet_20210616_090925-66df6be6.pth",
         state_dict = lambda sd: {
             "weight": sd["state_dict"]["head.fc.weight"],
             "bias": sd["state_dict"]["head.fc.bias"],
@@ -281,7 +281,7 @@ if __name__ == "__main__":
     hivittiny = dict(
         name = "hivittiny",
         model = nn.Linear(384, 1000, bias=True),
-        ckpt = "{HOME}/packs/ckpts/hivit-tiny-p16_8xb128_in1k/epoch_295.pth",
+        ckpt = f"{HOME}/packs/ckpts/hivit-tiny-p16_8xb128_in1k/epoch_295.pth",
         state_dict = lambda sd: {
             "weight": sd["state_dict"]["head.fc.weight"],
             "bias": sd["state_dict"]["head.fc.bias"],
@@ -291,7 +291,7 @@ if __name__ == "__main__":
     interntiny = dict(
         name = "interntiny",
         model = nn.Linear(768, 1000, bias=True),
-        ckpt = "{HOME}/packs/ckpts/internimage_t_1k_224.pth",
+        ckpt = f"{HOME}/packs/ckpts/internimage_t_1k_224.pth",
         state_dict = lambda sd: {
             "weight": sd["model"]["head.weight"],
             "bias": sd["model"]["head.bias"],
@@ -308,8 +308,18 @@ if __name__ == "__main__":
         }  
     )
 
+    deitbase = dict(
+        name = "deitbase ",
+        model = nn.Linear(768, 1000, bias=True),
+        ckpt = f"{HOME}/.cache/torch/hub/checkpoints/deit-base_pt-16xb64_in1k_20220216-db63c16c.pth",
+        state_dict = lambda sd: {
+            "weight": sd["state_dict"]["head.layers.head.weight"],
+            "bias": sd["state_dict"]["head.layers.head.bias"],
+        } 
+    )
+
     names = {}
-    for col in [vmambav2tiny, vmambav2l5tiny, vmambav0tiny, swintiny, convnexttiny, hivittiny, deitsmall, resnet50, interntiny]:
+    for col in [vmambav2tiny, vmambav2l5tiny, vmambav0tiny, swintiny, convnexttiny, hivittiny, deitsmall, resnet50, interntiny, xcittiny, deitbase]:
         names.update({col["name"]: col})
         size = 224
         model = col["model"]
@@ -318,8 +328,11 @@ if __name__ == "__main__":
         state_dict = col["state_dict"](torch.load(col["ckpt"], map_location=torch.device("cpu")))
 
     if args.name == "all":
-        for col in [vmambav2tiny, vmambav2l5tiny, vmambav0tiny, swintiny, convnexttiny, hivittiny, deitsmall, resnet50, interntiny]:
-            for size, lr in zip([224, 288, 384, 512, 640, 768, 1024], [0.05, 0.05, 0.05, 0.2, 0.5, 0.5, 0.5]):
+        for col in [vmambav2tiny, vmambav2l5tiny, vmambav0tiny, swintiny, convnexttiny, hivittiny, deitsmall, resnet50, interntiny, xcittiny]:
+        # for col in [xcittiny]:
+            # for size, lr in zip([224, 288, 384, 512, 640, 768, 1024], [0.05, 0.05, 0.05, 0.2, 0.5, 0.5, 0.5]):
+            for size, lr in zip([288], [0.05]):
+            # for size, lr in zip([224, 384, 512, 640, 768, 1024], [0.05, 0.05, 0.2, 0.5, 0.5, 0.5]):
                 model = col["model"]
                 feature_train = f"{HOME}/ckpts/feats/merge{size}/{col['name']}_sz{size}_train.pth"
                 feature_val = f"{HOME}/ckpts/feats/merge{size}/{col['name']}_sz{size}_val.pth"
