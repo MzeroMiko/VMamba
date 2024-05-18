@@ -760,11 +760,11 @@ class BuildModels:
         return model
 
     @staticmethod
-    def build_vmamba(with_ckpt=False, remove_head=False, only_backbone=False, scale="tv0", size=224, model=None, ckpt=None):
+    def build_vmamba(with_ckpt=False, remove_head=False, only_backbone=False, scale="tv0", size=224, cfg=None, ckpt=None, key="model"):
         print("vssm ================================", flush=True)
         _model = import_abspy("vmamba", f"{os.path.dirname(__file__)}/../classification/models")
         if scale == "flex":
-            model = model
+            model = _model.VSSM(**cfg)
             ckpt = ckpt
         else:
             tv2 = (
@@ -799,7 +799,7 @@ class BuildModels:
             ckpt = dict(tv0=tv0, tv1=tv1, tv2=tv2, sv0=sv0, sv2=sv2, bv0=bv0, bv2=bv2)[scale][1]
 
         if with_ckpt:
-            model.load_state_dict(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))["model"])
+            model.load_state_dict(torch.load(open(ckpt, "rb"), map_location=torch.device("cpu"))[key])
 
         if remove_head:
             print(model.classifier.head, flush=True)
