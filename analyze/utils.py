@@ -133,8 +133,8 @@ class visualize:
         import matplotlib.pyplot as plt
         if isinstance(attnmap, torch.Tensor):
             attnmap = attnmap.detach().cpu().numpy()
-        if isinstance(imgori, torch.Tensor):
-            imgori = imgori.detach().cpu().numpy()
+        # if isinstance(imgori, torch.Tensor):
+        #     imgori = imgori.detach().cpu().numpy()
         plt.rcParams["font.size"] = fontsize
         plt.figure(figsize=figsize, dpi=dpi, **kwargs)
         ax = plt.gca()

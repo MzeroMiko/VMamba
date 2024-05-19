@@ -14,7 +14,7 @@ attnmap_mamba = AttnMamba.attnmap_mamba
 this_path = os.path.dirname(os.path.abspath(__file__))
 
 
-def main_vssm():
+def main_attnmap():
     dataset = get_dataset(root='/media/Disk1/Dataset/ImageNet_ILSVRC2012/val', img_size=512, crop=False)
     dataset = get_dataset(root='/media/Disk1/Dataset/MSCOCO2014/images/', img_size=512, ret="val2014", crop=False)
     # dataset = get_dataset(root='/media/Disk1/Dataset/ADEChallengeData2016/images/', img_size=448, ret="validation", crop=False)    
@@ -47,7 +47,79 @@ def main_vssm():
             _ss2ds.append(ss2d)
         ss2ds.append(_ss2ds)
     
-    showpath = os.path.join(this_path, "show/vssm")
+    showpath = os.path.join(this_path, "show/vssmattnmap")
+
+    featHW = 32
+    idxs_posxs_posys = [
+        [0, 0.7, 0.3], [0, 0.2, 0.8], 
+        [149, 0.7, 0.5], [149, 0.2, 0.4], 
+        [162, 0.7, 0.4], [162, 0.4, 0.4], 
+        [204, 0.3, 0.6], [204, 0.7, 0.2], 
+        [273, 0.2, 0.6], [273, 0.9, 0.5],
+        [309, 0.1, 0.7], [309, 0.9, 0.8],
+
+    ]
+    for idx, posx, posy in idxs_posxs_posys:
+        img, label = dataset[idx]
+
+        with torch.no_grad():
+            out = vssm(img[None].cuda())
+        print(out.argmax().item(), label, img.shape)
+        os.makedirs(f"{showpath}/{idx}_{posx}_{posy}", exist_ok=True)
+        deimg = img.cpu() * torch.tensor([0.25, 0.25, 0.25]).view(-1, 1, 1) + torch.tensor([0.5, 0.5, 0.5]).view(-1, 1, 1)
+        deimg = deimg.permute(1, 2, 0).cpu()
+        Image.fromarray((deimg * 255).to(torch.uint8).numpy()).save(f"{showpath}/{idx}_{posx}_{posy}/imori.jpg")
+        # visualize.draw_image_grid(
+        #     Image.fromarray((deimg * 255).to(torch.uint8).numpy()),
+        #     [(posx * 512, posy * 512, 512 / 32, 512 / 32)]
+        # ).save(f"{showpath}/{idx}_{posx}_{posy}/imori.jpg")
+        # continue
+
+        for m0 in ["ao0", "ao1", "ao2", "ao3", "a0", "a1", "a2", "a3", "all", "nall"]:
+            for m1 in ["CB", "CwBw", "ww"]:
+                aaa = AttnMamba.get_attnmap_mamba(ss2ds, 2, f"{m0}_norm_{m1}", raw_attn=True, block_id=1)
+                # mask = aaa[int(posy * featHW) * int(featHW) + int(posx * featHW)].view(featHW, featHW)
+                visualize_attnmap(aaa, f"{showpath}/{idx}_{posx}_{posy}/{m0}_norm_{m1}.jpg", colorbar=False, sticks=False)
+                visualize_attnmap(torch.diag(aaa).view(featHW, featHW), f"{showpath}/{idx}_{posx}_{posy}/{m0}_norm_{m1}_diag.jpg", colorbar=False, sticks=False)
+        # breakpoint()
+    breakpoint()
+
+
+
+def main_vssm():
+    dataset = get_dataset(root='/media/Disk1/Dataset/ImageNet_ILSVRC2012/val', img_size=512, crop=False)
+    dataset = get_dataset(root='/media/Disk1/Dataset/MSCOCO2014/images/', img_size=512, ret="val2014", crop=False)
+    # dataset = get_dataset(root='/media/Disk1/Dataset/ADEChallengeData2016/images/', img_size=448, ret="validation", crop=False)    
+    
+    vmamba = import_abspy("vmamba", os.path.join(os.path.dirname(os.path.abspath(__file__)), "../classification/models"))
+    VSSM: nn.Module = vmamba.VSSM    
+    vssm: nn.Module = VSSM(
+        depths=[2, 2, 8, 2], 
+        dims=[96, 192, 384, 768], 
+        ssm_d_state=1,
+        ssm_ratio=1.0,
+        ssm_dt_rank="auto",
+        ssm_conv=3,
+        ssm_conv_bias=False,
+        forward_type="v05_noz",
+        mlp_ratio=4.0,
+        norm_layer="ln2d",
+        downsample_version="v3",
+        patchembed_version="v2",
+    ).cuda().eval()
+    vssm.load_state_dict(torch.load(open("/home/LiuYue/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230s/vssm1_tiny_0230s_ckpt_epoch_264.pth", "rb"), map_location="cpu")["model"], strict=False)
+    # vssm.load_state_dict(AttnMamba.convert_state_dict_from_mmdet(torch.load(open("/home/LiuYue/Workspace/PylanceAware/ckpts/private/detection/vssm1/detection/mask_rcnn_vssm_fpn_coco_tiny_ms_3x_s/epoch_36.pth", "rb"), map_location="cpu")["state_dict"]), strict=False)
+    
+    ss2ds = []
+    for layer in vssm.layers:
+        _ss2ds = []
+        for blk in layer.blocks:
+            ss2d = blk.op
+            setattr(ss2d, "__DEBUG__", True)
+            _ss2ds.append(ss2d)
+        ss2ds.append(_ss2ds)
+    
+    showpath = os.path.join(this_path, "show/vssm_cls")
 
     featHW = 32
     idxs_posxs_posys = [
@@ -72,7 +144,7 @@ def main_vssm():
             Image.fromarray((deimg * 255).to(torch.uint8).numpy()),
             [(posx * 512, posy * 512, 512 / 32, 512 / 32)]
         ).save(f"{showpath}/{idx}_{posx}_{posy}/imori.jpg")
-        continue
+        # continue
 
         for m0 in ["a0", "a1", "a2", "a3", "all", "nall"]:
             for m1 in ["CB", "CwBw", "ww"]:
@@ -91,7 +163,9 @@ def main_deit(det_model=False):
     attns = dict()
     deit_small_baseline = None
     if det_model:
-        from ckpts.ckpts.vit_adpter_baseline import deit_small_baseline, Attention, WindowedAttention
+        _deit = import_abspy("vit_adpter_baseline", "/home/LiuYue/Workspace/PylanceAware/ckpts/ckpts")
+        # from ckpts.ckpts.vit_adpter_baseline import deit_small_baseline, Attention, WindowedAttention
+        deit_small_baseline, Attention, WindowedAttention = _deit.deit_small_baseline, _deit.Attention, _deit.WindowedAttention
         sd = torch.load("/home/LiuYue/Workspace/PylanceAware/ckpts/others/deit_small_patch16_224-cd65a155.pth", map_location=torch.device("cpu"))
         deit_small_baseline = deit_small_baseline().cuda()
         deit_small_baseline.load_state_dict(sd['model'], strict=False)
@@ -112,14 +186,15 @@ def main_deit(det_model=False):
             return x
         
         for n, m in deit_small_baseline.blocks.named_children():
-            if isinstance(m.attn, Attention):
+            if isinstance(m.attn, WindowedAttention):
+                pass
+            elif isinstance(m.attn, Attention):
                 print(n, m.attn)
                 m.attn.forward = partial(attn_forward, m.attn)
-                attns.update({n: m.attn})
-            elif isinstance(m.attn, WindowedAttention):
-                pass
+                attns.update({n: m.attn})            
             else:
                 assert False
+        showpath = os.path.join(this_path, "show/deitdet")
     else:
         _build = import_abspy("models", f"{os.path.dirname(__file__)}/../classification")
         build_mmpretrain_models = _build.build_mmpretrain_models
@@ -156,9 +231,9 @@ def main_deit(det_model=False):
             attns.update({n: l.attn})
         
         deit_small_baseline = model
+        showpath = os.path.join(this_path, "show/deitcls")
 
     print(attns)
-    showpath = os.path.join(this_path, "show/deit")
 
     featHW = 32
     idxs_posxs_posys = [
@@ -183,7 +258,7 @@ def main_deit(det_model=False):
             Image.fromarray((deimg * 255).to(torch.uint8).numpy()),
             [(posx * 512, posy * 512, 512 / 32, 512 / 32)]
         ).save(f"{showpath}/{idx}_{posx}_{posy}/imori.jpg")
-        continue
+        # continue
 
         for m0 in ["attn"]:
             for m1 in ["attn"]:
@@ -197,6 +272,7 @@ def main_deit(det_model=False):
 
 
 if __name__ == "__main__":
-    main_deit()
+    # main_attnmap()
+    main_deit(det_model=True)
     main_vssm()
 

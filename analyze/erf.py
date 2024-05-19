@@ -54,7 +54,7 @@ if __name__ == "__main__":
         visualize.visualize_snsmaps(results_before + results_after, savefig=f"{showpath}/erf_initv0v1v2.jpg", rows=2, sticks=False, figsize=(10, 10.75), cmap='RdYlGn')
 
     # erf for tv2, unidi, bidi, cas2d; ndw, unidindw, bidindw, cas2dndw; 
-    if True:
+    if False:
         results_before = [
             (EffectiveReceiptiveField.get_input_grad_avg(BuildModels.build_vmamba(only_backbone=True, scale="tv2"), size=1024, data_path=data_path, norms=simpnorm), ""),
             (EffectiveReceiptiveField.get_input_grad_avg(BuildModels.build_vmamba(only_backbone=True, scale="flex", 
@@ -121,9 +121,39 @@ if __name__ == "__main__":
         ]
         visualize.visualize_snsmaps(results_before + results_after, savefig=f"{showpath}/erf_scanmethod.jpg", rows=2, sticks=False, figsize=(10, 10.75), cmap='RdYlGn')
 
-
     # erf for training stage for tv2
-    # ...
+    if True:
+        results_before = [
+            (EffectiveReceiptiveField.get_input_grad_avg(BuildModels.build_vmamba(only_backbone=True, scale="tv2"), size=1024, data_path=data_path, norms=simpnorm), ""),
+            (EffectiveReceiptiveField.get_input_grad_avg(BuildModels.build_vmamba(with_ckpt=True, only_backbone=True, scale="flex", 
+                cfg=dict(dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d"),
+                ckpt="/home/LiuYue/Workspace/PylanceAware/ckpts/private/vssm1_tiny_0230s/20240426174619/ckpt_epoch_2.pth",
+                key="model_ema",
+            ), size=1024, data_path=data_path, norms=simpnorm), ""),
+            (EffectiveReceiptiveField.get_input_grad_avg(BuildModels.build_vmamba(with_ckpt=True, only_backbone=True, scale="flex", 
+                cfg=dict(dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d"),
+                ckpt="/home/LiuYue/Workspace/PylanceAware/ckpts/private/vssm1_tiny_0230s/20240426174619/ckpt_epoch_5.pth",
+                key="model_ema",
+            ), size=1024, data_path=data_path, norms=simpnorm), ""),
+            (EffectiveReceiptiveField.get_input_grad_avg(BuildModels.build_vmamba(with_ckpt=True, only_backbone=True, scale="flex", 
+                cfg=dict(dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d"),
+                ckpt="/home/LiuYue/Workspace/PylanceAware/ckpts/private/vssm1_tiny_0230s/20240426174619/ckpt_epoch_8.pth",
+                key="model_ema",
+            ), size=1024, data_path=data_path, norms=simpnorm), ""),
+            (EffectiveReceiptiveField.get_input_grad_avg(BuildModels.build_vmamba(with_ckpt=True, only_backbone=True, scale="flex", 
+                cfg=dict(dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d"),
+                ckpt="/home/LiuYue/Workspace/PylanceAware/ckpts/private/vssm1_tiny_0230s/20240426174619/ckpt_epoch_11.pth",
+                key="model_ema",
+            ), size=1024, data_path=data_path, norms=simpnorm), ""),
+            (EffectiveReceiptiveField.get_input_grad_avg(BuildModels.build_vmamba(with_ckpt=True, only_backbone=True, scale="flex", 
+                cfg=dict(dims=96, depths=[2,2,8,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=3, ssm_conv_bias=False, forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d"),
+                ckpt="/home/LiuYue/Workspace/PylanceAware/ckpts/private/vssm1_tiny_0230s/20240426174619/ckpt_epoch_29.pth",
+                key="model_ema",
+            ), size=1024, data_path=data_path, norms=simpnorm), ""),
+            (EffectiveReceiptiveField.get_input_grad_avg(BuildModels.build_vmamba(with_ckpt=True, only_backbone=True, scale="tv2"), size=1024, data_path=data_path, norms=simpnorm), ""),
+        ]
+        visualize.visualize_snsmaps(results_before, savefig=f"{showpath}/erf_trainprocess.jpg", rows=1, sticks=False, figsize=(10, 10.75), cmap='RdYlGn')
+
 
 
 
