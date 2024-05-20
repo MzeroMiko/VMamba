@@ -223,7 +223,7 @@ If you only want to test the performance (together with params and flops):
 python -m torch.distributed.launch --nnodes=1 --node_rank=0 --nproc_per_node=1 --master_addr="127.0.0.1" --master_port=29501 main.py --cfg </path/to/config> --batch-size 128 --data-path </path/of/dataset> --output /tmp --pretrained </path/of/checkpoint>
 ```
 
-please refer to [modelcard](./modelcard.sh) for more details.
+***please refer to [modelcard](./modelcard.sh) for more details.***
 
 **Detection and Segmentation**
 
