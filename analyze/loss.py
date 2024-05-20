@@ -258,21 +258,27 @@ def readlog_mmdetection(logfile):
     return _ckpts
 
 
-def readlog_mmsegmentation(logfile):
+def readlog_mmsegmentation(logfile, test=False):
     _logs = open(logfile).readlines()
 
     _mious, _iters, _keylogs = [], [], []
     for i, _l in enumerate(_logs):
-        if ("INFO - Iter(val) [" in _l) and (" eta: 0:" not in _l):
-            _iter = None
-            for j in range(i, -1000, -1):
-                if "Saving checkpoint at" in _logs[j]:
-                    _iter = int(_logs[j].split("Saving checkpoint at ")[1].strip().split(" ")[0].strip())
-                    break
-            assert isinstance(_iter, int), "ERROR: can not find iter"
-            _iters.append(_iter)
-            _mious.append(float(_l.split(" mIoU:")[1].strip().split(" ")[0].strip()))
-            _keylogs.append(_l.strip("\n"))
+        if test:
+            if ("INFO - Iter(test) [" in _l) and (" eta: " not in _l):
+                _iters.append(-1)
+                _mious.append(float(_l.split(" mIoU:")[1].strip().split(" ")[0].strip()))
+                _keylogs.append(_l.strip("\n"))
+        else:
+            if ("INFO - Iter(val) [" in _l) and (" eta: " not in _l):
+                _iter = None
+                for j in range(i, -1000, -1):
+                    if "Saving checkpoint at" in _logs[j]:
+                        _iter = int(_logs[j].split("Saving checkpoint at ")[1].strip().split(" ")[0].strip())
+                        break
+                assert isinstance(_iter, int), "ERROR: can not find iter"
+                _iters.append(_iter)
+                _mious.append(float(_l.split(" mIoU:")[1].strip().split(" ")[0].strip()))
+                _keylogs.append(_l.strip("\n"))
 
     _max_miou = np.array(_mious).max() if len(_mious) > 0 else -1
     _max_miou_idx = np.flatnonzero(_mious == _max_miou)
@@ -314,6 +320,8 @@ def cpclassification(src, name, dstpath="", fake_copy=False, update=False, onlyl
             assert os.path.exists(_s)
             if os.path.exists(os.path.join(dst, file)):
                 print(f"WARNING: file [{os.path.join(dst, file)}] exist already")
+                with open(os.path.join(dst, file), "rb") as f:
+                    torch.load(f)
             else:
                 assert os.path.exists(dst) and os.path.isdir(dst)
                 print(f"copy from [{_s}] to [{dst}]")

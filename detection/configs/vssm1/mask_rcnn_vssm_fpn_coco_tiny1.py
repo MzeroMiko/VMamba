@@ -8,7 +8,7 @@ model = dict(
         out_indices=(0, 1, 2, 3),
         pretrained="/home/zjy/nodeHPC9/downstream/vssm1_tiny_0230/ckpt_epoch_262.pth",
         # copied from classification/configs/vssm/vssm_tiny_224.yaml
-       dims=96,
+        dims=96,
         depths=(2, 2, 5, 2),
         ssm_d_state=1,
         ssm_dt_rank="auto",

@@ -169,6 +169,7 @@ cd VMamba
 **Step 2: Environment Setup:**
 
 VMamba recommends setting up a conda environment and installing dependencies via pip. Use the following commands to set up your environment:
+Also, We recommend using the pytorch>=2.0, cuda>=11.8. But lower version of pytorch and CUDA are also supported.
 
 ***Create and activate a new conda environment***
 
@@ -206,13 +207,6 @@ pip install mmengine==0.10.1 mmcv==2.1.0 opencv-python-headless ftfy regex
 pip install mmdet==3.3.0 mmsegmentation==1.2.2 mmpretrain==1.2.0
 ```
 
-<!-- conda create -n cu12 python=3.10 -y && conda activate cu12
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-# install cuda121 for windows
-# install https://visualstudio.microsoft.com/visual-cpp-build-tools/
-pip install timm==0.4.12 fvcore packaging -->
-
-
 ### Model Training and Inference
 
 **Classification**
@@ -228,6 +222,8 @@ If you only want to test the performance (together with params and flops):
 ```bash
 python -m torch.distributed.launch --nnodes=1 --node_rank=0 --nproc_per_node=1 --master_addr="127.0.0.1" --master_port=29501 main.py --cfg </path/to/config> --batch-size 128 --data-path </path/of/dataset> --output /tmp --pretrained </path/of/checkpoint>
 ```
+
+please refer to [modelcard](./modelcard.sh) for more details.
 
 **Detection and Segmentation**
 
@@ -259,6 +255,8 @@ CUDA_VISIBLE_DEVICES=0 python analyze/erf.py
 CUDA_VISIBLE_DEVICES=0 python analyze/tp.py
 
 ```
+
+***We also included other analysing tools that we may use in this project. Thanks to all who have contributes to these tools.***
 
 
 ## Star History
