@@ -4,7 +4,9 @@
 <!-- TODO: replace $@#Anonymous#@$ in all files -->
 <!-- TODO: replace $@#Anonymous#EMAIL@$ in all files -->
 <!-- TODO: add back README.md -->
-<!-- TODO: add back VMamba/assets/performance_stage0.md VMamba/assets/performance_stage1.md -->
+<!-- TODO: add back VMamba/assets -->
+<!-- TODO: add back .gitignore -->
+<!-- TODO: mv get_started.md into assets -->
 
 ### Installation
 
