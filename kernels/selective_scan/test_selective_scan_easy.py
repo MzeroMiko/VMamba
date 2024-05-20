@@ -1,4 +1,4 @@
-# Modified by Mzero #20240123
+# Modified by $@#Anonymous#@$ #20240123
 # Copyright (C) 2023, Tri Dao, Albert Gu.
 import math
 from functools import partial

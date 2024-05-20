@@ -1,5 +1,5 @@
 # --------------------------------------------------------
-# Modified By Mzero
+# Modified By $@#Anonymous#@$
 # --------------------------------------------------------
 # Swin Transformer
 # Copyright (c) 2021 Microsoft

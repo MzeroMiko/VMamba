@@ -11,6 +11,7 @@ visualize_attnmap = visualize.visualize_attnmap
 visualize_attnmaps = visualize.visualize_attnmaps
 attnmap_mamba = AttnMamba.attnmap_mamba
 
+HOME = os.environ["HOME"].rstrip("/")
 this_path = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -35,8 +36,8 @@ def main_attnmap():
         downsample_version="v3",
         patchembed_version="v2",
     ).cuda().eval()
-    # vssm.load_state_dict(torch.load(open("/home/LiuYue/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230s/vssm1_tiny_0230s_ckpt_epoch_264.pth", "rb"), map_location="cpu")["model"], strict=False)
-    vssm.load_state_dict(AttnMamba.convert_state_dict_from_mmdet(torch.load(open("/home/LiuYue/Workspace/PylanceAware/ckpts/private/detection/vssm1/detection/mask_rcnn_vssm_fpn_coco_tiny_ms_3x_s/epoch_36.pth", "rb"), map_location="cpu")["state_dict"]), strict=False)
+    # vssm.load_state_dict(torch.load(open(f"{HOME}/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230s/vssm1_tiny_0230s_ckpt_epoch_264.pth", "rb"), map_location="cpu")["model"], strict=False)
+    vssm.load_state_dict(AttnMamba.convert_state_dict_from_mmdet(torch.load(open(f"{HOME}/Workspace/PylanceAware/ckpts/private/detection/vssm1/detection/mask_rcnn_vssm_fpn_coco_tiny_ms_3x_s/epoch_36.pth", "rb"), map_location="cpu")["state_dict"]), strict=False)
     
     ss2ds = []
     for layer in vssm.layers:
@@ -107,8 +108,8 @@ def main_vssm():
         downsample_version="v3",
         patchembed_version="v2",
     ).cuda().eval()
-    vssm.load_state_dict(torch.load(open("/home/LiuYue/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230s/vssm1_tiny_0230s_ckpt_epoch_264.pth", "rb"), map_location="cpu")["model"], strict=False)
-    # vssm.load_state_dict(AttnMamba.convert_state_dict_from_mmdet(torch.load(open("/home/LiuYue/Workspace/PylanceAware/ckpts/private/detection/vssm1/detection/mask_rcnn_vssm_fpn_coco_tiny_ms_3x_s/epoch_36.pth", "rb"), map_location="cpu")["state_dict"]), strict=False)
+    vssm.load_state_dict(torch.load(open(f"{HOME}/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230s/vssm1_tiny_0230s_ckpt_epoch_264.pth", "rb"), map_location="cpu")["model"], strict=False)
+    # vssm.load_state_dict(AttnMamba.convert_state_dict_from_mmdet(torch.load(open(f"{HOME}/Workspace/PylanceAware/ckpts/private/detection/vssm1/detection/mask_rcnn_vssm_fpn_coco_tiny_ms_3x_s/epoch_36.pth", "rb"), map_location="cpu")["state_dict"]), strict=False)
     
     ss2ds = []
     for layer in vssm.layers:
@@ -163,10 +164,10 @@ def main_deit(det_model=False):
     attns = dict()
     deit_small_baseline = None
     if det_model:
-        _deit = import_abspy("vit_adpter_baseline", "/home/LiuYue/Workspace/PylanceAware/ckpts/ckpts")
+        _deit = import_abspy("vit_adpter_baseline", f"{HOME}/Workspace/PylanceAware/ckpts/ckpts")
         # from ckpts.ckpts.vit_adpter_baseline import deit_small_baseline, Attention, WindowedAttention
         deit_small_baseline, Attention, WindowedAttention = _deit.deit_small_baseline, _deit.Attention, _deit.WindowedAttention
-        sd = torch.load("/home/LiuYue/Workspace/PylanceAware/ckpts/others/deit_small_patch16_224-cd65a155.pth", map_location=torch.device("cpu"))
+        sd = torch.load(f"{HOME}/Workspace/PylanceAware/ckpts/others/deit_small_patch16_224-cd65a155.pth", map_location=torch.device("cpu"))
         deit_small_baseline = deit_small_baseline().cuda()
         deit_small_baseline.load_state_dict(sd['model'], strict=False)
         

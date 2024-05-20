@@ -1,6 +1,10 @@
 # VMamba
 <!-- TODO: add back "the url" in old README.md -->
 <!-- TODO: add back "***Check Selective Scan (optional)***" in old README.md -->
+<!-- TODO: replace $@#Anonymous#@$ in all files -->
+<!-- TODO: replace $@#Anonymous#EMAIL@$ in all files -->
+<!-- TODO: add back README.md -->
+<!-- TODO: add back VMamba/assets/performance_stage0.md VMamba/assets/performance_stage1.md -->
 
 ### Installation
 

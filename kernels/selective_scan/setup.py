@@ -1,4 +1,4 @@
-# Modified by Mzero #20240123
+# Modified by $@#Anonymous#@$ #20240123
 # Copyright (c) 2023, Albert Gu, Tri Dao.
 import sys
 import warnings
@@ -143,8 +143,8 @@ setup(
     name="selective_scan",
     version="0.0.2",
     packages=[],
-    author="Tri Dao, Albert Gu, Mzero",
-    author_email="tri@tridao.me, agu@cs.cmu.edu, liuyue171@mails.ucas.ac.cn",
+    author="Tri Dao, Albert Gu, $@#Anonymous#@$ ",
+    author_email="tri@tridao.me, agu@cs.cmu.edu, $@#Anonymous#EMAIL@$",
     description="selective scan",
     long_description="",
     long_description_content_type="text/markdown",
