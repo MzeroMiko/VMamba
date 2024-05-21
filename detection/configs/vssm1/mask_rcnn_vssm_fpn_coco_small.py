@@ -6,7 +6,7 @@ model = dict(
     backbone=dict(
         type='MM_VSSM',
         out_indices=(0, 1, 2, 3),
-        pretrained="/home/zjy/nodeHPC9/downstream/vssm1_small_0229/ckpt_epoch_222.pth",
+        pretrained="",
         # copied from classification/configs/vssm/vssm_small_224.yaml
         dims=96,
         depths=(2, 2, 15, 2),
