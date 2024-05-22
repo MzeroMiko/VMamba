@@ -7,6 +7,8 @@
 <!-- TODO: add back VMamba/assets -->
 <!-- TODO: add back .gitignore -->
 <!-- TODO: mv get_started.md into assets -->
+<!-- TODO: add back VMamba/analyze/convnexts4nd -->
+<!-- TODO: add back VMamba/analyze/mmpretrain_configs -->
 
 ### Installation
 
