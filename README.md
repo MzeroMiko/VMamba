@@ -62,8 +62,8 @@ Designing computationally efficient network architectures persists as an ongoing
 ## Main Results
 <!-- copied from assets/performance.md  -->
 
-:book:
-***The checkpoints of some of the models listed below will be released in weeks!***
+<!-- :book: -->
+<!-- ***The checkpoints of some of the models listed below will be released in weeks!*** -->
 
 :book:
 ***For details see [performance.md](./assets/performance.md).***
