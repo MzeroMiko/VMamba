@@ -58,73 +58,69 @@ Designing computationally efficient network architectures persists as an ongoing
 </p>
 
 ## Main Results
-:book: 
-***Attention: The configs/logs/checkpoints of `Classification on ImageNet-1K`, `Object Detection on COCO`, `Semantic Segmentation on ADE20K` listed below corresponds to VMambav2[`arXiv 2401.10166v2`](https://arxiv.org/abs/2401.10166v2), which is also named `V9` in section `Accelerating VMamba`.***
+<!-- copied from assets/performance.md  -->
+
+<!-- :book:  -->
+<!-- ***Attention: The configs/logs/checkpoints of `Classification on ImageNet-1K`, `Object Detection on COCO`, `Semantic Segmentation on ADE20K` listed below corresponds to VMambav2[`arXiv 2401.10166v2`](https://arxiv.org/abs/2401.10166v2), which is also named `V9` in section `Accelerating VMamba`.*** -->
+
+<!-- :book:
+***Attention: The configs/logs/checkpoints of `Classification on ImageNet-1K`, `Object Detection on COCO`, `Semantic Segmentation on ADE20K` corresponding to [`arXiv 2401.10166v1`](https://arxiv.org/abs/2401.10166v1) has been moved [`here`](assets/performance_stage0.md).*** -->
 
 :book:
-***Attention: The configs/logs/checkpoints of `Classification on ImageNet-1K`, `Object Detection on COCO`, `Semantic Segmentation on ADE20K` corresponding to [`arXiv 2401.10166v1`](https://arxiv.org/abs/2401.10166v1) has been moved [`here`](assets/performance_stage0.md).***
+***The checkpoints of some of the models listed below will be released in weeks!***
+***For details see [performance.md](./assets/performance.md)***
 
-<!-- :book: 
-***The checkpoints of some of the models listed below will be released in weeks!*** -->
+### **Classification on ImageNet-1K**
+| name | pretrain | resolution |acc@1 | #params | FLOPs | TP. | Train TP. | configs/logs/ckpts |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| Swin-T | ImageNet-1K | 224x224 | 81.2 | 28M | 4.5G | 1244 |987 | -- |
+| Swin-S | ImageNet-1K | 224x224 | 83.2 | 50M | 8.7G | 718 |642 | -- |
+| Swin-B | ImageNet-1K | 224x224 | 83.5 | 88M | 15.4G | 458 |496 | -- |
+| VMamba-S[`s2l15`] | ImageNet-1K | 224x224 | 83.6 | 50M | 8.7G | 877 | 314| [config](../classification/configs/vssm/vmambav2_small_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240316/vssm_small_0229.txt)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240316/vssm_small_0229_ckpt_epoch_222.pth) |
+| VMamba-B[`s2l15`] | ImageNet-1K | 224x224 | 83.9 | 89M | 15.4G | 646 | 247 | [config](../classification/configs/vssm/vmambav2_base_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240316/vssm_base_0229.txt)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240316/vssm_base_0229_ckpt_epoch_237.pth) |
+| VMamba-T[`s1l8`] | ImageNet-1K | 224x224 | 82.6 | 30M | 4.9G | 1686| 571| [config](../classification/configs/vssm/vmambav2v_tiny_224.yaml)/[log](#)/[ckpt](#) |
 
-### **Classification on ImageNet-1K with VMambav2**
 
-| name | pretrain | resolution |acc@1 | #params | FLOPs | configs/logs/ckpts |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| Swin-T | ImageNet-1K | 224x224 | 81.2 | 28M | 4.5G | -- | -- |
-| Swin-S | ImageNet-1K | 224x224 | 83.2 | 50M | 8.7G | -- | -- |
-| Swin-B | ImageNet-1K | 224x224 | 83.5 | 88M | 15.4G | -- | -- |
-| VMamba-T[`s2l5`] | ImageNet-1K | 224x224 | 82.5 | 30M | 4.8G | [config](classification/configs/vssm/vmambav2_tiny_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240316/vssm_tiny_0230.txt)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240316/vssm_tiny_0230_ckpt_epoch_262.pth) |
-| VMamba-S[`s2l15`] | ImageNet-1K | 224x224 | 83.6 | 50M | 8.7G | [config](classification/configs/vssm/vmambav2_small_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240316/vssm_small_0229.txt)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240316/vssm_small_0229_ckpt_epoch_222.pth) |
-| VMamba-B[`s2l15`] | ImageNet-1K | 224x224 | 83.9 | 89M | 15.4G | [config](classification/configs/vssm/vmambav2_base_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240316/vssm_base_0229.txt)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240316/vssm_base_0229_ckpt_epoch_237.pth) |
-<!-- | VMamba-T[`s1l8`] | ImageNet-1K | 224x224 | 82.6 | - | - | [config](classification/configs/vssm/vmambav2v_tiny_224.yaml)/[log](#)/[ckpt](#) |
-| VMamba-S[`s1l20`] | ImageNet-1K | 224x224 | 83.3 | - | - | [config](classification/configs/vssm/vmambav2v_base_224.yaml)/[log](#)/[ckpt](#) |
-| VMamba-B[`s1l20`] | ImageNet-1K | 224x224 | 83.8 | - | - | [config](classification/configs/vssm/vmambav2_base_224.yaml)/[log](#)/[ckpt](#) | -->
+* *Models in this subsection is trained from scratch with random or manual initialization. The hyper-parameters are inherited from Swin, except for `drop_path_rate` and `EMA`. All models are trained with EMA except for the `Vanilla-VMamba-T`.*
+* *`TP.(Throughput)` and `Train TP. (Train Throughput)` are assessed on an A100 GPU paired with an AMD EPYC 7542 CPU, with batch size 128. `Train TP.` is tested with mix-resolution, excluding the time consumption of optimizers.*
+* *`FLOPs` and `parameters` are now gathered with `head` (In previous versions, without head, so the numbers raise a little bit).*
+* *we calculate `FLOPs` with the algorithm @albertgu [provides](https://github.com/state-spaces/mamba/issues/110), which will be bigger than previous calculation (which is based on the `selective_scan_ref` function, and ignores the hardware-aware algorithm).*
 
-* *Models in this subsection is trained from scratch with random or manual initialization.*
 
-* *The hyper-parameters are inherited from Swin, except for `drop_path_rate` and `EMA`.*
-
-* *we now calculate FLOPs with the algrithm @albertgu [provides](https://github.com/state-spaces/mamba/issues/110), which will be bigger than previous calculation (which is based on the `selective_scan_ref` function, and ignores the hardware-aware algrithm).*
-
-### **Object Detection on COCO with VMambav2**
+### **Object Detection on COCO**
   
-| Backbone | #params | FLOPs | Detector | box mAP | mask mAP | configs/logs/ckpts |
-| :---: | :---: | :---: | :---: | :---: | :---: |:---: |
-| Swin-T | 48M | 267G | MaskRCNN@1x | 42.7| 39.3 |-- |
-| VMamba-T | 50M | 270G | MaskRCNN@1x | 47.4| 42.7 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny1.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_tiny.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_tiny_epoch_12.pth) |
-| Swin-S | 69M | 354G | MaskRCNN@1x | 44.8| 40.9 |-- |
-| VMamba-S | 70M | 384G | MaskRCNN@1x | 48.7| 43.7 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_small.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small_epoch_11.pth) |
-| Swin-B | 107M | 496G | MaskRCNN@1x | 46.9| 42.3 |-- |
-| VMamba-B* | 108M | 485G | MaskRCNN@1x | 49.2| 43.9 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_base.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_base.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_base_epoch_12.pth) |
-| Swin-T | 48M | 267G | MaskRCNN@3x | 46.0| 41.6 |-- |
-| VMamba-T | 50M | 270G | MaskRCNN@3x | 48.9| 43.7 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny1_ms_3x.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_tiny_ms_3x.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_tiny_ms_3x_epoch_36.pth) |
-| Swin-S | 69M | 354G | MaskRCNN@3x | 48.2| 43.2 |-- |
-| VMamba-S | 70M | 384G | MaskRCNN@3x | 49.9| 44.2 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_small_ms_3x.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small_ms_3x.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small_ms_3x_epoch_32.pth) |
+| Backbone | #params | FLOPs | Detector | bboxAP | bboxAP50 | bboxAP75 | segmAP | segmAP50 | segmAP75 | configs/logs/ckpts |
+| :---: | :---: | :---: | :---: | :---: | :---: |:---: |:---: |:---: |:---: |:---: |
+| Swin-T | 48M | 267G | MaskRCNN@1x | 42.7 |65.2 |46.8 |39.3 |62.2 |42.2 |-- |
+| Swin-S | 69M | 354G | MaskRCNN@1x | 44.8 |66.6 |48.9 |40.9 |63.4 |44.2 |-- |-- |
+| Swin-B | 107M | 496G | MaskRCNN@1x | 46.9|--|--| 42.3|--|--|-- |-- |
+| VMamba-S[`s2l15`] | 70M | 384G | MaskRCNN@1x | 0.4870 |0.7000 |0.5340 |0.4370 |0.6730 |0.4700 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_small.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small_epoch_11.pth) |
+| VMamba-B[`s2l15`] | 108M | 485G | MaskRCNN@1x | 0.4920 |0.7140 |0.5400 |0.4410 |0.6830 |0.4770 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_base.py)/[log](#)/[ckpt](#) |
+| VMamba-B[`s2l15`] | 108M | 485G | MaskRCNN@1x[`bs8`] | 0.4920 |0.7090 |0.5390 |0.4390 |0.6770 |0.4760 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_base.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_base.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_base_epoch_12.pth) |
+| VMamba-T[`s1l8`] | 50M | 271G | MaskRCNN@1x | 0.4730 |0.6930 |0.5200 |0.4270 |0.6640 |0.4590 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny.py)/[log](#)/[ckpt](#) |
+| :---: | :---: | :---: | :---: | :---: | :---: |:---: |:---: |:---: |:---: |:---: |:---: |:---: |
+| Swin-T | 48M | 267G | MaskRCNN@3x | 46.0 |68.1 |50.3 |41.6 |65.1 |44.9 |-- |
+| Swin-S | 69M | 354G | MaskRCNN@3x | 48.2 |69.8 |52.8 |43.2 |67.0 |46.1  |-- |
+| VMamba-S[`s2l15`] | 70M | 384G | MaskRCNN@3x | 0.4990 |0.7090 |0.5470 |0.4420 |0.6820 |0.4770 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_small_ms_3x.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small_ms_3x.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small_ms_3x_epoch_32.pth) |
+| VMamba-T[`s1l8`] | 50M | 271G | MaskRCNN@3x | 0.4880 |0.7040 |0.5350 |0.4370 |0.6740 |0.4700 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny_ms_3x.py)/[log](#)/[ckpt](#) |
 
 * *Models in this subsection is initialized from the models trained in `classfication`.*
-
-* *The total batch size of VMamba-B in COCO is `8`, which is supposed to be `16` as in other experiments. This is a `mistake`, not feature. We may fix that later.*
-
 * *we now calculate FLOPs with the algrithm @albertgu [provides](https://github.com/state-spaces/mamba/issues/110), which will be bigger than previous calculation (which is based on the `selective_scan_ref` function, and ignores the hardware-aware algrithm).*
 
-### **Semantic Segmentation on ADE20K with VMambav2**
+### **Semantic Segmentation on ADE20K**
 
-| Backbone | Input|  #params | FLOPs | Segmentor | mIoU(SS) | mIoU(MS) | configs/logs/logs(ms)/ckpts | best iter |
-| :---: | :---: | :---: | :---: | :---: | :---: |:---: |:---: |:---: |
-| Swin-T | 512x512 | 60M | 945G | UperNet@160k | 44.4| 45.8| -- | -- |
-| VMamba-T| 512x512 | 62M | 948G | UperNet@160k | 48.3| 48.6| [config](segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_tiny1.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_tiny.log)/[log(ms)](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_tiny_tta.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_tiny_iter_160000.pth) | 160k |
-| Swin-S | 512x512 | 81M | 1039G | UperNet@160k | 47.6| 49.5| -- | -- |
-| VMamba-S| 512x512 | 82M | 1028G | UperNet@160k | 50.6| 51.2|[config](segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_small.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_small.log)/[log(ms)](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_small_tta.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_small_iter_144000.pth) | 144k |
+| Backbone | Input|  #params | FLOPs | Segmentor | mIoU(SS) | mIoU(MS) | configs/logs/logs(ms)/ckpts |
+| :---: | :---: | :---: | :---: | :---: | :---: |:---: |:---: |
+| Swin-T | 512x512 | 60M | 945G | UperNet@160k | 44.4| 45.8| -- |
+| Swin-S | 512x512 | 81M | 1039G | UperNet@160k | 47.6| 49.5| -- |
 | Swin-B | 512x512 | 121M | 1188G | UperNet@160k | 48.1| 49.7|-- |
-| VMamba-B| 512x512 | 122M | 1170G | UperNet@160k | 51.0| 51.6|[config](segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_base.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_base.log)/[log(ms)](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_base_tta.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_base_iter_160000.pth) | 160k |
-<!-- | Swin-S | 640x640 | 81M | 1614G | UperNet@160k | 47.9| 48.8| -- | -- |
-| VMamba-S| 640x640 | 82M | 1607G | UperNet@160k | 50.7| 51.2| [config](segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-640x640_small.py)/[log]/[log(ms)]/[ckpt] | 160k | -->
+| VMamba-S[`s2l15`] | 512x512 | 82M | 1028G | UperNet@160k | 50.6| 51.2|[config](../segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_small.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_small.log)/[log(ms)](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_small_tta.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_small_iter_144000.pth) |
+| VMamba-B[`s2l15`] | 512x512 | 122M | 1170G | UperNet@160k | 51.0| 51.6|[config](../segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_base.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_base.log)/[log(ms)](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_base_tta.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_base_iter_160000.pth) |
+| VMamba-T[`s1l8`] | 512x512 | 62M | 949G | UperNet@160k | 47.9| 48.8| [config](../segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_tiny.py)/[log](#)/[log(ms)](#)/[ckpt](#) |
+
 
 * *Models in this subsection is initialized from the models trained in `classfication`.*
-
 * *we now calculate FLOPs with the algrithm @albertgu [provides](https://github.com/state-spaces/mamba/issues/110), which will be bigger than previous calculation (which is based on the `selective_scan_ref` function, and ignores the hardware-aware algrithm).*
-
 
 ## Getting Started
 
