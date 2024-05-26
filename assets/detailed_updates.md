@@ -1,4 +1,6 @@
 ## :white_check_mark: Updates
+* **`May. 26th, 2024`**: Update: we release the updates on VMambav2, together with the new arxiv paper.
+
 * **`May. 7th, 2024`**: Update: **Important!** using `torch.backends.cudnn.enabled=True` in downstream tasks may be quite slow. If you found vmamba quite slow in your machine, disable it in vmamba.py, else, ignore this.
 
 * **` April. 10th, 2024`**: Update: we have released [arXiv 2401.10166v2](https://arxiv.org/abs/2401.10166v2), which contains lots of updates we made related to VMambav2!
