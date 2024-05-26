@@ -68,7 +68,8 @@ Designing computationally efficient network architectures persists as an ongoing
 
 :book:
 ***The checkpoints of some of the models listed below will be released in weeks!***
-***For details see [performance.md](./assets/performance.md)***
+
+***For details see [performance.md](./assets/performance.md).***
 
 ### **Classification on ImageNet-1K**
 | name | pretrain | resolution |acc@1 | #params | FLOPs | TP. | Train TP. | configs/logs/ckpts |
@@ -94,15 +95,15 @@ Designing computationally efficient network architectures persists as an ongoing
 | Swin-T | 48M | 267G | MaskRCNN@1x | 42.7 |65.2 |46.8 |39.3 |62.2 |42.2 |-- |
 | Swin-S | 69M | 354G | MaskRCNN@1x | 44.8 |66.6 |48.9 |40.9 |63.4 |44.2 |-- |-- |
 | Swin-B | 107M | 496G | MaskRCNN@1x | 46.9|--|--| 42.3|--|--|-- |-- |
-| VMamba-S[`s2l15`] | 70M | 384G | MaskRCNN@1x | 0.4870 |0.7000 |0.5340 |0.4370 |0.6730 |0.4700 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_small.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small_epoch_11.pth) |
-| VMamba-B[`s2l15`] | 108M | 485G | MaskRCNN@1x | 0.4920 |0.7140 |0.5400 |0.4410 |0.6830 |0.4770 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_base.py)/[log](#)/[ckpt](#) |
-| VMamba-B[`s2l15`] | 108M | 485G | MaskRCNN@1x[`bs8`] | 0.4920 |0.7090 |0.5390 |0.4390 |0.6770 |0.4760 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_base.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_base.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_base_epoch_12.pth) |
-| VMamba-T[`s1l8`] | 50M | 271G | MaskRCNN@1x | 0.4730 |0.6930 |0.5200 |0.4270 |0.6640 |0.4590 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny.py)/[log](#)/[ckpt](#) |
+| VMamba-S[`s2l15`] | 70M | 384G | MaskRCNN@1x | 48.7 |70.0 |53.4 |43.7 |67.3 |47.0 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_small.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small_epoch_11.pth) |
+| VMamba-B[`s2l15`] | 108M | 485G | MaskRCNN@1x | 49.2 |71.4 |54.0 |44.1 |68.3 |47.7 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_base.py)/[log](#)/[ckpt](#) |
+| VMamba-B[`s2l15`] | 108M | 485G | MaskRCNN@1x[`bs8`] | 49.2 |70.9 |53.9 |43.9 |67.7 |47.6 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_base.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_base.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_base_epoch_12.pth) |
+| VMamba-T[`s1l8`] | 50M | 271G | MaskRCNN@1x | 47.3 |69.3 |52.0 |42.7 |66.4 |45.9 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny.py)/[log](#)/[ckpt](#) |
 | :---: | :---: | :---: | :---: | :---: | :---: |:---: |:---: |:---: |:---: |:---: |:---: |:---: |
 | Swin-T | 48M | 267G | MaskRCNN@3x | 46.0 |68.1 |50.3 |41.6 |65.1 |44.9 |-- |
 | Swin-S | 69M | 354G | MaskRCNN@3x | 48.2 |69.8 |52.8 |43.2 |67.0 |46.1  |-- |
-| VMamba-S[`s2l15`] | 70M | 384G | MaskRCNN@3x | 0.4990 |0.7090 |0.5470 |0.4420 |0.6820 |0.4770 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_small_ms_3x.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small_ms_3x.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small_ms_3x_epoch_32.pth) |
-| VMamba-T[`s1l8`] | 50M | 271G | MaskRCNN@3x | 0.4880 |0.7040 |0.5350 |0.4370 |0.6740 |0.4700 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny_ms_3x.py)/[log](#)/[ckpt](#) |
+| VMamba-S[`s2l15`] | 70M | 384G | MaskRCNN@3x | 49.9 |70.9 |54.7 |44.20 |68.2 |47.7 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_small_ms_3x.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small_ms_3x.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small_ms_3x_epoch_32.pth) |
+| VMamba-T[`s1l8`] | 50M | 271G | MaskRCNN@3x | 48.8 |70.4 |53.50 |43.7 |67.4 |47.0 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny_ms_3x.py)/[log](#)/[ckpt](#) |
 
 * *Models in this subsection is initialized from the models trained in `classfication`.*
 * *we now calculate FLOPs with the algrithm @albertgu [provides](https://github.com/state-spaces/mamba/issues/110), which will be bigger than previous calculation (which is based on the `selective_scan_ref` function, and ignores the hardware-aware algrithm).*
