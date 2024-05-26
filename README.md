@@ -60,15 +60,10 @@ Designing computationally efficient network architectures persists as an ongoing
 ## Main Results
 <!-- copied from assets/performance.md  -->
 
-<!-- :book:  -->
-<!-- ***Attention: The configs/logs/checkpoints of `Classification on ImageNet-1K`, `Object Detection on COCO`, `Semantic Segmentation on ADE20K` listed below corresponds to VMambav2[`arXiv 2401.10166v2`](https://arxiv.org/abs/2401.10166v2), which is also named `V9` in section `Accelerating VMamba`.*** -->
-
-<!-- :book:
-***Attention: The configs/logs/checkpoints of `Classification on ImageNet-1K`, `Object Detection on COCO`, `Semantic Segmentation on ADE20K` corresponding to [`arXiv 2401.10166v1`](https://arxiv.org/abs/2401.10166v1) has been moved [`here`](assets/performance_stage0.md).*** -->
-
 :book:
 ***The checkpoints of some of the models listed below will be released in weeks!***
 
+:book:
 ***For details see [performance.md](./assets/performance.md).***
 
 ### **Classification on ImageNet-1K**
