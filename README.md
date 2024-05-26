@@ -79,7 +79,7 @@ Designing computationally efficient network architectures persists as an ongoing
 
 * *Models in this subsection is trained from scratch with random or manual initialization. The hyper-parameters are inherited from Swin, except for `drop_path_rate` and `EMA`. All models are trained with EMA except for the `Vanilla-VMamba-T`.*
 * *`TP.(Throughput)` and `Train TP. (Train Throughput)` are assessed on an A100 GPU paired with an AMD EPYC 7542 CPU, with batch size 128. `Train TP.` is tested with mix-resolution, excluding the time consumption of optimizers.*
-* *`FLOPs` and `parameters` are now gathered with `head` (In previous versions, without head, so the numbers raise a little bit).*
+* *`FLOPs` and `parameters` are now gathered with `head` (In previous versions, they were counted without head, so the numbers raise a little bit).*
 * *we calculate `FLOPs` with the algorithm @albertgu [provides](https://github.com/state-spaces/mamba/issues/110), which will be bigger than previous calculation (which is based on the `selective_scan_ref` function, and ignores the hardware-aware algorithm).*
 
 
