@@ -21,7 +21,9 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 * [**acknowledgment**](#acknowledgment)
 
 ## :white_check_mark: Updates
+* **`May. 26th, 2024`**: Update: we release the updates on VMambav2, together with the new arxiv paper.
 * **`May. 7th, 2024`**: Update: **Important!** using `torch.backends.cudnn.enabled=True` in downstream tasks may be quite slow. If you found vmamba quite slow in your machine, disable it in vmamba.py, else, ignore this.
+* **...**
 
 ***for details see [detailed_updates.md](assets/detailed_updates.md)***
 
@@ -90,15 +92,16 @@ Designing computationally efficient network architectures persists as an ongoing
 | Swin-T | 48M | 267G | MaskRCNN@1x | 42.7 |65.2 |46.8 |39.3 |62.2 |42.2 |-- |
 | Swin-S | 69M | 354G | MaskRCNN@1x | 44.8 |66.6 |48.9 |40.9 |63.4 |44.2 |-- |-- |
 | Swin-B | 107M | 496G | MaskRCNN@1x | 46.9|--|--| 42.3|--|--|-- |-- |
-| VMamba-S[`s2l15`] | 70M | 384G | MaskRCNN@1x | 48.7 |70.0 |53.4 |43.7 |67.3 |47.0 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_small.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small_epoch_11.pth) |
-| VMamba-B[`s2l15`] | 108M | 485G | MaskRCNN@1x | 49.2 |71.4 |54.0 |44.1 |68.3 |47.7 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_base.py)/[log](#)/[ckpt](#) |
-| VMamba-B[`s2l15`] | 108M | 485G | MaskRCNN@1x[`bs8`] | 49.2 |70.9 |53.9 |43.9 |67.7 |47.6 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_base.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_base.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_base_epoch_12.pth) |
-| VMamba-T[`s1l8`] | 50M | 271G | MaskRCNN@1x | 47.3 |69.3 |52.0 |42.7 |66.4 |45.9 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny.py)/[log](#)/[ckpt](#) |
+| VMamba-S[`s2l15`] | 70M | 384G | MaskRCNN@1x | 48.7 |70.0 |53.4 |43.7 |67.3 |47.0 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_small.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small_epoch_11.pth) |
+| VMamba-B[`s2l15`] | 108M | 485G | MaskRCNN@1x | 49.2 |71.4 |54.0 |44.1 |68.3 |47.7 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_base.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_base.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_base_epoch_11.pth) |
+| VMamba-B[`s2l15`] | 108M | 485G | MaskRCNN@1x[`bs8`] | 49.2 |70.9 |53.9 |43.9 |67.7 |47.6 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_base.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_base_bs8.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_base_epoch_12_bs8.pth) |
+| VMamba-T[`s1l8`] | 50M | 271G | MaskRCNN@1x | 47.3 |69.3 |52.0 |42.7 |66.4 |45.9 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_tiny_s.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_tiny_s_epoch_12.pth) |
 | :---: | :---: | :---: | :---: | :---: | :---: |:---: |:---: |:---: |:---: |:---: |:---: |:---: |
 | Swin-T | 48M | 267G | MaskRCNN@3x | 46.0 |68.1 |50.3 |41.6 |65.1 |44.9 |-- |
 | Swin-S | 69M | 354G | MaskRCNN@3x | 48.2 |69.8 |52.8 |43.2 |67.0 |46.1  |-- |
 | VMamba-S[`s2l15`] | 70M | 384G | MaskRCNN@3x | 49.9 |70.9 |54.7 |44.20 |68.2 |47.7 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_small_ms_3x.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small_ms_3x.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_small_ms_3x_epoch_32.pth) |
-| VMamba-T[`s1l8`] | 50M | 271G | MaskRCNN@3x | 48.8 |70.4 |53.50 |43.7 |67.4 |47.0 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny_ms_3x.py)/[log](#)/[ckpt](#) |
+| VMamba-T[`s1l8`] | 50M | 271G | MaskRCNN@3x | 48.8 |70.4 |53.50 |43.7 |67.4 |47.0 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny_ms_3x.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_tiny_ms_3x_s.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240320/mask_rcnn_vssm_fpn_coco_tiny_ms_3x_s_epoch_31.pth) |
+
 
 * *Models in this subsection is initialized from the models trained in `classfication`.*
 * *we now calculate FLOPs with the algrithm @albertgu [provides](https://github.com/state-spaces/mamba/issues/110), which will be bigger than previous calculation (which is based on the `selective_scan_ref` function, and ignores the hardware-aware algrithm).*
@@ -110,9 +113,9 @@ Designing computationally efficient network architectures persists as an ongoing
 | Swin-T | 512x512 | 60M | 945G | UperNet@160k | 44.4| 45.8| -- |
 | Swin-S | 512x512 | 81M | 1039G | UperNet@160k | 47.6| 49.5| -- |
 | Swin-B | 512x512 | 121M | 1188G | UperNet@160k | 48.1| 49.7|-- |
-| VMamba-S[`s2l15`] | 512x512 | 82M | 1028G | UperNet@160k | 50.6| 51.2|[config](../segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_small.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_small.log)/[log(ms)](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_small_tta.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_small_iter_144000.pth) |
-| VMamba-B[`s2l15`] | 512x512 | 122M | 1170G | UperNet@160k | 51.0| 51.6|[config](../segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_base.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_base.log)/[log(ms)](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_base_tta.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_base_iter_160000.pth) |
-| VMamba-T[`s1l8`] | 512x512 | 62M | 949G | UperNet@160k | 47.9| 48.8| [config](../segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_tiny.py)/[log](#)/[log(ms)](#)/[ckpt](#) |
+| VMamba-S[`s2l15`] | 512x512 | 82M | 1028G | UperNet@160k | 50.6| 51.2|[config](segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_small.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_small.log)/[log(ms)](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_small_tta.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_small_iter_144000.pth) |
+| VMamba-B[`s2l15`] | 512x512 | 122M | 1170G | UperNet@160k | 51.0| 51.6|[config](segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_base.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_base.log)/[log(ms)](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_base_tta.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_base_iter_160000.pth) |
+| VMamba-T[`s1l8`] | 512x512 | 62M | 949G | UperNet@160k | 47.9| 48.8| [config](segmentation/configs/vssm1/upernet_vssm_4xb4-160k_ade20k-512x512_tiny.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_tiny_s.log)/[log(ms)](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_tiny_s_tta.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%2320240319/upernet_vssm_4xb4-160k_ade20k-512x512_tiny_s_iter_160000.pth) |
 
 
 * *Models in this subsection is initialized from the models trained in `classfication`.*
