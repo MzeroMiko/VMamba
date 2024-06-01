@@ -74,9 +74,9 @@ Designing computationally efficient network architectures persists as an ongoing
 | Swin-T | ImageNet-1K | 224x224 | 81.2 | 28M | 4.5G | 1244 |987 | -- |
 | Swin-S | ImageNet-1K | 224x224 | 83.2 | 50M | 8.7G | 718 |642 | -- |
 | Swin-B | ImageNet-1K | 224x224 | 83.5 | 88M | 15.4G | 458 |496 | -- |
-| VMamba-S[`s2l15`] | ImageNet-1K | 224x224 | 83.6 | 50M | 8.7G | 877 | 314| [config](../classification/configs/vssm/vmambav2_small_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%23v2cls/vssm_small_0229.txt)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%23v2cls/vssm_small_0229_ckpt_epoch_222.pth) |
-| VMamba-B[`s2l15`] | ImageNet-1K | 224x224 | 83.9 | 89M | 15.4G | 646 | 247 | [config](../classification/configs/vssm/vmambav2_base_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%23v2cls/vssm_base_0229.txt)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%23v2cls/vssm_base_0229_ckpt_epoch_237.pth) |
-| VMamba-T[`s1l8`] | ImageNet-1K | 224x224 | 82.6 | 30M | 4.9G | 1686| 571| [config](../classification/configs/vssm/vmambav2v_tiny_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%23v2cls/vssm1_tiny_0230s.txt)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%23v2cls/vssm1_tiny_0230s_ckpt_epoch_264.pth) |
+| VMamba-S[`s2l15`] | ImageNet-1K | 224x224 | 83.6 | 50M | 8.7G | 877 | 314| [config](classification/configs/vssm/vmambav2_small_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%23v2cls/vssm_small_0229.txt)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%23v2cls/vssm_small_0229_ckpt_epoch_222.pth) |
+| VMamba-B[`s2l15`] | ImageNet-1K | 224x224 | 83.9 | 89M | 15.4G | 646 | 247 | [config](classification/configs/vssm/vmambav2_base_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%23v2cls/vssm_base_0229.txt)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%23v2cls/vssm_base_0229_ckpt_epoch_237.pth) |
+| VMamba-T[`s1l8`] | ImageNet-1K | 224x224 | 82.6 | 30M | 4.9G | 1686| 571| [config](classification/configs/vssm/vmambav2v_tiny_224.yaml)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%23v2cls/vssm1_tiny_0230s.txt)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%23v2cls/vssm1_tiny_0230s_ckpt_epoch_264.pth) |
 
 
 * *Models in this subsection is trained from scratch with random or manual initialization. The hyper-parameters are inherited from Swin, except for `drop_path_rate` and `EMA`. All models are trained with EMA except for the `Vanilla-VMamba-T`.*
@@ -99,8 +99,8 @@ Designing computationally efficient network architectures persists as an ongoing
 | :---: | :---: | :---: | :---: | :---: | :---: |:---: |:---: |:---: |:---: |:---: |:---: |:---: |
 | Swin-T | 48M | 267G | MaskRCNN@3x | 46.0 |68.1 |50.3 |41.6 |65.1 |44.9 |-- |
 | Swin-S | 69M | 354G | MaskRCNN@3x | 48.2 |69.8 |52.8 |43.2 |67.0 |46.1  |-- |
-| VMamba-S[`s2l15`] | 70M | 384G | MaskRCNN@3x | 49.9 |70.9 |54.7 |44.20 |68.2 |47.7 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_small_ms_3x.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%23v2det/mask_rcnn_vssm_fpn_coco_small_ms_3x.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%23v2det/mask_rcnn_vssm_fpn_coco_small_ms_3x_epoch_32.pth) |
-| VMamba-T[`s1l8`] | 50M | 271G | MaskRCNN@3x | 48.8 |70.4 |53.50 |43.7 |67.4 |47.0 | [config](../detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny_ms_3x.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%23v2det/mask_rcnn_vssm_fpn_coco_tiny_ms_3x_s.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%23v2det/mask_rcnn_vssm_fpn_coco_tiny_ms_3x_s_epoch_31.pth) |
+| VMamba-S[`s2l15`] | 70M | 384G | MaskRCNN@3x | 49.9 |70.9 |54.7 |44.20 |68.2 |47.7 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_small_ms_3x.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%23v2det/mask_rcnn_vssm_fpn_coco_small_ms_3x.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%23v2det/mask_rcnn_vssm_fpn_coco_small_ms_3x_epoch_32.pth) |
+| VMamba-T[`s1l8`] | 50M | 271G | MaskRCNN@3x | 48.8 |70.4 |53.50 |43.7 |67.4 |47.0 | [config](detection/configs/vssm1/mask_rcnn_vssm_fpn_coco_tiny_ms_3x.py)/[log](https://github.com/MzeroMiko/VMamba/releases/download/%23v2det/mask_rcnn_vssm_fpn_coco_tiny_ms_3x_s.log)/[ckpt](https://github.com/MzeroMiko/VMamba/releases/download/%23v2det/mask_rcnn_vssm_fpn_coco_tiny_ms_3x_s_epoch_31.pth) |
 
 
 * *Models in this subsection is initialized from the models trained in `classfication`.*
