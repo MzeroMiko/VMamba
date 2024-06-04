@@ -165,7 +165,8 @@ class CrossScanTriton(torch.autograd.Function):
     def forward(ctx, x: torch.Tensor):
         B, C, H, W = x.shape
         B, C, H, W = int(B), int(C), int(H), int(W)
-        BC, BH, BW = min(triton.next_power_of_2(C), 1), min(triton.next_power_of_2(H), 64), min(triton.next_power_of_2(W), 64)
+        # BC, BH, BW = min(triton.next_power_of_2(C), 1), min(triton.next_power_of_2(H), 64), min(triton.next_power_of_2(W), 64)
+        BC, BH, BW = 1, 32, 32
         NH, NW, NC = triton.cdiv(H, BH), triton.cdiv(W, BW), triton.cdiv(C, BC)
         ctx.shape = (B, C, H, W)
         ctx.triton_shape = (BC, BH, BW, NC, NH, NW)
@@ -190,7 +191,8 @@ class CrossMergeTriton(torch.autograd.Function):
     def forward(ctx, y: torch.Tensor):
         B, K, C, H, W = y.shape
         B, C, H, W = int(B), int(C), int(H), int(W)
-        BC, BH, BW = min(triton.next_power_of_2(C), 1), min(triton.next_power_of_2(H), 64), min(triton.next_power_of_2(W), 64)
+        # BC, BH, BW = min(triton.next_power_of_2(C), 1), min(triton.next_power_of_2(H), 64), min(triton.next_power_of_2(W), 64)
+        BC, BH, BW = 1, 32, 32
         NH, NW, NC = triton.cdiv(H, BH), triton.cdiv(W, BW), triton.cdiv(C, BC)
         ctx.shape = (B, C, H, W)
         ctx.triton_shape = (BC, BH, BW, NC, NH, NW)
@@ -215,7 +217,8 @@ class CrossScanTriton1b1(torch.autograd.Function):
     def forward(ctx, x: torch.Tensor):
         B, K, C, H, W = x.shape
         B, C, H, W = int(B), int(C), int(H), int(W)
-        BC, BH, BW = min(triton.next_power_of_2(C), 1), min(triton.next_power_of_2(H), 64), min(triton.next_power_of_2(W), 64)
+        # BC, BH, BW = min(triton.next_power_of_2(C), 1), min(triton.next_power_of_2(H), 64), min(triton.next_power_of_2(W), 64)
+        BC, BH, BW = 1, 32, 32
         NH, NW, NC = triton.cdiv(H, BH), triton.cdiv(W, BW), triton.cdiv(C, BC)
         ctx.shape = (B, C, H, W)
         ctx.triton_shape = (BC, BH, BW, NC, NH, NW)
@@ -375,7 +378,8 @@ class CrossMergeTritonF(torch.autograd.Function):
     def forward(ctx, y: torch.Tensor, channel_first=True):
         B, K, C, H, W = y.shape
         B, C, H, W = int(B), int(C), int(H), int(W)
-        BC, BH, BW = min(triton.next_power_of_2(C), 1), min(triton.next_power_of_2(H), 64), min(triton.next_power_of_2(W), 64)
+        # BC, BH, BW = min(triton.next_power_of_2(C), 1), min(triton.next_power_of_2(H), 64), min(triton.next_power_of_2(W), 64)
+        BC, BH, BW = 1, 32, 32
         NH, NW, NC = triton.cdiv(H, BH), triton.cdiv(W, BW), triton.cdiv(C, BC)
         ctx.channel_first = channel_first
         ctx.shape = (B, C, H, W)
@@ -404,7 +408,8 @@ class CrossScanTriton1b1F(torch.autograd.Function):
         if not channel_first:
             B, H, W, K, C = x.shape
         B, C, H, W = int(B), int(C), int(H), int(W)
-        BC, BH, BW = min(triton.next_power_of_2(C), 1), min(triton.next_power_of_2(H), 64), min(triton.next_power_of_2(W), 64)
+        # BC, BH, BW = min(triton.next_power_of_2(C), 1), min(triton.next_power_of_2(H), 64), min(triton.next_power_of_2(W), 64)
+        BC, BH, BW = 1, 32, 32
         NH, NW, NC = triton.cdiv(H, BH), triton.cdiv(W, BW), triton.cdiv(C, BC)
         ctx.channel_first = channel_first
         ctx.shape = (B, C, H, W)
@@ -592,7 +597,8 @@ def getCSM(mode=1):
         def forward(ctx, x: torch.Tensor):
             B, C, H, W = x.shape
             B, C, H, W = int(B), int(C), int(H), int(W)
-            BC, BH, BW = min(triton.next_power_of_2(C), 1), min(triton.next_power_of_2(H), 64), min(triton.next_power_of_2(W), 64)
+            # BC, BH, BW = min(triton.next_power_of_2(C), 1), min(triton.next_power_of_2(H), 64), min(triton.next_power_of_2(W), 64)
+            BC, BH, BW = 1, 32, 32
             NH, NW, NC = triton.cdiv(H, BH), triton.cdiv(W, BW), triton.cdiv(C, BC)
             ctx.shape = (B, C, H, W)
             ctx.triton_shape = (BC, BH, BW, NC, NH, NW)
@@ -617,7 +623,8 @@ def getCSM(mode=1):
         def forward(ctx, y: torch.Tensor):
             B, K, C, H, W = y.shape
             B, C, H, W = int(B), int(C), int(H), int(W)
-            BC, BH, BW = min(triton.next_power_of_2(C), 1), min(triton.next_power_of_2(H), 64), min(triton.next_power_of_2(W), 64)
+            # BC, BH, BW = min(triton.next_power_of_2(C), 1), min(triton.next_power_of_2(H), 64), min(triton.next_power_of_2(W), 64)
+            BC, BH, BW = 1, 32, 32
             NH, NW, NC = triton.cdiv(H, BH), triton.cdiv(W, BW), triton.cdiv(C, BC)
             ctx.shape = (B, C, H, W)
             ctx.triton_shape = (BC, BH, BW, NC, NH, NW)

@@ -31,6 +31,7 @@ detection/data
 segmentation/data
 
 kernels/selective_scan/1.log
+kernels/csmcuda
 classification/dev.py
 classification/models/triton_parts.py
 classification/1.log
