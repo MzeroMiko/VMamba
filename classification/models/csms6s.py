@@ -300,5 +300,70 @@ def selective_scan_flop_jit(inputs, outputs, flops_fn=flops_selective_scan_fn, v
     return flops
 
 
+if __name__ == "__main__":
+    def selective_scan_ref(
+        u: torch.Tensor, # (B, K * C, L)
+        delta: torch.Tensor, # (B, K * C, L)
+        A: torch.Tensor, # (K * C, N)
+        B: torch.Tensor, # (B, K, N, L)
+        C: torch.Tensor, # (B, K, N, L)
+        D: torch.Tensor = None, # (K * C)
+        delta_bias: torch.Tensor = None, # (K * C)
+        delta_softplus=True, 
+        oflex=True, 
+        **kwargs
+    ):
+        dtype_in = u.dtype
+        Batch, K, N, L = B.shape
+        KCdim = u.shape[1]
+        Cdim = int(KCdim / K)
+        assert u.shape == (Batch, KCdim, L)
+        assert delta.shape == (Batch, KCdim, L)
+        assert A.shape == (KCdim, N)
+        assert C.shape == B.shape
+
+        if delta_bias is not None:
+            delta = delta + delta_bias[..., None]
+        if delta_softplus:
+            delta = torch.nn.functional.softplus(delta)
+            
+        u, delta, A, B, C = u.float(), delta.float(), A.float(), B.float(), C.float()
+        B = B.view(Batch, K, 1, N, L).repeat(1, 1, Cdim, 1, 1).view(Batch, KCdim, N, L)
+        C = C.view(Batch, K, 1, N, L).repeat(1, 1, Cdim, 1, 1).view(Batch, KCdim, N, L)
+        deltaA = torch.exp(torch.einsum('bdl,dn->bdln', delta, A))
+        deltaB_u = torch.einsum('bdl,bdnl,bdl->bdln', delta, B, u)
+        
+        if True:
+            x = A.new_zeros((Batch, KCdim, N))
+            ys = []
+            for i in range(L):
+                x = deltaA[:, :, i, :] * x + deltaB_u[:, :, i, :]
+                y = torch.einsum('bdn,bdn->bd', x, C[:, :, :, i])
+                ys.append(y)
+            y = torch.stack(ys, dim=2) # (B, C, L)
+        
+        out = y if D is None else y + u * D.unsqueeze(-1)
+        return out if oflex else out.to(dtype=dtype_in)
+
+    B, K, C, N, L = 1, 4, 16, 8, 512
+    device = torch.device("cuda")
+    itype = torch.float
+    As = (-0.5 * torch.rand(K * C, N, device=device, dtype=torch.float32)).requires_grad_()
+    Bs = torch.randn((B, K, N, L), device=device, dtype=itype).requires_grad_()
+    Cs = torch.randn((B, K, N, L), device=device, dtype=itype).requires_grad_()
+    Ds = torch.randn((K * C), device=device, dtype=torch.float32).requires_grad_()
+    u = torch.randn((B, K * C, L), device=device, dtype=itype).requires_grad_()
+    delta = (0.5 * torch.rand((B, K * C, L),  device=device, dtype=itype)).requires_grad_()
+    delta_bias = (0.5 * torch.rand((K * C), device=device, dtype=torch.float32)).requires_grad_()
+    u1, As1, Bs1, Cs1, Ds1, delta1, delta_bias1 = [x.clone().detach().requires_grad_() for x in [u, As, Bs, Cs, Ds, delta, delta_bias]]
+    
+    out_ref = selective_scan_ref(u, delta, As, Bs, Cs, Ds, delta_bias, True)
+    out = SelectiveScanOflex.apply(u1, delta1, As1, Bs1, Cs1, Ds1, delta_bias1, True)
+    print((out_ref - out).abs().max())
+    out.sum().backward()
+    out_ref.sum().backward()
+    for x, y in zip([u, As, Bs, Cs, Ds, delta, delta_bias], [u1, As1, Bs1, Cs1, Ds1, delta1, delta_bias1]):
+        print((x.grad - y.grad).abs().max())
+
 
 
