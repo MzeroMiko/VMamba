@@ -345,25 +345,50 @@ if __name__ == "__main__":
         out = y if D is None else y + u * D.unsqueeze(-1)
         return out if oflex else out.to(dtype=dtype_in)
 
-    B, K, C, N, L = 1, 4, 16, 8, 512
-    device = torch.device("cuda")
-    itype = torch.float
-    As = (-0.5 * torch.rand(K * C, N, device=device, dtype=torch.float32)).requires_grad_()
-    Bs = torch.randn((B, K, N, L), device=device, dtype=itype).requires_grad_()
-    Cs = torch.randn((B, K, N, L), device=device, dtype=itype).requires_grad_()
-    Ds = torch.randn((K * C), device=device, dtype=torch.float32).requires_grad_()
-    u = torch.randn((B, K * C, L), device=device, dtype=itype).requires_grad_()
-    delta = (0.5 * torch.rand((B, K * C, L),  device=device, dtype=itype)).requires_grad_()
-    delta_bias = (0.5 * torch.rand((K * C), device=device, dtype=torch.float32)).requires_grad_()
-    u1, As1, Bs1, Cs1, Ds1, delta1, delta_bias1 = [x.clone().detach().requires_grad_() for x in [u, As, Bs, Cs, Ds, delta, delta_bias]]
-    
-    out_ref = selective_scan_ref(u, delta, As, Bs, Cs, Ds, delta_bias, True)
-    out = SelectiveScanOflex.apply(u1, delta1, As1, Bs1, Cs1, Ds1, delta_bias1, True)
-    print((out_ref - out).abs().max())
-    out.sum().backward()
-    out_ref.sum().backward()
-    for x, y in zip([u, As, Bs, Cs, Ds, delta, delta_bias], [u1, As1, Bs1, Cs1, Ds1, delta1, delta_bias1]):
-        print((x.grad - y.grad).abs().max())
+    def params(B, K, C, N, L, device = torch.device("cuda"), itype = torch.float):
+        As = (-0.5 * torch.rand(K * C, N, device=device, dtype=torch.float32)).requires_grad_()
+        Bs = torch.randn((B, K, N, L), device=device, dtype=itype).requires_grad_()
+        Cs = torch.randn((B, K, N, L), device=device, dtype=itype).requires_grad_()
+        Ds = torch.randn((K * C), device=device, dtype=torch.float32).requires_grad_()
+        u = torch.randn((B, K * C, L), device=device, dtype=itype).requires_grad_()
+        delta = (0.5 * torch.rand((B, K * C, L),  device=device, dtype=itype)).requires_grad_()
+        delta_bias = (0.5 * torch.rand((K * C), device=device, dtype=torch.float32)).requires_grad_()
+        return u, delta, As, Bs, Cs, Ds, delta_bias
+
+    def bench(func, xs, Warmup=30, NTimes=20):
+        import time
+        torch.cuda.synchronize()
+        for r in range(Warmup):
+            for x in xs:
+                func(x)
+        torch.cuda.synchronize()
+        tim0 = time.time()
+        for r in range(NTimes):
+            for x in xs:
+                func(x)
+        torch.cuda.synchronize()
+        return (time.time() - tim0) / NTimes
+
+    def check():
+        u, delta, As, Bs, Cs, Ds, delta_bias = params(1, 4, 16, 8, 512)
+        u1, delta1, As1, Bs1, Cs1, Ds1, delta_bias1 = [x.clone().detach().requires_grad_() for x in [u, delta, As, Bs, Cs, Ds, delta_bias]]
+        
+        out_ref = selective_scan_ref(u, delta, As, Bs, Cs, Ds, delta_bias, True)
+        out = SelectiveScanOflex.apply(u1, delta1, As1, Bs1, Cs1, Ds1, delta_bias1, True)
+        print((out_ref - out).abs().max())
+        out.sum().backward()
+        out_ref.sum().backward()
+        for x, y in zip([u, As, Bs, Cs, Ds, delta, delta_bias], [u1, As1, Bs1, Cs1, Ds1, delta1, delta_bias1]):
+            print((x.grad - y.grad).abs().max())
+
+        u, delta, As, Bs, Cs, Ds, delta_bias = params(128, 4, 96, 8, 56 * 56)
+        print(bench(lambda x: SelectiveScanOflex.apply(x[0], x[1], x[2], x[3], x[4], x[5], x[6], True), [(u, delta, As, Bs, Cs, Ds, delta_bias),]))
+        print(bench(lambda x: SelectiveScanMamba.apply(x[0], x[1], x[2], x[3], x[4], x[5], x[6], True), [(u, delta, As, Bs, Cs, Ds, delta_bias),]))
+        print(bench(lambda x: selective_scan_ref(x[0], x[1], x[2], x[3], x[4], x[5], x[6], True), [(u, delta, As, Bs, Cs, Ds, delta_bias),]))
 
 
+
+
+
+    check()
 
