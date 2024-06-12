@@ -130,7 +130,8 @@ def main(config, args):
             logger.info(f"number of GFLOPs: {flops / 1e9}")
         else:
             logger.info(flop_count_str(FlopCountAnalysis(model, (dataset_val[0][0][None],))))
-
+    torch.cuda.empty_cache()
+    dist.barrier()
     model.cuda()
     model_without_ddp = model
 
