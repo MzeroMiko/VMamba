@@ -859,8 +859,6 @@ class SS2Dv2:
         if force_fp32:
             xs, dts, Bs, Cs = to_fp32(xs, dts, Bs, Cs)
 
-        print(chunk_size,flush=True)
-
         ys, final_state = selective_scan_chunk_fn(
             xs, dts, As, Bs, Cs, chunk_size=chunk_size, D=Ds, dt_bias=dt_bias, 
             initial_states=initial_state, dt_softplus=True, return_final_states=True,
@@ -876,7 +874,7 @@ class SS2Dv2:
                 ys=ys, y=y, H=H, W=W,
             ))
         if self.initial_state is not None:
-            self.initial_state = final_state.detach().sum(0, keepdim=True)
+            self.initial_state = nn.Parameter(final_state.detach().sum(0, keepdim=True), requires_grad=False)
 
         y = self.out_norm(y.view(B, H, W, -1))
 
@@ -1742,7 +1740,7 @@ def vmamba_base_s1l20(channel_first=True):
 
 if __name__ == "__main__":
     model = VSSM(
-        depths=[2, 2, 8, 2], dims=96, drop_path_rate=0.2, 
+        depths=[2, 2, 5, 2], dims=96, drop_path_rate=0.2, 
         patch_size=4, in_chans=3, num_classes=1000, 
         ssm_d_state=64, ssm_ratio=1.0, ssm_dt_rank="auto", ssm_act_layer="gelu",
         ssm_conv=3, ssm_conv_bias=False, ssm_drop_rate=0.0, 
@@ -1752,7 +1750,11 @@ if __name__ == "__main__":
         downsample_version="v3", patchembed_version="v2", 
         use_checkpoint=False, posembed=False, imgsize=224, 
     )
-    model.flops()
+    print(parameter_count(model)[""])
+    print(model.flops()) # wrong
+    model.cuda().train()
+    inp = torch.randn((128,3, 224, 224))
+    model(inp).sum().backward()
     breakpoint()
 
 
