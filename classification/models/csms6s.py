@@ -1,3 +1,4 @@
+import time
 import torch
 import warnings
 
@@ -10,6 +11,7 @@ try:
 except ImportError:
     WITH_SELECTIVESCAN_OFLEX = False
     warnings.warn("Can not import selective_scan_cuda_oflex. This affects speed.")
+    print("Can not import selective_scan_cuda_oflex. This affects speed.", flush=True)
 try:
     import selective_scan_cuda_core
 except ImportError:
@@ -30,6 +32,7 @@ def selective_scan_torch(
     delta_bias: torch.Tensor = None, # (K * C)
     delta_softplus=True, 
     oflex=True, 
+    *args,
     **kwargs
 ):
     dtype_in = u.dtype
@@ -118,10 +121,9 @@ def selective_scan_fn(
     oflex=True,
     backend=None,
 ):
-    if backend == "torch":
-        return selective_scan_torch(u, delta, A, B, C, D, delta_bias, delta_softplus, oflex)
-    else:
-        return SelectiveScanCuda.apply(u, delta, A, B, C, D, delta_bias, delta_softplus, oflex, backend)
+    WITH_CUDA = (WITH_SELECTIVESCAN_OFLEX or WITH_SELECTIVESCAN_CORE or WITH_SELECTIVESCAN_MAMBA)
+    fn = selective_scan_torch if backend == "torch" or (not WITH_CUDA) else SelectiveScanCuda.apply
+    return fn(u, delta, A, B, C, D, delta_bias, delta_softplus, oflex, backend)
 
 
 # fvcore flops =======================================
@@ -207,9 +209,10 @@ def flops_selective_scan_ref(B=1, L=256, D=768, N=16, with_D=True, with_Z=False,
         flops += B * D * L  
     return flops
 
-def selective_scan_flop_jit(inputs, outputs, flops_fn=flops_selective_scan_fn, verbose=True):
+def selective_scan_flop_jit(inputs, outputs, backend="prefixsum", verbose=True):
     if verbose:
         print_jit_input_names(inputs)
+    flops_fn = flops_selective_scan_ref if backend == "naive" else flops_selective_scan_fn
     B, D, L = inputs[0].type().sizes()
     N = inputs[2].type().sizes()[1]
     flops = flops_fn(B=B, L=L, D=D, N=N, with_D=True, with_Z=False)
