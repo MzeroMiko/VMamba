@@ -1809,8 +1809,8 @@ if __name__ == "__main__":
         inp = torch.randn((128, 3, 224, 224)).cuda()
         for _ in range(30):
             model(inp)
-        tim = time.time()
         torch.cuda.synchronize()
+        tim = time.time()
         for _ in range(30):
             model(inp)
         torch.cuda.synchronize()
@@ -1818,8 +1818,8 @@ if __name__ == "__main__":
 
         for _ in range(30):
             model(inp).sum().backward()
-        tim = time.time()
         torch.cuda.synchronize()
+        tim = time.time()
         for _ in range(30):
             model(inp).sum().backward()
         torch.cuda.synchronize()
