@@ -196,7 +196,7 @@ def _bmm_chunk_fwd(a, b, chunk_size, seq_idx=None, causal=False, output_dtype=No
     with torch.cuda.device(a.device.index):
         _bmm_chunk_fwd_kernel[grid](
             a, b, out, seq_idx,
-            seqlen, chunk_size, k, ngroups if has_groups else 1,
+            int(seqlen), int(chunk_size), int(k), int(ngroups if has_groups else 1),
             a.stride(0), a.stride(1), 0 if not has_groups else a.stride(2), a.stride(-1),
             b.stride(0), b.stride(1), 0 if not has_groups else b.stride(2), b.stride(-1),
             out.stride(0), out.stride(1), 0 if not has_groups else out.stride(2), out.stride(-2), out.stride(-1),
@@ -251,7 +251,7 @@ def _bmm_chunk_bwd(a, dout, residual=None, out=None):
     with torch.cuda.device(a.device.index):
         _bmm_chunk_bwd_kernel[grid](
             a, dout, out, residual,
-            seqlen, chunk_size, k, ngroups if has_groups else 1,
+            int(seqlen), int(chunk_size), int(k), int(ngroups if has_groups else 1),
             a.stride(0), a.stride(1), 0 if not has_groups else a.stride(2), a.stride(-1),
             dout.stride(0), dout.stride(1), 0 if not has_groups else dout.stride(2), dout.stride(-2), dout.stride(-1),
             out.stride(0), out.stride(1), 0 if not has_groups else out.stride(2), out.stride(-1),

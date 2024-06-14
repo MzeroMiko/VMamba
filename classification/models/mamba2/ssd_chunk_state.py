@@ -581,7 +581,7 @@ def _chunk_cumsum_fwd(dt, A, chunk_size, dt_bias=None, dt_softplus=False, dt_lim
     with torch.cuda.device(dt.device.index):
         _chunk_cumsum_fwd_kernel[grid_chunk_cs](
             dt, A, dt_bias, dt_out, dA_cumsum,
-            batch, seqlen, nheads, chunk_size,
+            int(batch), int(seqlen), int(nheads), int(chunk_size),
             dt_limit[0], dt_limit[1],
             dt.stride(0), dt.stride(1), dt.stride(2),
             A.stride(0),
@@ -615,7 +615,7 @@ def _chunk_cumsum_bwd(ddA, ddt_out, dt, A, dt_bias=None, dt_softplus=False, dt_l
     with torch.cuda.device(dt.device.index):
         _chunk_cumsum_bwd_kernel[grid_chunk_cs](
             ddA, ddt_out, dt, A, dt_bias, ddt, dA, ddt_bias,
-            batch, seqlen, nheads, chunk_size,
+            int(batch), int(seqlen), int(nheads), int(chunk_size),
             dt_limit[0], dt_limit[1],
             ddA.stride(0), ddA.stride(2), ddA.stride(1), ddA.stride(3),
             ddt_out.stride(0), ddt_out.stride(2), ddt_out.stride(1), ddt_out.stride(3),
@@ -652,8 +652,8 @@ def _chunk_state_fwd(B, x, dt, dA_cumsum, seq_idx=None, states=None, states_in_f
     with torch.cuda.device(x.device.index):
         _chunk_state_fwd_kernel[grid](
             x, B, states, dt, dA_cumsum, seq_idx,
-            headdim, dstate, chunk_size,
-            batch, seqlen, nheads // ngroups,
+            int(headdim), int(dstate), int(chunk_size),
+            int(batch), int(seqlen), int(nheads // ngroups),
             x.stride(0), x.stride(1), x.stride(2), x.stride(3),
             B.stride(0), B.stride(1), B.stride(2), B.stride(-1),
             states.stride(0), states.stride(1), states.stride(2), states.stride(3), states.stride(4),
@@ -685,8 +685,8 @@ def _chunk_state_bwd_dx(B, x, dt, dA_cumsum, dstates, dx=None):
     with torch.cuda.device(x.device.index):
         _chunk_state_bwd_dx_kernel[grid_dx](
             x, B, dstates, dt, dA_cumsum, dx, ddt, ddA_cumsum,
-            chunk_size, headdim, dstate,
-            batch, seqlen, nheads // ngroups,
+            int(chunk_size), int(headdim), int(dstate),
+            int(batch), int(seqlen), int(nheads // ngroups),
             x.stride(0), x.stride(1), x.stride(2), x.stride(3),
             B.stride(0), B.stride(1), B.stride(2), B.stride(-1),
             dstates.stride(0), dstates.stride(1), dstates.stride(2), dstates.stride(3), dstates.stride(4),
@@ -729,8 +729,8 @@ def _chunk_state_bwd_db(x, dt, dA_cumsum, dstates, seq_idx=None, B=None, ngroups
     with torch.cuda.device(x.device.index):
         _chunk_state_bwd_db_kernel[grid_db](
             x, dstates, B, dt, dA_cumsum, seq_idx, dB, ddA_cumsum,
-            chunk_size, dstate, headdim,
-            batch, seqlen, nheads, nheads_per_program, ngroups,
+            int(chunk_size), int(dstate), int(headdim),
+            int(batch), int(seqlen), int(nheads), int(nheads_per_program), int(ngroups),
             x.stride(0), x.stride(1), x.stride(2), x.stride(3),
             dstates.stride(0), dstates.stride(1), dstates.stride(2), dstates.stride(3), dstates.stride(4),
             *B_strides,
@@ -771,8 +771,8 @@ def _chunk_state_bwd_ddAcs_stable(B, x, dt, dA_cumsum, dstates, seq_idx=None):
     with torch.cuda.device(x.device.index):
         _chunk_state_bwd_ddAcs_stable_kernel[grid_ddtcs](
             x, B, dstates, dt, dA_cumsum, seq_idx, ddA_cumsum,
-            chunk_size, headdim, dstate,
-            batch, seqlen, nheads // ngroups,
+            int(chunk_size), int(headdim), int(dstate),
+            int(batch), int(seqlen), int(nheads // ngroups),
             x.stride(0), x.stride(1), x.stride(2), x.stride(3),
             B.stride(0), B.stride(1), B.stride(2), B.stride(-1),
             dstates.stride(0), dstates.stride(1), dstates.stride(2), dstates.stride(3), dstates.stride(4),

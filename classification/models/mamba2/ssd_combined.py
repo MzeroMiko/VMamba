@@ -268,8 +268,8 @@ def _chunk_scan_chunk_state_bwd_dx(x, dt, dA_cumsum, B, CB, dout, dstates, D=Non
     with torch.cuda.device(x.device.index):
         _chunk_scan_chunk_state_bwd_dx_kernel[grid_dx](
             x, CB, dout, dt, dA_cumsum, seq_idx, D, B, dstates, dx, ddt, dD,
-            chunk_size, headdim, dstate,
-            batch, seqlen, nheads // ngroups,
+            int(chunk_size), int(headdim), int(dstate),
+            int(batch), int(seqlen), int(nheads // ngroups),
             x.stride(0), x.stride(1), x.stride(2), x.stride(3),
             CB.stride(0), CB.stride(1), CB.stride(2), CB.stride(-1), CB.stride(-2),
             dout.stride(0), dout.stride(1), dout.stride(2), dout.stride(3),
@@ -297,6 +297,8 @@ def _chunk_scan_chunk_state_bwd_dx(x, dt, dA_cumsum, B, CB, dout, dstates, D=Non
     return dx, ddt.to(dtype=dt.dtype), dD
 
 
+# @torch.compile(options={"triton.cudagraphs": True}, fullgraph=True)
+# @torch.compile(fullgraph=True)
 def _mamba_chunk_scan_combined_fwd(x, dt, A, B, C, chunk_size, D=None, z=None, dt_bias=None, initial_states=None, seq_idx=None, dt_softplus=False, dt_limit=(0.0, float("inf"))):
     batch, seqlen, nheads, headdim = x.shape
     _, _, ngroups, dstate = B.shape
@@ -329,12 +331,11 @@ def _mamba_chunk_scan_combined_fwd(x, dt, A, B, C, chunk_size, D=None, z=None, d
     # dA_cumsum_tmp1, dt_tmp1 = _chunk_cumsum_fwd(dt[:, 147:], A, chunk_size, dt_bias=dt_bias, dt_softplus=dt_softplus)
     # dA_cumsum_tmp2, dt_tmp2 = _chunk_cumsum_fwd(dt[:, 147:256], A, chunk_size, dt_bias=dt_bias, dt_softplus=dt_softplus)
     dA_cumsum, dt = _chunk_cumsum_fwd(dt, A, chunk_size, dt_bias=dt_bias, dt_softplus=dt_softplus, dt_limit=dt_limit)
-    dt = to_ttensor(dt)
     states = _chunk_state_fwd(B, x, dt, dA_cumsum, seq_idx=seq_idx, states_in_fp32=True)
     # states_tmp0 = _chunk_state_fwd(B[:, :147], x[:, :147], dt_tmp0, dA_cumsum_tmp0, states_in_fp32=True)
     # states_tmp1 = _chunk_state_fwd(B[:, 147:], x[:, 147:], dt_tmp1, dA_cumsum_tmp1, states_in_fp32=True)
     # states_tmp2 = _chunk_state_fwd(B[:, 147:256], x[:, 147:256], dt_tmp2, dA_cumsum_tmp2, states_in_fp32=True)
-    states, final_states = _state_passing_fwd(to_ttensor(rearrange(states, "... p n -> ... (p n)")), dA_cumsum[:, :, :, -1],
+    states, final_states = _state_passing_fwd(rearrange(states, "... p n -> ... (p n)"), dA_cumsum[:, :, :, -1],
                                               initial_states=rearrange(initial_states, "... p n -> ... (p n)") if initial_states is not None else None,
                                               seq_idx=seq_idx, chunk_size=chunk_size, out_dtype=C.dtype)
     states, final_states = [rearrange(t, "... (p n) -> ... p n", n=dstate) for t in [states, final_states]]
@@ -345,6 +346,8 @@ def _mamba_chunk_scan_combined_fwd(x, dt, A, B, C, chunk_size, D=None, z=None, d
     return out, out_x, dt, dA_cumsum, states, final_states
 
 
+# @torch.compile(options={"triton.cudagraphs": True}, fullgraph=True)
+# @torch.compile(fullgraph=True)
 def _mamba_chunk_scan_combined_bwd(dout, x, dt, A, B, C, out, chunk_size, D=None, z=None,
                                    dt_bias=None, initial_states=None, dfinal_states=None, seq_idx=None, dt_softplus=False,
                                    dt_limit=(0.0, float("inf")),
@@ -562,7 +565,7 @@ class MambaChunkScanCombinedFn(torch.autograd.Function):
         dx, ddt, dA, dB, dC, dD, dz, ddt_bias, dinitial_states = _mamba_chunk_scan_combined_bwd(dout, x, dt, A, B, C, out, ctx.chunk_size, D=D, z=z, dt_bias=dt_bias, initial_states=initial_states, dfinal_states=dfinal_states, seq_idx=seq_idx, dt_softplus=ctx.dt_softplus, dt_limit=ctx.dt_limit)
         return dx, ddt, dA, dB, dC, None, dD, dz, ddt_bias, dinitial_states, None, None, None, None
 
-
+# @torch.jit.ignore
 def mamba_chunk_scan_combined(x, dt, A, B, C, chunk_size, D=None, z=None, dt_bias=None, initial_states=None, seq_idx=None, dt_softplus=False, dt_limit=(0.0, float("inf")), return_final_states=False):
     """
     Argument:
@@ -581,7 +584,6 @@ def mamba_chunk_scan_combined(x, dt, A, B, C, chunk_size, D=None, z=None, dt_bia
     Return:
         out: (batch, seqlen, nheads, headdim)
     """
-    x, dt, A, B, C = to_ttensor(x, dt, A, B, C)
     return MambaChunkScanCombinedFn.apply(x, dt, A, B, C, chunk_size, D, z, dt_bias, initial_states, seq_idx, dt_softplus, dt_limit, return_final_states)
 
 
