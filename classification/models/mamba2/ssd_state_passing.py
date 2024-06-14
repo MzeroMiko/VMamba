@@ -208,7 +208,7 @@ def _state_passing_fwd(states, dA_chunk_cumsum, initial_states=None, seq_idx=Non
     with torch.cuda.device(states.device.index):
         _state_passing_fwd_kernel[grid](
             states, out, final_states, dA_chunk_cumsum, initial_states, seq_idx,
-            dim, nchunks, seqlen if seq_idx is not None else 0, chunk_size if seq_idx is not None else 0,
+            int(dim), int(nchunks), int(seqlen if seq_idx is not None else 0), int(chunk_size if seq_idx is not None else 0),
             states.stride(0), states.stride(1), states.stride(2), states.stride(3),
             out.stride(0), out.stride(1), out.stride(2), out.stride(3),
             final_states.stride(0), final_states.stride(1), final_states.stride(2),
@@ -257,7 +257,7 @@ def _state_passing_bwd(
         _state_passing_bwd_kernel[grid](
             dout, states, dA_chunk_cumsum, dfinal_states, seq_idx,
             dstates, ddA_chunk_cumsum, dinitstates, states_converted,
-            dim, nchunks, seqlen if seq_idx is not None else 0, chunk_size if seq_idx is not None else 0,
+            int(dim), int(nchunks), int(seqlen if seq_idx is not None else 0), int(chunk_size if seq_idx is not None else 0),
             dout.stride(0), dout.stride(1), dout.stride(2), dout.stride(3),
             states.stride(0), states.stride(1), states.stride(2), states.stride(3),
             dA_chunk_cumsum.stride(0), dA_chunk_cumsum.stride(2), dA_chunk_cumsum.stride(1),
