@@ -40,18 +40,6 @@ if torch.multiprocessing.get_start_method() != "spawn":
     print(f"||{torch.multiprocessing.get_start_method()}||", end="")
     torch.multiprocessing.set_start_method("spawn", force=True)
 
-
-def import_abspy(name="models", path="classification/"):
-    import sys
-    import importlib
-    path = os.path.abspath(path)
-    assert os.path.isdir(path)
-    sys.path.insert(0, path)
-    module = importlib.import_module(name)
-    sys.path.pop(0)
-    return module
-
-
 def str2bool(v):
     """
     Converts string to bool type; enables command line 
