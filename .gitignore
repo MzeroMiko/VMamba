@@ -42,4 +42,5 @@ test.sh
 classification/models/vmamba copy.py
 kernels/selective_scan/ssmjax.py
 classification/models/vheat_wzz.py
-mim
+classification/main_simmim_pt.py
+

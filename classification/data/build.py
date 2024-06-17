@@ -107,25 +107,6 @@ def build_dataset(is_train, config):
         else:
             root = os.path.join(config.DATA.DATA_PATH, prefix)
             dataset = datasets.ImageFolder(root, transform=transform)
-
-# =============================================================================
-# # JUST for test
-            if False:
-                from torch.utils.data import Dataset
-                class FDataset(Dataset):
-                    def __init__(self, *args, **kwargs):
-                        pass
-
-                    def __len__(self):
-                        return 1000
-
-                    def __getitem__(self, *args,**kwargs):
-                        return torch.randn((3, 224, 224)), 0
-                    
-                dataset = FDataset()
-            
-# =============================================================================
-
         nb_classes = 1000
     elif config.DATA.DATASET == 'imagenet22K':
         prefix = 'ILSVRC2011fall_whole'
