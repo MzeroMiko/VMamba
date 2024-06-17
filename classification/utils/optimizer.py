@@ -11,7 +11,7 @@ from functools import partial
 from torch import optim as optim
 
 
-def build_optimizer(config, model, logger, **kwargs):
+def build_optimizer(config, model, logger, simmim=False, is_pretrain=False, **kwargs):
     """
     Build optimizer, set weight decay of normalization to 0 by default.
     """
@@ -22,7 +22,17 @@ def build_optimizer(config, model, logger, **kwargs):
         skip = model.no_weight_decay()
     if hasattr(model, 'no_weight_decay_keywords'):
         skip_keywords = model.no_weight_decay_keywords()
-    parameters, no_decay_names = set_weight_decay(model, skip, skip_keywords)
+    if simmim:
+        if is_pretrain:
+            parameters = get_pretrain_param_groups(model, skip, skip_keywords)
+        else:
+            depths = config.MODEL.SWIN.DEPTHS if config.MODEL.TYPE == 'swin' else config.MODEL.SWINV2.DEPTHS
+            num_layers = sum(depths)
+            get_layer_func = partial(get_swin_layer, num_layers=num_layers + 2, depths=depths)
+            scales = list(config.TRAIN.LAYER_DECAY ** i for i in reversed(range(num_layers + 2)))
+            parameters = get_finetune_param_groups(model, config.TRAIN.BASE_LR, config.TRAIN.WEIGHT_DECAY, get_layer_func, scales, skip, skip_keywords)
+    else:
+        parameters, no_decay_names = set_weight_decay(model, skip, skip_keywords)
     logger.info(f"No weight decay list: {no_decay_names}")
 
     opt_lower = config.TRAIN.OPTIMIZER.NAME.lower()
