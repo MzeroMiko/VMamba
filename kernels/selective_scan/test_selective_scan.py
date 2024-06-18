@@ -364,6 +364,8 @@ else:
 print("use MODE:", MODE)
 DSTATE = [1]
 DIM = [768]
+DIM1 = [768]
+DIM1 = [24]
 BATCHSIZE = [2]
 # DSTATE = [1] if MODE in ["mamba_ssm_sscorendstate", "sscorendstate"] else [8]
 NROWS = [1,2,3,4]
@@ -387,9 +389,10 @@ IDTYPE = MODE in [None]
 @pytest.mark.parametrize("nrows", NROWS)
 @pytest.mark.parametrize("batch_size", BATCHSIZE)
 @pytest.mark.parametrize("dim", DIM)
+@pytest.mark.parametrize("dim1", DIM1)
 @pytest.mark.parametrize("dstate", DSTATE)
 def test_selective_scan(is_variable_B, is_variable_C, varBC_groups, has_D, has_z, has_delta_bias,
-                        delta_softplus, return_last_state, seqlen, itype, wtype, nrows, batch_size, dim, dstate):
+                        delta_softplus, return_last_state, seqlen, itype, wtype, nrows, batch_size, dim, dim1, dstate):
     wtype = itype if IDTYPE else wtype
     print(f'method: {selective_scan_cuda}')
     if varBC_groups > 1 and (not is_variable_B or not is_variable_C):
@@ -434,11 +437,11 @@ def test_selective_scan(is_variable_B, is_variable_C, varBC_groups, has_D, has_z
     else:
         z = None
     if has_delta_bias:
-        delta_bias = (0.5 * torch.rand(dim, device=device, dtype=torch.float32)).requires_grad_()
+        delta_bias = (0.5 * torch.rand(dim1, device=device, dtype=torch.float32)).requires_grad_()
     else:
         delta_bias = None
     u = torch.randn(batch_size, dim, seqlen, device=device, dtype=itype, requires_grad=True)
-    delta = (0.5 * torch.rand(batch_size, dim, seqlen, device=device, dtype=itype)).requires_grad_()
+    delta = (0.5 * torch.rand(batch_size, dim1, seqlen, device=device, dtype=itype)).requires_grad_()
     A_ref = A.detach().clone().requires_grad_()
     B_ref = B.detach().clone().requires_grad_()
     C_ref = C.detach().clone().requires_grad_()
@@ -447,6 +450,12 @@ def test_selective_scan(is_variable_B, is_variable_C, varBC_groups, has_D, has_z
     u_ref = u.detach().clone().requires_grad_()
     delta_ref = delta.detach().clone().requires_grad_()
     delta_bias_ref = delta_bias.detach().clone().requires_grad_() if delta_bias is not None else None
+    if dim1 != dim:
+        assert dim % dim1 == 0
+        delta_ref = delta.unsqueeze(2).repeat(1, 1, dim // dim1, 1).contiguous().flatten(1, 2)
+        delta_ref = delta_ref.detach().clone().requires_grad_()
+        delta_bias_ref = delta_bias.unsqueeze(1).repeat(1, dim // dim1).view(-1).detach().clone().requires_grad_() if delta_bias is not None else None
+    
     out, *rest = selective_scan_fn(
         u, delta, A, B, C, D, z=z,
         delta_bias=delta_bias, delta_softplus=delta_softplus,
@@ -476,30 +485,39 @@ def test_selective_scan(is_variable_B, is_variable_C, varBC_groups, has_D, has_z
     out.backward(g)
 
     print(f'du max diff: {(u.grad - u_ref.grad).abs().max().item()}')
-    print(f'ddelta max diff: {(delta.grad - delta_ref.grad).abs().max().item()}')
     print(f'dA max diff: {(A.grad - A_ref.grad).abs().max().item()}')
     print(f'dB max diff: {(B.grad - B_ref.grad).abs().max().item()}')
     print(f'dC max diff: {(C.grad - C_ref.grad).abs().max().item()}')
     if has_D:
         print(f'dD max diff: {(D.grad - D_ref.grad).abs().max().item()}')
+        assert torch.allclose(D.grad, D_ref.grad, rtol=rtolw, atol=atolw)
     if has_z:
         print(f'dz max diff: {(z.grad - z_ref.grad).abs().max().item()}')
-    if has_delta_bias:
-        print(f'ddelta_bias max diff: {(delta_bias.grad - delta_bias_ref.grad).abs().max().item()}')
-
+        assert torch.allclose(z.grad, z_ref.grad, rtol=rtolw, atol=atolw)
     assert torch.allclose(u.grad, u_ref.grad.to(dtype=itype), rtol=rtol * 2, atol=atol * 2)
-    assert torch.allclose(delta.grad, delta_ref.grad.to(dtype=itype), rtol=rtol * 5, atol=atol * 10)
     assert torch.allclose(A.grad, A_ref.grad, rtol=rtolw, atol=atolw * 5)
     assert torch.allclose(B.grad, B_ref.grad, rtol=rtolw if not is_variable_B else rtol,
                           atol=atolw if not is_variable_B else atol)
     assert torch.allclose(C.grad, C_ref.grad, rtol=rtolw if not is_variable_C else rtol,
                           atol=atolw if not is_variable_C else atol)
-    if has_D:
-        assert torch.allclose(D.grad, D_ref.grad, rtol=rtolw, atol=atolw)
-    if has_z:
-        assert torch.allclose(z.grad, z_ref.grad, rtol=rtolw, atol=atolw)
-    if has_delta_bias:
-        assert torch.allclose(delta_bias.grad, delta_bias_ref.grad, rtol=rtolw, atol=atolw)
 
-# test_selective_scan(True, True, 2, True, False, True, True, True, 64, torch.float32, torch.float32, 1, 2, 24, 1)
+    if dim == dim1:
+        print(f'ddelta max diff: {(delta.grad - delta_ref.grad).abs().max().item()}')
+        assert torch.allclose(delta.grad, delta_ref.grad.to(dtype=itype), rtol=rtol * 5, atol=atol * 10)
+        if has_delta_bias:
+            print(f'ddelta_bias max diff: {(delta_bias.grad - delta_bias_ref.grad).abs().max().item()}')
+            assert torch.allclose(delta_bias.grad, delta_bias_ref.grad, rtol=rtolw, atol=atolw)
+    else:
+        dgr = delta_ref.grad.view(delta_ref.grad.shape[0], -1, dim // dim1, delta_ref.grad.shape[-1]).sum(2)
+        print(f'ddelta max diff: {(delta.grad - dgr).abs().max().item()}')
+        assert torch.allclose(delta.grad, dgr.to(dtype=itype), rtol=rtol * 5, atol=atol * 10), breakpoint()
+        if has_delta_bias:
+            dbr = delta_bias_ref.grad.view(-1, dim // dim1).sum(-1)
+            print(f'ddelta_bias max diff: {(delta_bias.grad - dbr).abs().max().item()}')
+            assert torch.allclose(delta_bias.grad, dbr, rtol=rtolw, atol=atolw)
+
+
+
+# test_selective_scan(True, True, 2, True, False, True, True, True, 64, torch.float32, torch.float32, 1, 2, 24, 24, 1)
+# test_selective_scan(True, True, 2, True, False, True, True, True, 64, torch.float32, torch.float32, 1, 2, 24, 12, 1)
 

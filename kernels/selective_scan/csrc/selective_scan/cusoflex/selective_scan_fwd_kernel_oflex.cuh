@@ -12,7 +12,7 @@
 #include <cub/block/block_store.cuh>
 #include <cub/block/block_scan.cuh>
 
-#include "selective_scan.h"
+#include "selective_scan_oflex.h"
 #include "selective_scan_common.h"
 #include "static_switch.h"
 
@@ -88,10 +88,11 @@ void selective_scan_fwd_kernel(SSMParamsBase params) {
     const int batch_id = blockIdx.x;
     const int dim_id = blockIdx.y;
     const int group_id = dim_id / (params.dim_ngroups_ratio);
+    const int delta_group_id = dim_id / (params.dim_deltagroups_ratio);
     input_t *u = reinterpret_cast<input_t *>(params.u_ptr) + batch_id * params.u_batch_stride
         + dim_id * params.u_d_stride;
     input_t *delta = reinterpret_cast<input_t *>(params.delta_ptr) + batch_id * params.delta_batch_stride
-        + dim_id * params.delta_d_stride;
+        + delta_group_id * params.delta_d_stride;
     weight_t *A = reinterpret_cast<weight_t *>(params.A_ptr) + dim_id * params.A_d_stride;
     input_t *Bvar = reinterpret_cast<input_t *>(params.B_ptr) + batch_id * params.B_batch_stride + group_id * params.B_group_stride;
     input_t *Cvar = reinterpret_cast<input_t *>(params.C_ptr) + batch_id * params.C_batch_stride + group_id * params.C_group_stride;
@@ -103,7 +104,7 @@ void selective_scan_fwd_kernel(SSMParamsBase params) {
     }
     float delta_bias = 0;
     if (params.delta_bias_ptr != nullptr) {
-        delta_bias = reinterpret_cast<float *>(params.delta_bias_ptr)[dim_id];
+        delta_bias = reinterpret_cast<float *>(params.delta_bias_ptr)[delta_group_id];
     }
 
     constexpr int kChunkSize = kNThreads * kNItems;
