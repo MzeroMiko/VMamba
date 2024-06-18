@@ -1456,8 +1456,8 @@ class FLOPs:
     def register_supported_ops():
         build = import_abspy("models", os.path.join(os.path.dirname(os.path.abspath(__file__)), "../classification/"))
         selective_scan_flop_jit: Callable = build.vmamba.selective_scan_flop_jit
-        flops_selective_scan_fn: Callable = build.vmamba.flops_selective_scan_fn
-        flops_selective_scan_ref: Callable = build.vmamba.flops_selective_scan_ref 
+        # flops_selective_scan_fn: Callable = build.vmamba.flops_selective_scan_fn
+        # flops_selective_scan_ref: Callable = build.vmamba.flops_selective_scan_ref 
 
         supported_ops={
             "aten::gelu": None, # as relu is in _IGNORED_OPS
