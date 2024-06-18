@@ -48,3 +48,4 @@ classification/main_simmim_pt.py
 classification/main_simmim_pt.py
 classification/main_simmim_ft.py
 classification/utils/utils_simmim.py
+classification/models/simmim.py
