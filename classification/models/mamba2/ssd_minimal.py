@@ -100,6 +100,17 @@ def mamba_chunk_scan_combined_torch(x, dt, A, B, C, chunk_size, D=None, z=None, 
     Return:
         out: (batch, seqlen, nheads, headdim)
     """
+    batch, seqlen, ngroups, dstate = B.shape
+    nheads, headdim = x.shape[2:]
+    
+    while seqlen % chunk_size != 0:
+        chunk_size = chunk_size >> 1
+    
+    if nheads != ngroups:
+        assert nheads % ngroups == 0
+        B = B.view(batch, seqlen, ngroups, 1, dstate).repeat(1, 1, 1, nheads // ngroups, 1).view(batch, seqlen, nheads, dstate)
+        C = C.view(batch, seqlen, ngroups, 1, dstate).repeat(1, 1, 1, nheads // ngroups, 1).view(batch, seqlen, nheads, dstate)
+
     if dt_bias is not None:
         dt = dt + dt_bias
     if dt_softplus:
