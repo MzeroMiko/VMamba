@@ -1470,6 +1470,7 @@ class FLOPs:
             "prim::PythonOp.SelectiveScanOflex": selective_scan_flop_jit, # latter
             "prim::PythonOp.SelectiveScanCore": selective_scan_flop_jit, # latter
             "prim::PythonOp.SelectiveScan": selective_scan_flop_jit, # latter
+            "prim::PythonOp.SelectiveScanCuda": selective_scan_flop_jit, # latter
             # "aten::scaled_dot_product_attention": ...
         }
         return supported_ops
