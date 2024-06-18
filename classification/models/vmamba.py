@@ -1743,6 +1743,7 @@ def vmamba_base_s1l20(channel_first=True):
 
 
 # mamba2 support =====================================================
+# FLOPS count do not work now for mamba2!
 def vmamba_tiny_m2():
     return VSSM(
         depths=[2, 2, 4, 2], dims=96, drop_path_rate=0.2, 
