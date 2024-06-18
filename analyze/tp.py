@@ -12,8 +12,8 @@ from torchvision.models.vision_transformer import EncoderBlock
 from fvcore.nn import FlopCountAnalysis, flop_count_str, flop_count, parameter_count
 
 HOME = os.environ["HOME"].rstrip("/")
-basicpath = os.path.abspath(os.path.join(os.path.dirname(__file__), "../VMamba/analyze")).rstrip("/")
-# print(basicpath)
+basicpath = os.path.abspath(os.path.join(os.path.dirname(__file__), "../analyze")).rstrip("/")
+print(basicpath)
 
 # this mode will greatly influence the speed!
 torch.backends.cudnn.enabled = True
