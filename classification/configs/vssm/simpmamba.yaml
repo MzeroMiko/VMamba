@@ -1,5 +1,0 @@
-MODEL:
-  TYPE: sim_tp16
-  NAME: sim_tp16_tiny
-DATA:
-  BATCH_SIZE: 512 # 1card
