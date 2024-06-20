@@ -51,11 +51,23 @@ def build_model(config, is_pretrain=False):
     if model is None:
         model = build_vssm_model(config)
     if model is None:
-        try:
-            from .simvmamba import SimVMamba
-            model = SimVMamba()
-        except:
-            pass
+        from .simvmamba import SimVMamba
+        if config.MODEL.TYPE in ["sim_tp16"]:
+            model = SimVMamba(patch_size=16, embed_dim=192, depth=12, num_heads="auto", mlp_ratio=4.0, attn_dstate=1, channel_first=False)
+        elif config.MODEL.TYPE in ["sim_tp8"]:
+            model = SimVMamba(patch_size=8, embed_dim=192, depth=12, num_heads="auto", mlp_ratio=4.0, attn_dstate=1, channel_first=False)
+        elif config.MODEL.TYPE in ["sim_sp16"]:
+            model = SimVMamba(patch_size=16, embed_dim=384, depth=12, num_heads="auto", mlp_ratio=4.0, attn_dstate=1, channel_first=False)
+        elif config.MODEL.TYPE in ["sim_sp8"]:
+            model = SimVMamba(patch_size=8, embed_dim=384, depth=12, num_heads="auto", mlp_ratio=4.0, attn_dstate=1, channel_first=False)
+        elif config.MODEL.TYPE in ["sim_bp16"]:
+            model = SimVMamba(patch_size=16, embed_dim=768, depth=12, num_heads="auto", mlp_ratio=4.0, attn_dstate=1, channel_first=False)
+        elif config.MODEL.TYPE in ["sim_bp8"]:
+            model = SimVMamba(patch_size=8, embed_dim=768, depth=12, num_heads="auto", mlp_ratio=4.0, attn_dstate=1, channel_first=False)
+        elif config.MODEL.TYPE in ["sim_lp16"]:
+            model = SimVMamba(patch_size=16, embed_dim=1024, depth=24, num_heads="auto", mlp_ratio=4.0, attn_dstate=1, channel_first=False)
+        elif config.MODEL.TYPE in ["sim_lp8"]:
+            model = SimVMamba(patch_size=8, embed_dim=1024, depth=24, num_heads="auto", mlp_ratio=4.0, attn_dstate=1, channel_first=False)
     return model
 
 

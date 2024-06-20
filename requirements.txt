@@ -1,4 +1,4 @@
-torch
+torch # for full alignment 2.2.0
 torchvision
 torchaudio
 packaging
