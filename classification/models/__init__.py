@@ -49,7 +49,13 @@ def build_vssm_model(config, **kwargs):
 def build_model(config, is_pretrain=False):
     model = None
     if model is None:
-        model = build_vssm_model(config, is_pretrain)
+        model = build_vssm_model(config)
+    if model is None:
+        try:
+            from .simvmamba import SimVMamba
+            model = SimVMamba()
+        except:
+            pass
     return model
 
 
