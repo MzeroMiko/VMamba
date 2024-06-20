@@ -41,7 +41,7 @@ def import_abspy(name="models", path="classification/"):
     return module
 
 
-def get_dataset(root="./val", img_size=224, ret="", crop=True):
+def get_dataset(root="./val", img_size=224, ret="", crop=True, single_image=False):
     from torch.utils.data import SequentialSampler, DistributedSampler, DataLoader
     size = int((256 / 224) * img_size) if crop else int(img_size)
     transform = transforms.Compose([
@@ -50,14 +50,26 @@ def get_dataset(root="./val", img_size=224, ret="", crop=True):
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.25, 0.25, 0.25)),
     ])
-    dataset = datasets.ImageFolder(root, transform=transform)
-    if ret in dataset.classes:
-        print(f"found target {ret}", flush=True)
-        target = dataset.class_to_idx[ret]
-        dataset.samples =  [s for s in dataset.samples if s[1] == target]
-        dataset.targets = [s for s in dataset.targets if s == target]
-        dataset.classes = [ret]
-        dataset.class_to_idx = {ret: target}
+    if single_image:
+        class ds(datasets.ImageFolder):
+            def __init__(self, img, transform):
+                self.transform = transform
+                self.target_transform = None
+                self.loader = datasets.folder.default_loader
+                self.samples = [(img, 0)]
+                self.targets = [0]
+                self.classes = ["none"]
+                self.class_to_idx = {"none": 0}
+        dataset = ds(root, transform=transform)
+    else:
+        dataset = datasets.ImageFolder(root, transform=transform)
+        if ret in dataset.classes:
+            print(f"found target {ret}", flush=True)
+            target = dataset.class_to_idx[ret]
+            dataset.samples =  [s for s in dataset.samples if s[1] == target]
+            dataset.targets = [s for s in dataset.targets if s == target]
+            dataset.classes = [ret]
+            dataset.class_to_idx = {ret: target}
     return dataset
 
 
