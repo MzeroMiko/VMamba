@@ -231,7 +231,8 @@ def _update_config_from_file(config, cfg_file):
 
 
 def update_config(config, args):
-    _update_config_from_file(config, args.cfg)
+    if args.cfg != "":
+        _update_config_from_file(config, args.cfg)
 
     config.defrost()
     if args.opts:

@@ -57,7 +57,7 @@ def str2bool(v):
 
 def parse_option():
     parser = argparse.ArgumentParser('Swin Transformer training and evaluation script', add_help=False)
-    parser.add_argument('--cfg', type=str, metavar="FILE", help='path to config file', )
+    parser.add_argument('--cfg', type=str, metavar="FILE", default="", help='path to config file', )
     parser.add_argument(
         "--opts",
         help="Modify config options by adding 'KEY VALUE' pairs. ",
