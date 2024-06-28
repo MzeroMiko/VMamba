@@ -1127,7 +1127,7 @@ class SS2D(nn.Module, SS2Dv0, SS2Dv2, SS2Dv3, SS2Dm0):
         # ======================
         **kwargs,
     ):
-        super().__init__()
+        nn.Module.__init__(self)
         kwargs.update(
             d_model=d_model, d_state=d_state, ssm_ratio=ssm_ratio, dt_rank=dt_rank,
             act_layer=act_layer, d_conv=d_conv, conv_bias=conv_bias, dropout=dropout, bias=bias,
