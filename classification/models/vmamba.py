@@ -1170,6 +1170,8 @@ class VSSBlock(nn.Module):
         # =============================
         use_checkpoint: bool = False,
         post_norm: bool = False,
+        # =============================
+        _SS2D: type = SS2D,
         **kwargs,
     ):
         super().__init__()
@@ -1180,7 +1182,7 @@ class VSSBlock(nn.Module):
 
         if self.ssm_branch:
             self.norm = norm_layer(hidden_dim)
-            self.op = SS2D(
+            self.op = _SS2D(
                 d_model=hidden_dim, 
                 d_state=ssm_d_state, 
                 ssm_ratio=ssm_ratio,
@@ -1266,6 +1268,8 @@ class VSSM(nn.Module):
         # =========================
         posembed=False,
         imgsize=224,
+        _SS2D=SS2D,
+        # =========================
         **kwargs,
     ):
         super().__init__()
@@ -1341,6 +1345,8 @@ class VSSM(nn.Module):
                 mlp_act_layer=mlp_act_layer,
                 mlp_drop_rate=mlp_drop_rate,
                 gmlp=gmlp,
+                # =================
+                _SS2D=_SS2D,
             ))
 
         self.classifier = nn.Sequential(OrderedDict(
@@ -1448,6 +1454,8 @@ class VSSM(nn.Module):
         mlp_act_layer=nn.GELU,
         mlp_drop_rate=0.0,
         gmlp=False,
+        # ===========================
+        _SS2D=SS2D,
         **kwargs,
     ):
         # if channel first, then Norm and Output are both channel_first
@@ -1473,6 +1481,7 @@ class VSSM(nn.Module):
                 mlp_drop_rate=mlp_drop_rate,
                 gmlp=gmlp,
                 use_checkpoint=use_checkpoint,
+                _SS2D=_SS2D,
             ))
         
         return nn.Sequential(OrderedDict(
