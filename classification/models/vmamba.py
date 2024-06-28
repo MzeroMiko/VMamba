@@ -407,8 +407,11 @@ class SS2Dv2:
     ):
         factory_kwargs = {"device": None, "dtype": None}
         super().__init__()
-        d_inner = int(ssm_ratio * d_model)
-        dt_rank = math.ceil(d_model / 16) if dt_rank == "auto" else dt_rank
+        self.k_group = 4
+        self.d_model = int(d_model)
+        self.d_state = int(d_state)
+        self.d_inner = int(ssm_ratio * d_model)
+        self.dt_rank = int(math.ceil(self.d_model / 16) if dt_rank == "auto" else dt_rank)
         self.channel_first = channel_first
         self.with_dconv = d_conv > 1
         Linear = Linear2d if channel_first else nn.Linear
@@ -420,7 +423,7 @@ class SS2Dv2:
         self.oact, forward_type = checkpostfix("_oact", forward_type)
         self.disable_z, forward_type = checkpostfix("_noz", forward_type)
         self.disable_z_act, forward_type = checkpostfix("_nozact", forward_type)
-        self.out_norm, forward_type = self.get_outnorm(forward_type, d_inner, channel_first)
+        self.out_norm, forward_type = self.get_outnorm(forward_type, self.d_inner, channel_first)
 
         # forward_type debug =======================================
         FORWARD_TYPES = dict(
@@ -438,19 +441,18 @@ class SS2Dv2:
             v3=partial(self.forward_corev2, force_fp32=False, selective_scan_backend="oflex"),
         )
         self.forward_core = FORWARD_TYPES.get(forward_type, None)
-        k_group = 4
 
         # in proj =======================================
-        d_proj = d_inner if self.disable_z else (d_inner * 2)
-        self.in_proj = Linear(d_model, d_proj, bias=bias)
+        d_proj = self.d_inner if self.disable_z else (self.d_inner * 2)
+        self.in_proj = Linear(self.d_model, d_proj, bias=bias)
         self.act: nn.Module = act_layer()
         
         # conv =======================================
         if self.with_dconv:
             self.conv2d = nn.Conv2d(
-                in_channels=d_inner,
-                out_channels=d_inner,
-                groups=d_inner,
+                in_channels=self.d_inner,
+                out_channels=self.d_inner,
+                groups=self.d_inner,
                 bias=conv_bias,
                 kernel_size=d_conv,
                 padding=(d_conv - 1) // 2,
@@ -459,33 +461,33 @@ class SS2Dv2:
 
         # x proj ============================
         self.x_proj = [
-            nn.Linear(d_inner, (dt_rank + d_state * 2), bias=False)
-            for _ in range(k_group)
+            nn.Linear(self.d_inner, (self.dt_rank + self.d_state * 2), bias=False)
+            for _ in range(self.k_group)
         ]
         self.x_proj_weight = nn.Parameter(torch.stack([t.weight for t in self.x_proj], dim=0)) # (K, N, inner)
         del self.x_proj
         
         # out proj =======================================
         self.out_act = nn.GELU() if self.oact else nn.Identity()
-        self.out_proj = Linear(d_inner, d_model, bias=bias)
+        self.out_proj = Linear(self.d_inner, self.d_model, bias=bias)
         self.dropout = nn.Dropout(dropout) if dropout > 0. else nn.Identity()
 
         if initialize in ["v0"]:
             self.A_logs, self.Ds, self.dt_projs_weight, self.dt_projs_bias = mamba_init.init_dt_A_D(
-                d_state, dt_rank, d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, k_group=4,
+                self.d_state, self.dt_rank, self.d_inner, dt_scale, dt_init, dt_min, dt_max, dt_init_floor, k_group=self.k_group,
             )
         elif initialize in ["v1"]:
             # simple init dt_projs, A_logs, Ds
-            self.Ds = nn.Parameter(torch.ones((k_group * d_inner)))
-            self.A_logs = nn.Parameter(torch.randn((k_group * d_inner, d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
-            self.dt_projs_weight = nn.Parameter(0.1 * torch.randn((k_group, d_inner, dt_rank))) # 0.1 is added in 0430
-            self.dt_projs_bias = nn.Parameter(0.1 * torch.randn((k_group, d_inner))) # 0.1 is added in 0430
+            self.Ds = nn.Parameter(torch.ones((self.k_group * self.d_inner)))
+            self.A_logs = nn.Parameter(torch.randn((self.k_group * self.d_inner, self.d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
+            self.dt_projs_weight = nn.Parameter(0.1 * torch.randn((self.k_group, self.d_inner, self.dt_rank))) # 0.1 is added in 0430
+            self.dt_projs_bias = nn.Parameter(0.1 * torch.randn((self.k_group, self.d_inner))) # 0.1 is added in 0430
         elif initialize in ["v2"]:
             # simple init dt_projs, A_logs, Ds
-            self.Ds = nn.Parameter(torch.ones((k_group * d_inner)))
-            self.A_logs = nn.Parameter(torch.zeros((k_group * d_inner, d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
-            self.dt_projs_weight = nn.Parameter(0.1 * torch.rand((k_group, d_inner, dt_rank)))
-            self.dt_projs_bias = nn.Parameter(0.1 * torch.rand((k_group, d_inner)))
+            self.Ds = nn.Parameter(torch.ones((self.k_group * self.d_inner)))
+            self.A_logs = nn.Parameter(torch.zeros((self.k_group * self.d_inner, self.d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
+            self.dt_projs_weight = nn.Parameter(0.1 * torch.rand((self.k_group, self.d_inner, self.dt_rank)))
+            self.dt_projs_bias = nn.Parameter(0.1 * torch.rand((self.k_group, self.d_inner)))
 
     def forward_corev2(
         self,
@@ -511,8 +513,8 @@ class SS2Dv2:
         to_fp32 = lambda *args: (_a.to(torch.float32) for _a in args)
 
         B, D, H, W = x.shape
-        D, N = self.A_logs.shape
-        K, D, R = self.dt_projs_weight.shape
+        N = self.d_state
+        K, D, R = self.k_group, self.d_inner, self.dt_rank
         L = H * W
         _scan_mode = dict(cross2d=0, unidi=1, bidi=2, cascade2d=3)[scan_mode]
 
