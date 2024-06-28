@@ -493,7 +493,8 @@ def cross_scan_fn(x: torch.Tensor, in_channel_first=True, out_channel_first=True
     # y: (B, 4, C, L) | (B, L, 4, C)
     # scans: 0: cross scan; 1 unidirectional; 2: bidirectional;
     CSF = CrossScanTritonF if WITH_TRITON and x.is_cuda and (not force_torch) else CrossScanF
-    return CSF.apply(x, in_channel_first, out_channel_first, one_by_one, scans)
+    with torch.cuda.device(x.device):
+        return CSF.apply(x, in_channel_first, out_channel_first, one_by_one, scans)
 
 
 # @torch.compile(options={"triton.cudagraphs": True}, fullgraph=True)
@@ -502,7 +503,8 @@ def cross_merge_fn(y: torch.Tensor, in_channel_first=True, out_channel_first=Tru
     # x: (B, C, H * W) | (B, H * W, C) | (B, 4, C, H * W) | (B, H * W, 4, C)
     # scans: 0: cross scan; 1 unidirectional; 2: bidirectional;
     CMF = CrossMergeTritonF if WITH_TRITON and y.is_cuda and (not force_torch) else CrossMergeF
-    return CMF.apply(y, in_channel_first, out_channel_first, one_by_one, scans)
+    with torch.cuda.device(y.device):
+        return CMF.apply(y, in_channel_first, out_channel_first, one_by_one, scans)
 
 
 # checks =================================================================
