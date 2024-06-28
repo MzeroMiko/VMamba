@@ -386,7 +386,7 @@ class AttnMamba:
 
         mask = torch.tril(dts.new_ones((L, L)))
         dts = torch.nn.functional.softplus(dts + delta_bias[:, None]).view(B, G, D, L)
-        dw_logs = As.view(G, D, N)[None, :, :, None] * dts[:,:,:,None,:] # (B, G, D, N, L)
+        dw_logs = As.view(G, D, N)[None, :, :][:,:,:,:,None] * dts[:,:,:,None,:] # (B, G, D, N, L)
         ws = torch.cumsum(dw_logs, dim=-1).exp()
 
         if mode == "CB":
