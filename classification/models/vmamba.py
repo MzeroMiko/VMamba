@@ -603,13 +603,15 @@ class SS2Dv2:
             if no_einsum:
                 x_dbl = F.conv1d(xs.view(B, -1, L), self.x_proj_weight.view(-1, D, 1), bias=(x_proj_bias.view(-1) if x_proj_bias is not None else None), groups=K)
                 dts, Bs, Cs = torch.split(x_dbl.view(B, K, -1, L), [R, N, N], dim=2)
-                dts = F.conv1d(dts.contiguous().view(B, -1, L), self.dt_projs_weight.view(K * D, -1, 1), groups=K)
+                if hasattr(self, "dt_projs_weight"):
+                    dts = F.conv1d(dts.contiguous().view(B, -1, L), self.dt_projs_weight.view(K * D, -1, 1), groups=K)
             else:
                 x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, self.x_proj_weight)
                 if x_proj_bias is not None:
                     x_dbl = x_dbl + x_proj_bias.view(1, K, -1, 1)
                 dts, Bs, Cs = torch.split(x_dbl, [R, N, N], dim=2)
-                dts = torch.einsum("b k r l, k d r -> b k d l", dts, self.dt_projs_weight)
+                if hasattr(self, "dt_projs_weight"):
+                    dts = torch.einsum("b k r l, k d r -> b k d l", dts, self.dt_projs_weight)
 
             xs = xs.view(B, -1, L)
             dts = dts.contiguous().view(B, -1, L)

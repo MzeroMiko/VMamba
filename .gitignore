@@ -51,3 +51,4 @@ classification/utils/utils_simmim.py
 classification/models/simmim.py
 classification/models/pvmamba.py
 classification/models/simvmamba.py
+classification/models/csm_triton_n.py
