@@ -436,6 +436,7 @@ class SS2Dv2:
             v051d=partial(self.forward_corev2, force_fp32=False, no_einsum=True, scan_mode="unidi"),
             v052d=partial(self.forward_corev2, force_fp32=False, no_einsum=True, scan_mode="bidi"),
             v052dc=partial(self.forward_corev2, force_fp32=False, no_einsum=True, scan_mode="cascade2d"),
+            v052d3=partial(self.forward_corev2, force_fp32=False, no_einsum=True, scan_mode=3), # debug
             # ===============================
             v2=partial(self.forward_corev2, force_fp32=(not self.disable_force32), selective_scan_backend="core"),
             v3=partial(self.forward_corev2, force_fp32=False, selective_scan_backend="oflex"),
@@ -505,8 +506,9 @@ class SS2Dv2:
         # ==============================
         **kwargs,
     ):
-        assert scan_mode in ["unidi", "bidi", "cross2d", "cascade2d"]
-        assert selective_scan_backend in [None, "oflex", "core", "mamba", "torch"]
+        assert selective_scan_backend in [None, "oflex", "mamba", "torch"]
+        _scan_mode = dict(cross2d=0, unidi=1, bidi=2, cascade2d=-1).get(scan_mode, None) if isinstance(scan_mode, str) else scan_mode # for debug
+        assert isinstance(_scan_mode, int)
         delta_softplus = True
         out_norm = self.out_norm
         channel_first = self.channel_first
@@ -516,12 +518,11 @@ class SS2Dv2:
         N = self.d_state
         K, D, R = self.k_group, self.d_inner, self.dt_rank
         L = H * W
-        _scan_mode = dict(cross2d=0, unidi=1, bidi=2, cascade2d=3)[scan_mode]
 
         def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True):
             return selective_scan_fn(u, delta, A, B, C, D, delta_bias, delta_softplus, ssoflex, backend=selective_scan_backend)
         
-        if _scan_mode == 3:
+        if _scan_mode == -1:
             x_proj_bias = getattr(self, "x_proj_bias", None)
             def scan_rowcol(
                 x: torch.Tensor, 
