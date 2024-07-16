@@ -152,7 +152,7 @@ def cross_merge1b1_fwd(y: torch.Tensor, in_channel_first=True, out_channel_first
                 torch.flip(y[:, 3], dims=[-1]),
             ], dim=1)
     else:
-        B, H, W, _, D = y.shape
+        B, H, W, K, D = y.shape
         y = y.view(B, -1, K, D)
         if scans == 0:
             y = torch.stack([
@@ -277,8 +277,8 @@ class CrossMergeF(torch.autograd.Function):
 
 @triton.jit
 def triton_cross_scan_flex(
-    x, # (B, C, H, W) | (B, H, W, C) | (B, 4, C, H, W) | (B, H, W, 4, C)
-    y, # (B, 4, C, H, W) | (B, H, W, 4, C)
+    x: tl.tensor, # (B, C, H, W) | (B, H, W, C) | (B, 4, C, H, W) | (B, H, W, 4, C)
+    y: tl.tensor, # (B, 4, C, H, W) | (B, H, W, 4, C)
     x_layout: tl.constexpr,
     y_layout: tl.constexpr,
     operation: tl.constexpr,
@@ -306,18 +306,28 @@ def triton_cross_scan_flex(
     _mask_hw = _mask_h[:, None] & _mask_w[None, :]
     _for_C = min(DC - i_c * BC, BC)
 
-    HWRoute0 = i_h * BH * DW  + tl.arange(0, BH)[:, None] * DW + i_w * BW + tl.arange(0, BW)[None, :]
-    HWRoute1 = i_w * BW * DH + tl.arange(0, BW)[None, :] * DH + i_h * BH + tl.arange(0, BH)[:, None]  # trans
-    HWRoute2 = (NH - i_h - 1) * BH * DW  + (BH - 1 - tl.arange(0, BH)[:, None]) * DW + (NW - i_w - 1) * BW + (BW - 1 - tl.arange(0, BW)[None, :]) + (DH - NH * BH) * DW + (DW - NW * BW) # flip
-    HWRoute3 = (NW - i_w - 1) * BW * DH  + (BW - 1 - tl.arange(0, BW)[None, :]) * DH + (NH - i_h - 1) * BH + (BH - 1 - tl.arange(0, BH)[:, None]) + (DH - NH * BH) + (DW - NW * BW) * DH  # trans + flip
-
-    if scans == 1:
+    pos_h = (i_h * BH + tl.arange(0, BH)[:, None])
+    pos_w = (i_w * BW + tl.arange(0, BW)[None, :])
+    neg_h = (DH - i_h * BH - 1 - tl.arange(0, BH)[:, None])
+    neg_w = (DW - i_w * BW - 1 - tl.arange(0, BW)[None, :])
+    if scans == 0:
+        # none; trans; flip; trans + flip;
+        HWRoute0 = pos_h * DW + pos_w
+        HWRoute1 = pos_w * DH + pos_h # trans
+        HWRoute2 = neg_h * DW + neg_w # flip
+        HWRoute3 = neg_w * DH + neg_h # trans + flip
+    elif scans == 1:
+        # none; none; none; none;
+        HWRoute0 = pos_h * DW + pos_w
         HWRoute1 = HWRoute0
         HWRoute2 = HWRoute0
         HWRoute3 = HWRoute0
     elif scans == 2:
+        # none; none; flip; flip;
+        HWRoute0 = pos_h * DW + pos_w
         HWRoute1 = HWRoute0
-        HWRoute3 = HWRoute2        
+        HWRoute2 = neg_h * DW + neg_w # flip
+        HWRoute3 = HWRoute2      
 
     _tmp1 = DC * DH * DW
 
@@ -637,8 +647,45 @@ class CHECK:
             x.grad, x1.grad, y.grad, y1.grad = None, None, None, None
             print("===============", flush=True)
 
+    def check_csm_scan3():
+        if False:
+            x = torch.arange(0, 16).view(1, 1, 4, 4).cuda()
+            out1 = cross_scan_fn(x, scans=3, force_torch=True).view(1, 4, 1, 4, 4)
+            out2 = cross_merge_fn(out1, scans=3, force_torch=True).view(1, 1, 4, 4)
+            out4 = cross_merge_fn(out1, one_by_one=True, scans=3, force_torch=True).view(1, 4, 1, 4, 4)
+            out3 = cross_scan_fn(out4, one_by_one=True, scans=3, force_torch=True).view(1, 4, 1, 4, 4)
+            out5 = cross_scan_fn(x.view(1, 4, 4, 1), in_channel_first=False, out_channel_first=False, scans=3, force_torch=True).view(1, 4, 4, 4, 1)
+            out6 = cross_merge_fn(out5, in_channel_first=False, out_channel_first=False, scans=3, force_torch=True).view(1, 4, 4, 1)
+            out8 = cross_merge_fn(out5, in_channel_first=False, out_channel_first=False, one_by_one=True, scans=3, force_torch=True).view(1, 4, 4, 4, 1)
+            out7 = cross_scan_fn(out8, in_channel_first=False, out_channel_first=False, one_by_one=True, scans=3, force_torch=True).view(1, 4, 4, 4, 1)
+            print(out1.view(4, -1))
+            print(out2.view(-1))
+            print(out3.view(4, -1))
+            print(out4.view(4, -1))
+            print(out5.view(-1, 4).t())
+            print(out6.view(-1))
+            print(out7.view(-1, 4).t())
+            print(out8.view(-1, 4).t())
+
+        B, C, H, W = 27, 253, 57, 58
+        x = torch.randn((B, C, H, W)).cuda()
+
+        for scans in [0, 1, 2, 3]:
+            o1 = cross_scan_fn(x, scans=scans, force_torch=True).view(B, 4, C, H, W)
+            print((cross_scan_fn(x, scans=scans) == cross_scan_fn(x, scans=scans, force_torch=True)).all())
+            print((cross_merge_fn(o1, scans=scans) == cross_merge_fn(o1, scans=scans, force_torch=True)).all())
+
+            kwargs = dict(in_channel_first=False, out_channel_first=False)
+            x2 = x.permute(0, 2, 3, 1).contiguous()
+            o2 = o1.permute(0, 3, 4, 1, 2).contiguous()
+            print((cross_scan_fn(x, scans=scans, **kwargs) == cross_scan_fn(x, scans=scans, force_torch=True, **kwargs)).all())
+            print((cross_merge_fn(o2, scans=scans, **kwargs) == cross_merge_fn(o2, scans=scans, force_torch=True, **kwargs)).all())            
+
+        breakpoint()
+
 
 if __name__ == "__main__":
+    CHECK.check_csm_scan3()
     CHECK.check_csm_triton()
 
 
