@@ -52,3 +52,8 @@ classification/models/simmim.py
 classification/models/pvmamba.py
 classification/models/simvmamba.py
 classification/models/csm_triton_n.py
+detection/vis/bears.jpg
+detection/1.ipynb
+detection/bears.jpg
+classification/1.ipynb
+1.txt

@@ -1,65 +1,60 @@
+# this is only a script !
 import os
+import torch
+import torch.nn as nn
 from functools import partial
-import torch
-import torch.nn as nn
 from PIL import Image
-import torch
-import torch.nn as nn
-
 from utils import visualize, get_dataset, AttnMamba, import_abspy, show_mask_on_image
-visualize_attnmap = visualize.visualize_attnmap
-visualize_attnmaps = visualize.visualize_attnmaps
-attnmap_mamba = AttnMamba.attnmap_mamba
-
 HOME = os.environ["HOME"].rstrip("/")
-this_path = os.path.dirname(os.path.abspath(__file__))
 
 
-def main_attnmap():
-    dataset = get_dataset(root='/media/Disk1/Dataset/ImageNet_ILSVRC2012/val', img_size=512, crop=False)
-    dataset = get_dataset(root='/media/Disk1/Dataset/MSCOCO2014/images/', img_size=512, ret="val2014", crop=False)
-    # dataset = get_dataset(root='/media/Disk1/Dataset/ADEChallengeData2016/images/', img_size=448, ret="validation", crop=False)    
+def main_vssm(det_model=True, showpath= "show/vssmattnmap"):
+    raw_attn = True
+    stage = 2
+    block_id = 1
+    img_size = 512
+    featHW = 32 # stage 2 so 32
+
+    if not det_model:
+        dataset = get_dataset(root='/media/Disk1/Dataset/ImageNet_ILSVRC2012/val', img_size=img_size, crop=False)
+        idxs_posxs_posys = [
+            [72, 0.7, 0.3], [72, 0.2, 0.8], 
+            [273, 0.7, 0.3], [282, 0.2, 0.8], 
+            [282, 0.7, 0.3], [282, 0.2, 0.8], 
+            [14602, 0.7, 0.3], [14602, 0.2, 0.8], 
+            [17460, 0.6, 0.3], [17460, 0.2, 0.6], 
+            [19256, 0.7, 0.3], [19256, 0.2, 0.3], 
+            [47512, 0.7, 0.3], [47512, 0.3, 0.6], 
+        ]
+        # print([i for i, s in enumerate(dataset.samples) if "ILSVRC2012_val_00012107.JPEG" in s[0] ])
+    else:
+        # we want multiple objects, so we choose to use det model
+        dataset = get_dataset(root='/media/Disk1/Dataset/MSCOCO2014/images/', img_size=img_size, ret="val2014", crop=False)
+        idxs_posxs_posys = [
+            [0, 0.3, 0.5], [0, 0.8, 0.8], 
+            [149, 0.7, 0.5], [149, 0.2, 0.4], 
+            [162, 0.7, 0.4], [162, 0.4, 0.4], 
+            [204, 0.3, 0.6], [204, 0.7, 0.2], 
+            [273, 0.2, 0.6], [273, 0.9, 0.5],
+            [309, 0.1, 0.7], [309, 0.9, 0.8],
+        ]
+    
+    # dataset = get_dataset(root='/media/Disk1/Dataset/ADEChallengeData2016/images/', img_size=img_size, ret="validation", crop=False)    
     
     vmamba = import_abspy("vmamba", os.path.join(os.path.dirname(os.path.abspath(__file__)), "../classification/models"))
-    VSSM: nn.Module = vmamba.VSSM    
-    vssm: nn.Module = VSSM(
-        depths=[2, 2, 8, 2], 
-        dims=[96, 192, 384, 768], 
-        ssm_d_state=1,
-        ssm_ratio=1.0,
-        ssm_dt_rank="auto",
-        ssm_conv=3,
-        ssm_conv_bias=False,
-        forward_type="v05_noz",
-        mlp_ratio=4.0,
-        norm_layer="ln2d",
-        downsample_version="v3",
-        patchembed_version="v2",
-    ).cuda().eval()
-    # vssm.load_state_dict(torch.load(open(f"{HOME}/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230s/vssm1_tiny_0230s_ckpt_epoch_264.pth", "rb"), map_location="cpu")["model"], strict=False)
-    vssm.load_state_dict(AttnMamba.convert_state_dict_from_mmdet(torch.load(open(f"{HOME}/Workspace/PylanceAware/ckpts/private/detection/vssm1/detection/mask_rcnn_vssm_fpn_coco_tiny_ms_3x_s/epoch_36.pth", "rb"), map_location="cpu")["state_dict"]), strict=False)
-    
-    ss2ds = []
-    for layer in vssm.layers:
-        _ss2ds = []
-        for blk in layer.blocks:
-            ss2d = blk.op
-            setattr(ss2d, "__DEBUG__", True)
-            _ss2ds.append(ss2d)
-        ss2ds.append(_ss2ds)
-    
-    showpath = os.path.join(this_path, "show/vssmattnmap")
+    vssm: nn.Module = vmamba.vmamba_tiny_s1l8().cuda().eval()
+    if det_model:
+        vssm.load_state_dict(AttnMamba.convert_state_dict_from_mmdet(torch.load(open(f"{HOME}/Workspace/PylanceAware/ckpts/private/detection/vssm1/detection/mask_rcnn_vssm_fpn_coco_tiny_ms_3x_s/epoch_36.pth", "rb"), map_location="cpu")["state_dict"]), strict=False)
+    else:
+        vssm.load_state_dict(torch.load(open(f"{HOME}/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230s/vssm1_tiny_0230s_ckpt_epoch_264.pth", "rb"), map_location="cpu")["model"], strict=False)
 
-    featHW = 32
-    idxs_posxs_posys = [
-        [0, 0.7, 0.3], [0, 0.2, 0.8], 
-        [149, 0.7, 0.5], [149, 0.2, 0.4], 
-        [162, 0.7, 0.4], [162, 0.4, 0.4], 
-        [204, 0.3, 0.6], [204, 0.7, 0.2], 
-        [273, 0.2, 0.6], [273, 0.9, 0.5],
-        [309, 0.1, 0.7], [309, 0.9, 0.8],
+    if raw_attn:
+        setattr(vssm.layers[stage].blocks[block_id].op, "__DEBUG__", True)
+        ss2ds = vssm.layers[stage].blocks[block_id].op
+    else:
+        [[ setattr(blk.op, "__DEBUG__", True)  for blk in layer.blocks] for layer in vssm.layers ]
+        ss2ds = [[blk.op  for blk in layer.blocks] for layer in vssm.layers ]
 
-    ]
     for idx, posx, posy in idxs_posxs_posys:
         img, label = dataset[idx]
 
@@ -70,96 +65,55 @@ def main_attnmap():
         deimg = img.cpu() * torch.tensor([0.25, 0.25, 0.25]).view(-1, 1, 1) + torch.tensor([0.5, 0.5, 0.5]).view(-1, 1, 1)
         deimg = deimg.permute(1, 2, 0).cpu()
         Image.fromarray((deimg * 255).to(torch.uint8).numpy()).save(f"{showpath}/{idx}_{posx}_{posy}/imori.jpg")
-        # visualize.draw_image_grid(
-        #     Image.fromarray((deimg * 255).to(torch.uint8).numpy()),
-        #     [(posx * 512, posy * 512, 512 / 32, 512 / 32)]
-        # ).save(f"{showpath}/{idx}_{posx}_{posy}/imori.jpg")
-        # continue
-
-        for m0 in ["ao0", "ao1", "ao2", "ao3", "a0", "a1", "a2", "a3", "all", "nall"]:
-            for m1 in ["CB", "CwBw", "ww"]:
-                aaa = AttnMamba.get_attnmap_mamba(ss2ds, 2, f"{m0}_norm_{m1}", raw_attn=True, block_id=1)
-                # mask = aaa[int(posy * featHW) * int(featHW) + int(posx * featHW)].view(featHW, featHW)
-                visualize_attnmap(aaa, f"{showpath}/{idx}_{posx}_{posy}/{m0}_norm_{m1}.jpg", colorbar=False, sticks=False)
-                visualize_attnmap(torch.diag(aaa).view(featHW, featHW), f"{showpath}/{idx}_{posx}_{posy}/{m0}_norm_{m1}_diag.jpg", colorbar=False, sticks=False)
-        # breakpoint()
-    breakpoint()
-
-
-
-def main_vssm():
-    dataset = get_dataset(root='/media/Disk1/Dataset/ImageNet_ILSVRC2012/val', img_size=512, crop=False)
-    dataset = get_dataset(root='/media/Disk1/Dataset/MSCOCO2014/images/', img_size=512, ret="val2014", crop=False)
-    # dataset = get_dataset(root='/media/Disk1/Dataset/ADEChallengeData2016/images/', img_size=448, ret="validation", crop=False)    
-    
-    vmamba = import_abspy("vmamba", os.path.join(os.path.dirname(os.path.abspath(__file__)), "../classification/models"))
-    VSSM: nn.Module = vmamba.VSSM    
-    vssm: nn.Module = VSSM(
-        depths=[2, 2, 8, 2], 
-        dims=[96, 192, 384, 768], 
-        ssm_d_state=1,
-        ssm_ratio=1.0,
-        ssm_dt_rank="auto",
-        ssm_conv=3,
-        ssm_conv_bias=False,
-        forward_type="v05_noz",
-        mlp_ratio=4.0,
-        norm_layer="ln2d",
-        downsample_version="v3",
-        patchembed_version="v2",
-    ).cuda().eval()
-    vssm.load_state_dict(torch.load(open(f"{HOME}/Workspace/PylanceAware/ckpts/publish/vssm1/classification/vssm1_tiny_0230s/vssm1_tiny_0230s_ckpt_epoch_264.pth", "rb"), map_location="cpu")["model"], strict=False)
-    # vssm.load_state_dict(AttnMamba.convert_state_dict_from_mmdet(torch.load(open(f"{HOME}/Workspace/PylanceAware/ckpts/private/detection/vssm1/detection/mask_rcnn_vssm_fpn_coco_tiny_ms_3x_s/epoch_36.pth", "rb"), map_location="cpu")["state_dict"]), strict=False)
-    
-    ss2ds = []
-    for layer in vssm.layers:
-        _ss2ds = []
-        for blk in layer.blocks:
-            ss2d = blk.op
-            setattr(ss2d, "__DEBUG__", True)
-            _ss2ds.append(ss2d)
-        ss2ds.append(_ss2ds)
-    
-    showpath = os.path.join(this_path, "show/vssm_cls")
-
-    featHW = 32
-    idxs_posxs_posys = [
-        [0, 0.7, 0.3], [0, 0.2, 0.8], 
-        [149, 0.7, 0.5], [149, 0.2, 0.4], 
-        [162, 0.7, 0.4], [162, 0.4, 0.4], 
-        [204, 0.3, 0.6], [204, 0.7, 0.2], 
-        [273, 0.2, 0.6], [273, 0.9, 0.5],
-        [309, 0.1, 0.7], [309, 0.9, 0.8],
-
-    ]
-    for idx, posx, posy in idxs_posxs_posys:
-        img, label = dataset[idx]
-
-        with torch.no_grad():
-            out = vssm(img[None].cuda())
-        print(out.argmax().item(), label, img.shape)
-        os.makedirs(f"{showpath}/{idx}_{posx}_{posy}", exist_ok=True)
-        deimg = img.cpu() * torch.tensor([0.25, 0.25, 0.25]).view(-1, 1, 1) + torch.tensor([0.5, 0.5, 0.5]).view(-1, 1, 1)
-        deimg = deimg.permute(1, 2, 0).cpu()
         visualize.draw_image_grid(
             Image.fromarray((deimg * 255).to(torch.uint8).numpy()),
-            [(posx * 512, posy * 512, 512 / 32, 512 / 32)]
-        ).save(f"{showpath}/{idx}_{posx}_{posy}/imori.jpg")
+            [(posx * img_size, posy * img_size, img_size / featHW, img_size / featHW,)]
+        ).save(f"{showpath}/{idx}_{posx}_{posy}/imori_grid.jpg")
         # continue
 
         for m0 in ["a0", "a1", "a2", "a3", "all", "nall"]:
+        # for m0 in ["ao0", "ao1", "ao2", "ao3", "a0", "a1", "a2", "a3", "all", "nall"]:
             for m1 in ["CB", "CwBw", "ww"]:
-                aaa = AttnMamba.get_attnmap_mamba(ss2ds, 2, f"{m0}_norm_{m1}", raw_attn=True, block_id=1)
+                aaa = AttnMamba.get_attnmap_mamba(ss2ds, stage, f"{m0}_norm_{m1}", raw_attn=True, block_id=block_id)
+                # attention map
+                # visualize.visualize_attnmap(aaa, f"{showpath}/{idx}_{posx}_{posy}/attn_{m0}_norm_{m1}.jpg", colorbar=False, sticks=False)
+                # diag attention map
+                # visualize.visualize_attnmap(torch.diag(aaa).view(featHW, featHW), f"{showpath}/{idx}_{posx}_{posy}/attn_{m0}_norm_{m1}_diag.jpg", colorbar=False, sticks=False)
+                # activation map
                 mask = aaa[int(posy * featHW) * int(featHW) + int(posx * featHW)].view(featHW, featHW)
-                visualize_attnmap(mask, f"{showpath}/{idx}_{posx}_{posy}/{m0}_norm_{m1}.jpg", colorbar=False, sticks=False)
-        # breakpoint()
-    breakpoint()
+                visualize.visualize_attnmap(mask, f"{showpath}/{idx}_{posx}_{posy}/activation_{m0}_norm_{m1}.jpg", colorbar=False, sticks=False)
 
 
-def main_deit(det_model=False):
-    dataset = get_dataset(root='/media/Disk1/Dataset/ImageNet_ILSVRC2012/val', img_size=512, crop=False)
-    dataset = get_dataset(root='/media/Disk1/Dataset/MSCOCO2014/images/', img_size=512, ret="val2014", crop=False)
-    # dataset = get_dataset(root='/media/Disk1/Dataset/ADEChallengeData2016/images/', img_size=448, ret="validation", crop=False)    
+def main_deit(det_model=True, showpath="show/deitdet"):
+    raw_attn = True
+    stage = 2
+    block_id = 1
+    img_size = 512
+    featHW = 32 # stage 2 so 32
+
+    if not det_model:
+        dataset = get_dataset(root='/media/Disk1/Dataset/ImageNet_ILSVRC2012/val', img_size=img_size, crop=False)
+        idxs_posxs_posys = [
+            [0, 0.7, 0.3], [0, 0.2, 0.8], 
+            [149, 0.7, 0.5], [149, 0.2, 0.4], 
+            [162, 0.7, 0.4], [162, 0.4, 0.4], 
+            [204, 0.3, 0.6], [204, 0.7, 0.2], 
+            [273, 0.2, 0.6], [273, 0.9, 0.5],
+            [309, 0.1, 0.7], [309, 0.9, 0.8],
+        ]
+    else:
+        # we want multiple objects, so we choose to use det model
+        dataset = get_dataset(root='/media/Disk1/Dataset/MSCOCO2014/images/', img_size=img_size, ret="val2014", crop=False)
+        idxs_posxs_posys = [
+            [0, 0.7, 0.3], [0, 0.2, 0.8], 
+            [149, 0.7, 0.5], [149, 0.2, 0.4], 
+            [162, 0.7, 0.4], [162, 0.4, 0.4], 
+            [204, 0.3, 0.6], [204, 0.7, 0.2], 
+            [273, 0.2, 0.6], [273, 0.9, 0.5],
+            [309, 0.1, 0.7], [309, 0.9, 0.8],
+        ]
+    
+    # dataset = get_dataset(root='/media/Disk1/Dataset/ADEChallengeData2016/images/', img_size=img_size, ret="validation", crop=False)    
     
     attns = dict()
     deit_small_baseline = None
@@ -190,18 +144,13 @@ def main_deit(det_model=False):
             if isinstance(m.attn, WindowedAttention):
                 pass
             elif isinstance(m.attn, Attention):
-                print(n, m.attn)
                 m.attn.forward = partial(attn_forward, m.attn)
                 attns.update({n: m.attn})            
             else:
                 assert False
-        showpath = os.path.join(this_path, "show/deitdet")
     else:
-        _build = import_abspy("models", f"{os.path.dirname(__file__)}/../classification")
-        build_mmpretrain_models = _build.build_mmpretrain_models
-        model = partial(build_mmpretrain_models, cfg="deit_small", ckpt=True, only_backbone=False, with_norm=True,)
-        model = model().cuda()
-        from mmpretrain.models import VisionTransformer
+        from utils import BuildModels
+        model = BuildModels.build_deit_mmpretrain(with_ckpt=True, scale="small").cuda().eval()
         from mmpretrain.models.utils.attention import MultiheadAttention
         from mmpretrain.models.utils.attention import scaled_dot_product_attention_pyimpl
 
@@ -232,20 +181,9 @@ def main_deit(det_model=False):
             attns.update({n: l.attn})
         
         deit_small_baseline = model
-        showpath = os.path.join(this_path, "show/deitcls")
 
-    print(attns)
+    print(attns.keys())
 
-    featHW = 32
-    idxs_posxs_posys = [
-        [0, 0.7, 0.3], [0, 0.2, 0.8], 
-        [149, 0.7, 0.5], [149, 0.2, 0.4], 
-        [162, 0.7, 0.4], [162, 0.4, 0.4], 
-        [204, 0.3, 0.6], [204, 0.7, 0.2], 
-        [273, 0.2, 0.6], [273, 0.9, 0.5],
-        [309, 0.1, 0.7], [309, 0.9, 0.8],
-
-    ]
     for idx, posx, posy in idxs_posxs_posys:
         img, label = dataset[idx]
 
@@ -257,23 +195,31 @@ def main_deit(det_model=False):
         deimg = deimg.permute(1, 2, 0).cpu()
         visualize.draw_image_grid(
             Image.fromarray((deimg * 255).to(torch.uint8).numpy()),
-            [(posx * 512, posy * 512, 512 / 32, 512 / 32)]
+            [(posx * img_size, posy * img_size, img_size / featHW, img_size / featHW,)]
         ).save(f"{showpath}/{idx}_{posx}_{posy}/imori.jpg")
-        # continue
 
         for m0 in ["attn"]:
             for m1 in ["attn"]:
                 aaa = getattr(attns['8'], "__data__")[0]
                 aaa = ((aaa - aaa.min()) / (aaa.max() - aaa.min())).mean(dim=0)
+                
+                # attention map
+                visualize.visualize_attnmap(aaa, f"{showpath}/{idx}_{posx}_{posy}/attn_{m0}_norm_{m1}.jpg", colorbar=False, sticks=False)
+                
+                # activation map
                 if aaa.shape[0] == featHW * featHW + 1:
                     aaa = aaa[1:, 1:]
                 mask = aaa[int(posy * featHW) * int(featHW) + int(posx * featHW)].view(featHW, featHW)
-                visualize_attnmap(mask, f"{showpath}/{idx}_{posx}_{posy}/{m0}_norm_{m1}.jpg", colorbar=False, sticks=False)
-    breakpoint()
+                visualize.visualize_attnmap(mask, f"{showpath}/{idx}_{posx}_{posy}/activation_{m0}_norm_{m1}.jpg", colorbar=False, sticks=False)
 
 
 if __name__ == "__main__":
-    # main_attnmap()
-    main_deit(det_model=True)
-    main_vssm()
+    this_path = os.path.dirname(os.path.abspath(__file__))
+    # main_deit(det_model=True, showpath="show/deitdet")
+    # main_deit(det_model=False, showpath="show/deitcls")
+    main_vssm(det_model=False, showpath="show/vssmcls")
+    # main_vssm(det_model=True, showpath="show/vssmdet")
+
+
+
 

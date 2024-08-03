@@ -96,8 +96,14 @@ def main():
         Throughput.testall(BuildModels.build_resnet_mmpretrain(scale="r101"), dataloader, args.data_path, size, args.batch_size)
         return
 
-    if False:
+    if True:
+        # 3056 12385 # structure difference
+        Throughput.testall(BuildModels.build_vmamba(scale="tv2"), dataloader, args.data_path, size, args.batch_size)
+        # 1111 9103 # structure difference
+        Throughput.testall(BuildModels.build_visionmamba(scale="small"), dataloader, args.data_path, size, args.batch_size)
+        # tmem 3945 mem 18782
         Throughput.testall(BuildModels.build_s4nd(scale="ctiny"), dataloader, args.data_path, size, args.batch_size)
+        # tmem 2463 mem 15328
         Throughput.testall(BuildModels.build_s4nd(scale="vitb"), dataloader, args.data_path, size, args.batch_size)
         return
 
