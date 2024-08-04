@@ -318,8 +318,18 @@ if __name__ == "__main__":
         } 
     )
 
+    vims = dict(
+        name = "deitsmall ",
+        model = nn.Linear(384, 1000, bias=True),
+        ckpt = f"{HOME}/packs/ckpts/vim_s_midclstok_80p5acc.pth",
+        state_dict = lambda sd: {
+            "weight": sd["model"]["head.weight"],
+            "bias": sd["model"]["head.bias"],
+        }         
+    )
+
     names = {}
-    for col in [vmambav2tiny, vmambav2l5tiny, vmambav0tiny, swintiny, convnexttiny, hivittiny, deitsmall, resnet50, interntiny, xcittiny, deitbase]:
+    for col in [vmambav2tiny, vmambav2l5tiny, vmambav0tiny, swintiny, convnexttiny, hivittiny, deitsmall, resnet50, interntiny, xcittiny, deitbase, vims]:
         names.update({col["name"]: col})
         size = 224
         model = col["model"]
@@ -328,11 +338,9 @@ if __name__ == "__main__":
         state_dict = col["state_dict"](torch.load(col["ckpt"], map_location=torch.device("cpu")))
 
     if args.name == "all":
-        for col in [vmambav2tiny, vmambav2l5tiny, vmambav0tiny, swintiny, convnexttiny, hivittiny, deitsmall, resnet50, interntiny, xcittiny]:
-        # for col in [xcittiny]:
-            # for size, lr in zip([224, 288, 384, 512, 640, 768, 1024], [0.05, 0.05, 0.05, 0.2, 0.5, 0.5, 0.5]):
-            for size, lr in zip([288], [0.05]):
-            # for size, lr in zip([224, 384, 512, 640, 768, 1024], [0.05, 0.05, 0.2, 0.5, 0.5, 0.5]):
+        # for col in [vmambav2tiny, vmambav2l5tiny, vmambav0tiny, swintiny, convnexttiny, hivittiny, deitsmall, resnet50, interntiny, xcittiny, vims]:
+        for col in [vims]:
+            for size, lr in zip([224, 288, 384, 512, 640, 768, 1024], [0.05, 0.05, 0.05, 0.2, 0.5, 0.5, 0.5]):
                 model = col["model"]
                 feature_train = f"{HOME}/ckpts/feats/merge{size}/{col['name']}_sz{size}_train.pth"
                 feature_val = f"{HOME}/ckpts/feats/merge{size}/{col['name']}_sz{size}_val.pth"

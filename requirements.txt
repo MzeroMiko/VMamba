@@ -12,3 +12,6 @@ submitit
 tensorboardX
 fvcore
 seaborn
+# timm==0.5.4 # for s4nd
+# hydra-core # for s4nd
+# pytorch_lightning # for s4nd

@@ -177,7 +177,7 @@ def _extract_feature(data_path="ImageNet_ILSVRC2012", start=0, end=200, step=-1,
         deitbase = BuildModels.build_deit_mmpretrain(with_ckpt=True, remove_head=True, scale="base", size=img_size).cuda().eval()
 
     if True:
-        vims = ExtraDev.build_vim_for_throughput(with_ckpt=True, remove_head=True).cuda().eval()
+        vims = ExtraDev.build_vim_for_throughput(with_ckpt=True, remove_head=True, size=img_size).cuda().eval()
 
     if True:
         if step > 0:

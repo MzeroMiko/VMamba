@@ -291,6 +291,7 @@ class ExtraDev:
             assert model.use_middle_cls_token
             assert ckpt["pos_embed"].shape[1] == 197
             target_token_length = (img_size // 16)**2
+            target_token_length_HW = ((img_size // 16), (img_size // 16))
             if target_token_length != 197 - 1:
                 mid_token_idx = target_token_length // 2
                 cls_token = ckpt["pos_embed"][:, 83:84, :]
@@ -298,8 +299,8 @@ class ExtraDev:
                 extra_tokens_right = ckpt["pos_embed"][:, 84:, :]
                 extra_tokens = torch.cat([extra_tokens_left, extra_tokens_right], dim=1)
                 extra_tokens = extra_tokens.reshape(1, 14, 14, -1).permute(0, 3, 1, 2)
-                extra_tokens = torch.nn.functional.interpolate(extra_tokens, size=(imgHW, imgHW), align_corners=False, mode="bicubic")
-                extra_tokens = extra_tokens.permute(0, 2, 3, 1).contiguous().view(1, img_size, -1)
+                extra_tokens = torch.nn.functional.interpolate(extra_tokens, size=target_token_length_HW, align_corners=False, mode="bicubic")
+                extra_tokens = extra_tokens.permute(0, 2, 3, 1).contiguous().view(1, target_token_length, -1)
                 pos_embed = torch.cat([extra_tokens[:, :mid_token_idx, :], cls_token, extra_tokens[:, mid_token_idx:, :]], dim=1)
                 ckpt["pos_embed"] = pos_embed
             
