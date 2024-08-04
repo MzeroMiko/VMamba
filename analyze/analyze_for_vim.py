@@ -286,7 +286,7 @@ class ExtraDev:
             # to interplate pos_mebed, the cls_token position must be fixed !
             # otherwise, ignore cls_token and apply interplation to all
             # this checkpoint uses middle cls token
-            from mmpretrain.models.backbones.vision_transformer import resize_pos_embed
+            # from mmpretrain.models.backbones.vision_transformer import resize_pos_embed
             assert not model.use_double_cls_token
             assert model.use_middle_cls_token
             assert ckpt["pos_embed"].shape[1] == 197
