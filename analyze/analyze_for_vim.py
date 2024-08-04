@@ -12,11 +12,10 @@ HOME = os.environ["HOME"].rstrip("/")
 class ExtraDev:
     # 5.162112298177406 30007057
     # 17.069485400571516 91157224
-    def flops_s4nd(size=224):
+    def flops_s4nd(size=224, scale="ctiny"):
         import math
         from fvcore.nn import flop_count
 
-        print("convnext-s4nd ================================", flush=True)
         specpath = os.path.join(os.path.dirname(os.path.abspath(__file__)), "./convnexts4nd")
         sys.path.insert(0, specpath)
         import timm; assert timm.__version__ == "0.5.4"
@@ -68,27 +67,251 @@ class ExtraDev:
             }
             return supported_ops
 
-
-        # model = ctiny().cuda().eval()
-        model = ctiny
+        model = {"ctiny": ctiny, "vitb": vitb}[scale]
         input_shape = (1, 3, size, size)
         inputs = (torch.randn(input_shape).to(next(model.parameters()).device),)
         model(inputs[0]) # to force init first
         Gflops, unsupported = flop_count(model=model, inputs=inputs, supported_ops=_supported_ops())
-        print(sum(Gflops.values()), sum([p.numel() for _, p in model.named_parameters()]))    
+        print("GFlops: ", sum(Gflops.values()), "Params: ", sum([p.numel() for _, p in model.named_parameters()]), flush=True)
 
-        # model = vitb().cuda().eval()
-        model = vitb
-        model(inputs[0]) # to force init first
-        Gflops, unsupported = flop_count(model=model, inputs=inputs, supported_ops=_supported_ops())
-        print(sum(Gflops.values()), sum([p.numel() for _, p in model.named_parameters()]))    
+    def build_vim_for_throughput(with_ckpt=False, remove_head=False, only_backbone=False, size=224):
+        img_size = size
+        imgHW = int(math.sqrt(img_size))
+        specpath = f"{HOME}/packs/Vim/mamba-1p1p1"
+        sys.path.insert(0, specpath)
+        import mamba_ssm
+        _model = import_abspy("models_mamba", f"{HOME}/packs/Vim/vim")
+        sys.path = sys.path[1:]
+        # model = _model.vim_small_patch16_224_bimambav2_final_pool_mean_abs_pos_embed_with_midclstok_div2()
+        kwargs=dict()
+        # model = _model.VisionMamba(patch_size=16, embed_dim=384, depth=24, rms_norm=True, residual_in_fp32=True, fused_add_norm=True, final_pool_type='mean', if_abs_pos_embed=True, if_rope=False, if_rope_residual=False, bimamba_type="v2", if_cls_token=True, if_devide_out=True, use_middle_cls_token=True, **kwargs)
+        
+        model = _model.VisionMamba(img_size=img_size, patch_size=16, embed_dim=384, depth=24, rms_norm=True, residual_in_fp32=True, fused_add_norm=True, final_pool_type='mean', if_abs_pos_embed=True, if_rope=False, if_rope_residual=False, bimamba_type="v2", if_cls_token=True, if_devide_out=True, use_middle_cls_token=True, **kwargs)
+           
+        if only_backbone:
+            # copy from https://github.com/hustvl/Vim/blob/main/vim/models_mamba.py#VisionMamba
+            # added "return hidden_states, token_position"
+            RMSNorm, layer_norm_fn, rms_norm_fn = _model.RMSNorm, _model.layer_norm_fn, _model.rms_norm_fn
+            def forward_features(self, x, inference_params=None, if_random_cls_token_position=False, if_random_token_rank=False):
+                # taken from https://github.com/rwightman/pytorch-image-models/blob/master/timm/models/vision_transformer.py
+                # with slight modifications to add the dist_token
+                x = self.patch_embed(x)
+                B, M, _ = x.shape
+
+                if self.if_cls_token:
+                    if self.use_double_cls_token:
+                        cls_token_head = self.cls_token_head.expand(B, -1, -1)
+                        cls_token_tail = self.cls_token_tail.expand(B, -1, -1)
+                        token_position = [0, M + 1]
+                        x = torch.cat((cls_token_head, x, cls_token_tail), dim=1)
+                        M = x.shape[1]
+                    else:
+                        if self.use_middle_cls_token:
+                            cls_token = self.cls_token.expand(B, -1, -1)
+                            token_position = M // 2
+                            # add cls token in the middle
+                            x = torch.cat((x[:, :token_position, :], cls_token, x[:, token_position:, :]), dim=1)
+                        elif if_random_cls_token_position:
+                            cls_token = self.cls_token.expand(B, -1, -1)
+                            token_position = random.randint(0, M)
+                            x = torch.cat((x[:, :token_position, :], cls_token, x[:, token_position:, :]), dim=1)
+                            print("token_position: ", token_position)
+                        else:
+                            cls_token = self.cls_token.expand(B, -1, -1)  # stole cls_tokens impl from Phil Wang, thanks
+                            token_position = 0
+                            x = torch.cat((cls_token, x), dim=1)
+                        M = x.shape[1]
+
+                if self.if_abs_pos_embed:
+                    # if new_grid_size[0] == self.patch_embed.grid_size[0] and new_grid_size[1] == self.patch_embed.grid_size[1]:
+                    #     x = x + self.pos_embed
+                    # else:
+                    #     pos_embed = interpolate_pos_embed_online(
+                    #                 self.pos_embed, self.patch_embed.grid_size, new_grid_size,0
+                    #             )
+                    x = x + self.pos_embed
+                    x = self.pos_drop(x)
+
+                if if_random_token_rank:
+
+                    # 生成随机 shuffle 索引
+                    shuffle_indices = torch.randperm(M)
+
+                    if isinstance(token_position, list):
+                        print("original value: ", x[0, token_position[0], 0], x[0, token_position[1], 0])
+                    else:
+                        print("original value: ", x[0, token_position, 0])
+                    print("original token_position: ", token_position)
+
+                    # 执行 shuffle
+                    x = x[:, shuffle_indices, :]
+
+                    if isinstance(token_position, list):
+                        # 找到 cls token 在 shuffle 之后的新位置
+                        new_token_position = [torch.where(shuffle_indices == token_position[i])[0].item() for i in range(len(token_position))]
+                        token_position = new_token_position
+                    else:
+                        # 找到 cls token 在 shuffle 之后的新位置
+                        token_position = torch.where(shuffle_indices == token_position)[0].item()
+
+                    if isinstance(token_position, list):
+                        print("new value: ", x[0, token_position[0], 0], x[0, token_position[1], 0])
+                    else:
+                        print("new value: ", x[0, token_position, 0])
+                    print("new token_position: ", token_position)
+
+
+
+
+                if_flip_img_sequences = False
+                if self.flip_img_sequences_ratio > 0 and (self.flip_img_sequences_ratio - random.random()) > 1e-5:
+                    x = x.flip([1])
+                    if_flip_img_sequences = True
+
+                # mamba impl
+                residual = None
+                hidden_states = x
+                if not self.if_bidirectional:
+                    for layer in self.layers:
+
+                        if if_flip_img_sequences and self.if_rope:
+                            hidden_states = hidden_states.flip([1])
+                            if residual is not None:
+                                residual = residual.flip([1])
+
+                        # rope about
+                        if self.if_rope:
+                            hidden_states = self.rope(hidden_states)
+                            if residual is not None and self.if_rope_residual:
+                                residual = self.rope(residual)
+
+                        if if_flip_img_sequences and self.if_rope:
+                            hidden_states = hidden_states.flip([1])
+                            if residual is not None:
+                                residual = residual.flip([1])
+
+                        hidden_states, residual = layer(
+                            hidden_states, residual, inference_params=inference_params
+                        )
+                else:
+                    # get two layers in a single for-loop
+                    for i in range(len(self.layers) // 2):
+                        if self.if_rope:
+                            hidden_states = self.rope(hidden_states)
+                            if residual is not None and self.if_rope_residual:
+                                residual = self.rope(residual)
+
+                        hidden_states_f, residual_f = self.layers[i * 2](
+                            hidden_states, residual, inference_params=inference_params
+                        )
+                        hidden_states_b, residual_b = self.layers[i * 2 + 1](
+                            hidden_states.flip([1]), None if residual == None else residual.flip([1]), inference_params=inference_params
+                        )
+                        hidden_states = hidden_states_f + hidden_states_b.flip([1])
+                        residual = residual_f + residual_b.flip([1])
+
+                if not self.fused_add_norm:
+                    if residual is None:
+                        residual = hidden_states
+                    else:
+                        residual = residual + self.drop_path(hidden_states)
+                    hidden_states = self.norm_f(residual.to(dtype=self.norm_f.weight.dtype))
+                else:
+                    # Set prenorm=False here since we don't need the residual
+                    fused_add_norm_fn = rms_norm_fn if isinstance(self.norm_f, RMSNorm) else layer_norm_fn
+                    hidden_states = fused_add_norm_fn(
+                        self.drop_path(hidden_states),
+                        self.norm_f.weight,
+                        self.norm_f.bias,
+                        eps=self.norm_f.eps,
+                        residual=residual,
+                        prenorm=False,
+                        residual_in_fp32=self.residual_in_fp32,
+                    )
+
+                return hidden_states, token_position
+            
+                # return only cls token if it exists
+                if self.if_cls_token:
+                    if self.use_double_cls_token:
+                        return (hidden_states[:, token_position[0], :] + hidden_states[:, token_position[1], :]) / 2
+                    else:
+                        if self.use_middle_cls_token:
+                            return hidden_states[:, token_position, :]
+                        elif if_random_cls_token_position:
+                            return hidden_states[:, token_position, :]
+                        else:
+                            return hidden_states[:, token_position, :]
+
+                if self.final_pool_type == 'none':
+                    return hidden_states[:, -1, :]
+                elif self.final_pool_type == 'mean':
+                    return hidden_states.mean(dim=1)
+                elif self.final_pool_type == 'max':
+                    return hidden_states
+                elif self.final_pool_type == 'all':
+                    return hidden_states
+                else:
+                    raise NotImplementedError
+
+            # modified from https://github.com/hustvl/Vim/blob/main/vim/models_mamba.py#VisionMamba
+            def forward(self, x, return_features=False, inference_params=None, if_random_cls_token_position=False, if_random_token_rank=False):
+                hs, token_position = forward_features(self, x, inference_params, if_random_cls_token_position=if_random_cls_token_position, if_random_token_rank=if_random_token_rank)
+                print("self.if_cls_token", self.if_cls_token, end=" ")
+                print("self.use_double_cls_token", self.use_double_cls_token, end=" ")
+                print("self.use_middle_cls_token", self.use_middle_cls_token, end=" ")
+                print("if_random_cls_token_position", if_random_cls_token_position, end=" ")
+                print("if_random_token_rank", if_random_token_rank, end=" ")
+
+                indexes = list(range(hs.shape[1]))
+                token_position = token_position if isinstance(token_position, list) else [token_position]
+                for t in token_position:
+                    indexes.remove(t)
+                hs = hs[:, indexes, :].contiguous()
+                H = int(math.sqrt(hs.shape[1]))
+                hs = hs.permute(0, 2, 1).contiguous().view(hs.shape[0], -1, H, H)
+                return hs
+
+            model.forward = partial(forward, model)
+
+        elif remove_head:
+            model.forward = partial(model.forward, return_features=True)
+
+
+        model = model.cuda().eval()
+        
+        if with_ckpt:
+            ckpt = torch.load(open(f"{HOME}/packs/ckpts/vim_s_midclstok_80p5acc.pth", "rb"), map_location=torch.device("cpu"))["model"]
+        
+            # to interplate pos_mebed, the cls_token position must be fixed !
+            # otherwise, ignore cls_token and apply interplation to all
+            # this checkpoint uses middle cls token
+            from mmpretrain.models.backbones.vision_transformer import resize_pos_embed
+            assert not model.use_double_cls_token
+            assert model.use_middle_cls_token
+            assert ckpt["pos_embed"].shape[1] == 197
+            target_token_length = (img_size // 16)**2
+            if target_token_length != 197 - 1:
+                mid_token_idx = target_token_length // 2
+                cls_token = ckpt["pos_embed"][:, 83:84, :]
+                extra_tokens_left = ckpt["pos_embed"][:, :83, :]
+                extra_tokens_right = ckpt["pos_embed"][:, 84:, :]
+                extra_tokens = torch.cat([extra_tokens_left, extra_tokens_right], dim=1)
+                extra_tokens = extra_tokens.reshape(1, 14, 14, -1).permute(0, 3, 1, 2)
+                extra_tokens = torch.nn.functional.interpolate(extra_tokens, size=(imgHW, imgHW), align_corners=False, mode="bicubic")
+                extra_tokens = extra_tokens.permute(0, 2, 3, 1).contiguous().view(1, img_size, -1)
+                pos_embed = torch.cat([extra_tokens[:, :mid_token_idx, :], cls_token, extra_tokens[:, mid_token_idx:, :]], dim=1)
+                ckpt["pos_embed"] = pos_embed
+            
+            model.load_state_dict(ckpt)
+
+        return model
 
     # 5.301500928 25796584
     def flops_vim(size=224):
         from fvcore.nn import flop_count
 
         # FLOPs.fvcore_flop_count(BuildModels.build_vmamba(scale="tv2").cuda().eval(), input_shape=(3, size, size), show_arch=False)
-        print("vim ================================", flush=True)
         specpath = f"{HOME}/packs/Vim/mamba-1p1p1"
         sys.path.insert(0, specpath)
         import mamba_ssm
@@ -99,7 +322,7 @@ class ExtraDev:
         # model = _model.VisionMamba(patch_size=16, embed_dim=384, depth=24, rms_norm=True, residual_in_fp32=True, fused_add_norm=True, final_pool_type='mean', if_abs_pos_embed=True, if_rope=False, if_rope_residual=False, bimamba_type="v2", if_cls_token=True, if_devide_out=True, use_middle_cls_token=True, **kwargs)
         
         # fused add norm share the same flops as naive one
-        model = _model.VisionMamba(patch_size=16, embed_dim=384, depth=24, rms_norm=True, residual_in_fp32=True, fused_add_norm=False, final_pool_type='mean', if_abs_pos_embed=True, if_rope=False, if_rope_residual=False, bimamba_type="v2", if_cls_token=True, if_devide_out=True, use_middle_cls_token=True, **kwargs)
+        model = _model.VisionMamba(img_size=size, patch_size=16, embed_dim=384, depth=24, rms_norm=True, residual_in_fp32=True, fused_add_norm=False, final_pool_type='mean', if_abs_pos_embed=True, if_rope=False, if_rope_residual=False, bimamba_type="v2", if_cls_token=True, if_devide_out=True, use_middle_cls_token=True, **kwargs)
         vims = model.cuda().eval()
 
         # RMSNorm share the same flops as naive one
@@ -256,7 +479,8 @@ class ExtraDev:
         }
         inputs = (torch.randn(input_shape).to(next(model.parameters()).device),)
         Gflops, unsupported = flop_count(model=model, inputs=inputs, supported_ops=supported_ops)
-        print(sum(Gflops.values()), sum([p.numel() for _, p in model.named_parameters()]))    
+        # print(Gflops.items())
+        print("GFlops: ", sum(Gflops.values()), "Params: ", sum([p.numel() for _, p in model.named_parameters()]), flush=True)
 
     def erf_vim(data_path = "/media/Disk1/Dataset/ImageNet_ILSVRC2012"):
         print("vim ================================", flush=True)

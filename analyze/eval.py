@@ -8,7 +8,6 @@ import sys
 import logging
 from functools import partial
 from torchvision import datasets, transforms
-from timm.data import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
 from torchvision.models.vision_transformer import EncoderBlock
 from fvcore.nn import FlopCountAnalysis, flop_count_str, flop_count, parameter_count
 import torch
@@ -33,8 +32,8 @@ torch.backends.cudnn.benchmark = True
 torch.backends.cudnn.deterministic = True
 
 from utils import ExtractFeatures, BuildModels
+from analyze_for_vim import ExtraDev
 
-extract_feature = ExtractFeatures.extract_feature
 
 
 def import_abspy(name="models", path="classification/"):
@@ -163,13 +162,8 @@ def _validate(
             print(f"batch_size {_batch_size}", flush=True)
 
 
-from utils import ExtractFeatures, BuildModels
-
-extract_feature = ExtractFeatures.extract_feature
-
-
 def _extract_feature(data_path="ImageNet_ILSVRC2012", start=0, end=200, step=-1, img_size=224, batch_size=16, train=True, aug=False):
-    if True:
+    if False:
         resnet50 = BuildModels.build_resnet_mmpretrain(with_ckpt=True, remove_head=True, scale="r50", size=img_size).cuda().eval()
         deitsmall = BuildModels.build_deit_mmpretrain(with_ckpt=True, remove_head=True, scale="small", size=img_size).cuda().eval()
         vmambav0tiny = BuildModels.build_vmamba(with_ckpt=True, remove_head=True, scale="tv0").cuda().eval()
@@ -183,6 +177,9 @@ def _extract_feature(data_path="ImageNet_ILSVRC2012", start=0, end=200, step=-1,
         deitbase = BuildModels.build_deit_mmpretrain(with_ckpt=True, remove_head=True, scale="base", size=img_size).cuda().eval()
 
     if True:
+        vims = ExtraDev.build_vim_for_throughput(with_ckpt=True, remove_head=True).cuda().eval()
+
+    if True:
         if step > 0:
             starts = list(range(start, end, step))
             ends = [s + step for s in starts]
@@ -193,32 +190,34 @@ def _extract_feature(data_path="ImageNet_ILSVRC2012", start=0, end=200, step=-1,
             starts, ends = [start], [end]
 
         for s, e in zip(starts, ends):
-            extract_feature(
+            ExtractFeatures.extract_feature(
                 backbones=dict(
-                    vmambav2tiny = vmambav2tiny,
-                    convnexttiny = convnexttiny,
-                    swintiny = swintiny,
-                    interntiny = interntiny,
-                    vmambav0tiny = vmambav0tiny,
-                    vmambav2l5tiny = vmambav2l5tiny,
-                    deitsmall = deitsmall,
-                    hivittiny = hivittiny,
-                    resnet50 = resnet50,
-                    xcittiny = xcittiny,
-                    deitbase = deitbase,
+                    # vmambav2tiny = vmambav2tiny,
+                    # convnexttiny = convnexttiny,
+                    # swintiny = swintiny,
+                    # interntiny = interntiny,
+                    # vmambav0tiny = vmambav0tiny,
+                    # vmambav2l5tiny = vmambav2l5tiny,
+                    # deitsmall = deitsmall,
+                    # hivittiny = hivittiny,
+                    # resnet50 = resnet50,
+                    # xcittiny = xcittiny,
+                    # deitbase = deitbase,
+                    vims = vims,
                 ), 
                 dims=dict(
-                    vmambav2tiny = 768,
-                    convnexttiny = 768,
-                    swintiny = 768,
-                    interntiny = 768,
-                    vmambav0tiny = 768,
-                    vmambav2l5tiny = 768,
-                    deitsmall = 384,
-                    hivittiny = 384,
-                    resnet50 = 2048,
-                    xcittiny = 384,
-                    deitbase = 768,
+                    # vmambav2tiny = 768,
+                    # convnexttiny = 768,
+                    # swintiny = 768,
+                    # interntiny = 768,
+                    # vmambav0tiny = 768,
+                    # vmambav2l5tiny = 768,
+                    # deitsmall = 384,
+                    # hivittiny = 384,
+                    # resnet50 = 2048,
+                    # xcittiny = 384,
+                    # deitbase = 768,
+                    vims = 384,
                 ),
                 batch_size=batch_size,
                 img_size=img_size,
