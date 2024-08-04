@@ -319,7 +319,7 @@ if __name__ == "__main__":
     )
 
     vims = dict(
-        name = "deitsmall ",
+        name = "vims",
         model = nn.Linear(384, 1000, bias=True),
         ckpt = f"{HOME}/packs/ckpts/vim_s_midclstok_80p5acc.pth",
         state_dict = lambda sd: {
