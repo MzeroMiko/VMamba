@@ -157,14 +157,13 @@ if __name__ == "__main__":
         visualize.visualize_snsmaps(results_before, savefig=f"{showpath}/erf_trainprocess.jpg", rows=1, sticks=False, figsize=(10, 10.75), cmap='RdYlGn')
 
     # erf for vim
-    if False:
+    if True:
         from analyze_for_vim import ExtraDev
-        vim_before, vim_after = ExtraDev.erf_vim(data_path=data_path)
         results_before = [
-            (vim_before, ""),
+            (EffectiveReceiptiveField.get_input_grad_avg(ExtraDev.build_vim_for_throughput(only_backbone=True, size=1024), size=1024, data_path=data_path, norms=simpnorm), ""),
         ]
         results_after = [
-            (vim_after, ""),
+            (EffectiveReceiptiveField.get_input_grad_avg(ExtraDev.build_vim_for_throughput(with_ckpt=True, only_backbone=True, size=1024), size=1024, data_path=data_path, norms=simpnorm), ""),
         ]
         visualize.visualize_snsmaps(results_before + results_after, savefig=f"{showpath}/erf_vimmethods.jpg", rows=2, sticks=False, figsize=(10, 10.75), cmap='RdYlGn')
 

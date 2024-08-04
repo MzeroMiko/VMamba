@@ -26,11 +26,13 @@ def import_abspy(name="models", path="classification/"):
     return module
 
 
-utils = import_abspy(name="utils", path=f"{basicpath}")
-BuildModels = utils.BuildModels
-FLOPs = utils.FLOPs
-Throughput = utils.Throughput
-get_val_dataloader = utils.get_val_dataloader
+# utils = import_abspy(name="utils", path=f"{basicpath}")
+# BuildModels = utils.BuildModels
+# FLOPs = utils.FLOPs
+# Throughput = utils.Throughput
+# get_val_dataloader = utils.get_val_dataloader
+
+from utils import BuildModels, FLOPs, Throughput, get_val_dataloader
 
 
 def get_variable_name(variable, loc=locals()):
@@ -90,6 +92,34 @@ def main():
         Throughput.testall(BuildModels.build_resnet_mmpretrain(scale="r101"), dataloader, args.data_path, size, args.batch_size)
         return
 
+    if False:
+        # T15: GFlops:  4.905609984 Params:  30249064 1666; 3057; 564;  12391; 450; 20857;
+        Throughput.testall(BuildModels.build_vmamba(scale="tv2"), dataloader, args.data_path, size, args.batch_size)
+        _model = import_abspy("vmamba", f"{basicpath}/../classification/models")
+        # T15: GFlops:  4.018473215999999 Params:  22926376 1336; 3602; 405;  10314; 367; 17234;
+        abt_tv1_161_2222_mlp = partial(_model.VSSM, dims=96, depths=[2,2,2,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=-1,  forward_type="v05", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # 
+        Throughput.testall(abt_tv1_161_2222_mlp(), dataloader, args.data_path, size, args.batch_size)
+
+    if False:
+        from analyze_for_vim import ExtraDev
+        for size in [224, 288, 256, 384, 512, 640, 768, 1024]:
+            print(f"s4nd {size} ==========================")
+            ExtraDev.flops_s4nd(size=size, scale="ctiny")
+            Throughput.testall(BuildModels.build_s4nd(size=size), None, args.data_path, size, 32, with_flops=False)
+        return
+
+    if False:
+        from analyze_for_vim import ExtraDev
+        for size in [224, 288, 256, 384, 512, 640, 768, 1024]:
+            print(f"vim {size} ==========================")
+            ExtraDev.flops_vim(size=size)
+            Throughput.testall(ExtraDev.build_vim_for_throughput(size=size), None, args.data_path, size, 32, with_flops=False)
+        return
+
+    if False:
+        test_scaleup(partial(BuildModels.build_vmamba, scale="tv2"))
+        return
+
     if True:
         # 3056 12385 # structure difference
         Throughput.testall(BuildModels.build_vmamba(scale="tv2"), dataloader, args.data_path, size, args.batch_size)
@@ -143,6 +173,7 @@ def main():
         abt_tv0_flex = partial(_model.VSSM, dims=96, depths=[2,2,9,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v04", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1") # GFlops:  5.62689504 Params:  22893448 432
         abt_tv0_noeinlayout = partial(_model.VSSM, dims=96, depths=[2,2,9,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, forward_type="v05", mlp_ratio=0.0, downsample_version="v1", patchembed_version="v1", norm_layer="ln2d") # GFlops:  5.62689504 Params:  22893448 594
         abt_tv1_mlp = partial(_model.VSSM, dims=96, depths=[2,2,2,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1,  forward_type="v05", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  5.632660223999999 Params:  28991656 773
+        abt_tv1_161_2222_mlp = partial(_model.VSSM, dims=96, depths=[2,2,2,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=-1,  forward_type="v05", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # 
         abt_tv1_161 = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=-1,  forward_type="v05", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  5.178818303999999 Params:  28256680 1079 #a8ln
         abt_tv1_161_noz = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=16, ssm_dt_rank="auto", ssm_ratio=1.0, ssm_conv=-1,  forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  4.860903167999999 Params:  26247592 1113 #a9d
         abt_tv1_12_noz = partial(_model.VSSM, dims=96, depths=[2,2,5,2], ssm_d_state=1, ssm_dt_rank="auto", ssm_ratio=2.0, ssm_conv=-1,  forward_type="v05_noz", mlp_ratio=4.0, downsample_version="v3", patchembed_version="v2", norm_layer="ln2d") # GFlops:  4.833356544 Params:  30633256 1290 
