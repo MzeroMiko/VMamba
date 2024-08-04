@@ -1,15 +1,9 @@
-import time
 import torch
 import torch.utils.data
 import argparse
 import os
-import sys
 import logging
 from functools import partial
-from torchvision import datasets, transforms
-from timm.data import IMAGENET_DEFAULT_MEAN, IMAGENET_DEFAULT_STD
-from torchvision.models.vision_transformer import EncoderBlock
-from fvcore.nn import FlopCountAnalysis, flop_count_str, flop_count, parameter_count
 
 HOME = os.environ["HOME"].rstrip("/")
 basicpath = os.path.abspath(os.path.join(os.path.dirname(__file__), "../analyze")).rstrip("/")
