@@ -21,7 +21,7 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 * [**acknowledgment**](#acknowledgment)
 
 ## :white_check_mark: Updates
-* **`Sep. 25th, 2024`**: Update: VMamba is accepted by NeurIPS2024 (spotlight)!
+* **`Sep. 25th, 2024`**: Update: **VMamba is accepted by NeurIPS2024 (spotlight)!**
 * **`June. 14th, 2024`**: Update: we clean the code to be easier to read; we add support for `mamba2`.
 * **`May. 26th, 2024`**: Update: we release the updated weights of VMambav2, together with the new arxiv paper.
 * **`May. 7th, 2024`**: Update: **Important!** using `torch.backends.cudnn.enabled=True` in downstream tasks may be quite slow. If you found vmamba quite slow in your machine, disable it in vmamba.py, else, ignore this.
