@@ -27,6 +27,11 @@ this_dir = os.path.dirname(os.path.abspath(__file__))
 # For CI, we want the option to build with C++11 ABI since the nvcr images use C++11 ABI
 FORCE_CXX11_ABI = os.getenv("FORCE_CXX11_ABI", "FALSE") == "TRUE"
 
+def get_compute_capability():
+    device = torch.device("cuda")
+    capability = torch.cuda.get_device_capability(device)
+    return int(str(capability[0]) + str(capability[1]))
+    
 def get_cuda_bare_metal_version(cuda_dir):
     raw_output = subprocess.check_output(
         [cuda_dir + "/bin/nvcc", "-V"], universal_newlines=True
@@ -47,23 +52,21 @@ def get_ext():
     print("\n\ntorch.__version__  = {}\n\n".format(torch.__version__))
     print("\n\nCUDA_HOME = {}\n\n".format(CUDA_HOME))
 
-    # Check, if CUDA11 is installed for compute capability 8.0
+    # Check if card has compute capability 8.0 or higher for BFloat16 operations
+    if get_compute_capability() < 80:
+        warnings.warn("This code uses BFloat16 date type, which is only supported on GPU architectures with compute capability 8.0 or higher")
+        
     multi_threads = True
-    gencode_sm90 = False
     if CUDA_HOME is not None:
         _, bare_metal_version = get_cuda_bare_metal_version(CUDA_HOME)
         print("CUDA version: ", bare_metal_version, flush=True)
-        if bare_metal_version >= Version("11.8"):
-            gencode_sm90 = True
         if bare_metal_version < Version("11.6"):
             warnings.warn("CUDA version ealier than 11.6 may leads to performance mismatch.")
         if bare_metal_version < Version("11.2"):
             multi_threads = False
             
-    cc_flag.extend(["-gencode", "arch=compute_70,code=sm_70"])
-    cc_flag.extend(["-gencode", "arch=compute_80,code=sm_80"])
-    if gencode_sm90:
-        cc_flag.extend(["-gencode", "arch=compute_90,code=sm_90"])
+    cc_flag.append(f"-arch=sm_{get_compute_capability()}")
+    
     if multi_threads:
         cc_flag.extend(["--threads", "4"])
 
