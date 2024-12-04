@@ -805,7 +805,7 @@ class SharedQK_Proj(torch.nn.Module):
     def __init__(self, qk_proj, v_proj):
         super(SharedQK_Proj, self).__init__()
         self.qk_proj = qk_proj
-        self.v_proj = qk_proj
+        self.v_proj = v_proj
 
     def forward(self, q, k, v):
         return self.qk_proj(q), self.qk_proj(k), self.v_proj(v)
