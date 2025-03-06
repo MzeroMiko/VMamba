@@ -20,6 +20,13 @@ Paper: ([arXiv 2401.10166](https://arxiv.org/abs/2401.10166))
 * [**citation**](#citation)
 * [**acknowledgment**](#acknowledgment)
 
+## :white_check_mark: use VMamba with only ***one file*** and in ***fewest steps*** !
+```bash
+conda create -n vmamba python=3.10
+pip install torch==2.2 torchvision torchaudio triton pytest chardet yacs termcolor fvcore seaborn packaging ninja einops numpy==1.24.4 timm==0.4.12
+pip install https://github.com/state-spaces/mamba/releases/download/v2.2.4/mamba_ssm-2.2.4+cu12torch2.2cxx11abiTRUE-cp310-cp310-linux_x86_64.whl
+python vmamba.py
+```
 ## :white_check_mark: Updates
 * **`Sep. 25th, 2024`**: Update: **VMamba is accepted by NeurIPS2024 (spotlight)!**
 * **`June. 14th, 2024`**: Update: we clean the code to be easier to read; we add support for `mamba2`.
