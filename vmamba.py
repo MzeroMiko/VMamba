@@ -2626,15 +2626,15 @@ if __name__ == "__main__":
     # do_validate("vmamba_base_s1l20") # 83.79297242318049 96.61420314781112 0.7243407973646582
     
 
-    # do_throughput("vanilla_vmamba_tiny") # 82.17106973558698 96.03223806724185 0.7879069638634182
-    # do_throughput("vanilla_vmamba_small") # 83.4609923402307 96.47021178881855 0.7160880894021359
-    # do_throughput("vanilla_vmamba_base") # 83.72897626157689 96.62420254754197 0.6968230148378597
-    # do_throughput("vmamba_tiny_s2l5") # 82.48505089740392 96.00023998636375 0.7805386169017359
-    # do_throughput("vmamba_small_s2l15") # 83.64698118090027 96.59420434667109 0.7185810452935324
-    # do_throughput("vmamba_base_s2l15") # 83.88296702213125 96.71219726709586 0.7198211466686999
-    do_throughput("vmamba_tiny_s1l8") # 82.60104393751634 96.0402375854397 0.766659762133022
-    # do_throughput("vmamba_small_s1l20") # 83.33899965941008 96.42821430607351 nan
-    # do_throughput("vmamba_base_s1l20") # 83.79297242318049 96.61420314781112 0.7243407973646582
+    # do_throughput("vanilla_vmamba_tiny")
+    # do_throughput("vanilla_vmamba_small")
+    # do_throughput("vanilla_vmamba_base")
+    # do_throughput("vmamba_tiny_s2l5")
+    # do_throughput("vmamba_small_s2l15")
+    # do_throughput("vmamba_base_s2l15")
+    do_throughput("vmamba_tiny_s1l8")
+    # do_throughput("vmamba_small_s1l20")
+    # do_throughput("vmamba_base_s1l20")
     
 
 
