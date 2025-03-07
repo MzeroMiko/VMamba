@@ -1,4 +1,5 @@
 ##########################################################
+# simplified version
 # just one file and include everything  
 # written by MzeroMiko                  
 ##########################################################
@@ -1464,15 +1465,15 @@ class SS2Dv2:
             )
 
         # x proj ============================
-        # self.x_proj = Linear(self.d_inner, self.k_group * (self.dt_rank + self.d_state * 2), groups=self.k_group, bias=False, channel_first=True)
-        # self.dt_projs = Linear(self.dt_rank, self.k_group * self.d_inner, groups=self.k_group, bias=False, channel_first=True)
+        self.x_proj = Linear(self.d_inner, self.k_group * (self.dt_rank + self.d_state * 2), groups=self.k_group, bias=False, channel_first=True)
+        self.dt_projs = Linear(self.dt_rank, self.k_group * self.d_inner, groups=self.k_group, bias=False, channel_first=True)
           
-        self.x_proj = [
-            nn.Linear(self.d_inner, (self.dt_rank + self.d_state * 2), bias=False)
-            for _ in range(self.k_group)
-        ]
-        self.x_proj_weight = nn.Parameter(torch.stack([t.weight for t in self.x_proj], dim=0)) # (K, N, inner)
-        del self.x_proj
+        # self.x_proj = [
+        #     nn.Linear(self.d_inner, (self.dt_rank + self.d_state * 2), bias=False)
+        #     for _ in range(self.k_group)
+        # ]
+        # self.x_proj_weight = nn.Parameter(torch.stack([t.weight for t in self.x_proj], dim=0)) # (K, N, inner)
+        # del self.x_proj
         
         # out proj =======================================
         self.out_act = nn.GELU() if self.oact else nn.Identity()
@@ -1495,169 +1496,12 @@ class SS2Dv2:
             self.A_logs = nn.Parameter(torch.zeros((self.k_group * self.d_inner, self.d_state))) # A == -A_logs.exp() < 0; # 0 < exp(A * dt) < 1
             self.dt_projs_weight = nn.Parameter(0.1 * torch.rand((self.k_group, self.d_inner, self.dt_rank)))
             self.dt_projs_bias = nn.Parameter(0.1 * torch.rand((self.k_group, self.d_inner)))
-        # self.dt_projs.weight.data = self.dt_projs_weight.data.view(self.dt_projs.weight.shape)
+        self.dt_projs.weight.data = self.dt_projs_weight.data.view(self.dt_projs.weight.shape)
         # self.dt_projs.bias.data = self.dt_projs_bias.data.view(self.dt_projs.bias.shape)
-        # del self.dt_projs_weight
+        del self.dt_projs_weight
         # del self.dt_projs_bias
- 
+
     def forward_corev2(
-        self,
-        x: torch.Tensor=None, 
-        # ==============================
-        force_fp32=False, # True: input fp32
-        # ==============================
-        ssoflex=True, # True: input 16 or 32 output 32 False: output dtype as input
-        no_einsum=False, # replace einsum with linear or conv1d to raise throughput
-        # ==============================
-        selective_scan_backend = None,
-        # ==============================
-        scan_mode = "cross2d",
-        scan_force_torch = False,
-        # ==============================
-        **kwargs,
-    ):
-        assert selective_scan_backend in [None, "oflex", "mamba", "torch"], selective_scan_backend
-        _scan_mode = dict(cross2d=0, unidi=1, bidi=2, cascade2d=-1).get(scan_mode, None) if isinstance(scan_mode, str) else scan_mode # for debug
-        assert isinstance(_scan_mode, int)
-        delta_softplus = True
-        out_norm = self.out_norm
-        channel_first = self.channel_first
-        to_fp32 = lambda *args: (_a.to(torch.float32) for _a in args)
-
-        B, D, H, W = x.shape
-        N = self.d_state
-        K, D, R = self.k_group, self.d_inner, self.dt_rank
-        L = H * W
-
-        def selective_scan(u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=True):
-            return selective_scan_fn(u, delta, A, B, C, D, delta_bias, delta_softplus, ssoflex, backend=selective_scan_backend)
-        
-        if _scan_mode == -1:
-            x_proj_bias = getattr(self, "x_proj_bias", None)
-            def scan_rowcol(
-                x: torch.Tensor, 
-                proj_weight: torch.Tensor, 
-                proj_bias: torch.Tensor, 
-                dt_weight: torch.Tensor, 
-                dt_bias: torch.Tensor, # (2*c)
-                _As: torch.Tensor, # As = -torch.exp(A_logs.to(torch.float))[:2,] # (2*c, d_state)
-                _Ds: torch.Tensor,
-                width = True,
-            ):
-                # x: (B, D, H, W)
-                # proj_weight: (2 * D, (R+N+N))
-                XB, XD, XH, XW = x.shape
-                if width:
-                    _B, _D, _L = XB * XH, XD, XW
-                    xs = x.permute(0, 2, 1, 3).contiguous()
-                else:
-                    _B, _D, _L = XB * XW, XD, XH
-                    xs = x.permute(0, 3, 1, 2).contiguous()
-                xs = torch.stack([xs, xs.flip(dims=[-1])], dim=2) # (B, H, 2, D, W)
-                if no_einsum:
-                    x_dbl = F.conv1d(xs.view(_B, -1, _L), proj_weight.view(-1, _D, 1), bias=(proj_bias.view(-1) if proj_bias is not None else None), groups=2)
-                    dts, Bs, Cs = torch.split(x_dbl.view(_B, 2, -1, _L), [R, N, N], dim=2)
-                    dts = F.conv1d(dts.contiguous().view(_B, -1, _L), dt_weight.view(2 * _D, -1, 1), groups=2)
-                else:
-                    x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, proj_weight)
-                    if x_proj_bias is not None:
-                        x_dbl = x_dbl + x_proj_bias.view(1, 2, -1, 1)
-                    dts, Bs, Cs = torch.split(x_dbl, [R, N, N], dim=2)
-                    dts = torch.einsum("b k r l, k d r -> b k d l", dts, dt_weight)
-
-                xs = xs.view(_B, -1, _L)
-                dts = dts.contiguous().view(_B, -1, _L)
-                As = _As.view(-1, N).to(torch.float)
-                Bs = Bs.contiguous().view(_B, 2, N, _L)
-                Cs = Cs.contiguous().view(_B, 2, N, _L)
-                Ds = _Ds.view(-1)
-                delta_bias = dt_bias.view(-1).to(torch.float)
-
-                if force_fp32:
-                    xs = xs.to(torch.float)
-                dts = dts.to(xs.dtype)
-                Bs = Bs.to(xs.dtype)
-                Cs = Cs.to(xs.dtype)
-
-                ys: torch.Tensor = selective_scan(
-                    xs, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus
-                ).view(_B, 2, -1, _L)
-                return ys
-            
-            As = -self.A_logs.to(torch.float).exp().view(4, -1, N)
-            x = F.layer_norm(x.permute(0, 2, 3, 1), normalized_shape=(int(x.shape[1]),)).permute(0, 3, 1, 2).contiguous() # added0510 to avoid nan
-            y_row = scan_rowcol(
-                x,
-                proj_weight = self.x_proj_weight.view(4, -1, D)[:2].contiguous(), 
-                proj_bias = (x_proj_bias.view(4, -1)[:2].contiguous() if x_proj_bias is not None else None),
-                dt_weight = self.dt_projs_weight.view(4, D, -1)[:2].contiguous(),
-                dt_bias = (self.dt_projs_bias.view(4, -1)[:2].contiguous() if self.dt_projs_bias is not None else None),
-                _As = As[:2].contiguous().view(-1, N),
-                _Ds = self.Ds.view(4, -1)[:2].contiguous().view(-1),
-                width=True,
-            ).view(B, H, 2, -1, W).sum(dim=2).permute(0, 2, 1, 3) # (B,C,H,W)
-            y_row = F.layer_norm(y_row.permute(0, 2, 3, 1), normalized_shape=(int(y_row.shape[1]),)).permute(0, 3, 1, 2).contiguous() # added0510 to avoid nan
-            y_col = scan_rowcol(
-                y_row,
-                proj_weight = self.x_proj_weight.view(4, -1, D)[2:].contiguous().to(y_row.dtype), 
-                proj_bias = (x_proj_bias.view(4, -1)[2:].contiguous().to(y_row.dtype) if x_proj_bias is not None else None),
-                dt_weight = self.dt_projs_weight.view(4, D, -1)[2:].contiguous().to(y_row.dtype),
-                dt_bias = (self.dt_projs_bias.view(4, -1)[2:].contiguous().to(y_row.dtype) if self.dt_projs_bias is not None else None),
-                _As = As[2:].contiguous().view(-1, N),
-                _Ds = self.Ds.view(4, -1)[2:].contiguous().view(-1),
-                width=False,
-            ).view(B, W, 2, -1, H).sum(dim=2).permute(0, 2, 3, 1)
-            y = y_col
-        else:
-            x_proj_bias = getattr(self, "x_proj_bias", None)
-            xs = cross_scan_fn(x, in_channel_first=True, out_channel_first=True, scans=_scan_mode, force_torch=scan_force_torch)
-
-            if True:
-                if no_einsum:
-                    x_dbl = F.conv1d(xs.view(B, -1, L), self.x_proj_weight.view(-1, D, 1), bias=(x_proj_bias.view(-1) if x_proj_bias is not None else None), groups=K)
-                    dts, Bs, Cs = torch.split(x_dbl.view(B, K, -1, L), [R, N, N], dim=2)
-                    if hasattr(self, "dt_projs_weight"):
-                        dts = F.conv1d(dts.contiguous().view(B, -1, L), self.dt_projs_weight.view(K * D, -1, 1), groups=K)
-                else:
-                    x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs, self.x_proj_weight)
-                    if x_proj_bias is not None:
-                        x_dbl = x_dbl + x_proj_bias.view(1, K, -1, 1)
-                    dts, Bs, Cs = torch.split(x_dbl, [R, N, N], dim=2)
-                    if hasattr(self, "dt_projs_weight"):
-                        dts = torch.einsum("b k r l, k d r -> b k d l", dts, self.dt_projs_weight)
-
-            xs = xs.view(B, -1, L)
-            dts = dts.contiguous().view(B, -1, L)
-            As = -self.A_logs.to(torch.float).exp() # (k * c, d_state)
-            Ds = self.Ds.to(torch.float) # (K * c)
-            Bs = Bs.contiguous().view(B, K, N, L)
-            Cs = Cs.contiguous().view(B, K, N, L)
-            delta_bias = self.dt_projs_bias.view(-1).to(torch.float)
-
-            if force_fp32:
-                xs, dts, Bs, Cs = to_fp32(xs, dts, Bs, Cs)
-
-            ys: torch.Tensor = selective_scan(
-                xs, dts, As, Bs, Cs, Ds, delta_bias, delta_softplus
-            ).view(B, K, -1, H, W)
-            
-            y: torch.Tensor = cross_merge_fn(ys, in_channel_first=True, out_channel_first=True, scans=_scan_mode, force_torch=scan_force_torch)
-
-            if getattr(self, "__DEBUG__", False):
-                setattr(self, "__data__", dict(
-                    A_logs=self.A_logs, Bs=Bs, Cs=Cs, Ds=Ds,
-                    us=xs, dts=dts, delta_bias=delta_bias,
-                    ys=ys, y=y, H=H, W=W,
-                ))
-
-        y = y.view(B, -1, H, W)
-        if not channel_first:
-            y = y.view(B, -1, H * W).transpose(dim0=1, dim1=2).contiguous().view(B, H, W, -1) # (B, L, C)
-        y = out_norm(y)
-
-        return y.to(x.dtype)
-
-    def _forward_corev2(
         self,
         x: torch.Tensor=None, 
         # ==============================
@@ -2520,7 +2364,7 @@ def get_val_loader(batch_size=64, root="./val", img_size=224, sequential=True, n
 
 
 @torch.no_grad()
-def validate(data_loader, model, amp_enable=True, print_freq=1000):
+def validate(data_loader, model, amp_enable=True, print_freq=100000):
     from timm.utils import accuracy, AverageMeter
     criterion = nn.CrossEntropyLoss()
     model.cuda()
@@ -2556,7 +2400,7 @@ def validate(data_loader, model, amp_enable=True, print_freq=1000):
         batch_time.update(time.time() - end)
         end = time.time()
 
-        if idx % print_freq == 0:
+        if (idx + 1) % print_freq == 0:
             memory_used = torch.cuda.max_memory_allocated() / (1024.0 * 1024.0)
             print(
                 f'Test: [{idx}/{len(data_loader)}]\t'
@@ -2565,7 +2409,7 @@ def validate(data_loader, model, amp_enable=True, print_freq=1000):
                 f'Acc@1 {acc1_meter.val:.3f} ({acc1_meter.avg:.3f})\t'
                 f'Acc@5 {acc5_meter.val:.3f} ({acc5_meter.avg:.3f})\t'
                 f'Mem {memory_used:.0f}MB')
-    print(f' * Acc@1 {acc1_meter.avg:.3f} Acc@5 {acc5_meter.avg:.3f}')
+    # print(f' * Acc@1 {acc1_meter.avg:.3f} Acc@5 {acc5_meter.avg:.3f}')
     return acc1_meter.avg, acc5_meter.avg, loss_meter.avg
 
 
@@ -2616,12 +2460,12 @@ if __name__ == "__main__":
     # do_validate("vanilla_vmamba_tiny") # 82.17106973558698 96.03223806724185 0.7879069638634182
     # do_validate("vanilla_vmamba_small") # 83.4609923402307 96.47021178881855 0.7160880894021359
     # do_validate("vanilla_vmamba_base") # 83.72897626157689 96.62420254754197 0.6968230148378597
-    # do_validate("vmamba_tiny_s2l5") # 82.48505089740392 96.00023998636375 0.7805386169017359
-    # do_validate("vmamba_small_s2l15") # 83.64698118090027 96.59420434667109 0.7185810452935324
-    # do_validate("vmamba_base_s2l15") # 83.88296702213125 96.71219726709586 0.7198211466686999
-    # do_validate("vmamba_tiny_s1l8") # 82.60104393751634 96.0402375854397 0.766659762133022
-    # do_validate("vmamba_small_s1l20") # 83.33899965941008 96.42821430607351 nan
-    # do_validate("vmamba_base_s1l20") # 83.79297242318049 96.61420314781112 0.7243407973646582
+    # do_validate("vmamba_tiny_s2l5") # 82.48905065741832 95.99624022634936 0.7805328359985901
+    # do_validate("vmamba_small_s2l15") # 83.64898106090746 96.59420434667109 0.7185911423439594
+    # do_validate("vmamba_base_s2l15") # 83.87896726211686 96.71219726709586 0.7198247987933224
+    # do_validate("vmamba_tiny_s1l8") # 83.87896726211686 96.71219726709586 0.7198247987933224
+    # do_validate("vmamba_small_s1l20") # 83.33899965941008 96.42621442606632 nan
+    # do_validate("vmamba_base_s1l20") # 83.79097254317328 96.61420314781112 0.7243299191111033
     
 
     # do_throughput("vanilla_vmamba_tiny")
