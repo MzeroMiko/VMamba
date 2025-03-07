@@ -1,5 +1,4 @@
 ##########################################################
-# this file is more easy to use         
 # just one file and include everything  
 # written by MzeroMiko                  
 ##########################################################
@@ -881,8 +880,7 @@ def selective_scan_fn(
     oflex=True,
     backend=None,
 ):
-    WITH_CUDA = (WITH_SELECTIVESCAN_OFLEX or WITH_SELECTIVESCAN_CORE or WITH_SELECTIVESCAN_MAMBA)
-    fn = selective_scan_torch if backend == "torch" or (not WITH_CUDA) else SelectiveScanCuda.apply
+    fn = selective_scan_torch if backend == "torch" or (not WITH_SELECTIVESCAN_MAMBA) else SelectiveScanCuda.apply
     return fn(u, delta, A, B, C, D, delta_bias, delta_softplus, oflex, backend)
 
 
