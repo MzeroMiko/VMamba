@@ -838,8 +838,8 @@ class SelectiveScanCuda(torch.autograd.Function):
     @torch.cuda.amp.custom_fwd
     def forward(ctx, u, delta, A, B, C, D=None, delta_bias=None, delta_softplus=False, oflex=True, backend=None):
         ctx.delta_softplus = delta_softplus
-        backend = "oflex" if WITH_SELECTIVESCAN_OFLEX and (backend is None) else backend
-        backend = "core" if WITH_SELECTIVESCAN_CORE and (backend is None) else backend
+        # backend = "oflex" if WITH_SELECTIVESCAN_OFLEX and (backend is None) else backend
+        # backend = "core" if WITH_SELECTIVESCAN_CORE and (backend is None) else backend
         backend = "mamba" if WITH_SELECTIVESCAN_MAMBA and (backend is None) else backend
         ctx.backend = backend
         if backend == "oflex":
