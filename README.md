@@ -154,7 +154,7 @@ Also, We recommend using the pytorch>=2.0, cuda>=11.8. But lower version of pyto
 ***Create and activate a new conda environment***
 
 ```bash
-conda create -n vmamba
+conda create -n vmamba python=3.8 -y
 conda activate vmamba
 ```
 
